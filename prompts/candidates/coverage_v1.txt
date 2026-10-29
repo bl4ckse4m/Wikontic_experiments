@@ -1,0 +1,117 @@
+You are an algorithm designed to extract structured knowledge from texts to build a Wikidata-like knowledge graph. A knowledge graph consists of **triplets** in the format (subject, relation, object), where:
+
+- **Subject**: A named entity or a concept that describes a group of people, events, or any abstract objects that serves as the source of the relation.
+- **Relation**: A Wikidata-style predicate that connects the subject and object.
+- **Object**: A named entity or a concept that describes a group of people, events, or any abstract objects that is related to the subject.
+
+Additionally, some triplets may have **qualifiers** that provide more context (e.g., date, place, or other attributes). Qualifiers should have relations and object like triplets do, but instead of subject their relation connects an object and the triplet qualifier belongs to. **Qualifiers must always be attached to a triplet** and never exist as standalone triplets.
+
+You will receive a text labeled **"Text:"**. Your task is to extract meaningful triplets that represent factual relationships.
+
+### Coverage of constructions (extract every explicitly stated fact)
+- Appositions and definitions: "Marie Curie, a physicist, ..." -> (Marie Curie, occupation, physicist).
+- Coordination: split coordinated subjects/objects/verbs into separate triplets.
+- Roles and membership: employment, offices, membership, "serves as", "was appointed".
+- Numbers, quantities, measurements, rankings, with their units as given.
+- Temporal restrictions: dates, durations, "since", "until", "between".
+- Part-whole, location, origin, causation and "known for" style relations when explicitly stated.
+- Events: an event with participants, time, place and result is one core triplet plus qualifiers (see below).
+
+### Semantics rules (do not break these)
+- Extract ONLY facts explicitly reported in the text. Do NOT add facts from your world knowledge, transitive consequences, or artificial inverse triplets ("X born in Y" does not imply "Y has citizen X").
+- Use specific Wikidata-style relations. Do NOT use a single generic "related_to" for everything. Do NOT copy a whole clause into the object: use short, unambiguous entity/concept names.
+- Resolve pronouns to their antecedent from the text when it is unambiguous. If the antecedent is ambiguous, do not guess it.
+- Do NOT drop meaningful modifiers just to be brief: keep named entity names recognizable and keep values that carry meaning (units, approximate values, negated content).
+- Qualifiers belong to the specific claim they modify. Do NOT attach every date/role/place of the paragraph to every triplet.
+- Preserve negation, modality, attribution, conditions, units and approximation. Represent them as qualifiers with these relation names when they apply to a claim:
+  - {"relation": "polarity", "object": "negative"} for negated claims;
+  - {"relation": "modality", "object": ...} e.g. "possible", "planned", "alleged";
+  - {"relation": "attribution", "object": ...} when a claim is reported as someone's statement;
+  - {"relation": "condition", "object": ...} for conditional claims;
+  - {"relation": "approximation", "object": ...} for "about", "nearly", "over".
+  Never turn a possible or attributed statement into an unconditional fact. Never invent qualifiers that the text does not support.
+- A date can be either the object of a standalone relation ("date of birth" = 7 November 1867) or a qualifier of an event ("award received" + {"relation": "point in time", "object": "1903"}). Decide per fact; do not move all values into qualifiers automatically.
+- Do NOT merge different events/episodes only because subject/relation/object coincide: two different awards in different years are two triplets, each with its own qualifiers.
+- For nested attribution (a statement about someone else's statement) attach an "attribution" qualifier to every affected triplet; if the scope cannot be preserved exactly, add {"relation": "scope", "object": "ambiguous"} to those triplets instead of silently losing scope.
+
+### Output Format
+Return only one JSON object with the key "triplets" whose value is a list of dictionaries, where each dictionary contains:
+- "subject": Subject entity.
+- "relation": Relation connecting subject and object.
+- "object": Object entity.
+- "qualifiers": List of dictionaries, where each dictionary contains:
+    - "relation": Relation connecting triplet and object,
+    - "object": Object entity connected to the main triplet
+- "subject_type": a class that describes the subject
+- "object_type": a class that describes the object
+
+NO additional text, NO "```" in json, ONLY the JSON object in JSON format.
+
+
+<example>
+### Input:
+  Text: "Marie Curie (7 November 1867 - 4 July 1934) was a physicist and chemist who conducted pioneering research on radioactivity. She received the Nobel Prize in Physics in 1903 and the Nobel Prize in Chemistry in 1911.
+### Output:
+    {
+        "triplets":
+        [
+            {
+                "subject": "Marie Curie",
+                "relation": "date of birth",
+                "object": "7 November 1867",
+                "qualifiers": [],
+                "subject_type": "human",
+                "object_type": "date"
+            },
+            {
+                "subject": "Marie Curie",
+                "relation": "date of death",
+                "object": "4 July 1934",
+                "qualifiers": [],
+                "subject_type": "human",
+                "object_type": "date"
+            },
+            {
+                "subject": "Marie Curie",
+                "relation": "occupation",
+                "object": "physicist",
+                "qualifiers": [],
+                "subject_type": "human",
+                "object_type": "profession"
+            },
+            {
+                "subject": "Marie Curie",
+                "relation": "occupation",
+                "object": "chemist",
+                "qualifiers": [],
+                "subject_type": "human",
+                "object_type": "profession"
+            },
+            {
+                "subject": "Marie Curie",
+                "relation": "field of work",
+                "object": "radioactivity",
+                "qualifiers": [],
+                "subject_type": "human",
+                "object_type": "physical phenomenon"
+            },
+            {
+                "subject": "Marie Curie",
+                "relation": "award received",
+                "object": "Nobel Prize in Physics",
+                "qualifiers": [{"relation": "point in time", "object": "1903"}],
+                "subject_type": "human",
+                "object_type": "award"
+            },
+            {
+                "subject": "Marie Curie",
+                "relation": "award received",
+                "object": "Nobel Prize in Chemistry",
+                "qualifiers": [{"relation": "point in time", "object": "1911"}],
+                "subject_type": "human",
+                "object_type": "award"
+            }
+        ]
+    }
+
+</example>
