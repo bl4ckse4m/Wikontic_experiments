@@ -1,0 +1,166 @@
+{
+  "task": {
+    "input_id": "c4bb4aecd0f84668",
+    "input_hash": "2d4aa2992d05787782c012ef19872b921363d9ea2edeeb956fbb3b41c8e7faf4",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-845de0b31c0879615cdeb51983739ba9",
+    "object": "chat.completion",
+    "created": 1791506608,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Bell's father\",\n            \"relation\": \"field of work\",\n            \"object\": \"elocution and speech\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Bell's grandfather\",\n            \"relation\": \"field of work\",\n            \"object\": \"elocution and speech\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Bell's brother\",\n            \"relation\": \"field of work\",\n            \"object\": \"elocution and speech\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Bell's mother\",\n            \"relation\": \"disability\",\n            \"object\": \"deaf\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"disability\"\n        },\n        {\n            \"subject\": \"Bell's wife\",\n            \"relation\": \"disability\",\n            \"object\": \"deaf\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"disability\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"field of work\",\n            \"object\": \"hearing and speech\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"experimented with\",\n            \"object\": \"hearing devices\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"device\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"award received\",\n            \"object\": \"first U.S. patent for the telephone\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1876\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"patent\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"refused to have\",\n            \"object\": \"telephone\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"study\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"device\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nFirst, identify entities: Alexander Graham Bell (subject). Also his father, grandfather, brother (collectively). Mother and wife. Also \"first U.S. patent for the telephone\". Also \"telephone\". Also \"research on hearing and speech\". Also \"hearing devices\". Also \"invention\". Also \"study\". Also \"patent\" date 1876.\n\nWe need to extract explicit facts.\n\nSentences:\n\n\"Bell's father, grandfather, and brother had all been associated with work on elocution and speech, and both his mother and wife were deaf, profoundly influencing Bell's life's work.\"\n\nFrom this we can extract:\n\n- (Alexander Graham Bell, family member, father) maybe relation \"parent\" but we need explicit fact: father associated with work on elocution and speech. So we could have triplet: (Bell's father, occupation/field of work?, \"elocution and speech\") but need relation. Use \"field of work\". Subject is father (but father not named). Might need to create entity \"Bell's father\". Acceptable? Probably yes.\n\n- Similarly for grandfather and brother: each associated with work on elocution and speech.\n\n- Mother and wife were deaf. So (Bell's mother, disability, deaf) or (Bell's mother, hearing status, deaf). Use relation \"disability\". Object \"deaf\". Similarly for wife.\n\n- \"profoundly influencing Bell's life's work.\" This is influence relation: (Bell's mother, influence on, Alexander Graham Bell's life's work) but maybe too complex. Might skip.\n\nSecond sentence: \"His research on hearing and speech further led him to experiment with hearing devices which eventually culminated in Bell being awarded the first U.S. patent for the telephone in 1876.\"\n\nExtract:\n\n- (Alexander Graham Bell, research field, hearing and speech) maybe relation \"field of work\" or \"research topic\". Use \"research field\".\n\n- (Alexander Graham Bell, experimented with, hearing devices) relation \"experimented with\". Object \"hearing devices\".\n\n- (Alexander Graham Bell, award received, first U.S. patent for the telephone) with qualifier point in time 1876.\n\n- Also could have (first U.S. patent for the telephone, inventor, Alexander Graham Bell) but not needed.\n\nThird: \"Bell considered his most famous invention an intrusion on his real work as a scientist and refused to have a telephone in his study.\"\n\nExtract:\n\n- (Alexander Graham Bell, considered, his most famous invention) relation \"considered\". But need object entity: \"telephone\" maybe? Actually \"most famous invention\" refers to telephone. So we could have (Alexander Graham Bell, considered, telephone) with qualifier maybe \"polarity\"? Not negative. It's a belief.\n\n- Also \"considered ... an intrusion on his real work as a scientist\" maybe relation \"opinion\" but we can capture as (Alexander Graham Bell, opinion about, telephone) with qualifier \"intrusion on his real work as a scientist\". Might be too complex.\n\n- \"refused to have a telephone in his study.\" So (Alexander Graham Bell, refused to have, telephone) with qualifier location \"study\". Or relation \"refused\" not typical. Could use \"refused to have\" as relation.\n\nWe need to use Wikidata-style predicates. Common ones: \"father\", \"grandfather\", \"brother\", \"mother\", \"spouse\". But the text says father, grandfather, brother associated with work on elocution and speech. So maybe relation \"field of work\". Use \"field of work\". For mother and wife, relation \"disability\". For research, \"field of work\". For experiment, \"experimented with\". For award, \"award received\". For patent date qualifier.\n\nAlso need subject_type and object_type.\n\nDefine types: human for persons, profession for fields? For \"elocution and speech\" object_type maybe \"field of work\". For \"deaf\" object_type \"disability\". For \"hearing devices\" object_type \"device\". For \"first U.S. patent for the telephone\" object_type \"patent\". For \"telephone\" object_type \"device\". For \"study\" object_type \"room\". For \"research on hearing and speech\" maybe object_type \"field of work\". For \"experimented with\" object_type \"device\". For \"considered\" maybe object_type \"invention\". Might be okay.\n\nNow list triplets.\n\nWe need separate for each family member.\n\nFamily members: father, grandfather, brother.\n\nTriplet 1: subject \"Bell's father\", relation \"field of work\", object \"elocution and speech\". qualifiers none. subject_type \"human\", object_type \"field of work\".\n\nSimilarly for grandfather and brother.\n\nMother and wife deaf:\n\nTriplet: subject \"Bell's mother\", relation \"disability\", object \"deaf\". subject_type \"human\", object_type \"disability\".\n\nTriplet: subject \"Bell's wife\", relation \"disability\", object \"deaf\".\n\nResearch:\n\nTriplet: subject \"Alexander Graham Bell\", relation \"field of work\", object \"hearing and speech\". (maybe \"research field\").\n\nTriplet: subject \"Alexander Graham Bell\", relation \"experimented with\", object \"hearing devices\". object_type \"device\".\n\nAward:\n\nTriplet: subject \"Alexander Graham Bell\", relation \"award received\", object \"first U.S. patent for the telephone\". qualifiers: point in time 1876.\n\nSubject_type \"human\", object_type \"patent\".\n\nConsidered invention intrusion: maybe we can capture as (Alexander Graham Bell, considered, telephone) with qualifier \"polarity\"? Not negative. Could add qualifier \"condition\"? Not needed. Might skip as not a factual claim but opinion. But it's explicit: \"Bell considered his most famous invention an intrusion on his real work as a scientist\". That's a belief. We can encode as relation \"considered\" with object \"telephone\". qualifiers maybe \"description\": \"intrusion on his real work as a scientist\". But qualifiers must be relation-object pairs; we could use \"qualifier relation\": \"description\" maybe not standard but allowed? The spec says qualifiers use relations like \"polarity\", \"modality\", etc. Not \"description\". Might not include.\n\nBetter to include a triplet: (Alexander Graham Bell, refused to have, telephone) with qualifier location \"study\". Use relation \"refused to have\". Not standard but okay.\n\nTriplet: subject \"Alexander Graham Bell\", relation \"refused to have\", object \"telephone\". qualifiers: {\"relation\":\"location\",\"object\":\"study\"}.\n\nSubject_type human, object_type device.\n\nNow compile JSON.\n\nCheck for duplicates: father, grandfather, brother each separate.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1695,
+      "total_tokens": 3641,
+      "completion_tokens": 1946,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Bell's father\",\n            \"relation\": \"field of work\",\n            \"object\": \"elocution and speech\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Bell's grandfather\",\n            \"relation\": \"field of work\",\n            \"object\": \"elocution and speech\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Bell's brother\",\n            \"relation\": \"field of work\",\n            \"object\": \"elocution and speech\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Bell's mother\",\n            \"relation\": \"disability\",\n            \"object\": \"deaf\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"disability\"\n        },\n        {\n            \"subject\": \"Bell's wife\",\n            \"relation\": \"disability\",\n            \"object\": \"deaf\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"disability\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"field of work\",\n            \"object\": \"hearing and speech\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"experimented with\",\n            \"object\": \"hearing devices\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"device\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"award received\",\n            \"object\": \"first U.S. patent for the telephone\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1876\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"patent\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"refused to have\",\n            \"object\": \"telephone\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"study\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"device\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Bell's father",
+        "relation": "field of work",
+        "object": "elocution and speech",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "field of work"
+      },
+      {
+        "subject": "Bell's grandfather",
+        "relation": "field of work",
+        "object": "elocution and speech",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "field of work"
+      },
+      {
+        "subject": "Bell's brother",
+        "relation": "field of work",
+        "object": "elocution and speech",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "field of work"
+      },
+      {
+        "subject": "Bell's mother",
+        "relation": "disability",
+        "object": "deaf",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "disability"
+      },
+      {
+        "subject": "Bell's wife",
+        "relation": "disability",
+        "object": "deaf",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "disability"
+      },
+      {
+        "subject": "Alexander Graham Bell",
+        "relation": "field of work",
+        "object": "hearing and speech",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "field of work"
+      },
+      {
+        "subject": "Alexander Graham Bell",
+        "relation": "experimented with",
+        "object": "hearing devices",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "device"
+      },
+      {
+        "subject": "Alexander Graham Bell",
+        "relation": "award received",
+        "object": "first U.S. patent for the telephone",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1876"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "patent"
+      },
+      {
+        "subject": "Alexander Graham Bell",
+        "relation": "refused to have",
+        "object": "telephone",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "study"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "device"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1695,
+    "total_tokens": 3641,
+    "completion_tokens": 1946,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 739,
+    "output_tokens_est": 647
+  },
+  "attempts": 1,
+  "latency_s": 23.494523252004,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:43:51.917952+00:00",
+  "cache_key": "ce8cc4f595cac7cc76c2df9b7468d6db"
+}

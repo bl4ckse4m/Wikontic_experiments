@@ -1,0 +1,170 @@
+{
+  "task": {
+    "input_id": "fc0e270329718fd1",
+    "input_hash": "ab1c426dfe581c241cdd5531688f3cee69aefc4a08b18a655dda31bf81021795",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-1bcf8abd349fb2ca0434f622d83da890",
+    "object": "chat.completion",
+    "created": 1791508378,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Social Security benefits\",\n            \"relation\": \"subject to tax\",\n            \"object\": \"income tax\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"benefit\",\n            \"object_type\": \"tax\"\n        },\n        {\n            \"subject\": \"Social Security benefits\",\n            \"relation\": \"tax portion\",\n            \"object\": \"50%\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1984\"\n                }\n            ],\n            \"subject_type\": \"benefit\",\n            \"object_type\": \"percentage\"\n        },\n        {\n            \"subject\": \"Social Security benefits\",\n            \"relation\": \"tax portion\",\n            \"object\": \"85%\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1993\"\n                },\n                {\n                    \"relation\": \"legislation\",\n                    \"object\": \"Deficit Reduction Act of 1993\"\n                }\n            ],\n            \"subject_type\": \"benefit\",\n            \"object_type\": \"percentage\"\n        },\n        {\n            \"subject\": \"Retiree\",\n            \"relation\": \"income threshold for tax\",\n            \"object\": \"$25,000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"filing status\",\n                    \"object\": \"married filing separately, not living with spouse\"\n                },\n                {\n                    \"relation\": \"filing status\",\n                    \"object\": \"single\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"currency amount\"\n        },\n        {\n            \"subject\": \"Retiree\",\n            \"relation\": \"combined income threshold for tax\",\n            \"object\": \"$32,000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"filing status\",\n                    \"object\": \"married filing jointly\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"currency amount\"\n        },\n        {\n            \"subject\": \"Retiree\",\n            \"relation\": \"income threshold for tax\",\n            \"object\": \"any amount\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"filing status\",\n                    \"object\": \"married filing separately and lived with spouse\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"currency amount\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text. Identify entities: Social Security (United States) – maybe subject. Facts:\n\n1. Originally the benefits received by retirees were not taxed as income. So relation: \"tax status of benefits\" maybe \"benefits taxed as income\" = false. Could represent as relation \"taxed as income\" with object \"no\" or \"negative\". Use qualifier polarity negative. Subject: \"Social Security benefits\" or \"benefits received by retirees\". Let's create subject \"Social Security benefits\". object \"income tax\". relation \"subject to\" maybe \"subject to tax\". But we need explicit fact: benefits were not taxed as income. So (Social Security benefits, tax status, not taxed as income). Use object \"income tax\" with qualifier polarity negative. Or relation \"subject to tax\" with object \"income tax\" and qualifier polarity negative. We'll choose relation \"subject to tax\". object \"income tax\". qualifier polarity negative.\n\n2. Beginning in tax year 1984, with the Reagan-era reforms ... retirees with incomes over $25,000 (in the case of married persons filing separately who did not live with the spouse at any time during the year, and for persons filing as \"single\"), or with combined incomes over $32,000 (if married filing jointly) or, in certain cases, any income amount (if married filing separately from the spouse in a year in which the taxpayer lived with the spouse at any time) generally saw part of the retiree benefits subject to federal federal income tax.\n\nSo we have a rule: Starting tax year 1984, part of retiree benefits subject to federal income tax for retirees with incomes over thresholds. Could create triplet: (Social Security benefits, portion subject to tax, 50%) with qualifier point in time 1984. Also thresholds: (Retiree, income threshold, $25,000) with qualifiers for filing status etc. Might be many.\n\nSimplify: Extract explicit numeric facts:\n\n- In 1984, the portion of the benefits potentially subject to tax was 50%. So (Social Security benefits, tax portion, 50%) with qualifier point in time 1984.\n\n- The Deficit Reduction Act of 1993 set the portion to 85%. So (Social Security benefits, tax portion, 85%) with qualifier point in time 1993, and qualifier \"legislation\" maybe \"Deficit Reduction Act of 1993\". Could also have relation \"tax portion set by\" linking to act. But we can include qualifier \"point in time\" 1993 and maybe \"legislation\" \"Deficit Reduction Act of 1993\". Use qualifier relation \"legislation\" object \"Deficit Reduction Act of 1993\".\n\nAlso thresholds: (Retiree, income threshold, $25,000) with qualifier \"filing status\", \"married filing separately, not living with spouse\". Could be multiple. Might be too detailed. But we need to capture explicit facts: retirees with incomes over $25,000 (in case ...) generally saw part of benefits subject to tax. So we can create triplet: (Retiree, income threshold for tax, $25,000) with qualifier \"filing status\", \"married filing separately not living with spouse\" and also \"single\". Could split.\n\nSimilarly: (Retiree, combined income threshold for tax, $32,000) with qualifier \"filing status\", \"married filing jointly\".\n\nAlso: (Retiree, any income amount) for certain cases (married filing separately but lived with spouse). Could capture as (Retiree, income threshold for tax, any) with qualifier condition \"married filing separately and lived with spouse\". Might be okay.\n\nWe need subject_type and object_type. For \"Social Security benefits\" subject_type maybe \"social security benefit\" (or \"benefit\"). object_type for tax portion maybe \"percentage\". For income thresholds object_type \"currency amount\". For \"Retiree\" subject_type \"human\". For filing status maybe \"tax filing status\". For legislation object_type \"law\".\n\nAlso need qualifiers list.\n\nLet's craft triplets:\n\n1. subject: \"Social Security benefits\", relation: \"subject to tax\", object: \"income tax\", qualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"}], subject_type: \"benefit\", object_type: \"tax\".\n\n2. subject: \"Social Security benefits\", relation: \"tax portion\", object: \"50%\", qualifiers: [{\"relation\":\"point in time\",\"object\":\"1984\"}], subject_type: \"benefit\", object_type: \"percentage\".\n\n3. subject: \"Social Security benefits\", relation: \"tax portion\", object: \"85%\", qualifiers: [{\"relation\":\"point in time\",\"object\":\"1993\"},{\"relation\":\"legislation\",\"object\":\"Deficit Reduction Act of 1993\"}], subject_type: \"benefit\", object_type: \"percentage\".\n\n4. subject: \"Retiree\", relation: \"income threshold for tax\", object: \"$25,000\", qualifiers: [{\"relation\":\"filing status\",\"object\":\"married filing separately, not living with spouse\"},{\"relation\":\"filing status\",\"object\":\"single\"}], subject_type: \"human\", object_type: \"currency amount\".\n\n5. subject: \"Retiree\", relation: \"combined income threshold for tax\", object: \"$32,000\", qualifiers: [{\"relation\":\"filing status\",\"object\":\"married filing jointly\"}], subject_type: \"human\", object_type: \"currency amount\".\n\n6. subject: \"Retiree\", relation: \"income threshold for tax\", object: \"any amount\", qualifiers: [{\"relation\":\"filing status\",\"object\":\"married filing separately and lived with spouse\"}], subject_type: \"human\", object_type: \"currency amount\".\n\nPotentially also include that the reforms were \"Reagan-era reforms\" in 1984. Could add triplet: (Reagan-era reforms, enacted in, 1984) but not necessary.\n\nMake sure JSON format correct.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1763,
+      "total_tokens": 3537,
+      "completion_tokens": 1774,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Social Security benefits\",\n            \"relation\": \"subject to tax\",\n            \"object\": \"income tax\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"benefit\",\n            \"object_type\": \"tax\"\n        },\n        {\n            \"subject\": \"Social Security benefits\",\n            \"relation\": \"tax portion\",\n            \"object\": \"50%\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1984\"\n                }\n            ],\n            \"subject_type\": \"benefit\",\n            \"object_type\": \"percentage\"\n        },\n        {\n            \"subject\": \"Social Security benefits\",\n            \"relation\": \"tax portion\",\n            \"object\": \"85%\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1993\"\n                },\n                {\n                    \"relation\": \"legislation\",\n                    \"object\": \"Deficit Reduction Act of 1993\"\n                }\n            ],\n            \"subject_type\": \"benefit\",\n            \"object_type\": \"percentage\"\n        },\n        {\n            \"subject\": \"Retiree\",\n            \"relation\": \"income threshold for tax\",\n            \"object\": \"$25,000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"filing status\",\n                    \"object\": \"married filing separately, not living with spouse\"\n                },\n                {\n                    \"relation\": \"filing status\",\n                    \"object\": \"single\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"currency amount\"\n        },\n        {\n            \"subject\": \"Retiree\",\n            \"relation\": \"combined income threshold for tax\",\n            \"object\": \"$32,000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"filing status\",\n                    \"object\": \"married filing jointly\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"currency amount\"\n        },\n        {\n            \"subject\": \"Retiree\",\n            \"relation\": \"income threshold for tax\",\n            \"object\": \"any amount\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"filing status\",\n                    \"object\": \"married filing separately and lived with spouse\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"currency amount\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Social Security benefits",
+        "relation": "subject to tax",
+        "object": "income tax",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "benefit",
+        "object_type": "tax"
+      },
+      {
+        "subject": "Social Security benefits",
+        "relation": "tax portion",
+        "object": "50%",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1984"
+          }
+        ],
+        "subject_type": "benefit",
+        "object_type": "percentage"
+      },
+      {
+        "subject": "Social Security benefits",
+        "relation": "tax portion",
+        "object": "85%",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1993"
+          },
+          {
+            "relation": "legislation",
+            "object": "Deficit Reduction Act of 1993"
+          }
+        ],
+        "subject_type": "benefit",
+        "object_type": "percentage"
+      },
+      {
+        "subject": "Retiree",
+        "relation": "income threshold for tax",
+        "object": "$25,000",
+        "qualifiers": [
+          {
+            "relation": "filing status",
+            "object": "married filing separately, not living with spouse"
+          },
+          {
+            "relation": "filing status",
+            "object": "single"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "currency amount"
+      },
+      {
+        "subject": "Retiree",
+        "relation": "combined income threshold for tax",
+        "object": "$32,000",
+        "qualifiers": [
+          {
+            "relation": "filing status",
+            "object": "married filing jointly"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "currency amount"
+      },
+      {
+        "subject": "Retiree",
+        "relation": "income threshold for tax",
+        "object": "any amount",
+        "qualifiers": [
+          {
+            "relation": "filing status",
+            "object": "married filing separately and lived with spouse"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "currency amount"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1763,
+    "total_tokens": 3537,
+    "completion_tokens": 1774,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 775,
+    "output_tokens_est": 682
+  },
+  "attempts": 1,
+  "latency_s": 22.12875704599719,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:13:21.012471+00:00",
+  "cache_key": "d464dbdfea78df38f58fa8d0d3c683b1"
+}

@@ -1,0 +1,145 @@
+{
+  "task": {
+    "input_id": "a2a58d0bcb8b5386",
+    "input_hash": "160565db99e99a7bc241c557a4686693cd448f1e1542fce7103f436726b63dd0",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-accb94f89568c165b5db5a935497c68d",
+    "object": "chat.completion",
+    "created": 1791505620,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"instance of\",\n            \"object\": \"state park\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"park\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located on\",\n            \"object\": \"Oswego River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located in\",\n            \"object\": \"Oswego County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located in\",\n            \"object\": \"New York\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"contains\",\n            \"object\": \"Battle Island State Park Golf Course\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"hole count\",\n                    \"object\": \"18\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"golf course\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located north of\",\n            \"object\": \"City of Fulton\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located along\",\n            \"object\": \"New York State Highway 48\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"highway\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Battle Island State Park\n\nBattle Island State Park is a state park located on the Oswego River in Oswego County, New York. Included within the park is the 18-hole Battle Island State Park Golf Course. The park is located on the west bank of the river, north of the City of Fulton, along New York State Highway 48.\"\n\nWe need to identify entities: Battle Island State Park (subject), Oswego River, Oswego County, New York, Battle Island State Park Golf Course, City of Fulton, New York State Highway 48.\n\nRelations: type (state park), location (on the Oswego River), located in (Oswego County, New York). Also \"included within the park is the 18-hole Battle Island State Park Golf Course\" => relation: contains or has part. Could be \"has part\" or \"contains\". Use \"contains\" maybe. So (Battle Island State Park, contains, Battle Island State Park Golf Course). Also \"the park is located on the west bank of the river\" => location relation: \"west bank of\" maybe \"located on\". Could be \"located on the west bank of the river\". So relation: \"located on\", object: \"west bank of the Oswego River\". Might treat as location qualifier: \"point in time\"? No. Use relation \"located on\". object_type: \"geographic feature\". Also \"north of the City of Fulton\" => relation \"located north of\". So (Battle Island State Park, location relative to, City of Fulton) with qualifier \"direction north\". But maybe simpler: relation \"located north of\", object \"City of Fulton\". Also \"along New York State Highway 48\" => relation \"located along\", object \"New York State Highway 48\". Need subject_type: \"park\". object_type: appropriate.\n\nAlso \"state park\" is a type: relation \"instance of\" maybe \"instance of\", object \"state park\". Use \"instance of\". object_type: \"park\". Also \"state park located on the Oswego River in Oswego County, New York.\" Could have two location relations: \"located on\" Oswego River, \"located in\" Oswego County, \"located in\" New York (state). Could combine.\n\nLet's produce triplets:\n\n1. (Battle Island State Park, instance of, state park) subject_type: \"park\", object_type: \"park type\"? maybe \"park\". Use \"park\". object_type: \"park\". \n\n2. (Battle Island State Park, located on, Oswego River) subject_type: \"park\", object_type: \"river\".\n\n3. (Battle Island State Park, located in, Oswego County) subject_type: \"park\", object_type: \"county\".\n\n4. (Battle Island State Park, located in, New York) subject_type: \"park\", object_type: \"state\".\n\n5. (Battle Island State Park, contains, Battle Island State Park Golf Course) subject_type: \"park\", object_type: \"golf course\". Also note \"18-hole\" attribute maybe qualifier: \"hole count\" 18. Could add qualifier: {\"relation\":\"hole count\",\"object\":\"18\"} but not required. Might add qualifier \"hole count\" as qualifier. Use qualifier relation \"hole count\". object \"18\". object_type \"number\". We'll include.\n\n6. (Battle Island State Park, located on, west bank of Oswego River) maybe separate: but we already have located on river. Could add qualifier direction: \"west bank\". Use qualifier: {\"relation\":\"position\",\"object\":\"west bank\"} but not defined. Could use qualifier \"position\" maybe. But not required.\n\n7. (Battle Island State Park, located north of, City of Fulton) subject_type: \"park\", object_type: \"city\". Could also add qualifier \"direction\": \"north\". But relation already includes north.\n\n8. (Battle Island State Park, located along, New York State Highway 48) subject_type: \"park\", object_type: \"highway\".\n\nMake sure qualifiers list empty unless we add.\n\nLet's include hole count qualifier.\n\nTriplet 5 qualifiers: [{\"relation\":\"hole count\",\"object\":\"18\"}] but hole count is not a relation typical; but we can treat as qualifier.\n\nsubject_type: \"park\". object_type: \"golf course\". qualifiers list.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1655,
+      "total_tokens": 2977,
+      "completion_tokens": 1322,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"instance of\",\n            \"object\": \"state park\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"park\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located on\",\n            \"object\": \"Oswego River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located in\",\n            \"object\": \"Oswego County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located in\",\n            \"object\": \"New York\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"contains\",\n            \"object\": \"Battle Island State Park Golf Course\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"hole count\",\n                    \"object\": \"18\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"golf course\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located north of\",\n            \"object\": \"City of Fulton\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Battle Island State Park\",\n            \"relation\": \"located along\",\n            \"object\": \"New York State Highway 48\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"highway\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Battle Island State Park",
+        "relation": "instance of",
+        "object": "state park",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "park"
+      },
+      {
+        "subject": "Battle Island State Park",
+        "relation": "located on",
+        "object": "Oswego River",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "river"
+      },
+      {
+        "subject": "Battle Island State Park",
+        "relation": "located in",
+        "object": "Oswego County",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "county"
+      },
+      {
+        "subject": "Battle Island State Park",
+        "relation": "located in",
+        "object": "New York",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "state"
+      },
+      {
+        "subject": "Battle Island State Park",
+        "relation": "contains",
+        "object": "Battle Island State Park Golf Course",
+        "qualifiers": [
+          {
+            "relation": "hole count",
+            "object": "18"
+          }
+        ],
+        "subject_type": "park",
+        "object_type": "golf course"
+      },
+      {
+        "subject": "Battle Island State Park",
+        "relation": "located north of",
+        "object": "City of Fulton",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "city"
+      },
+      {
+        "subject": "Battle Island State Park",
+        "relation": "located along",
+        "object": "New York State Highway 48",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "highway"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1655,
+    "total_tokens": 2977,
+    "completion_tokens": 1322,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 579,
+    "output_tokens_est": 487
+  },
+  "attempts": 1,
+  "latency_s": 16.45866144500178,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:27:17.424649+00:00",
+  "cache_key": "bea3cd61cf14fe8d63127440df8c6d69"
+}

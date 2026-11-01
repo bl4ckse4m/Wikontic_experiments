@@ -1,0 +1,129 @@
+{
+  "task": {
+    "input_id": "692f39ee9e7288ba",
+    "input_hash": "5d9057cb47adc6bb08923f09655a0d7cc97368ebf97c6ecb5ec799d5258ac2d3",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-6f684b5a2639f26e072e6bdc02306579",
+    "object": "chat.completion",
+    "created": 1791503813,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Flag of Sint Maarten\",\n            \"relation\": \"national flag of\",\n            \"object\": \"Sint Maarten\",\n            \"qualifiers\": [],\n            \"subject_type\": \"flag\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Sint Maarten\",\n            \"relation\": \"part of\",\n            \"object\": \"Kingdom of the Netherlands\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Sint Maarten\",\n            \"relation\": \"located on\",\n            \"object\": \"Saint Martin\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"Flag of Sint Maarten\",\n            \"relation\": \"designed by\",\n            \"object\": \"Roselle Richardson\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"age\",\n                    \"object\": \"17\"\n                }\n            ],\n            \"subject_type\": \"flag\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Flag of Sint Maarten\",\n            \"relation\": \"date of adoption\",\n            \"object\": \"13 June 1985\",\n            \"qualifiers\": [],\n            \"subject_type\": \"flag\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Flag of Sint Maarten\n\nThe flag of Sint Maarten is the national flag of Sint Maarten, a country within the Kingdom of the Netherlands occupying the southern half of the island of Saint Martin. The flag, designed by 17 year old Rosette Richardson, was officially adopted on 13 June 1985.\"\n\nWe have entities: Flag of Sint Maarten (the flag), Sint Maarten (country), Kingdom of the Netherlands (state), island of Saint Martin (geographic), Roselle Richardson (designer). Also date of adoption.\n\nTriplets:\n\n1. Flag of Sint Maarten – instance of – national flag? relation maybe \"instance of\" or \"type\". But we need specific relation: \"flag of\" maybe \"flag of\". In example they used \"award received\". For flag, we can have relation \"flag of\" linking flag to country. So (Flag of Sint Maarten, flag of, Sint Maarten). subject_type: \"flag\". object_type: \"country\".\n\n2. Flag of Sint Maarten – \"status\" maybe \"national flag\". Could be relation \"designation\" but we can capture \"national flag of\" as relation \"national flag of\". So (Flag of Sint Maarten, national flag of, Sint Maarten). But that duplicates. Might just have one.\n\nBetter: (Flag of Sint Maarten, country, Sint Maarten) with relation \"country\". But we need to follow Wikidata style: property P1449? Not needed. We'll just use \"country\". Acceptable.\n\n3. Sint Maarten – \"instance of\" – \"country\". (Sint Maarten, instance of, country). subject_type: \"political entity\". object_type: \"political entity type\". But maybe not needed.\n\nBut we need only facts explicitly in text. The text says: \"The flag of Sint Maarten is the national flag of Sint Maarten, a country within the Kingdom of the Netherlands occupying the southern half of the island of Saint Martin.\"\n\nThus we can extract:\n\n- Flag of Sint Maarten – \"national flag of\" – Sint Maarten.\n\n- Sint Maarten – \"located in\" – Kingdom of the Netherlands (or \"part of\" maybe). The phrase \"a country within the Kingdom of the Netherlands\". So relation \"subdivision of\" or \"part of\". Use \"part of\". So (Sint Maarten, part of, Kingdom of the Netherlands).\n\n- Sint Maarten – \"located on\" – island of Saint Martin (or \"occupies southern half of\"). Could be relation \"located on\". So (Sint Maarten, located on, Saint Martin). Or \"occupies part of\". Use \"occupies\" relation maybe. We'll use \"occupies part of\". But need object type \"island\". So (Sint Maarten, occupies, southern half of Saint Martin). Might need qualifier for \"southern half\". Could be qualifier \"location qualifier\" but maybe just include as object \"southern half of Saint Martin\". But object should be entity. Could be \"southern half of Saint Martin\". We'll treat as object \"southern half of Saint Martin\". object_type: \"geographic region\". Accept.\n\n- Flag of Sint Maarten – \"designed by\" – Roselle Richardson. Also note \"17 year old\". Could add qualifier \"age\" maybe. Use qualifier: {\"relation\":\"age\",\"object\":\"17\"}? Not defined but we can use qualifier \"age\". The spec didn't list but qualifiers can be any relation. We'll include qualifier \"age\" with object \"17\". Also note \"designer\" maybe relation \"designed by\". So (Flag of Sint Maarten, designed by, Roselle Richardson) with qualifier age 17.\n\n- Flag of Sint Maarten – \"date of adoption\" – 13 June 1985. Could be relation \"date of adoption\" or \"inception\". Use \"date of adoption\". object type date.\n\n- Roselle Richardson – \"occupation\"? Not given. So just entity.\n\nAlso maybe \"Flag of Sint Maarten – official adoption date – 13 June 1985\". Use qualifier \"point in time\". In example they used \"award received\" with qualifier point in time. For adoption, could be relation \"adopted on\". So (Flag of Sint Maarten, adoption date, 13 June 1985). We'll use relation \"date of adoption\". No qualifiers.\n\nNow define subject_type and object_type.\n\n- Flag of Sint Maarten: \"flag\".\n- Sint Maarten: \"country\".\n- Kingdom of the Netherlands: \"country\".\n- Saint Martin: \"island\".\n- Roselle Richardson: \"human\".\n- Date: \"date\".\n\nNow produce JSON.\n\nTriplet list:\n\n1. subject Flag of Sint Maarten, relation \"national flag of\", object Sint Maarten, qualifiers [], types flag, country.\n\n2. subject Sint Maarten, relation \"part of\", object Kingdom of the Netherlands, qualifiers [], types country, country.\n\n3. subject Sint Maarten, relation \"located on\", object Saint Martin, qualifiers [], types country, island. (Or \"occupies\", but we choose \"located on\".)\n\n4. subject Flag of Sint Maarten, relation \"designed by\", object Roselle Richardson, qualifiers [{\"relation\":\"age\",\"object\":\"17\"}], types flag, human.\n\n5. subject Flag of Sint Maarten, relation \"date of adoption\", object \"13 June 1985\", qualifiers [], types flag, date.\n\nPotential also: \"Flag of Sint Maarten – type – flag\". Not needed.\n\nMake sure JSON format.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1649,
+      "total_tokens": 3111,
+      "completion_tokens": 1462,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Flag of Sint Maarten\",\n            \"relation\": \"national flag of\",\n            \"object\": \"Sint Maarten\",\n            \"qualifiers\": [],\n            \"subject_type\": \"flag\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Sint Maarten\",\n            \"relation\": \"part of\",\n            \"object\": \"Kingdom of the Netherlands\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Sint Maarten\",\n            \"relation\": \"located on\",\n            \"object\": \"Saint Martin\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"Flag of Sint Maarten\",\n            \"relation\": \"designed by\",\n            \"object\": \"Roselle Richardson\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"age\",\n                    \"object\": \"17\"\n                }\n            ],\n            \"subject_type\": \"flag\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Flag of Sint Maarten\",\n            \"relation\": \"date of adoption\",\n            \"object\": \"13 June 1985\",\n            \"qualifiers\": [],\n            \"subject_type\": \"flag\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Flag of Sint Maarten",
+        "relation": "national flag of",
+        "object": "Sint Maarten",
+        "qualifiers": [],
+        "subject_type": "flag",
+        "object_type": "country"
+      },
+      {
+        "subject": "Sint Maarten",
+        "relation": "part of",
+        "object": "Kingdom of the Netherlands",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Sint Maarten",
+        "relation": "located on",
+        "object": "Saint Martin",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "island"
+      },
+      {
+        "subject": "Flag of Sint Maarten",
+        "relation": "designed by",
+        "object": "Roselle Richardson",
+        "qualifiers": [
+          {
+            "relation": "age",
+            "object": "17"
+          }
+        ],
+        "subject_type": "flag",
+        "object_type": "human"
+      },
+      {
+        "subject": "Flag of Sint Maarten",
+        "relation": "date of adoption",
+        "object": "13 June 1985",
+        "qualifiers": [],
+        "subject_type": "flag",
+        "object_type": "date"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1649,
+    "total_tokens": 3111,
+    "completion_tokens": 1462,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 442,
+    "output_tokens_est": 349
+  },
+  "attempts": 1,
+  "latency_s": 18.204540482001903,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:57:11.867882+00:00",
+  "cache_key": "3b666c0e7bcbd1140c3e6ad16e70e6f5"
+}

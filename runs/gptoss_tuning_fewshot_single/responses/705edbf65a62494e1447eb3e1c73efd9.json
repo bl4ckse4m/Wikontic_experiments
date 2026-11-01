@@ -1,0 +1,129 @@
+{
+  "task": {
+    "input_id": "d537c47091cebbc0",
+    "input_hash": "b4b4d2dc06879754194a7fc708d3c1e5026794b56d8226a5ee490d5cd7054707",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c34793f82aef4ab5072556974d64ca71",
+    "object": "chat.completion",
+    "created": 1791521820,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Garden Of Unearthly Delights\",\n            \"relation\": \"instance of\",\n            \"object\": \"novel\",\n            \"qualifiers\": [],\n            \"subject_type\": \"novel\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"The Garden Of Unearthly Delights\",\n            \"relation\": \"author\",\n            \"object\": \"Robert Rankin\",\n            \"qualifiers\": [],\n            \"subject_type\": \"novel\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Robert Rankin\",\n            \"relation\": \"occupation\",\n            \"object\": \"author\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country of citizenship\",\n                    \"object\": \"United Kingdom\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"The Garden Of Unearthly Delights\",\n            \"relation\": \"title reference\",\n            \"object\": \"The Garden of Earthly Delights\",\n            \"qualifiers\": [],\n            \"subject_type\": \"novel\",\n            \"object_type\": \"painting\"\n        },\n        {\n            \"subject\": \"The Garden of Earthly Delights\",\n            \"relation\": \"creator\",\n            \"object\": \"Hieronymus Bosch\",\n            \"qualifiers\": [],\n            \"subject_type\": \"painting\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"The Garden of Unearthly Delights\n\nThe Garden Of Unearthly Delights is a novel by British author Robert Rankin. Its title is a reference to the painting \"The Garden of Earthly Delights\" by the painter Hieronymus Bosch.\"\n\nWe have entities: The Garden Of Unearthly Delights (novel). Relation: instance of novel? Probably \"instance of\" or \"genre\". Use \"instance of\" maybe but they used \"occupation\", \"award received\". For books, typical relation: \"author\". So we can have triplet: subject \"The Garden Of Unearthly Delights\", relation \"author\", object \"Robert Rankin\". Also need subject_type \"novel\", object_type \"human\". Also maybe \"title reference\" relation: \"title reference\" or \"reference to\". Use relation \"title reference\" maybe \"reference to\". In example they used \"reference to\" not shown. We'll create relation \"title reference\" with object \"The Garden of Earthly Delights\". Qualifiers: maybe \"creator\" of painting is Hieronymus Bosch, but that's separate.\n\nTriplet: subject \"The Garden of Earthly Delights\", relation \"creator\", object \"Hieronymus Bosch\". But the sentence says painting by the painter Hieronymus Bosch. So we can have \"The Garden of Earthly Delights\" (painting) relation \"creator\" object \"Hieronymus Bosch\". Subject_type \"painting\", object_type \"human\".\n\nAlso maybe \"The Garden of Earthly Delights\" is a painting. So we need a type: \"instance of painting\". Could add a triplet: subject \"The Garden of Earthly Delights\", relation \"instance of\", object \"painting\". But not required; we can just have creator relation.\n\nAlso \"British author\" indicates nationality. Could add qualifier to author relation: \"country of citizenship\" \"United Kingdom\". But example used qualifier for occupation: they added qualifier \"country of citizenship\". Here \"British author Robert Rankin\". So we could have triplet: subject \"Robert Rankin\", relation \"occupation\", object \"author\", qualifier \"country of citizenship\" \"United Kingdom\". But the text says \"British author Robert Rankin\". So we can capture that.\n\nBut we must extract every explicitly stated fact. So we have:\n\n1. The Garden Of Unearthly Delights is a novel. So relation \"instance of\" object \"novel\". subject_type \"novel\"? Actually subject_type \"novel\". object_type \"genre\"? Might be \"work\". Use object_type \"literary work\". We'll set object_type \"genre\" maybe. But guidelines: use class name. Let's use \"novel\" as object_type \"literary work\". Subject_type \"novel\"? That seems odd. Subject_type could be \"novel\". But they used for \"Marie Curie\" subject_type \"human\". For a work, subject_type \"novel\". object_type \"literary work\"? Actually \"instance of\" relation expects object type \"genre\". We'll set object_type \"genre\". Good.\n\n2. The Garden Of Unearthly Delights author Robert Rankin. Relation \"author\". subject_type \"novel\". object_type \"human\".\n\nAdd qualifier \"country of citizenship\" \"United Kingdom\". Use qualifier relation \"country of citizenship\". object \"United Kingdom\". subject_type \"human\"? Actually qualifier attached to triplet \"author\". So qualifiers list includes that.\n\n3. Its title is a reference to the painting \"The Garden of Earthly Delights\". So relation \"title reference\" maybe \"reference to\". We'll use relation \"title reference\". object \"The Garden of Earthly Delights\". qualifiers none. subject_type \"novel\". object_type \"painting\".\n\n4. The painting \"The Garden of Earthly Delights\" by the painter Hieronymus Bosch. So relation \"creator\" (or \"artist\") object \"Hieronymus Bosch\". subject_type \"painting\". object_type \"human\". Could also have \"instance of\" painting. But not necessary.\n\nAlso \"British author\" indicates nationality of Robert Rankin. Already captured as qualifier. Could also have separate triplet: subject \"Robert Rankin\", relation \"country of citizenship\", object \"United Kingdom\". But that would be a separate fact. The text says \"British author Robert Rankin\". That's a description; we can treat as qualifier or separate. In example they used qualifier for occupation. They didn't also create separate citizenship triplet. So we follow that pattern: include qualifier on occupation. But we have occupation not captured yet. We have author relation, not occupation. Could also have occupation triplet: subject \"Robert Rankin\", relation \"occupation\", object \"author\", qualifier \"country of citizenship\" \"United Kingdom\". That seems more aligned with example. Let's include that.\n\nThus we have:\n\n- Triplet: subject \"Robert Rankin\", relation \"occupation\", object \"author\", qualifiers [{\"relation\":\"country of citizenship\",\"object\":\"United Kingdom\"}], subject_type \"human\", object_type \"profession\".\n\n- Triplet: subject \"The Garden Of Unearthly Delights\", relation \"author\", object \"Robert Rankin\". But if we have occupation, maybe we don't need author relation? But it's explicit: \"novel by British author Robert Rankin\". So we should capture author relation.\n\nThus we have both.\n\nNow ensure no duplication.\n\nNow produce JSON.\n\nCheck types:\n\n- \"The Garden Of Unearthly Delights\": type \"novel\" (work). object_type for author relation: \"human\". For instance of: object_type \"genre\". For title reference: object_type \"painting\". For reference maybe \"reference\". We'll set object_type \"painting\".\n\n- \"The Garden of Earthly Delights\": type \"painting\". For creator relation: object_type \"human\". Also could have \"instance of\" painting but not needed.\n\nNow produce JSON list.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1643,
+      "total_tokens": 3176,
+      "completion_tokens": 1533,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Garden Of Unearthly Delights\",\n            \"relation\": \"instance of\",\n            \"object\": \"novel\",\n            \"qualifiers\": [],\n            \"subject_type\": \"novel\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"The Garden Of Unearthly Delights\",\n            \"relation\": \"author\",\n            \"object\": \"Robert Rankin\",\n            \"qualifiers\": [],\n            \"subject_type\": \"novel\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Robert Rankin\",\n            \"relation\": \"occupation\",\n            \"object\": \"author\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country of citizenship\",\n                    \"object\": \"United Kingdom\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"The Garden Of Unearthly Delights\",\n            \"relation\": \"title reference\",\n            \"object\": \"The Garden of Earthly Delights\",\n            \"qualifiers\": [],\n            \"subject_type\": \"novel\",\n            \"object_type\": \"painting\"\n        },\n        {\n            \"subject\": \"The Garden of Earthly Delights\",\n            \"relation\": \"creator\",\n            \"object\": \"Hieronymus Bosch\",\n            \"qualifiers\": [],\n            \"subject_type\": \"painting\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "The Garden Of Unearthly Delights",
+        "relation": "instance of",
+        "object": "novel",
+        "qualifiers": [],
+        "subject_type": "novel",
+        "object_type": "genre"
+      },
+      {
+        "subject": "The Garden Of Unearthly Delights",
+        "relation": "author",
+        "object": "Robert Rankin",
+        "qualifiers": [],
+        "subject_type": "novel",
+        "object_type": "human"
+      },
+      {
+        "subject": "Robert Rankin",
+        "relation": "occupation",
+        "object": "author",
+        "qualifiers": [
+          {
+            "relation": "country of citizenship",
+            "object": "United Kingdom"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "The Garden Of Unearthly Delights",
+        "relation": "title reference",
+        "object": "The Garden of Earthly Delights",
+        "qualifiers": [],
+        "subject_type": "novel",
+        "object_type": "painting"
+      },
+      {
+        "subject": "The Garden of Earthly Delights",
+        "relation": "creator",
+        "object": "Hieronymus Bosch",
+        "qualifiers": [],
+        "subject_type": "painting",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1643,
+    "total_tokens": 3176,
+    "completion_tokens": 1533,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 459,
+    "output_tokens_est": 367
+  },
+  "attempts": 1,
+  "latency_s": 18.932379751000553,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:57:19.384750+00:00",
+  "cache_key": "705edbf65a62494e1447eb3e1c73efd9"
+}

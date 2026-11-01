@@ -1,0 +1,162 @@
+{
+  "task": {
+    "input_id": "f344f256db54b690",
+    "input_hash": "ab6c8b0957fb896731b2a29f40a4ee97b25b3a8634c3a31c1bbb2e6fd1d9083d",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793214521-oArpVggA5JVeK9m6ttOy",
+    "object": "chat.completion",
+    "created": 1793214521,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DeepInfra",
+    "system_fingerprint": null,
+    "service_tier": "default",
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"date\",\n            \"object\": \"6 November 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"elects\",\n            \"object\": \"Governor of Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"concurrent with\",\n            \"object\": \"Michigan Class I U.S. Senate election\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"election\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"concurrent with\",\n            \"object\": \"United States Senate elections in other states\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"election\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"concurrent with\",\n            \"object\": \"United States House of Representatives elections\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"election\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"concurrent with\",\n            \"object\": \"state and local elections\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"election\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text. The text describes the 2018 Michigan gubernatorial election. Facts:\n\n- Event: 2018 Michigan gubernatorial election\n- It will take place on November 6, 2018.\n- Purpose: to elect the Governor of Michigan.\n- It is concurrent with the election of Michigan's Class I U.S. Senate seat.\n- Also concurrent with other elections to the United States Senate in other states.\n- Also concurrent with elections to the United States House of Representatives.\n- Also concurrent with various state and local elections.\n\nWe need to produce triplets with subject, relation, object, qualifiers, subject_type, object_type.\n\nDefine entities:\n\n- \"2018 Michigan gubernatorial election\" (event)\n- \"November 6, 2018\" (date)\n- \"Governor of Michigan\" (position)\n- \"Michigan's Class I U.S. Senate seat\" (position/office)\n- \"United States Senate elections\" (maybe generic)\n- \"United States House of Representatives elections\"\n- \"state and local elections\" (maybe category)\n\nRelations:\n\n- \"date of election\" or \"date\" maybe \"date\" relation. Use \"date\" or \"date of election\". Let's use \"date\" (common). Or \"date of event\". Use \"date\". object_type \"date\".\n\n- \"elects\" maybe relation \"elects\". Subject election elects object position. So relation \"elects\" object \"Governor of Michigan\". object_type \"political office\" or \"position\". Use \"political office\".\n\n- \"concurrent with\" relation \"concurrent with\". Could be multiple objects.\n\n- \"concurrent with\" qualifiers? Not needed.\n\n- For \"Michigan's Class I U.S. Senate seat\" object_type \"political office\". Also \"United States Senate election\" maybe \"election type\". But we can treat as \"election\" event.\n\nBetter to create separate triplets:\n\n1. subject: \"2018 Michigan gubernatorial election\", relation: \"date\", object: \"6 November 2018\". object_type: \"date\". subject_type: \"election\".\n\n2. subject: \"2018 Michigan gubernatorial election\", relation: \"elects\", object: \"Governor of Michigan\". object_type: \"political office\". subject_type: \"election\".\n\n3. subject: \"2018 Michigan gubernatorial election\", relation: \"concurrent with\", object: \"Michigan's Class I U.S. Senate election\". object_type: \"election\". subject_type: \"election\". But the text says \"election of Michigan's Class I U.S. Senate seat\". So object could be \"Michigan Class I U.S. Senate seat election\". We'll phrase as \"Michigan Class I U.S. Senate election\". object_type \"election\".\n\n4. subject: \"2018 Michigan gubernatorial election\", relation: \"concurrent with\", object: \"United States Senate elections in other states\". object_type \"election\". Might be generic.\n\n5. subject: \"2018 Michigan gubernatorial election\", relation: \"concurrent with\", object: \"United States House of Representatives elections\". object_type \"election\".\n\n6. subject: \"2018 Michigan gubernatorial election\", relation: \"concurrent with\", object: \"state and local elections\". object_type \"election\".\n\nWe also might include that the election is \"type\" \"gubernatorial election\". Could add relation \"type of election\". But not required.\n\nMake sure qualifiers list is empty for each.\n\nNow produce JSON with \"triplets\": [ ... ].\n\nCheck naming: Use singular names. \"Governor of Michigan\" is fine.\n\nDate format: \"6 November 2018\" or \"November 6, 2018\". Use \"6 November 2018\". object_type \"date\". subject_type \"election\". object_type for political office \"political office\". For election objects \"election\". For \"state and local elections\" maybe \"election\". Good.\n\nNow produce final answer.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text. The text describes the 2018 Michigan gubernatorial election. Facts:\n\n- Event: 2018 Michigan gubernatorial election\n- It will take place on November 6, 2018.\n- Purpose: to elect the Governor of Michigan.\n- It is concurrent with the election of Michigan's Class I U.S. Senate seat.\n- Also concurrent with other elections to the United States Senate in other states.\n- Also concurrent with elections to the United States House of Representatives.\n- Also concurrent with various state and local elections.\n\nWe need to produce triplets with subject, relation, object, qualifiers, subject_type, object_type.\n\nDefine entities:\n\n- \"2018 Michigan gubernatorial election\" (event)\n- \"November 6, 2018\" (date)\n- \"Governor of Michigan\" (position)\n- \"Michigan's Class I U.S. Senate seat\" (position/office)\n- \"United States Senate elections\" (maybe generic)\n- \"United States House of Representatives elections\"\n- \"state and local elections\" (maybe category)\n\nRelations:\n\n- \"date of election\" or \"date\" maybe \"date\" relation. Use \"date\" or \"date of election\". Let's use \"date\" (common). Or \"date of event\". Use \"date\". object_type \"date\".\n\n- \"elects\" maybe relation \"elects\". Subject election elects object position. So relation \"elects\" object \"Governor of Michigan\". object_type \"political office\" or \"position\". Use \"political office\".\n\n- \"concurrent with\" relation \"concurrent with\". Could be multiple objects.\n\n- \"concurrent with\" qualifiers? Not needed.\n\n- For \"Michigan's Class I U.S. Senate seat\" object_type \"political office\". Also \"United States Senate election\" maybe \"election type\". But we can treat as \"election\" event.\n\nBetter to create separate triplets:\n\n1. subject: \"2018 Michigan gubernatorial election\", relation: \"date\", object: \"6 November 2018\". object_type: \"date\". subject_type: \"election\".\n\n2. subject: \"2018 Michigan gubernatorial election\", relation: \"elects\", object: \"Governor of Michigan\". object_type: \"political office\". subject_type: \"election\".\n\n3. subject: \"2018 Michigan gubernatorial election\", relation: \"concurrent with\", object: \"Michigan's Class I U.S. Senate election\". object_type: \"election\". subject_type: \"election\". But the text says \"election of Michigan's Class I U.S. Senate seat\". So object could be \"Michigan Class I U.S. Senate seat election\". We'll phrase as \"Michigan Class I U.S. Senate election\". object_type \"election\".\n\n4. subject: \"2018 Michigan gubernatorial election\", relation: \"concurrent with\", object: \"United States Senate elections in other states\". object_type \"election\". Might be generic.\n\n5. subject: \"2018 Michigan gubernatorial election\", relation: \"concurrent with\", object: \"United States House of Representatives elections\". object_type \"election\".\n\n6. subject: \"2018 Michigan gubernatorial election\", relation: \"concurrent with\", object: \"state and local elections\". object_type \"election\".\n\nWe also might include that the election is \"type\" \"gubernatorial election\". Could add relation \"type of election\". But not required.\n\nMake sure qualifiers list is empty for each.\n\nNow produce JSON with \"triplets\": [ ... ].\n\nCheck naming: Use singular names. \"Governor of Michigan\" is fine.\n\nDate format: \"6 November 2018\" or \"November 6, 2018\". Use \"6 November 2018\". object_type \"date\". subject_type \"election\". object_type for political office \"political office\". For election objects \"election\". For \"state and local elections\" maybe \"election\". Good.\n\nNow produce final answer.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1419,
+      "completion_tokens": 1203,
+      "total_tokens": 2622,
+      "cost": 0.000257013,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000257013,
+        "upstream_inference_prompt_cost": 5.2503e-05,
+        "upstream_inference_completions_cost": 0.00020451
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 885,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"date\",\n            \"object\": \"6 November 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"elects\",\n            \"object\": \"Governor of Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"concurrent with\",\n            \"object\": \"Michigan Class I U.S. Senate election\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"election\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"concurrent with\",\n            \"object\": \"United States Senate elections in other states\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"election\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"concurrent with\",\n            \"object\": \"United States House of Representatives elections\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"election\"\n        },\n        {\n            \"subject\": \"2018 Michigan gubernatorial election\",\n            \"relation\": \"concurrent with\",\n            \"object\": \"state and local elections\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"election\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "2018 Michigan gubernatorial election",
+        "relation": "date",
+        "object": "6 November 2018",
+        "qualifiers": [],
+        "subject_type": "election",
+        "object_type": "date"
+      },
+      {
+        "subject": "2018 Michigan gubernatorial election",
+        "relation": "elects",
+        "object": "Governor of Michigan",
+        "qualifiers": [],
+        "subject_type": "election",
+        "object_type": "political office"
+      },
+      {
+        "subject": "2018 Michigan gubernatorial election",
+        "relation": "concurrent with",
+        "object": "Michigan Class I U.S. Senate election",
+        "qualifiers": [],
+        "subject_type": "election",
+        "object_type": "election"
+      },
+      {
+        "subject": "2018 Michigan gubernatorial election",
+        "relation": "concurrent with",
+        "object": "United States Senate elections in other states",
+        "qualifiers": [],
+        "subject_type": "election",
+        "object_type": "election"
+      },
+      {
+        "subject": "2018 Michigan gubernatorial election",
+        "relation": "concurrent with",
+        "object": "United States House of Representatives elections",
+        "qualifiers": [],
+        "subject_type": "election",
+        "object_type": "election"
+      },
+      {
+        "subject": "2018 Michigan gubernatorial election",
+        "relation": "concurrent with",
+        "object": "state and local elections",
+        "qualifiers": [],
+        "subject_type": "election",
+        "object_type": "election"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1419,
+    "completion_tokens": 1203,
+    "total_tokens": 2622,
+    "cost": 0.000257013,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000257013,
+      "upstream_inference_prompt_cost": 5.2503e-05,
+      "upstream_inference_completions_cost": 0.00020451
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 885,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 569,
+    "output_tokens_est": 441
+  },
+  "attempts": 1,
+  "latency_s": 38.936789677005436,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T19:09:19.440332+00:00",
+  "cache_key": "9e837fb80c22dc493cc5dbdfc904eeff"
+}

@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "dc421d5ca1ba9c40",
+    "input_hash": "e6815615db08d75127a1196e8e6f7b67ffbfed1906a0ccaa6bf81d41a32c8d2e",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-4ecfe62bbe048ec6fc6106484bf01a5f",
+    "object": "chat.completion",
+    "created": 1791507391,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"instance of\",\n            \"object\": \"container ship\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"ship type\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"date of construction\",\n            \"object\": \"2006\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"builder\",\n            \"object\": \"Daewoo Mangalia Heavy Industries\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Daewoo Mangalia Heavy Industries\",\n            \"relation\": \"location\",\n            \"object\": \"Mangalia, Romania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"operator\",\n            \"object\": \"Mediterranean Shipping Company S.A.\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"recipient\",\n            \"object\": \"Mediterranean Shipping Company S.A.\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"order in series\",\n            \"object\": \"1\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"total in series\",\n                    \"object\": \"12\"\n                }\n            ],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Mediterranean Shipping Company S.A.\",\n            \"relation\": \"country\",\n            \"object\": \"Switzerland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"MSC Geneva\n\nThe MSC Geneva is a container ship built in 2006 by the Daewoo Mangalia Heavy Industries in Mangalia, Romania and currently operated by Mediterranean Shipping Company S.A.. She is the first ship delivered to the Swiss company in a series of 12 ordered.\"\n\nWe need to parse facts.\n\nEntities: MSC Geneva (ship), Daewoo Mangalia Heavy Industries (company), Mangalia (city), Romania (country), Mediterranean Shipping Company S.A. (company), Swiss company (refers to Mediterranean Shipping Company S.A. maybe, but we can treat as \"Mediterranean Shipping Company S.A.\" is Swiss). Also \"first ship delivered to the Swiss company in a series of 12 ordered.\"\n\nRelations:\n\n- MSC Geneva instance of container ship (type). relation: \"instance of\" or \"type\". Use \"instance of\" maybe. object_type: \"ship type\" or \"vessel\". We'll use \"container ship\" as object, type \"ship type\".\n\n- MSC Geneva built in 2006. relation: \"inception\" or \"date of construction\". Use \"date of construction\". object_type: date.\n\n- MSC Geneva built by Daewoo Mangalia Heavy Industries. relation: \"builder\" or \"constructed by\". Use \"builder\". object_type: organization.\n\n- Daewoo Mangalia Heavy Industries located in Mangalia, Romania. The phrase \"in Mangalia, Romania\" qualifies the building location. So we can have a qualifier for the builder relation: location. But guidelines: qualifiers attached to specific claim. So for \"builder\" claim, we can add qualifier \"location\" = \"Mangalia, Romania\". Or we could make separate triplet: \"Daewoo Mangalia Heavy Industries\" \"location\" \"Mangalia, Romania\". That is a fact. We'll include separate triplet.\n\n- MSC Geneva currently operated by Mediterranean Shipping Company S.A. relation: \"operator\". object_type: organization. Also \"currently\" is a temporal qualifier maybe \"point in time\" = \"present\". Could add qualifier \"point in time\" \"present\". But maybe not needed. We'll add qualifier \"point in time\" \"present\". Or \"point in time\" \"2026\"? Not given. We'll just add qualifier \"status\" maybe. But guidelines: date qualifiers. We'll skip.\n\n- MSC Geneva is the first ship delivered to the Swiss company in a series of 12 ordered. So relation: \"position in series\" maybe \"order in series\" = 1. object: \"series of 12 ships\". Could create triplet: MSC Geneva \"order in series\" \"1\". qualifier: \"total in series\" \"12\". Also \"delivered to\" relation: \"recipient\" \"Mediterranean Shipping Company S.A.\" (Swiss company). So we have \"delivered to\" relation.\n\n- Also \"first ship delivered to the Swiss company\" indicates that MSC Geneva is the first ship delivered to that company. So we can have triplet: MSC Geneva \"order in series\" \"1\". qualifiers: {\"relation\":\"total in series\",\"object\":\"12\"}.\n\n- Also \"Swiss company\" refers to Mediterranean Shipping Company S.A., which is Swiss. Could add triplet: Mediterranean Shipping Company S.A. \"country of origin\" \"Switzerland\". But not explicitly stated; \"Swiss company\" indicates nationality. So we can have \"Mediterranean Shipping Company S.A.\" \"country\" \"Switzerland\". We'll include.\n\n- Also \"series of 12 ordered\" indicates there are 12 ships ordered. Could have triplet: \"series of 12 ordered\" maybe not needed.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- MSC Geneva: \"ship\" (or \"vessel\").\n\n- container ship: \"ship type\".\n\n- 2006: date.\n\n- Daewoo Mangalia Heavy Industries: \"organization\" (shipbuilder).\n\n- Mangalia: \"city\".\n\n- Romania: \"country\".\n\n- Mediterranean Shipping Company S.A.: \"organization\" (shipping company).\n\n- Switzerland: \"country\".\n\n- \"first ship delivered\" maybe \"order in series\" object is integer \"1\" type \"quantity\". Qualifier total in series \"12\" type \"quantity\".\n\n- \"recipient\": object is Mediterranean Shipping Company S.A.\n\nNow produce JSON.\n\nTriplet list:\n\n1. MSC Geneva - instance of - container ship.\n\n2. MSC Geneva - date of construction - 2006.\n\n3. MSC Geneva - builder - Daewoo Mangalia Heavy Industries.\n\n4. Daewoo Mangalia Heavy Industries - location - Mangalia, Romania. Could split into two: location city, location country. We'll do one with object \"Mangalia, Romania\" type \"location\". Or separate: location city Mangalia, location country Romania. Simpler: location - Mangalia, Romania.\n\n5. MSC Geneva - operator - Mediterranean Shipping Company S.A.\n\n6. MSC Geneva - recipient - Mediterranean Shipping Company S.A. (delivered to). Might be redundant with operator but okay.\n\n7. MSC Geneva - order in series - 1, qualifiers total in series 12.\n\n8. Mediterranean Shipping Company S.A. - country - Switzerland.\n\nCheck qualifiers: For builder, we could add qualifier \"point in time\" 2006? Already separate. Not needed.\n\nFor operator, maybe qualifier \"point in time\" \"present\". Not needed.\n\nNow format each with qualifiers list.\n\nTriplet 1 qualifiers empty.\n\nTriplet 2 qualifiers empty.\n\nTriplet 3 qualifiers empty (maybe location qualifier but we have separate triplet).\n\nTriplet 4 qualifiers empty.\n\nTriplet 5 qualifiers empty.\n\nTriplet 6 qualifiers empty.\n\nTriplet 7 qualifiers list with one qualifier: {\"relation\":\"total in series\",\"object\":\"12\"}.\n\nTriplet 8 qualifiers empty.\n\nNow subject_type/object_type:\n\n1. subject_type \"ship\", object_type \"ship type\".\n\n2. subject_type \"ship\", object_type \"date\".\n\n3. subject_type \"ship\", object_type \"organization\".\n\n4. subject_type \"organization\", object_type \"location\".\n\n5. subject_type \"ship\", object_type \"organization\".\n\n6. subject_type \"ship\", object_type \"organization\".\n\n7. subject_type \"ship\", object_type \"quantity\".\n\n8. subject_type \"organization\", object_type \"country\".\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1642,
+      "total_tokens": 3413,
+      "completion_tokens": 1771,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"instance of\",\n            \"object\": \"container ship\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"ship type\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"date of construction\",\n            \"object\": \"2006\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"builder\",\n            \"object\": \"Daewoo Mangalia Heavy Industries\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Daewoo Mangalia Heavy Industries\",\n            \"relation\": \"location\",\n            \"object\": \"Mangalia, Romania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"operator\",\n            \"object\": \"Mediterranean Shipping Company S.A.\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"recipient\",\n            \"object\": \"Mediterranean Shipping Company S.A.\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"MSC Geneva\",\n            \"relation\": \"order in series\",\n            \"object\": \"1\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"total in series\",\n                    \"object\": \"12\"\n                }\n            ],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Mediterranean Shipping Company S.A.\",\n            \"relation\": \"country\",\n            \"object\": \"Switzerland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "MSC Geneva",
+        "relation": "instance of",
+        "object": "container ship",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "ship type"
+      },
+      {
+        "subject": "MSC Geneva",
+        "relation": "date of construction",
+        "object": "2006",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "date"
+      },
+      {
+        "subject": "MSC Geneva",
+        "relation": "builder",
+        "object": "Daewoo Mangalia Heavy Industries",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Daewoo Mangalia Heavy Industries",
+        "relation": "location",
+        "object": "Mangalia, Romania",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "location"
+      },
+      {
+        "subject": "MSC Geneva",
+        "relation": "operator",
+        "object": "Mediterranean Shipping Company S.A.",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "organization"
+      },
+      {
+        "subject": "MSC Geneva",
+        "relation": "recipient",
+        "object": "Mediterranean Shipping Company S.A.",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "organization"
+      },
+      {
+        "subject": "MSC Geneva",
+        "relation": "order in series",
+        "object": "1",
+        "qualifiers": [
+          {
+            "relation": "total in series",
+            "object": "12"
+          }
+        ],
+        "subject_type": "ship",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Mediterranean Shipping Company S.A.",
+        "relation": "country",
+        "object": "Switzerland",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1642,
+    "total_tokens": 3413,
+    "completion_tokens": 1771,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 641,
+    "output_tokens_est": 548
+  },
+  "attempts": 1,
+  "latency_s": 20.452218929000082,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:56:52.655270+00:00",
+  "cache_key": "9d9a3f901b51c048894aa0eaf6250eb3"
+}

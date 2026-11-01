@@ -1,0 +1,163 @@
+{
+  "task": {
+    "input_id": "2126540cd3ad91b3",
+    "input_hash": "21b3ab32904083cd8bd32a45fc4015a35eab06133b63ae2dd05552a825373253",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-dea9cec70cc858c29c3556b3dc06b4f3",
+    "object": "chat.completion",
+    "created": 1791501629,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"instance of\",\n            \"object\": \"television series\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"country of origin\",\n            \"object\": \"Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"country of origin\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"genre\",\n            \"object\": \"drama\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"original network\",\n            \"object\": \"Nine Network\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2009\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"original network\",\n            \"object\": \"Space\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2009\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Canada\"\n                }\n            ],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"broadcast date\",\n            \"object\": \"August 2009\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"type\",\n                    \"object\": \"repeat\"\n                }\n            ],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Stormworld\n\nStormworld is an Australian-Canadian television drama series aired ...\"\n\nWe have entity \"Stormworld\" (TV series). Need subject_type likely \"television series\". Object types: \"country\" for Australian-Canadian? Could be \"country of origin\". Relation maybe \"country of origin\" or \"origin\". Use Wikidata style: \"country of origin\". Also \"genre\" = drama series? Actually \"television drama series\". Could have relation \"instance of\" = television series. Also \"language\"? Not given. \"network\" = Nine Network (Australia) and Space (Canada). Also \"first aired\" dates: 2009 in Australia on Nine Network, first aired on Space March 2009 in Canada, repeat broadcast August 2009 (maybe also on Space? Not clear). We'll create separate triplets.\n\nTriplet 1: (Stormworld, instance of, television series) subject_type television series, object_type class? maybe \"television series\". Use object_type \"television series\". But object_type should be class. We'll set \"object_type\": \"television series\". Might be redundant but okay.\n\nTriplet 2: (Stormworld, country of origin, Australia) qualifiers? Also Canada. Could have two separate triplets: one for each country. subject_type television series, object_type country.\n\nTriplet 3: (Stormworld, country of origin, Canada) similarly.\n\nTriplet 4: (Stormworld, original network, Nine Network) with qualifier point in time 2009? Actually aired on Nine Network in 2009 in Australia. So relation \"original network\" maybe \"original broadcast network\". Use \"original network\". Qualifier point in time 2009, and maybe location Australia. Could add qualifier \"country\" but not needed. We'll include point in time.\n\nTriplet 5: (Stormworld, original network, Space) with qualifier point in time March 2009, and maybe country Canada. Use point in time \"March 2009\". Could also add qualifier \"country\" Canada but not required.\n\nTriplet 6: (Stormworld, repeat broadcast, Space) with qualifier point in time August 2009. Not sure if repeat broadcast network is Space; text says \"with a repeat broadcast in August 2009.\" Not specifying network, but likely same network? ambiguous. Could just have (Stormworld, repeat broadcast, unspecified). Better to create (Stormworld, repeat broadcast, unknown) but we need object entity. Could use \"August 2009\" as object? No, repeat broadcast is an event. Could treat as (Stormworld, broadcast, August 2009) with qualifier \"type\" repeat. Simpler: (Stormworld, broadcast, August 2009) with qualifier \"type\" repeat. But relation \"broadcast\" maybe not standard. Could use \"broadcast date\". However we already have original network with dates. For repeat broadcast, we could have (Stormworld, broadcast date, August 2009) with qualifier \"type\" repeat. We'll do that.\n\nAlso maybe \"genre\" = drama series. Relation \"genre\". Object \"drama\". subject_type television series, object_type genre.\n\nAlso \"language\"? Not given.\n\nLet's craft JSON.\n\nNeed qualifiers list of dicts.\n\nDefine relations: \"instance of\", \"country of origin\", \"genre\", \"original network\", \"broadcast date\", \"repeat broadcast\"? Use \"broadcast date\". Provide qualifier \"point in time\" for date? Actually broadcast date is the date itself, so we can set object as date and no qualifier. But we need to differentiate original network vs repeat. For original network we have network as object and qualifier point in time.\n\nThus:\n\nTriplet original network Nine Network: object \"Nine Network\", qualifier point in time \"2009\". Also maybe qualifier \"country\" \"Australia\". Could add but not required.\n\nTriplet original network Space: object \"Space\", qualifier point in time \"March 2009\". Also qualifier \"country\" \"Canada\".\n\nTriplet broadcast date: object \"August 2009\", qualifier \"type\" \"repeat\". Use relation \"broadcast date\". object_type date.\n\nNow produce JSON.\n\nCheck subject_type for each: \"Stormworld\" is a television series, so subject_type \"television series\". For all triplets same.\n\nobject_type: for instance of: \"television series\". For country: \"country\". For genre: \"genre\". For network: \"television network\". For broadcast date: \"date\". For repeat broadcast type maybe \"string\". But object_type for broadcast date is date.\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1630,
+      "total_tokens": 3076,
+      "completion_tokens": 1446,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"instance of\",\n            \"object\": \"television series\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"country of origin\",\n            \"object\": \"Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"country of origin\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"genre\",\n            \"object\": \"drama\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"original network\",\n            \"object\": \"Nine Network\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2009\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"original network\",\n            \"object\": \"Space\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2009\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Canada\"\n                }\n            ],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"Stormworld\",\n            \"relation\": \"broadcast date\",\n            \"object\": \"August 2009\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"type\",\n                    \"object\": \"repeat\"\n                }\n            ],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Stormworld",
+        "relation": "instance of",
+        "object": "television series",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "television series"
+      },
+      {
+        "subject": "Stormworld",
+        "relation": "country of origin",
+        "object": "Australia",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "country"
+      },
+      {
+        "subject": "Stormworld",
+        "relation": "country of origin",
+        "object": "Canada",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "country"
+      },
+      {
+        "subject": "Stormworld",
+        "relation": "genre",
+        "object": "drama",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "genre"
+      },
+      {
+        "subject": "Stormworld",
+        "relation": "original network",
+        "object": "Nine Network",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2009"
+          },
+          {
+            "relation": "country",
+            "object": "Australia"
+          }
+        ],
+        "subject_type": "television series",
+        "object_type": "television network"
+      },
+      {
+        "subject": "Stormworld",
+        "relation": "original network",
+        "object": "Space",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "March 2009"
+          },
+          {
+            "relation": "country",
+            "object": "Canada"
+          }
+        ],
+        "subject_type": "television series",
+        "object_type": "television network"
+      },
+      {
+        "subject": "Stormworld",
+        "relation": "broadcast date",
+        "object": "August 2009",
+        "qualifiers": [
+          {
+            "relation": "type",
+            "object": "repeat"
+          }
+        ],
+        "subject_type": "television series",
+        "object_type": "date"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1630,
+    "total_tokens": 3076,
+    "completion_tokens": 1446,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 706,
+    "output_tokens_est": 613
+  },
+  "attempts": 1,
+  "latency_s": 18.199979625002015,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:20:48.103691+00:00",
+  "cache_key": "f0323e27b393b130b4662ab9ec5f4dc7"
+}

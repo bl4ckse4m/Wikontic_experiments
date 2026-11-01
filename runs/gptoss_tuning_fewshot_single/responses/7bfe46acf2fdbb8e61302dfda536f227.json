@@ -1,0 +1,125 @@
+{
+  "task": {
+    "input_id": "9787ca0587857877",
+    "input_hash": "ebb02932164ccda220704fbb1a6642ce6df423cacf2b07822eafe4972616d527",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a14b3fd1cf8b0749091658a8395f6c1e",
+    "object": "chat.completion",
+    "created": 1791519844,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"has part\",\n            \"object\": \"southwest coastal plain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"geographical region\"\n        },\n        {\n            \"subject\": \"southwest coastal plain\",\n            \"relation\": \"primary drainage\",\n            \"object\": \"Kouilou-Niari River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographical region\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"has part\",\n            \"object\": \"central plateau\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"geographical region\"\n        },\n        {\n            \"subject\": \"forests\",\n            \"relation\": \"pressure\",\n            \"object\": \"exploitation pressure\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"increasing\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Republic of the Congo\"\n                }\n            ],\n            \"subject_type\": \"forest\",\n            \"object_type\": \"environmental pressure\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Republic of the Congo\n\nThe southwest of the country is a coastal plain for which the primary drainage is the Kouilou-Niari River; the interior of the country consists of a central plateau between two basins to the south and north. Forests are under increasing exploitation pressure.\"\n\nWe have entity: Republic of the Congo (country). Facts:\n\n1. The southwest of the country is a coastal plain. So relation: \"has region\" maybe? Could be \"southwest region\" is a \"coastal plain\". Subject: Republic of the Congo, relation: \"has region type\"? Might use \"geographical feature\" relation. Let's think typical Wikidata relations: \"has part\" (P527) maybe. So we can produce: subject: Republic of the Congo, relation: \"has part\", object: \"southwest coastal plain\". But need to capture that it's a coastal plain. Could also have separate triplet: \"southwest of Republic of the Congo\" is a \"coastal plain\". Might treat \"southwest of the country\" as region. We'll create entity \"southwest coastal plain of Republic of the Congo\". But we need simple.\n\nBetter: Triplet: {\"subject\":\"Republic of the Congo\",\"relation\":\"geographical feature\",\"object\":\"coastal plain (southwest)\"} but need object_type.\n\nMaybe use \"geographical region\". Let's define object \"southwest coastal plain\". object_type \"geographical region\". Qualifiers maybe \"location\" \"southwest\". But we already embed.\n\nSecond fact: The primary drainage of that coastal plain is the Kouilou-Niari River. So relation: \"primary drainage\" between coastal plain and river. Could be \"drainage basin\" but we can produce: subject: \"southwest coastal plain of Republic of the Congo\", relation: \"primary drainage\", object: \"Kouilou-Niari River\". object_type \"river\". subject_type \"geographical region\".\n\nThird fact: The interior of the country consists of a central plateau between two basins to the south and north. So interior region is a central plateau. So relation: \"has part\" maybe \"central plateau\". So subject: Republic of the Congo, relation: \"has part\", object: \"central plateau\". object_type \"geographical region\". Could also add qualifier \"location\" \"interior\". But maybe not needed.\n\nAlso \"central plateau\" is between two basins to the south and north. Could create relation: \"located between\" between central plateau and two basins. But we don't have names of basins. So maybe not.\n\nFourth: \"Forests are under increasing exploitation pressure.\" This is a statement about forests (presumably in the country). So subject: \"forests in Republic of the Congo\" maybe. Relation: \"exploitation pressure\". Could be \"subject: Forests (in Republic of the Congo)\", relation: \"exploitation pressure\", object: \"increasing\". Use qualifier \"polarity\"? Not. Use qualifier \"trend\" maybe \"increasing\". We'll treat as qualifier \"trend\" but not defined. The allowed qualifiers: \"polarity\", \"modality\", \"attribution\", \"condition\", \"unit\", \"approximation\", \"point in time\", \"place\". \"Increasing\" is a trend, not in list. Could treat as \"approximation\"? Not. Might encode as qualifier \"trend\" not allowed. Could instead make object \"exploitation pressure\" with qualifier \"approximation\" \"increasing\". But not ideal.\n\nMaybe we treat as statement: subject \"forests\", relation \"subject to\", object \"exploitation pressure\". Qualifier \"approximation\" \"increasing\". Or \"polarity\" positive? Not.\n\nBetter: relation \"exploitation pressure\" with object \"forests\". But direction? Usually \"forests\" are under pressure, so relation \"under pressure\" object \"exploitation\". Could use \"subject\": \"forests\", relation: \"pressure type\", object: \"exploitation\". Qualifier \"trend\": \"increasing\". Not allowed.\n\nMaybe we skip that because not a clear relation.\n\nBut we need to extract every explicitly stated fact. So we should include a triplet: subject \"forests\", relation \"exploitation pressure\", object \"increasing\". But object_type maybe \"trend\". Not defined but we can still assign generic \"qualitative descriptor\". Might be okay.\n\nWe also need subject_type \"natural feature\"? \"forest\". object_type \"pressure\". Could be \"environmental pressure\". We'll assign.\n\nNow need to decide entity names.\n\nLet's define:\n\n- \"Republic of the Congo\" subject_type \"country\".\n- \"southwest coastal plain\" object_type \"geographical region\".\n- \"Kouilou-Niari River\" object_type \"river\".\n- \"central plateau\" object_type \"geographical region\".\n- \"forests\" object_type \"ecosystem\" or \"forest\". We'll use \"forest\".\n- \"exploitation pressure\" object_type \"environmental pressure\".\n\nQualifiers:\n\nFor primary drainage: maybe no qualifiers.\n\nFor \"southwest coastal plain\" we might add qualifier \"location\" \"southwest\". But not required.\n\nFor \"central plateau\" we could add qualifier \"location\" \"interior\". Not required.\n\nBut we can include qualifiers \"place\" \"Republic of the Congo\" for region? Already subject.\n\nBetter to keep simple.\n\nNow produce JSON.\n\nTriplets list:\n\n1. Republic of the Congo – has part – southwest coastal plain. qualifiers: [].\n\n2. Southwest coastal plain – primary drainage – Kouilou-Niari River.\n\n3. Republic of the Congo – has part – central plateau.\n\n4. Forests – pressure – exploitation pressure. qualifiers: [{\"relation\":\"approximation\",\"object\":\"increasing\"}] maybe use \"trend\" not allowed. Use \"approximation\" to capture \"increasing\". Might be okay.\n\nBut \"approximation\" is for \"about\". Not perfect but allowed qualifiers list includes \"approximation\". We'll use it.\n\nAlso maybe add qualifier \"place\" \"Republic of the Congo\" for forests. Could add.\n\nAdd qualifier \"place\": \"Republic of the Congo\". That is allowed.\n\nThus triplet 4 qualifiers: [{\"relation\":\"approximation\",\"object\":\"increasing\"},{\"relation\":\"place\",\"object\":\"Republic of the Congo\"}].\n\nNow ensure each dict includes subject_type and object_type.\n\nDefine types:\n\n- \"Republic of the Congo\": \"country\".\n- \"southwest coastal plain\": \"geographical region\".\n- \"Kouilou-Niari River\": \"river\".\n- \"central plateau\": \"geographical region\".\n- \"forests\": \"forest\".\n- \"exploitation pressure\": \"environmental pressure\".\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1648,
+      "total_tokens": 3313,
+      "completion_tokens": 1665,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"has part\",\n            \"object\": \"southwest coastal plain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"geographical region\"\n        },\n        {\n            \"subject\": \"southwest coastal plain\",\n            \"relation\": \"primary drainage\",\n            \"object\": \"Kouilou-Niari River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographical region\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"has part\",\n            \"object\": \"central plateau\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"geographical region\"\n        },\n        {\n            \"subject\": \"forests\",\n            \"relation\": \"pressure\",\n            \"object\": \"exploitation pressure\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"increasing\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Republic of the Congo\"\n                }\n            ],\n            \"subject_type\": \"forest\",\n            \"object_type\": \"environmental pressure\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Republic of the Congo",
+        "relation": "has part",
+        "object": "southwest coastal plain",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "geographical region"
+      },
+      {
+        "subject": "southwest coastal plain",
+        "relation": "primary drainage",
+        "object": "Kouilou-Niari River",
+        "qualifiers": [],
+        "subject_type": "geographical region",
+        "object_type": "river"
+      },
+      {
+        "subject": "Republic of the Congo",
+        "relation": "has part",
+        "object": "central plateau",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "geographical region"
+      },
+      {
+        "subject": "forests",
+        "relation": "pressure",
+        "object": "exploitation pressure",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "increasing"
+          },
+          {
+            "relation": "place",
+            "object": "Republic of the Congo"
+          }
+        ],
+        "subject_type": "forest",
+        "object_type": "environmental pressure"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1648,
+    "total_tokens": 3313,
+    "completion_tokens": 1665,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 434,
+    "output_tokens_est": 342
+  },
+  "attempts": 1,
+  "latency_s": 20.359476188998087,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:24:24.727797+00:00",
+  "cache_key": "7bfe46acf2fdbb8e61302dfda536f227"
+}

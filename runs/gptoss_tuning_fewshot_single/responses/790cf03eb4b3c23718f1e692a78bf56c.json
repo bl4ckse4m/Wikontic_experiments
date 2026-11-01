@@ -1,0 +1,160 @@
+{
+  "task": {
+    "input_id": "4345217d787105e6",
+    "input_hash": "5aeb1d6dbede7b169647d5de536cfa87f1c893712185c7d129caf401b00a256e",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-9d3ef706bf049ee78c9582c37cd3d39e",
+    "object": "chat.completion",
+    "created": 1791516942,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"end of World War II\",\n            \"relation\": \"caused\",\n            \"object\": \"baby boom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"demographic phenomenon\"\n        },\n        {\n            \"subject\": \"baby boom\",\n            \"relation\": \"location\",\n            \"object\": \"many countries\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Western countries\"\n                }\n            ],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"geopolitical entity\"\n        },\n        {\n            \"subject\": \"post-war baby boom\",\n            \"relation\": \"beginning date\",\n            \"object\": \"years immediately after World War II\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"most often agreed\"\n                }\n            ],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"post-war baby boom\",\n            \"relation\": \"beginning date\",\n            \"object\": \"1941-1943\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"some\"\n                }\n            ],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"baby boom\",\n            \"relation\": \"decline start date\",\n            \"object\": \"1958\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"baby boom\",\n            \"relation\": \"end date\",\n            \"object\": \"1961\",\n            \"qualifiers\": [],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"baby boom\",\n            \"relation\": \"duration\",\n            \"object\": \"20 years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"time period\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText:\n\n\"Mid-twentieth century baby boom\n\nThe end of World War II brought a baby boom to many countries, especially Western ones. There is some disagreement as to the precise beginning and ending dates of the post-war baby boom, but it is most often agreed to have begun in the years immediately after the war, though some place it earlier at the increase of births in 1941 - 1943. The boom started to decline as birth rates in the United States started to decline in 1958, though the boom would only grind to a halt 3 years later in 1961, 20 years after it began.\"\n\nWe need to extract triplets.\n\nEntities: \"World War II\", \"baby boom\", \"many countries\", \"Western ones\", \"post-war baby boom\", \"the years immediately after the war\", \"increase of births in 1941 - 1943\", \"United States\", \"1958\", \"1961\", \"20 years after it began\".\n\nWe need to capture facts:\n\n1. End of World War II -> caused baby boom to many countries (or \"brought a baby boom to many countries\").\n\nTriplet: subject \"World War II\" (or \"end of World War II\")? The phrase \"The end of World War II brought a baby boom to many countries\". So subject: \"end of World War II\". Relation: \"caused\". Object: \"baby boom\". Qualifier: \"place\" maybe \"many countries\". Also \"especially Western ones\" qualifies the target countries.\n\nBetter: \"baby boom\" relation \"location\" \"many countries\". But we need to capture that the end of WWII brought a baby boom to many countries. So we can have two triplets:\n\n- subject: \"end of World War II\", relation: \"caused\", object: \"baby boom\", qualifiers: [].\n\n- subject: \"baby boom\", relation: \"occurred in\", object: \"many countries\", qualifiers: [{\"relation\":\"note\",\"object\":\"especially Western ones\"}] but we need proper relation \"location\". Use \"location\". Qualifier maybe \"note\". But we have limited set of qualifier types: point in time, place, etc. \"especially Western ones\" is a qualifier of place: we could have qualifier \"place\" with object \"Western countries\". But we already have location \"many countries\". Might be okay to have two separate: location \"many countries\" and qualifier \"place\" \"Western countries\". But guidelines: qualifiers attach to claim they modify. The claim \"baby boom occurred in many countries\". The qualifier \"especially Western ones\" qualifies the place. So we can add qualifier relation \"place\" object \"Western countries\". That seems okay.\n\n2. Disagreement about precise beginning and ending dates of post-war baby boom. That's a statement about disagreement, not a fact about dates. Could capture: \"post-war baby boom\" relation \"beginning date\" object \"years immediately after the war\" with qualifier \"agreement\" maybe \"most often agreed\". But we need explicit: \"it is most often agreed to have begun in the years immediately after the war\". So we can have triplet: subject \"post-war baby boom\", relation \"beginning date\", object \"years immediately after World War II\". Qualifier: maybe \"polarity\" positive? Not needed. Could add qualifier \"attribution\" \"most often agreed\". Use qualifier relation \"attribution\" object \"most often agreed\". Also we need object_type date? It's a period. Use \"date\". So:\n\n- subject: \"post-war baby boom\", relation: \"beginning date\", object: \"years immediately after World War II\", qualifiers: [{\"relation\":\"attribution\",\"object\":\"most often agreed\"}].\n\n3. Some place it earlier at the increase of births in 1941-1943. So another claim: some say beginning earlier at increase of births 1941-1943. Triplet: subject \"post-war baby boom\", relation \"beginning date\", object \"1941-1943\". Qualifier: \"attribution\" \"some\". Also maybe \"note\" \"increase of births\". But we can just capture.\n\n4. The boom started to decline as birth rates in the United States started to decline in 1958. So claim: \"baby boom\" relation \"decline start date\" object \"1958\". Qualifier: \"place\" \"United States\". Also \"point in time\" maybe same. So:\n\n- subject \"baby boom\", relation \"decline start date\", object \"1958\", qualifiers [{\"relation\":\"place\",\"object\":\"United States\"}].\n\n5. The boom would only grind to a halt 3 years later in 1961, 20 years after it began. So claim: \"baby boom\" relation \"end date\" object \"1961\". Qualifier: \"duration\" maybe \"20 years after it began\". Use qualifier \"point in time\" \"1961\". Also qualifier \"duration\" not allowed; we have \"approximation\", \"condition\", \"unit\". Could use qualifier \"note\" but not allowed. Could use qualifier \"point in time\" for 1961 and maybe \"duration\" not defined. Could use qualifier \"quantity\" \"20 years\". But we have \"unit\". So we can add qualifier \"unit\" \"years\" with object \"20\". But we need to express \"20 years after it began\". Could use qualifier \"condition\" \"20 years after it began\". But maybe better: qualifier \"point in time\" \"1961\". Also qualifier \"duration\" not allowed. Use qualifier \"approximation\"? Not approximate. Use qualifier \"note\". Not allowed. Could use qualifier \"point in time\" only. The extra info may be omitted if not easily mapped.\n\nBut we could also have triplet: subject \"baby boom\", relation \"duration\", object \"20 years\". Qualifier maybe \"point in time\" \"1961\". But guidelines: only explicit facts. The text says \"20 years after it began\". That's a fact about duration. So we can have separate triplet: subject \"baby boom\", relation \"duration\", object \"20 years\". Qualifier maybe \"point in time\" \"1961\". Or \"start date\" \"1941\"? Not explicit. The beginning is \"years immediately after the war\". Not a precise date. So we can have duration.\n\nLet's decide:\n\nTriplet: subject \"baby boom\", relation \"duration\", object \"20 years\". Qualifier: maybe \"point in time\" \"1961\". But that seems odd. Could just have object \"20 years\". Use object_type \"time period\". Qualifier none.\n\nBut we need to ensure each triplet has subject_type and object_type.\n\nDefine entity types:\n\n- \"World War II\": event\n- \"end of World War II\": event? maybe \"event\".\n- \"baby boom\": phenomenon (demographic phenomenon)\n- \"many countries\": geopolitical entity (group)\n- \"Western countries\": geopolitical entity\n- \"post-war baby boom\": phenomenon (same as baby boom)\n- \"years immediately after World War II\": time period\n- \"1941-1943\": time period\n- \"United States\": country\n- \"1958\": date (year)\n- \"1961\": date (year)\n- \"20 years\": duration (time period)\n\nNow construct JSON.\n\nList of triplets:\n\n1. {\"subject\":\"end of World War II\",\"relation\":\"caused\",\"object\":\"baby boom\",\"qualifiers\":[],\"subject_type\":\"event\",\"object_type\":\"demographic phenomenon\"}\n\n2. {\"subject\":\"baby boom\",\"relation\":\"location\",\"object\":\"many countries\",\"qualifiers\":[{\"relation\":\"place\",\"object\":\"Western countries\"}],\"subject_type\":\"demographic phenomenon\",\"object_type\":\"geopolitical entity\"}\n\n3. {\"subject\":\"post-war baby boom\",\"relation\":\"beginning date\",\"object\":\"years immediately after World War II\",\"qualifiers\":[{\"relation\":\"attribution\",\"object\":\"most often agreed\"}],\"subject_type\":\"demographic phenomenon\",\"object_type\":\"date\"}\n\n4. {\"subject\":\"post-war baby boom\",\"relation\":\"beginning date\",\"object\":\"1941-1943\",\"qualifiers\":[{\"relation\":\"attribution\",\"object\":\"some\"}],\"subject_type\":\"demographic phenomenon\",\"object_type\":\"date\"}\n\n5. {\"subject\":\"baby boom\",\"relation\":\"decline start date\",\"object\":\"1958\",\"qualifiers\":[{\"relation\":\"place\",\"object\":\"United States\"}],\"subject_type\":\"demographic phenomenon\",\"object_type\":\"date\"}\n\n6. {\"subject\":\"baby boom\",\"relation\":\"end date\",\"object\":\"1961\",\"qualifiers\":[],\"subject_type\":\"demographic phenomenon\",\"object_type\":\"date\"}\n\n7. {\"subject\":\"baby boom\",\"relation\":\"duration\",\"object\":\"20 years\",\"qualifiers\":[],\"subject_type\":\"demographic phenomenon\",\"object_type\":\"time period\"}\n\nCheck qualifiers: we used \"place\" qualifier for location; but we already have location relation. Might be redundant but okay.\n\nMake sure qualifiers list is list of dicts.\n\nReturn JSON with key \"triplets\"."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1717,
+      "total_tokens": 4065,
+      "completion_tokens": 2348,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"end of World War II\",\n            \"relation\": \"caused\",\n            \"object\": \"baby boom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"demographic phenomenon\"\n        },\n        {\n            \"subject\": \"baby boom\",\n            \"relation\": \"location\",\n            \"object\": \"many countries\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Western countries\"\n                }\n            ],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"geopolitical entity\"\n        },\n        {\n            \"subject\": \"post-war baby boom\",\n            \"relation\": \"beginning date\",\n            \"object\": \"years immediately after World War II\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"most often agreed\"\n                }\n            ],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"post-war baby boom\",\n            \"relation\": \"beginning date\",\n            \"object\": \"1941-1943\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"some\"\n                }\n            ],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"baby boom\",\n            \"relation\": \"decline start date\",\n            \"object\": \"1958\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"baby boom\",\n            \"relation\": \"end date\",\n            \"object\": \"1961\",\n            \"qualifiers\": [],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"baby boom\",\n            \"relation\": \"duration\",\n            \"object\": \"20 years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"demographic phenomenon\",\n            \"object_type\": \"time period\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "end of World War II",
+        "relation": "caused",
+        "object": "baby boom",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "demographic phenomenon"
+      },
+      {
+        "subject": "baby boom",
+        "relation": "location",
+        "object": "many countries",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "Western countries"
+          }
+        ],
+        "subject_type": "demographic phenomenon",
+        "object_type": "geopolitical entity"
+      },
+      {
+        "subject": "post-war baby boom",
+        "relation": "beginning date",
+        "object": "years immediately after World War II",
+        "qualifiers": [
+          {
+            "relation": "attribution",
+            "object": "most often agreed"
+          }
+        ],
+        "subject_type": "demographic phenomenon",
+        "object_type": "date"
+      },
+      {
+        "subject": "post-war baby boom",
+        "relation": "beginning date",
+        "object": "1941-1943",
+        "qualifiers": [
+          {
+            "relation": "attribution",
+            "object": "some"
+          }
+        ],
+        "subject_type": "demographic phenomenon",
+        "object_type": "date"
+      },
+      {
+        "subject": "baby boom",
+        "relation": "decline start date",
+        "object": "1958",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "demographic phenomenon",
+        "object_type": "date"
+      },
+      {
+        "subject": "baby boom",
+        "relation": "end date",
+        "object": "1961",
+        "qualifiers": [],
+        "subject_type": "demographic phenomenon",
+        "object_type": "date"
+      },
+      {
+        "subject": "baby boom",
+        "relation": "duration",
+        "object": "20 years",
+        "qualifiers": [],
+        "subject_type": "demographic phenomenon",
+        "object_type": "time period"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1717,
+    "total_tokens": 4065,
+    "completion_tokens": 2348,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 691,
+    "output_tokens_est": 598
+  },
+  "attempts": 1,
+  "latency_s": 26.31217399900197,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:36:09.110273+00:00",
+  "cache_key": "790cf03eb4b3c23718f1e692a78bf56c"
+}

@@ -1,0 +1,163 @@
+{
+  "task": {
+    "input_id": "3875197ad243e403",
+    "input_hash": "d8e1c007da30e57aee4bfad4f71f408648ade2fe202620cd8874ec4806d6e951",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793297947-2e2KAfAB8HbfgYpOikru",
+    "object": "chat.completion",
+    "created": 1793297947,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"instance of\",\n            \"object\": \"Bible Institute\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"located in\",\n            \"object\": \"La Grange\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Wyoming\",\n                    \"object_type\": \"state\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"approval status\",\n            \"object\": \"state approved\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"status\"\n        },\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"nonprofit status\",\n            \"object\": \"non-profit\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"status\"\n        },\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"field of work\",\n            \"object\": \"education\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"field of study\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Frontier School of the Bible\n\nFrontier School of the Bible is a small Bible Institute located in La Grange, Wyoming, United States. It is a state approved, non-profit institution of education.\"\n\nWe need to identify entities: Frontier School of the Bible (institution), La Grange (city), Wyoming (state), United States (country). Also \"Bible Institute\" (type), \"state approved\" maybe a qualifier? \"non-profit institution of education\" is type.\n\nTriplets:\n\n1. Frontier School of the Bible — instance of — Bible Institute? Actually relation \"instance of\" or \"type\". In examples they used occupation, field of work, etc. For institution type, maybe \"instance of\" with object_type \"educational institution\". But we need to follow pattern: subject_type \"organization\" maybe. Use \"institution type\" relation? In Wikidata, \"instance of\" (P31). Use relation \"instance of\". object: \"Bible Institute\". object_type: \"educational institution\" or \"type of institution\". Let's set object_type \"educational institution\".\n\n2. Frontier School of the Bible — location — La Grange. relation \"located in\". object_type \"city\". Also qualifiers: \"state\" Wyoming, \"country\" United States. Could add qualifiers for location: \"located in\" with qualifiers \"state\" and \"country\". So main triplet: subject Frontier School of the Bible, relation \"located in\", object \"La Grange\". qualifiers: state Wyoming (object_type \"state\"), country United States (object_type \"country\").\n\n3. Frontier School of the Bible — status — \"state approved\". relation maybe \"approval status\". object \"state approved\". object_type \"status\". Or could be qualifier on institution type. Simpler: create triplet: subject Frontier School of the Bible, relation \"approval\", object \"state approved\". object_type \"approval\". But we need consistent.\n\n4. Frontier School of the Bible — nonprofit status — \"non-profit\". relation \"nonprofit\". object \"non-profit\". object_type \"organization type\". Or \"financial status\".\n\n5. Frontier School of the Bible — sector — \"education\". relation \"field of work\" maybe. object \"education\". object_type \"field of study\". But maybe \"institution of education\". Could use relation \"type of institution\" with object \"educational institution\". Already have instance of \"Bible Institute\". Could add \"type of institution\" \"non-profit educational institution\". Might be redundant.\n\nBetter to capture: \"non-profit institution of education\" as type: \"non-profit educational institution\". So we could have triplet: Frontier School of the Bible — instance of — non-profit educational institution. But we already have instance of Bible Institute. Could have two instance-of statements.\n\nLet's produce:\n\n- Triplet 1: subject Frontier School of the Bible, relation \"instance of\", object \"Bible Institute\", qualifiers none, subject_type \"organization\", object_type \"educational institution\".\n\n- Triplet 2: subject Frontier School of the Bible, relation \"located in\", object \"La Grange\", qualifiers: state Wyoming, country United States, subject_type \"organization\", object_type \"city\".\n\n- Triplet 3: subject Frontier School of the Bible, relation \"approval status\", object \"state approved\", qualifiers none, subject_type \"organization\", object_type \"status\".\n\n- Triplet 4: subject Frontier School of the Bible, relation \"nonprofit status\", object \"non-profit\", qualifiers none, subject_type \"organization\", object_type \"status\".\n\n- Triplet 5: subject Frontier School of the Bible, relation \"field of work\", object \"education\", qualifiers none, subject_type \"organization\", object_type \"field of study\".\n\nPotentially also \"country\" as separate location: could have separate triplet \"located in country United States\". But we already have qualifiers.\n\nMake sure qualifiers have object_type.\n\nNow produce JSON format:\n\n{\n \"triplets\": [\n   {...}, ...\n ]\n}\n\nLet's craft.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"Frontier School of the Bible\n\nFrontier School of the Bible is a small Bible Institute located in La Grange, Wyoming, United States. It is a state approved, non-profit institution of education.\"\n\nWe need to identify entities: Frontier School of the Bible (institution), La Grange (city), Wyoming (state), United States (country). Also \"Bible Institute\" (type), \"state approved\" maybe a qualifier? \"non-profit institution of education\" is type.\n\nTriplets:\n\n1. Frontier School of the Bible — instance of — Bible Institute? Actually relation \"instance of\" or \"type\". In examples they used occupation, field of work, etc. For institution type, maybe \"instance of\" with object_type \"educational institution\". But we need to follow pattern: subject_type \"organization\" maybe. Use \"institution type\" relation? In Wikidata, \"instance of\" (P31). Use relation \"instance of\". object: \"Bible Institute\". object_type: \"educational institution\" or \"type of institution\". Let's set object_type \"educational institution\".\n\n2. Frontier School of the Bible — location — La Grange. relation \"located in\". object_type \"city\". Also qualifiers: \"state\" Wyoming, \"country\" United States. Could add qualifiers for location: \"located in\" with qualifiers \"state\" and \"country\". So main triplet: subject Frontier School of the Bible, relation \"located in\", object \"La Grange\". qualifiers: state Wyoming (object_type \"state\"), country United States (object_type \"country\").\n\n3. Frontier School of the Bible — status — \"state approved\". relation maybe \"approval status\". object \"state approved\". object_type \"status\". Or could be qualifier on institution type. Simpler: create triplet: subject Frontier School of the Bible, relation \"approval\", object \"state approved\". object_type \"approval\". But we need consistent.\n\n4. Frontier School of the Bible — nonprofit status — \"non-profit\". relation \"nonprofit\". object \"non-profit\". object_type \"organization type\". Or \"financial status\".\n\n5. Frontier School of the Bible — sector — \"education\". relation \"field of work\" maybe. object \"education\". object_type \"field of study\". But maybe \"institution of education\". Could use relation \"type of institution\" with object \"educational institution\". Already have instance of \"Bible Institute\". Could add \"type of institution\" \"non-profit educational institution\". Might be redundant.\n\nBetter to capture: \"non-profit institution of education\" as type: \"non-profit educational institution\". So we could have triplet: Frontier School of the Bible — instance of — non-profit educational institution. But we already have instance of Bible Institute. Could have two instance-of statements.\n\nLet's produce:\n\n- Triplet 1: subject Frontier School of the Bible, relation \"instance of\", object \"Bible Institute\", qualifiers none, subject_type \"organization\", object_type \"educational institution\".\n\n- Triplet 2: subject Frontier School of the Bible, relation \"located in\", object \"La Grange\", qualifiers: state Wyoming, country United States, subject_type \"organization\", object_type \"city\".\n\n- Triplet 3: subject Frontier School of the Bible, relation \"approval status\", object \"state approved\", qualifiers none, subject_type \"organization\", object_type \"status\".\n\n- Triplet 4: subject Frontier School of the Bible, relation \"nonprofit status\", object \"non-profit\", qualifiers none, subject_type \"organization\", object_type \"status\".\n\n- Triplet 5: subject Frontier School of the Bible, relation \"field of work\", object \"education\", qualifiers none, subject_type \"organization\", object_type \"field of study\".\n\nPotentially also \"country\" as separate location: could have separate triplet \"located in country United States\". But we already have qualifiers.\n\nMake sure qualifiers have object_type.\n\nNow produce JSON format:\n\n{\n \"triplets\": [\n   {...}, ...\n ]\n}\n\nLet's craft.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1394,
+      "completion_tokens": 1178,
+      "total_tokens": 2572,
+      "cost": 0.000262106,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000262106,
+        "upstream_inference_prompt_cost": 4.182e-05,
+        "upstream_inference_completions_cost": 0.000220286
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"instance of\",\n            \"object\": \"Bible Institute\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"located in\",\n            \"object\": \"La Grange\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Wyoming\",\n                    \"object_type\": \"state\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"approval status\",\n            \"object\": \"state approved\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"status\"\n        },\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"nonprofit status\",\n            \"object\": \"non-profit\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"status\"\n        },\n        {\n            \"subject\": \"Frontier School of the Bible\",\n            \"relation\": \"field of work\",\n            \"object\": \"education\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"field of study\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Frontier School of the Bible",
+        "relation": "instance of",
+        "object": "Bible Institute",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "educational institution"
+      },
+      {
+        "subject": "Frontier School of the Bible",
+        "relation": "located in",
+        "object": "La Grange",
+        "qualifiers": [
+          {
+            "relation": "state",
+            "object": "Wyoming"
+          },
+          {
+            "relation": "country",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "city"
+      },
+      {
+        "subject": "Frontier School of the Bible",
+        "relation": "approval status",
+        "object": "state approved",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "status"
+      },
+      {
+        "subject": "Frontier School of the Bible",
+        "relation": "nonprofit status",
+        "object": "non-profit",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "status"
+      },
+      {
+        "subject": "Frontier School of the Bible",
+        "relation": "field of work",
+        "object": "education",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "field of study"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1394,
+    "completion_tokens": 1178,
+    "total_tokens": 2572,
+    "cost": 0.000262106,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000262106,
+      "upstream_inference_prompt_cost": 4.182e-05,
+      "upstream_inference_completions_cost": 0.000220286
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 556,
+    "output_tokens_est": 429
+  },
+  "attempts": 1,
+  "latency_s": 31.73017631600669,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-29T18:19:36.531668+00:00",
+  "cache_key": "2be9837d5909f3e39664431bd2df432e"
+}

@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "dce77cd386e43c90",
+    "input_hash": "360eb43d1725d505bc31f78846b0220a7d035eca16a019b83f74636ad346be07",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a9ea675a9303862aa2fe409dd05b40fd",
+    "object": "chat.completion",
+    "created": 1791513876,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"located in\",\n            \"object\": \"Hopewell Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"township\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"located in\",\n            \"object\": \"Mercer County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"located in\",\n            \"object\": \"New Jersey\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"centered at\",\n            \"object\": \"intersection of County Route 518 and County Route 579\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"intersection\"\n        },\n        {\n            \"subject\": \"County Route 518\",\n            \"relation\": \"instance of\",\n            \"object\": \"road\",\n            \"qualifiers\": [],\n            \"subject_type\": \"road\",\n            \"object_type\": \"infrastructure type\"\n        },\n        {\n            \"subject\": \"County Route 579\",\n            \"relation\": \"instance of\",\n            \"object\": \"road\",\n            \"qualifiers\": [],\n            \"subject_type\": \"road\",\n            \"object_type\": \"infrastructure type\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nEntities: Coopers Corner, New Jersey (maybe location), Hopewell Township, Mercer County, New Jersey, United States, County Routes 518, County Routes 579.\n\nRelations: instance of (unincorporated community), located in (Hopewell Township), located in (Mercer County), located in (New Jersey), located in (United States). Also \"settlement is centered about the intersection of County Routes 518 and 579\" -> relation: \"centered at intersection of\" maybe \"located at intersection\". Could be: Coopers Corner - \"located at intersection\" - \"County Routes 518 and 579\". Might split into two: intersection of County Route 518 and County Route 579.\n\nWe need subject_type and object_type. For Coopers Corner: subject_type \"human settlement\" or \"unincorporated community\". Use \"human settlement\". For Hopewell Township: object_type \"township\". Mercer County: \"county\". New Jersey: \"state\". United States: \"country\". County Route 518: \"road\". County Route 579: \"road\". Intersection: maybe \"intersection\". Could treat object as \"intersection of County Route 518 and County Route 579\". Might create a triplet: Coopers Corner - \"centered at\" - \"intersection of County Route 518 and County Route 579\". Provide qualifiers? Not needed.\n\nAlso maybe \"Coopers Corner, New Jersey\" is a location name. Could have \"located in state\" relation.\n\nLet's produce list:\n\n1. Coopers Corner - instance of - unincorporated community. subject_type: human settlement, object_type: settlement type? Use \"settlement type\". Might be \"administrative division type\". We'll use \"settlement type\".\n\n2. Coopers Corner - located in - Hopewell Township. qualifiers maybe none. subject_type: human settlement, object_type: township.\n\n3. Hopewell Township - located in - Mercer County. (But maybe not needed; only about Coopers Corner). But we can include hierarchical location: Coopers Corner - located in - Mercer County (since within Hopewell Township which is within Mercer County). The text says \"located within Hopewell Township in Mercer County\". So we can have both.\n\n4. Coopers Corner - located in - Mercer County. subject_type: human settlement, object_type: county.\n\n5. Coopers Corner - located in - New Jersey. object_type: state.\n\n6. Coopers Corner - located in - United States. object_type: country.\n\n7. Coopers Corner - centered at intersection of - County Route 518 and County Route 579. Could split: Coopers Corner - located at - \"intersection of County Route 518 and County Route 579\". object_type: intersection.\n\nAlso could have separate triplets: \"County Route 518\" - type - \"county road\". same for 579.\n\nBut keep minimal.\n\nNow format JSON.\n\nEach triplet includes qualifiers list (empty). Provide subject_type and object_type.\n\nLet's define types:\n\n- Coopers Corner: \"human settlement\"\n- unincorporated community: \"settlement type\"\n- Hopewell Township: \"township\"\n- Mercer County: \"county\"\n- New Jersey: \"state\"\n- United States: \"country\"\n- intersection of County Route 518 and County Route 579: \"intersection\"\n- County Route 518: \"road\"\n- County Route 579: \"road\"\n\nWe might also include triplet for each road type.\n\nBut maybe not needed.\n\nWe'll produce 7 triplets.\n\nCheck qualifiers: none.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 981,
+      "total_tokens": 2178,
+      "completion_tokens": 1197,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"located in\",\n            \"object\": \"Hopewell Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"township\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"located in\",\n            \"object\": \"Mercer County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"located in\",\n            \"object\": \"New Jersey\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Coopers Corner\",\n            \"relation\": \"centered at\",\n            \"object\": \"intersection of County Route 518 and County Route 579\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"intersection\"\n        },\n        {\n            \"subject\": \"County Route 518\",\n            \"relation\": \"instance of\",\n            \"object\": \"road\",\n            \"qualifiers\": [],\n            \"subject_type\": \"road\",\n            \"object_type\": \"infrastructure type\"\n        },\n        {\n            \"subject\": \"County Route 579\",\n            \"relation\": \"instance of\",\n            \"object\": \"road\",\n            \"qualifiers\": [],\n            \"subject_type\": \"road\",\n            \"object_type\": \"infrastructure type\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Coopers Corner",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Coopers Corner",
+        "relation": "located in",
+        "object": "Hopewell Township",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "township"
+      },
+      {
+        "subject": "Coopers Corner",
+        "relation": "located in",
+        "object": "Mercer County",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Coopers Corner",
+        "relation": "located in",
+        "object": "New Jersey",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "state"
+      },
+      {
+        "subject": "Coopers Corner",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "country"
+      },
+      {
+        "subject": "Coopers Corner",
+        "relation": "centered at",
+        "object": "intersection of County Route 518 and County Route 579",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "intersection"
+      },
+      {
+        "subject": "County Route 518",
+        "relation": "instance of",
+        "object": "road",
+        "qualifiers": [],
+        "subject_type": "road",
+        "object_type": "infrastructure type"
+      },
+      {
+        "subject": "County Route 579",
+        "relation": "instance of",
+        "object": "road",
+        "qualifiers": [],
+        "subject_type": "road",
+        "object_type": "infrastructure type"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 981,
+    "total_tokens": 2178,
+    "completion_tokens": 1197,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 626,
+    "output_tokens_est": 527
+  },
+  "attempts": 1,
+  "latency_s": 14.611141935994965,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:44:51.365980+00:00",
+  "cache_key": "d5557f81e507d84ac39b7595653e642d"
+}

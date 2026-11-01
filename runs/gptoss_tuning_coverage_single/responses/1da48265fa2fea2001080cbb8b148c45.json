@@ -1,0 +1,113 @@
+{
+  "task": {
+    "input_id": "3bd66194f05e6cc6",
+    "input_hash": "70c3f4db55a936e1aea1842f4f7164c684dc6618e9e95b85c25defd258c0c795",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-edee6ed2f1875594defbfa317c277812",
+    "object": "chat.completion",
+    "created": 1791502406,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Sandy Huff\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Sandy Huff\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"McDowell County, West Virginia, United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Sandy Huff\",\n            \"relation\": \"located on\",\n            \"object\": \"Tug Fork\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"east-northeast of Iaeger\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"river\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Sandy Huff, West Virginia\n\nSandy Huff is an unincorporated community in McDowell County, West Virginia, United States. Sandy Huff is located on the Tug Fork east-northeast of Iaeger.\"\n\nWe have entity \"Sandy Huff\". It's a place (unincorporated community). Relations:\n\n- instance of? maybe \"type of settlement\". Use relation \"instance of\" with object \"unincorporated community\". subject_type: \"human settlement\"? object_type: \"settlement type\". But guidelines: use specific Wikidata-style relations. \"instance of\" is common. So:\n\n(subject: Sandy Huff, relation: instance of, object: unincorporated community)\n\n- location: \"in McDowell County, West Virginia, United States\". So relation \"located in the administrative territorial entity\" (common). object: McDowell County. Could also include West Virginia and United States as higher-level. Might produce separate triplets: Sandy Huff located in McDowell County; McDowell County located in West Virginia; West Virginia located in United States. But only explicit facts: text says \"in McDowell County, West Virginia, United States\". So we can produce three hierarchical location triplets, each derived from same phrase. Probably okay.\n\n- Another location: \"located on the Tug Fork east-northeast of Iaeger.\" So relation \"located on\" with object \"Tug Fork\". Also maybe \"direction\" qualifier: east-northeast of Iaeger. Could be qualifier: relation \"direction\" object \"east-northeast of Iaeger\". Or \"relative location\". Use qualifier \"direction\" with object \"east-northeast of Iaeger\". Also maybe \"point in time\"? No.\n\nThus triplets:\n\n1. Sandy Huff – instance of – unincorporated community. subject_type: \"human settlement\"? object_type: \"settlement type\".\n\n2. Sandy Huff – located in the administrative territorial entity – McDowell County. subject_type: \"human settlement\". object_type: \"county\".\n\n3. McDowell County – located in the administrative territorial entity – West Virginia. (But not directly about Sandy Huff; but it's a fact in text? The phrase includes \"McDowell County, West Virginia, United States\". It's a list of hierarchical location. Could be considered separate facts. The text doesn't explicitly say \"McDowell County is in West Virginia\", but it's implied by the comma list. Usually we treat as location hierarchy. Might be okay.\n\nBut guidelines: extract every explicitly stated fact. The phrase \"McDowell County, West Virginia, United States\" is a location chain; it's not a separate clause. Might be considered as one location statement: Sandy Huff is in McDowell County, which is in West Virginia, which is in United States. However, the text doesn't explicitly state the latter two relations. Might be considered implicit. We should avoid adding implicit facts. So maybe only produce the direct location: Sandy Huff located in McDowell County, West Virginia, United States. Could we treat object as \"McDowell County, West Virginia, United States\"? That is a combined entity. But better to separate.\n\nGiven guidelines: \"Extract ONLY facts explicitly reported in the text.\" The text says \"Sandy Huff is an unincorporated community in McDowell County, West Virginia, United States.\" This is a single fact: location in McDowell County, West Virginia, United States. Could be represented as location in McDowell County (the immediate). The rest is hierarchical but not separate statements. So we will produce one location triplet with object \"McDowell County, West Virginia, United States\". But object_type maybe \"administrative territorial entity\". Might be okay.\n\nBut also second sentence: \"Sandy Huff is located on the Tug Fork east-northeast of Iaeger.\" So relation \"located on\" object \"Tug Fork\". qualifier direction.\n\nThus produce two main triplets.\n\nAdd qualifiers for direction.\n\nNow produce JSON.\n\nDefine subject_type: \"human settlement\". object_type for unincorporated community: \"settlement type\". For location: object_type \"administrative territorial entity\". For Tug Fork: object_type \"river\". For direction qualifier: object_type maybe \"direction\". Use \"direction\" as relation.\n\nLet's craft.\n\nTriplet 1:\n{\n \"subject\": \"Sandy Huff\",\n \"relation\": \"instance of\",\n \"object\": \"unincorporated community\",\n \"qualifiers\": [],\n \"subject_type\": \"human settlement\",\n \"object_type\": \"settlement type\"\n}\n\nTriplet 2:\n{\n \"subject\": \"Sandy Huff\",\n \"relation\": \"located in the administrative territorial entity\",\n \"object\": \"McDowell County, West Virginia, United States\",\n \"qualifiers\": [],\n \"subject_type\": \"human settlement\",\n \"object_type\": \"administrative territorial entity\"\n}\n\nTriplet 3:\n{\n \"subject\": \"Sandy Huff\",\n \"relation\": \"located on\",\n \"object\": \"Tug Fork\",\n \"qualifiers\": [{\"relation\": \"direction\", \"object\": \"east-northeast of Iaeger\"}],\n \"subject_type\": \"human settlement\",\n \"object_type\": \"river\"\n}\n\nCheck qualifiers: direction relation maybe \"relative location\". Use \"direction\". Accept.\n\nReturn JSON with list.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1630,
+      "total_tokens": 2955,
+      "completion_tokens": 1325,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Sandy Huff\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Sandy Huff\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"McDowell County, West Virginia, United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Sandy Huff\",\n            \"relation\": \"located on\",\n            \"object\": \"Tug Fork\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"east-northeast of Iaeger\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"river\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Sandy Huff",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Sandy Huff",
+        "relation": "located in the administrative territorial entity",
+        "object": "McDowell County, West Virginia, United States",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Sandy Huff",
+        "relation": "located on",
+        "object": "Tug Fork",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "east-northeast of Iaeger"
+          }
+        ],
+        "subject_type": "human settlement",
+        "object_type": "river"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1630,
+    "total_tokens": 2955,
+    "completion_tokens": 1325,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 351,
+    "output_tokens_est": 259
+  },
+  "attempts": 1,
+  "latency_s": 16.530061832003412,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:33:43.414137+00:00",
+  "cache_key": "1da48265fa2fea2001080cbb8b148c45"
+}

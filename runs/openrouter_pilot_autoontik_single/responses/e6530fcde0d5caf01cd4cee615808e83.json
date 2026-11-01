@@ -1,0 +1,195 @@
+{
+  "task": {
+    "input_id": "c5696901cba62bc5",
+    "input_hash": "1fa0247fabb65b44ee9c639bdfc2e32ab439f9e0d0f2c79f598f3e67213964a5",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793211148-MDauZC7yUEcIFPMHYSrs",
+    "object": "chat.completion",
+    "created": 1793211148,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Venice",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Admiral Robert Blake\",\n            \"relation\": \"burial place\",\n            \"object\": \"Westminster Abbey\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1657\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"burial practice in Westminster Abbey\",\n            \"relation\": \"initiated by\",\n            \"object\": \"Oliver Cromwell\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1657\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"cultural practice\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Isaac Newton\",\n            \"relation\": \"burial place\",\n            \"object\": \"Westminster Abbey\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"4 April 1727\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Isaac Newton\",\n            \"relation\": \"occupation\",\n            \"object\": \"scientist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Charles Darwin\",\n            \"relation\": \"burial place\",\n            \"object\": \"Westminster Abbey\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"19 April 1882\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Charles Darwin\",\n            \"relation\": \"occupation\",\n            \"object\": \"scientist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"burial in Westminster Abbey\",\n            \"relation\": \"honour status\",\n            \"object\": \"significant honour\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Britain\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"cultural practice\",\n            \"object_type\": \"honour\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to parse the text and extract triplets.\n\nText: \"Burials and memorials in Westminster Abbey\n\nSubsequently, it became one of Britain's most significant honours to be buried or commemorated here. The practice of burying national figures in the Abbey began under Oliver Cromwell with the burial of Admiral Robert Blake in 1657. The practice spread to include generals, admirals, politicians, doctors and scientists such as Isaac Newton, buried on 4 April 1727 and Charles Darwin buried 19 April 1882.\"\n\nWe need entities: Westminster Abbey, Britain (or United Kingdom), Oliver Cromwell, Admiral Robert Blake, Isaac Newton, Charles Darwin. Also categories: burial, commemoration, national figure, honour.\n\nTriplets:\n\n1. Westminster Abbey - location type? maybe \"instance of\" building? Not needed unless text says. But we can have \"Burials and memorials in Westminster Abbey\" indicates that Westminster Abbey has function \"burial site\". So: subject: Westminster Abbey, relation: \"has function\", object: \"burial site\". But maybe better: \"Westminster Abbey\" - \"contains burial\" - \"Admiral Robert Blake\". However we need separate triplets for each burial.\n\nWe need to capture that burial of Robert Blake occurred in 1657, under Oliver Cromwell (the practice began under Oliver Cromwell). So:\n\n- \"burial of Admiral Robert Blake\" is an event. Could represent as: subject: Admiral Robert Blake, relation: \"burial place\", object: \"Westminster Abbey\". qualifiers: date 1657, \"initiated by\" Oliver Cromwell? Actually \"practice began under Oliver Cromwell with the burial of Admiral Robert Blake\". So we can have a triplet: \"burial of Admiral Robert Blake\" - \"initiated by\" - \"Oliver Cromwell\". But maybe simpler: \"Admiral Robert Blake\" - \"burial place\" - \"Westminster Abbey\" with qualifier \"date\" 1657. Also \"Oliver Cromwell\" - \"role\" - \"initiator of burial practice in Westminster Abbey\". Could be \"Oliver Cromwell\" - \"initiated burial practice\" - \"Westminster Abbey\". We'll capture.\n\n- \"Isaac Newton\" - \"burial place\" - \"Westminster Abbey\", qualifier date 4 April 1727, also \"occupation\" maybe \"scientist\". But text says \"scientists such as Isaac Newton\". So we can have \"Isaac Newton\" - \"occupation\" - \"scientist\". Also \"Isaac Newton\" - \"burial place\" - \"Westminster Abbey\" with date.\n\n- \"Charles Darwin\" - \"burial place\" - \"Westminster Abbey\", qualifier date 19 April 1882, occupation \"scientist\". Also maybe \"Charles Darwin\" - \"occupation\" - \"scientist\".\n\n- The practice spread to include generals, admirals, politicians, doctors and scientists. This is a generic statement, not specific individuals. Could capture as: \"burial practice in Westminster Abbey\" - \"includes category\" - \"generals\". But maybe not needed.\n\n- \"Burial or commemoration in Westminster Abbey\" is \"one of Britain's most significant honours\". So we can have: \"burial in Westminster Abbey\" - \"is honour type\" - \"significant honour in Britain\". Might be too abstract.\n\nSimplify: focus on concrete facts.\n\nDefine entity types:\n\n- Westminster Abbey: building (type: \"building\" or \"church\").\n- Oliver Cromwell: human.\n- Admiral Robert Blake: human, occupation: admiral (type: \"military rank\"?). We'll set object_type \"human\" for subjects, and object_type for objects accordingly.\n\n- Isaac Newton: human, occupation: scientist (object_type \"profession\").\n\n- Charles Darwin: human, occupation: scientist.\n\n- Burial date: date.\n\nRelations:\n\n- \"burial place\": object Westminster Abbey (type building)\n- \"burial date\": date\n- \"initiated burial practice\": maybe relation \"initiated burial practice\" (object Westminster Abbey) with qualifier \"under\" Oliver Cromwell? Actually \"practice began under Oliver Cromwell\". So we can have: subject: \"burial practice in Westminster Abbey\", relation: \"initiated by\", object: \"Oliver Cromwell\". But we need an entity for \"burial practice in Westminster Abbey\". Could be \"burial practice (Westminster Abbey)\". Might be okay.\n\nBut maybe better: \"Oliver Cromwell\" - \"role\" - \"initiator of burial practice in Westminster Abbey\". Use relation \"initiated burial practice\". object: \"Westminster Abbey\". qualifiers none.\n\nAlso \"Burial or commemoration in Westminster Abbey\" - \"is honour\" - \"significant honour in Britain\". Could be: subject: \"burial in Westminster Abbey\", relation: \"honour status\", object: \"significant honour\". qualifiers: \"location\" Britain? Not needed.\n\nGiven guidelines, we should not create vague entities. Let's stick to concrete.\n\nThus triplets:\n\n1. Admiral Robert Blake - burial place - Westminster Abbey; qualifier date 1657.\n2. Oliver Cromwell - initiated burial practice - Westminster Abbey (maybe qualifier \"point in time\" 1657? Not given). Could also have \"burial practice\" - \"began under\" - Oliver Cromwell. Let's create entity \"burial practice in Westminster Abbey\". So:\n\n- \"burial practice in Westminster Abbey\" - \"began under\" - \"Oliver Cromwell\". qualifiers: date 1657? Not explicit but could be.\n\nBut guidelines: qualifiers must be attached to a triplet. So we can add qualifier \"point in time\" 1657.\n\n3. Isaac Newton - burial place - Westminster Abbey; qualifier date 4 April 1727.\n4. Isaac Newton - occupation - scientist.\n5. Charles Darwin - burial place - Westminster Abbey; qualifier date 19 April 1882.\n6. Charles Darwin - occupation - scientist.\n7. Westminster Abbey - location - \"London\"? Not in text. Not needed.\n8. Burial or commemoration in Westminster Abbey - \"is honour\" - \"significant honour in Britain\". Could be: subject: \"burial in Westminster Abbey\", relation: \"honour status\", object: \"significant honour\". qualifiers: \"country\" Britain.\n\nBut maybe too abstract.\n\nLet's produce JSON with these 6 concrete triplets.\n\nNeed to include \"subject_type\" and \"object_type\". Types:\n\n- Admiral Robert Blake: human\n- burial place: object Westminster Abbey: building (type \"building\" or \"church\"). Use \"building\".\n- date: object_type \"date\".\n- Oliver Cromwell: human\n- burial practice in Westminster Abbey: maybe \"cultural practice\". Use \"cultural practice\".\n- scientist: profession (type \"profession\").\n- Isaac Newton, Charles Darwin: human.\n\nRelations:\n\n- \"burial place\"\n- \"burial date\" maybe use qualifier \"date\". The relation is \"burial place\", qualifier relation \"date\" (or \"point in time\") as per example they used \"point in time\". Use \"point in time\".\n\n- \"occupation\"\n\n- \"initiated burial practice\" maybe relation \"initiated\". Use \"initiated\". Or \"began under\". Use \"began under\". But relation should be short predicate. Use \"initiated by\". So subject: \"burial practice in Westminster Abbey\", relation: \"initiated by\", object: \"Oliver Cromwell\". Qualifier: point in time 1657.\n\nThus need entity \"burial practice in Westminster Abbey\". Type: \"cultural practice\".\n\nNow produce JSON list.\n\nCheck format: top-level key \"triplets\": list of dicts.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list, \"subject_type\", \"object_type\".\n\nQualifiers dict includes \"relation\", \"object\", \"object_type\".\n\nLet's craft.\n\nTriplet 1:\n\n{\n \"subject\": \"Admiral Robert Blake\",\n \"relation\": \"burial place\",\n \"object\": \"Westminster Abbey\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"1657\", \"object_type\": \"year\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 2:\n\n{\n \"subject\": \"burial practice in Westminster Abbey\",\n \"relation\": \"initiated by\",\n \"object\": \"Oliver Cromwell\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"1657\", \"object_type\": \"year\"}],\n \"subject_type\": \"cultural practice\",\n \"object_type\": \"human\"\n}\n\nTriplet 3:\n\n{\n \"subject\": \"Isaac Newton\",\n \"relation\": \"burial place\",\n \"object\": \"Westminster Abbey\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"4 April 1727\", \"object_type\": \"date\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 4:\n\n{\n \"subject\": \"Isaac Newton\",\n \"relation\": \"occupation\",\n \"object\": \"scientist\",\n \"qualifiers\": [],\n \"subject_type\": \"human\",\n \"object_type\": \"profession\"\n}\n\nTriplet 5:\n\n{\n \"subject\": \"Charles Darwin\",\n \"relation\": \"burial place\",\n \"object\": \"Westminster Abbey\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"19 April 1882\", \"object_type\": \"date\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 6:\n\n{\n \"subject\": \"Charles Darwin\",\n \"relation\": \"occupation\",\n \"object\": \"scientist\",\n \"qualifiers\": [],\n \"subject_type\": \"human\",\n \"object_type\": \"profession\"\n}\n\nPotential extra: \"Burial or commemoration in Westminster Abbey\" - \"is honour\" - \"significant honour\". Could add but optional.\n\nI'll include maybe one more:\n\nTriplet 7:\n\n{\n \"subject\": \"burial in Westminster Abbey\",\n \"relation\": \"honour status\",\n \"object\": \"significant honour\",\n \"qualifiers\": [{\"relation\": \"country\", \"object\": \"Britain\", \"object_type\": \"country\"}],\n \"subject_type\": \"cultural practice\",\n \"object_type\": \"honour\"\n}\n\nBut \"significant honour\" type \"honour\". Use \"honour\". Provide.\n\nLet's output JSON with these 7 triplets.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to parse the text and extract triplets.\n\nText: \"Burials and memorials in Westminster Abbey\n\nSubsequently, it became one of Britain's most significant honours to be buried or commemorated here. The practice of burying national figures in the Abbey began under Oliver Cromwell with the burial of Admiral Robert Blake in 1657. The practice spread to include generals, admirals, politicians, doctors and scientists such as Isaac Newton, buried on 4 April 1727 and Charles Darwin buried 19 April 1882.\"\n\nWe need entities: Westminster Abbey, Britain (or United Kingdom), Oliver Cromwell, Admiral Robert Blake, Isaac Newton, Charles Darwin. Also categories: burial, commemoration, national figure, honour.\n\nTriplets:\n\n1. Westminster Abbey - location type? maybe \"instance of\" building? Not needed unless text says. But we can have \"Burials and memorials in Westminster Abbey\" indicates that Westminster Abbey has function \"burial site\". So: subject: Westminster Abbey, relation: \"has function\", object: \"burial site\". But maybe better: \"Westminster Abbey\" - \"contains burial\" - \"Admiral Robert Blake\". However we need separate triplets for each burial.\n\nWe need to capture that burial of Robert Blake occurred in 1657, under Oliver Cromwell (the practice began under Oliver Cromwell). So:\n\n- \"burial of Admiral Robert Blake\" is an event. Could represent as: subject: Admiral Robert Blake, relation: \"burial place\", object: \"Westminster Abbey\". qualifiers: date 1657, \"initiated by\" Oliver Cromwell? Actually \"practice began under Oliver Cromwell with the burial of Admiral Robert Blake\". So we can have a triplet: \"burial of Admiral Robert Blake\" - \"initiated by\" - \"Oliver Cromwell\". But maybe simpler: \"Admiral Robert Blake\" - \"burial place\" - \"Westminster Abbey\" with qualifier \"date\" 1657. Also \"Oliver Cromwell\" - \"role\" - \"initiator of burial practice in Westminster Abbey\". Could be \"Oliver Cromwell\" - \"initiated burial practice\" - \"Westminster Abbey\". We'll capture.\n\n- \"Isaac Newton\" - \"burial place\" - \"Westminster Abbey\", qualifier date 4 April 1727, also \"occupation\" maybe \"scientist\". But text says \"scientists such as Isaac Newton\". So we can have \"Isaac Newton\" - \"occupation\" - \"scientist\". Also \"Isaac Newton\" - \"burial place\" - \"Westminster Abbey\" with date.\n\n- \"Charles Darwin\" - \"burial place\" - \"Westminster Abbey\", qualifier date 19 April 1882, occupation \"scientist\". Also maybe \"Charles Darwin\" - \"occupation\" - \"scientist\".\n\n- The practice spread to include generals, admirals, politicians, doctors and scientists. This is a generic statement, not specific individuals. Could capture as: \"burial practice in Westminster Abbey\" - \"includes category\" - \"generals\". But maybe not needed.\n\n- \"Burial or commemoration in Westminster Abbey\" is \"one of Britain's most significant honours\". So we can have: \"burial in Westminster Abbey\" - \"is honour type\" - \"significant honour in Britain\". Might be too abstract.\n\nSimplify: focus on concrete facts.\n\nDefine entity types:\n\n- Westminster Abbey: building (type: \"building\" or \"church\").\n- Oliver Cromwell: human.\n- Admiral Robert Blake: human, occupation: admiral (type: \"military rank\"?). We'll set object_type \"human\" for subjects, and object_type for objects accordingly.\n\n- Isaac Newton: human, occupation: scientist (object_type \"profession\").\n\n- Charles Darwin: human, occupation: scientist.\n\n- Burial date: date.\n\nRelations:\n\n- \"burial place\": object Westminster Abbey (type building)\n- \"burial date\": date\n- \"initiated burial practice\": maybe relation \"initiated burial practice\" (object Westminster Abbey) with qualifier \"under\" Oliver Cromwell? Actually \"practice began under Oliver Cromwell\". So we can have: subject: \"burial practice in Westminster Abbey\", relation: \"initiated by\", object: \"Oliver Cromwell\". But we need an entity for \"burial practice in Westminster Abbey\". Could be \"burial practice (Westminster Abbey)\". Might be okay.\n\nBut maybe better: \"Oliver Cromwell\" - \"role\" - \"initiator of burial practice in Westminster Abbey\". Use relation \"initiated burial practice\". object: \"Westminster Abbey\". qualifiers none.\n\nAlso \"Burial or commemoration in Westminster Abbey\" - \"is honour\" - \"significant honour in Britain\". Could be: subject: \"burial in Westminster Abbey\", relation: \"honour status\", object: \"significant honour\". qualifiers: \"location\" Britain? Not needed.\n\nGiven guidelines, we should not create vague entities. Let's stick to concrete.\n\nThus triplets:\n\n1. Admiral Robert Blake - burial place - Westminster Abbey; qualifier date 1657.\n2. Oliver Cromwell - initiated burial practice - Westminster Abbey (maybe qualifier \"point in time\" 1657? Not given). Could also have \"burial practice\" - \"began under\" - Oliver Cromwell. Let's create entity \"burial practice in Westminster Abbey\". So:\n\n- \"burial practice in Westminster Abbey\" - \"began under\" - \"Oliver Cromwell\". qualifiers: date 1657? Not explicit but could be.\n\nBut guidelines: qualifiers must be attached to a triplet. So we can add qualifier \"point in time\" 1657.\n\n3. Isaac Newton - burial place - Westminster Abbey; qualifier date 4 April 1727.\n4. Isaac Newton - occupation - scientist.\n5. Charles Darwin - burial place - Westminster Abbey; qualifier date 19 April 1882.\n6. Charles Darwin - occupation - scientist.\n7. Westminster Abbey - location - \"London\"? Not in text. Not needed.\n8. Burial or commemoration in Westminster Abbey - \"is honour\" - \"significant honour in Britain\". Could be: subject: \"burial in Westminster Abbey\", relation: \"honour status\", object: \"significant honour\". qualifiers: \"country\" Britain.\n\nBut maybe too abstract.\n\nLet's produce JSON with these 6 concrete triplets.\n\nNeed to include \"subject_type\" and \"object_type\". Types:\n\n- Admiral Robert Blake: human\n- burial place: object Westminster Abbey: building (type \"building\" or \"church\"). Use \"building\".\n- date: object_type \"date\".\n- Oliver Cromwell: human\n- burial practice in Westminster Abbey: maybe \"cultural practice\". Use \"cultural practice\".\n- scientist: profession (type \"profession\").\n- Isaac Newton, Charles Darwin: human.\n\nRelations:\n\n- \"burial place\"\n- \"burial date\" maybe use qualifier \"date\". The relation is \"burial place\", qualifier relation \"date\" (or \"point in time\") as per example they used \"point in time\". Use \"point in time\".\n\n- \"occupation\"\n\n- \"initiated burial practice\" maybe relation \"initiated\". Use \"initiated\". Or \"began under\". Use \"began under\". But relation should be short predicate. Use \"initiated by\". So subject: \"burial practice in Westminster Abbey\", relation: \"initiated by\", object: \"Oliver Cromwell\". Qualifier: point in time 1657.\n\nThus need entity \"burial practice in Westminster Abbey\". Type: \"cultural practice\".\n\nNow produce JSON list.\n\nCheck format: top-level key \"triplets\": list of dicts.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list, \"subject_type\", \"object_type\".\n\nQualifiers dict includes \"relation\", \"object\", \"object_type\".\n\nLet's craft.\n\nTriplet 1:\n\n{\n \"subject\": \"Admiral Robert Blake\",\n \"relation\": \"burial place\",\n \"object\": \"Westminster Abbey\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"1657\", \"object_type\": \"year\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 2:\n\n{\n \"subject\": \"burial practice in Westminster Abbey\",\n \"relation\": \"initiated by\",\n \"object\": \"Oliver Cromwell\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"1657\", \"object_type\": \"year\"}],\n \"subject_type\": \"cultural practice\",\n \"object_type\": \"human\"\n}\n\nTriplet 3:\n\n{\n \"subject\": \"Isaac Newton\",\n \"relation\": \"burial place\",\n \"object\": \"Westminster Abbey\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"4 April 1727\", \"object_type\": \"date\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 4:\n\n{\n \"subject\": \"Isaac Newton\",\n \"relation\": \"occupation\",\n \"object\": \"scientist\",\n \"qualifiers\": [],\n \"subject_type\": \"human\",\n \"object_type\": \"profession\"\n}\n\nTriplet 5:\n\n{\n \"subject\": \"Charles Darwin\",\n \"relation\": \"burial place\",\n \"object\": \"Westminster Abbey\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"19 April 1882\", \"object_type\": \"date\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 6:\n\n{\n \"subject\": \"Charles Darwin\",\n \"relation\": \"occupation\",\n \"object\": \"scientist\",\n \"qualifiers\": [],\n \"subject_type\": \"human\",\n \"object_type\": \"profession\"\n}\n\nPotential extra: \"Burial or commemoration in Westminster Abbey\" - \"is honour\" - \"significant honour\". Could add but optional.\n\nI'll include maybe one more:\n\nTriplet 7:\n\n{\n \"subject\": \"burial in Westminster Abbey\",\n \"relation\": \"honour status\",\n \"object\": \"significant honour\",\n \"qualifiers\": [{\"relation\": \"country\", \"object\": \"Britain\", \"object_type\": \"country\"}],\n \"subject_type\": \"cultural practice\",\n \"object_type\": \"honour\"\n}\n\nBut \"significant honour\" type \"honour\". Use \"honour\". Provide.\n\nLet's output JSON with these 7 triplets.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1448,
+      "completion_tokens": 2720,
+      "total_tokens": 4168,
+      "cost": 0.00045144,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1024,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00045144,
+        "upstream_inference_prompt_cost": 4.344e-05,
+        "upstream_inference_completions_cost": 0.000408
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 2166,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Admiral Robert Blake\",\n            \"relation\": \"burial place\",\n            \"object\": \"Westminster Abbey\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1657\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"burial practice in Westminster Abbey\",\n            \"relation\": \"initiated by\",\n            \"object\": \"Oliver Cromwell\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1657\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"cultural practice\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Isaac Newton\",\n            \"relation\": \"burial place\",\n            \"object\": \"Westminster Abbey\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"4 April 1727\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Isaac Newton\",\n            \"relation\": \"occupation\",\n            \"object\": \"scientist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Charles Darwin\",\n            \"relation\": \"burial place\",\n            \"object\": \"Westminster Abbey\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"19 April 1882\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Charles Darwin\",\n            \"relation\": \"occupation\",\n            \"object\": \"scientist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"burial in Westminster Abbey\",\n            \"relation\": \"honour status\",\n            \"object\": \"significant honour\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Britain\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"cultural practice\",\n            \"object_type\": \"honour\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Admiral Robert Blake",
+        "relation": "burial place",
+        "object": "Westminster Abbey",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1657"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "building"
+      },
+      {
+        "subject": "burial practice in Westminster Abbey",
+        "relation": "initiated by",
+        "object": "Oliver Cromwell",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1657"
+          }
+        ],
+        "subject_type": "cultural practice",
+        "object_type": "human"
+      },
+      {
+        "subject": "Isaac Newton",
+        "relation": "burial place",
+        "object": "Westminster Abbey",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "4 April 1727"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "building"
+      },
+      {
+        "subject": "Isaac Newton",
+        "relation": "occupation",
+        "object": "scientist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Charles Darwin",
+        "relation": "burial place",
+        "object": "Westminster Abbey",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "19 April 1882"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "building"
+      },
+      {
+        "subject": "Charles Darwin",
+        "relation": "occupation",
+        "object": "scientist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "burial in Westminster Abbey",
+        "relation": "honour status",
+        "object": "significant honour",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "Britain"
+          }
+        ],
+        "subject_type": "cultural practice",
+        "object_type": "honour"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1448,
+    "completion_tokens": 2720,
+    "total_tokens": 4168,
+    "cost": 0.00045144,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00045144,
+      "upstream_inference_prompt_cost": 4.344e-05,
+      "upstream_inference_completions_cost": 0.000408
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 2166,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 808,
+    "output_tokens_est": 680
+  },
+  "attempts": 1,
+  "latency_s": 64.22970415399323,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:13:32.494035+00:00",
+  "cache_key": "e6530fcde0d5caf01cd4cee615808e83"
+}

@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "7d476fc421f4c367",
+    "input_hash": "c5e9b3e4dee379adbb92f9c09e274d64f2eaeb5c7984e3639ef3f3431e3f28de",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-434d2c65f3292d88b8ea9c290bcf90a4",
+    "object": "chat.completion",
+    "created": 1791504421,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Hertfordshire\",\n            \"relation\": \"instance of\",\n            \"object\": \"county\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Hertfordshire\",\n            \"relation\": \"located north of\",\n            \"object\": \"London\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Hertfordshire\",\n            \"relation\": \"part of\",\n            \"object\": \"East of England\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Hertfordshire\",\n            \"relation\": \"commuter population\",\n            \"object\": \"City of London commuters\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"population group\"\n        },\n        {\n            \"subject\": \"Essex\",\n            \"relation\": \"located east of\",\n            \"object\": \"Hertfordshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Buckinghamshire\",\n            \"relation\": \"located west of\",\n            \"object\": \"Hertfordshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Bedfordshire\",\n            \"relation\": \"located north of\",\n            \"object\": \"Hertfordshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Cambridgeshire\",\n            \"relation\": \"located north of\",\n            \"object\": \"Hertfordshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"county\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract factual triplets from the text.\n\nText: \"Hertfordshire\n\nHertfordshire is the county immediately north of London and is part of the East of England region, a mainly statistical unit. A significant minority of the population across all districts are City of London commuters. To the east is Essex, to the west is Buckinghamshire and to the north are Bedfordshire and Cambridgeshire.\"\n\nWe need to parse sentences.\n\nFirst sentence: \"Hertfordshire is the county immediately north of London and is part of the East of England region, a mainly statistical unit.\"\n\nTriplets:\n\n- (Hertfordshire, instance of, county) maybe relation \"instance of\" or \"subclass of\"? Probably \"instance of\" with object \"county\". Use relation \"instance of\" (or \"type of\"). In examples they used \"occupation\". For geography, maybe \"administrative territorial entity\". But we need a relation. Could use \"type\" but better \"instance of\". We'll set subject_type \"administrative region\"? Let's decide.\n\n- (Hertfordshire, location relative to, London) but more precise: \"immediately north of London\". Relation could be \"located north of\". Use \"located north of\". object \"London\". qualifiers maybe \"distance\" but not given. So just relation \"located north of\". subject_type \"county\", object_type \"city\". Might be \"city\" for London.\n\n- (Hertfordshire, part of, East of England region). Relation \"part of\". object \"East of England\". subject_type \"county\", object_type \"region\". Also note \"a mainly statistical unit\" is a description of the region, not a separate fact about Hertfordshire.\n\nSecond sentence: \"A significant minority of the population across all districts are City of London commuters.\"\n\nInterpretation: \"A significant minority of the population across all districts are City of London commuters.\" So fact: \"population of Hertfordshire\" includes commuters to City of London. Could be expressed as (Hertfordshire, has population group, City of London commuters). Relation maybe \"population includes\". Or \"commuter to\". Might be (City of London commuters, location, Hertfordshire). But phrase says they are commuters from Hertfordshire to City of London. So we could have (Hertfordshire, has commuter population, City of London commuters). Use relation \"commuter population\". Not standard but okay.\n\nWe'll create triplet: subject \"Hertfordshire\", relation \"commuter population\", object \"City of London commuters\". qualifiers maybe \"significant minority\". Could add qualifier \"qualifier\": {\"relation\":\"approximation\",\"object\":\"significant minority\"}? The guidelines: approximation qualifier for \"about\", \"nearly\", \"over\". \"significant minority\" is a qualitative description, maybe \"qualifier\": {\"relation\":\"description\",\"object\":\"significant minority\"} but not defined. Might skip qualifiers. Could add \"qualifier\": {\"relation\":\"population proportion\",\"object\":\"significant minority\"} but not defined. Probably omit.\n\nThird sentence: \"To the east is Essex, to the west is Buckinghamshire and to the north are Bedfordshire and Cambridgeshire.\"\n\nWe need directional relations.\n\n- (Essex, east of, Hertfordshire) or (Hertfordshire, east neighbor, Essex). The phrase \"To the east is Essex\" means Essex is east of Hertfordshire. So relation \"located east of\". Subject Essex, object Hertfordshire. Or we could use (Hertfordshire, has eastern neighbor, Essex). Choose \"located east of\". Subject \"Essex\", object \"Hertfordshire\". Similarly for Buckinghamshire: \"to the west is Buckinghamshire\" => Buckinghamshire located west of Hertfordshire. (Buckinghamshire, located west of, Hertfordshire). For Bedfordshire and Cambridgeshire: both north of Hertfordshire. So two triplets: (Bedfordshire, located north of, Hertfordshire) and (Cambridgeshire, located north of, Hertfordshire).\n\nNow determine subject_type and object_type.\n\n- Hertfordshire: type \"county\" (administrative territorial entity). Use \"county\".\n- London: type \"city\".\n- East of England region: type \"region\".\n- City of London commuters: type \"population group\" maybe \"commuter group\". Use \"population group\".\n- Essex, Buckinghamshire, Bedfordshire, Cambridgeshire: type \"county\".\n- For directional relations, object is Hertfordshire (county).\n\nNow produce JSON.\n\nList of triplets:\n\n1. Hertfordshire instance of county.\n2. Hertfordshire located north of London.\n3. Hertfordshire part of East of England.\n4. Hertfordshire commuter population City of London commuters. (maybe relation \"commuter population\").\n5. Essex located east of Hertfordshire.\n6. Buckinghamshire located west of Hertfordshire.\n7. Bedfordshire located north of Hertfordshire.\n8. Cambridgeshire located north of Hertfordshire.\n\nCheck qualifiers: none needed.\n\nNow format.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1654,
+      "total_tokens": 3106,
+      "completion_tokens": 1452,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Hertfordshire\",\n            \"relation\": \"instance of\",\n            \"object\": \"county\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Hertfordshire\",\n            \"relation\": \"located north of\",\n            \"object\": \"London\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Hertfordshire\",\n            \"relation\": \"part of\",\n            \"object\": \"East of England\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Hertfordshire\",\n            \"relation\": \"commuter population\",\n            \"object\": \"City of London commuters\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"population group\"\n        },\n        {\n            \"subject\": \"Essex\",\n            \"relation\": \"located east of\",\n            \"object\": \"Hertfordshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Buckinghamshire\",\n            \"relation\": \"located west of\",\n            \"object\": \"Hertfordshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Bedfordshire\",\n            \"relation\": \"located north of\",\n            \"object\": \"Hertfordshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Cambridgeshire\",\n            \"relation\": \"located north of\",\n            \"object\": \"Hertfordshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"county\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Hertfordshire",
+        "relation": "instance of",
+        "object": "county",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Hertfordshire",
+        "relation": "located north of",
+        "object": "London",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "city"
+      },
+      {
+        "subject": "Hertfordshire",
+        "relation": "part of",
+        "object": "East of England",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "region"
+      },
+      {
+        "subject": "Hertfordshire",
+        "relation": "commuter population",
+        "object": "City of London commuters",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "population group"
+      },
+      {
+        "subject": "Essex",
+        "relation": "located east of",
+        "object": "Hertfordshire",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "county"
+      },
+      {
+        "subject": "Buckinghamshire",
+        "relation": "located west of",
+        "object": "Hertfordshire",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "county"
+      },
+      {
+        "subject": "Bedfordshire",
+        "relation": "located north of",
+        "object": "Hertfordshire",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "county"
+      },
+      {
+        "subject": "Cambridgeshire",
+        "relation": "located north of",
+        "object": "Hertfordshire",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "county"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1654,
+    "total_tokens": 3106,
+    "completion_tokens": 1452,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 596,
+    "output_tokens_est": 503
+  },
+  "attempts": 1,
+  "latency_s": 17.87194140599604,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:07:19.541816+00:00",
+  "cache_key": "13639806259298260fbc28bc0a1db60b"
+}

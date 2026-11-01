@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "d685d5eeb7d52dcd",
+    "input_hash": "871b5841b5b1c77235c6e27a2b01e3e0b34dde55d898de5d2e529582a1682165",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d67eb925c96da3484fa1782e7b921d02",
+    "object": "chat.completion",
+    "created": 1791521890,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"album type\",\n            \"object\": \"solo studio album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album type\"\n        },\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"ordinal\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"album type\",\n                    \"object\": \"solo studio album\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"artist\",\n            \"object\": \"David Crosby\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"David Crosby\",\n            \"relation\": \"occupation\",\n            \"object\": \"rock artist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"David Crosby\",\n            \"relation\": \"member of\",\n            \"object\": \"Crosby, Stills, and Nash\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"role\",\n                    \"object\": \"founding member\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"band\"\n        },\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"publication date\",\n            \"object\": \"1993\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"publisher\",\n            \"object\": \"Atlantic Records\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"organisation\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Thousand Roads\n\nThousand Roads is the third solo studio album by the rock artist David Crosby, a founding member of Crosby, Stills, and Nash. It was released on in 1993 on Atlantic Records.\"\n\nWe have album \"Thousand Roads\". Facts:\n\n- Thousand Roads is a solo studio album (type: album) by David Crosby. Also \"third\" indicates ordinal position. So relation maybe \"instance of\" or \"album type\". We can have relation \"album type\" = \"solo studio album\". Also \"position in discography\" maybe \"ordinal\" but we can capture \"order\" qualifier.\n\n- David Crosby is a rock artist (occupation). Also founding member of Crosby, Stills, and Nash (membership). But we only extract facts explicitly stated. The sentence: \"rock artist David Crosby, a founding member of Crosby, Stills, and Nash.\" So we can have two facts: David Crosby occupation = rock artist (or \"musician\" but text says \"rock artist\"). Also David Crosby member of group \"Crosby, Stills, and Nash\" with qualifier \"role\" maybe \"founding member\". Use relation \"member of\" with qualifier \"role\" = \"founding member\". Or \"founder of\". We'll follow pattern: relation \"member of\" object \"Crosby, Stills, and Nash\" qualifiers [{\"relation\":\"role\",\"object\":\"founding member\"}].\n\n- Album released in 1993 on Atlantic Records. So relation \"release date\" = 1993 (point in time qualifier maybe). Actually release date is a property, we can set relation \"publication date\" or \"release date\". Use relation \"publication date\". object \"1993\". qualifier maybe none. Also relation \"publisher\" = Atlantic Records with qualifier \"point in time\" maybe same year? Could be separate: \"released on\" includes both date and label. We'll create two triplets: album release date, album publisher.\n\n- Also \"third solo studio album\". Could capture relation \"ordinal number\" or \"position in discography\". Use relation \"ordinal\" with object \"3\". qualifier maybe \"type\" = \"solo studio album\". But we can just have relation \"album sequence number\" = \"3\". We'll include qualifier \"album type\" = \"solo studio album\". But guidelines: qualifiers attached to claim they modify. So claim: \"Thousand Roads\" \"position in discography\" \"3\" with qualifier \"album type\" \"solo studio album\". Might be okay.\n\n- Subject types: \"Thousand Roads\" is an album (type: album). \"David Crosby\" human. \"Crosby, Stills, and Nash\" group (band). \"Atlantic Records\" organisation (record label). \"1993\" date.\n\n- Also \"rock artist\" as occupation (profession). We'll have occupation relation.\n\nNow produce JSON.\n\nTriplets list:\n\n1. subject \"Thousand Roads\", relation \"instance of\", object \"album\". But maybe not needed. But we can include \"album type\" relation. Let's include \"album type\" = \"solo studio album\". No qualifiers.\n\n2. subject \"Thousand Roads\", relation \"position in discography\", object \"3\", qualifiers [{\"relation\":\"album type\",\"object\":\"solo studio album\"}].\n\nBut maybe better: relation \"ordinal\" with object \"3\". We'll include qualifier \"album type\".\n\n3. subject \"Thousand Roads\", relation \"artist\", object \"David Crosby\". qualifier maybe none.\n\n4. subject \"David Crosby\", relation \"occupation\", object \"rock artist\". qualifier none.\n\n5. subject \"David Crosby\", relation \"member of\", object \"Crosby, Stills, and Nash\", qualifiers [{\"relation\":\"role\",\"object\":\"founding member\"}].\n\n6. subject \"Thousand Roads\", relation \"publication date\", object \"1993\", qualifiers [].\n\n7. subject \"Thousand Roads\", relation \"publisher\", object \"Atlantic Records\", qualifiers [].\n\nCheck pronoun resolution: \"It was released on in 1993 on Atlantic Records.\" \"It\" refers to Thousand Roads.\n\nNow assign subject_type and object_type:\n\n- Album: \"album\"\n- David Crosby: \"human\"\n- rock artist: \"profession\" maybe \"musician\". Use \"profession\".\n- Crosby, Stills, and Nash: \"band\"\n- role: maybe \"role\" as string, but object_type \"role\". We'll set object_type \"role\".\n- publication date: object_type \"date\".\n- Atlantic Records: \"organisation\" (record label).\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1635,
+      "total_tokens": 2996,
+      "completion_tokens": 1361,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"album type\",\n            \"object\": \"solo studio album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album type\"\n        },\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"ordinal\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"album type\",\n                    \"object\": \"solo studio album\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"artist\",\n            \"object\": \"David Crosby\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"David Crosby\",\n            \"relation\": \"occupation\",\n            \"object\": \"rock artist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"David Crosby\",\n            \"relation\": \"member of\",\n            \"object\": \"Crosby, Stills, and Nash\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"role\",\n                    \"object\": \"founding member\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"band\"\n        },\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"publication date\",\n            \"object\": \"1993\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Thousand Roads\",\n            \"relation\": \"publisher\",\n            \"object\": \"Atlantic Records\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"organisation\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Thousand Roads",
+        "relation": "album type",
+        "object": "solo studio album",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "album type"
+      },
+      {
+        "subject": "Thousand Roads",
+        "relation": "ordinal",
+        "object": "3",
+        "qualifiers": [
+          {
+            "relation": "album type",
+            "object": "solo studio album"
+          }
+        ],
+        "subject_type": "album",
+        "object_type": "integer"
+      },
+      {
+        "subject": "Thousand Roads",
+        "relation": "artist",
+        "object": "David Crosby",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "human"
+      },
+      {
+        "subject": "David Crosby",
+        "relation": "occupation",
+        "object": "rock artist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "David Crosby",
+        "relation": "member of",
+        "object": "Crosby, Stills, and Nash",
+        "qualifiers": [
+          {
+            "relation": "role",
+            "object": "founding member"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "band"
+      },
+      {
+        "subject": "Thousand Roads",
+        "relation": "publication date",
+        "object": "1993",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "date"
+      },
+      {
+        "subject": "Thousand Roads",
+        "relation": "publisher",
+        "object": "Atlantic Records",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "organisation"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1635,
+    "total_tokens": 2996,
+    "completion_tokens": 1361,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 592,
+    "output_tokens_est": 499
+  },
+  "attempts": 1,
+  "latency_s": 16.846063896999112,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:58:28.107810+00:00",
+  "cache_key": "f14b70487f5ee1eb01d0e6f19bcf816b"
+}

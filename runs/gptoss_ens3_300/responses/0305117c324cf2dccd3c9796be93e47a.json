@@ -1,0 +1,177 @@
+{
+  "task": {
+    "input_id": "16ac0a8f0b3718d3",
+    "input_hash": "f5938e1e256438354a58ac3245d2261faf40245290da7a844b0ab9005179690f",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-153b9f8e7a2daa9384b70e73d59ed244",
+    "object": "chat.completion",
+    "created": 1791548248,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"instance of\",\n            \"object\": \"lake\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"water type\",\n            \"object\": \"freshwater\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"water type\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located in\",\n            \"object\": \"Temagami region\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located in\",\n            \"object\": \"Northeastern Ontario\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located in\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located near\",\n            \"object\": \"Pecours Bay\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"bay\"\n        },\n        {\n            \"subject\": \"Pecours Bay\",\n            \"relation\": \"part of\",\n            \"object\": \"Snake Island Lake\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bay\",\n            \"object_type\": \"lake\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located in\",\n            \"object\": \"White Bear Forest\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"forest\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"approached from\",\n            \"object\": \"Peregrine Trail\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"trail\"\n        },\n        {\n            \"subject\": \"Peregrine Trail\",\n            \"relation\": \"adjoins\",\n            \"object\": \"Red Fox Trail\",\n            \"qualifiers\": [],\n            \"subject_type\": \"trail\",\n            \"object_type\": \"trail\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"adjoins\",\n            \"object\": \"Otter Trail\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"eastern portion\"\n                }\n            ],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"trail\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts from the text.\n\nText: \"Poison Pond\n\nPoison Pond is a small freshwater lake in the Temagami region of Northeastern Ontario, Canada, located near Pecords Bay of Snake Island Lake. Poison Pond is in the White Bear Forest and is typically approached from the Peregrine Trail, which adjoins the Red Fox Trail to the west. Its eastern portion adjoins the Otter Trail.\"\n\nWe need to create triplets.\n\nEntities: Poison Pond (subject). Relations:\n\n- instance of / type: lake? We could use \"instance of\" relation with object \"lake\". But guidelines: use specific Wikidata-style predicates. They used \"occupation\", \"award received\". For geographic features, typical relations: \"instance of\" (Q) maybe \"lake\". Also \"location\" (country, region). \"located in\" (region). \"has part\" maybe for eastern portion.\n\nLet's extract:\n\n1. (Poison Pond, instance of, lake) subject_type: geographic feature? object_type: geographic feature.\n\n2. (Poison Pond, water type, freshwater) maybe \"water type\" but maybe \"has water type\". Could be \"water type\" relation. object_type: water type.\n\n3. (Poison Pond, located in administrative territorial entity, Temagami region) but Temagami region is part of Northeastern Ontario, Canada. Could have multiple location relations.\n\n- (Poison Pond, located in, Temagami region) with qualifiers? Not needed.\n\n- (Poison Pond, located in, Northeastern Ontario) maybe as a larger region.\n\n- (Poison Pond, country, Canada) maybe \"country\" relation.\n\nBut we must avoid redundancy? Provide each explicit location mention.\n\nSentence: \"Poison Pond is a small freshwater lake in the Temagami region of Northeastern Ontario, Canada, located near Pecours Bay of Snake Island Lake.\"\n\nThus facts:\n\n- Poison Pond is a small freshwater lake. \"small\" is size adjective, could be captured as qualifier \"size\" with object \"small\". Could use qualifier relation \"size\" but not sure. Not required maybe.\n\n- location near Pecours Bay of Snake Island Lake. So (Poison Pond, located near, Pecours Bay) and need to indicate that Pecours Bay is part of Snake Island Lake. But we can just capture (Poison Pond, located near, Pecours Bay) object_type: bay.\n\n- (Poison Pond, part of, White Bear Forest) Actually \"Poison Pond is in the White Bear Forest\". So (Poison Pond, located in, White Bear Forest).\n\n- (Poison Pond, approached from, Peregrine Trail). The phrase \"typically approached from the Peregrine Trail\". So relation maybe \"access point\" or \"approached from\". Use \"access route\" maybe \"approach route\". We'll use \"approached from\".\n\n- (Peregrine Trail, adjoins, Red Fox Trail) relation \"adjoins\". This is about Peregrine Trail, not Poison Pond. But the sentence mentions it. So we need triplet: (Peregrine Trail, adjoins, Red Fox Trail). Subject_type: trail, object_type: trail.\n\n- Also \"Its eastern portion adjoins the Otter Trail.\" \"Its\" refers to Poison Pond. So (Poison Pond eastern portion, adjoins, Otter Trail). But we likely need to express as (Poison Pond, adjoins, Otter Trail) with qualifier \"direction\" maybe \"eastern portion\". Could create object \"Otter Trail\". Add qualifier \"location\" maybe \"eastern portion\". Using qualifier \"direction\" with object \"east\". Better: (Poison Pond, adjoins, Otter Trail) with qualifier {\"relation\":\"direction\",\"object\":\"eastern portion\"}.\n\nBut need to reflect that it's the eastern portion of Poison Pond that adjoins.\n\nWe could also make a part relation: (Poison Pond, has part, eastern portion) but not needed.\n\nWe'll produce triplets:\n\n1. Poison Pond - instance of - lake\n2. Poison Pond - water type - freshwater\n3. Poison Pond - located in - Temagami region\n4. Poison Pond - located in - Northeastern Ontario\n5. Poison Pond - country - Canada (or \"located in\" - Canada)\n6. Poison Pond - located near - Pecours Bay\n7. Pecours Bay - part of - Snake Island Lake (maybe not required, but phrase \"of Snake Island Lake\" indicates Pecours Bay is part of Snake Island Lake). Could include: (Pecours Bay, part of, Snake Island Lake).\n8. Poison Pond - located in - White Bear Forest\n9. Poison Pond - approached from - Peregrine Trail\n10. Peregrine Trail - adjoins - Red Fox Trail\n11. Poison Pond - adjoins - Otter Trail with qualifier direction eastern portion.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- lake: geographic feature (or \"lake\").\n- freshwater: water type (water type)\n- Temagami region: region (geographic region)\n- Northeastern Ontario: region\n- Canada: country\n- Pecours Bay: bay (geographic feature)\n- Snake Island Lake: lake\n- White Bear Forest: forest (geographic feature)\n- Peregrine Trail: trail (geographic feature)\n- Red Fox Trail: trail\n- Otter Trail: trail\n- eastern portion: maybe \"geographic area\" but we can treat as qualifier not separate.\n\nNow qualifiers list: mostly empty except for adjoins with direction.\n\nLet's format JSON.\n\nCheck pronoun: \"Its eastern portion\" refers to Poison Pond, resolved.\n\nQualifiers for adjoins: [{\"relation\":\"direction\",\"object\":\"eastern portion\"}] object_type maybe \"spatial qualifier\"? But qualifiers just have relation and object; object type not needed for qualifiers.\n\nWe must include \"subject_type\" and \"object_type\" for each triplet.\n\nLet's produce.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1660,
+      "total_tokens": 3532,
+      "completion_tokens": 1872,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"instance of\",\n            \"object\": \"lake\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"water type\",\n            \"object\": \"freshwater\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"water type\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located in\",\n            \"object\": \"Temagami region\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located in\",\n            \"object\": \"Northeastern Ontario\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located in\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located near\",\n            \"object\": \"Pecours Bay\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"bay\"\n        },\n        {\n            \"subject\": \"Pecours Bay\",\n            \"relation\": \"part of\",\n            \"object\": \"Snake Island Lake\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bay\",\n            \"object_type\": \"lake\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"located in\",\n            \"object\": \"White Bear Forest\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"forest\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"approached from\",\n            \"object\": \"Peregrine Trail\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"trail\"\n        },\n        {\n            \"subject\": \"Peregrine Trail\",\n            \"relation\": \"adjoins\",\n            \"object\": \"Red Fox Trail\",\n            \"qualifiers\": [],\n            \"subject_type\": \"trail\",\n            \"object_type\": \"trail\"\n        },\n        {\n            \"subject\": \"Poison Pond\",\n            \"relation\": \"adjoins\",\n            \"object\": \"Otter Trail\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"eastern portion\"\n                }\n            ],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"trail\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Poison Pond",
+        "relation": "instance of",
+        "object": "lake",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "geographic feature"
+      },
+      {
+        "subject": "Poison Pond",
+        "relation": "water type",
+        "object": "freshwater",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "water type"
+      },
+      {
+        "subject": "Poison Pond",
+        "relation": "located in",
+        "object": "Temagami region",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "region"
+      },
+      {
+        "subject": "Poison Pond",
+        "relation": "located in",
+        "object": "Northeastern Ontario",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "region"
+      },
+      {
+        "subject": "Poison Pond",
+        "relation": "located in",
+        "object": "Canada",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "country"
+      },
+      {
+        "subject": "Poison Pond",
+        "relation": "located near",
+        "object": "Pecours Bay",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "bay"
+      },
+      {
+        "subject": "Pecours Bay",
+        "relation": "part of",
+        "object": "Snake Island Lake",
+        "qualifiers": [],
+        "subject_type": "bay",
+        "object_type": "lake"
+      },
+      {
+        "subject": "Poison Pond",
+        "relation": "located in",
+        "object": "White Bear Forest",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "forest"
+      },
+      {
+        "subject": "Poison Pond",
+        "relation": "approached from",
+        "object": "Peregrine Trail",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "trail"
+      },
+      {
+        "subject": "Peregrine Trail",
+        "relation": "adjoins",
+        "object": "Red Fox Trail",
+        "qualifiers": [],
+        "subject_type": "trail",
+        "object_type": "trail"
+      },
+      {
+        "subject": "Poison Pond",
+        "relation": "adjoins",
+        "object": "Otter Trail",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "eastern portion"
+          }
+        ],
+        "subject_type": "geographic feature",
+        "object_type": "trail"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1660,
+    "total_tokens": 3532,
+    "completion_tokens": 1872,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 822,
+    "output_tokens_est": 730
+  },
+  "attempts": 1,
+  "latency_s": 22.256404060011846,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:17:51.339408+00:00",
+  "cache_key": "0305117c324cf2dccd3c9796be93e47a"
+}

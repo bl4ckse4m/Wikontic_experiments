@@ -1,0 +1,174 @@
+{
+  "task": {
+    "input_id": "54279a8b471dc009",
+    "input_hash": "63923aab46da733ad10ce3f860e0623de835326af79d02cd461cafe77623ee6f",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a652283722449a6e8cebd334eb43a4f3",
+    "object": "chat.completion",
+    "created": 1791503191,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2014 FIFA World Cup\",\n            \"relation\": \"winner\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"defeated\",\n            \"object\": \"Argentina\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014 FIFA World Cup final\"\n                },\n                {\n                    \"relation\": \"score\",\n                    \"object\": \"1–0\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"world cup titles count\",\n            \"object\": \"4\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"record holder\",\n            \"object\": \"first European team to win World Cup staged in the Americas\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"record\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"part of record\",\n            \"object\": \"first time nations from same continent won three consecutive World Cups\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"record\"\n        },\n        {\n            \"subject\": \"West Germany\",\n            \"relation\": \"defeated\",\n            \"object\": \"Argentina\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1990 FIFA World Cup final\"\n                }\n            ],\n            \"subject_type\": \"historical country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"first world title after\",\n            \"object\": \"German reunification\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText describes 2014 FIFA World Cup final. Facts:\n\n- Event: 2014 FIFA World Cup (tournament). Germany defeated Argentina 1-0 in the final to win the tournament.\n- Germany secured the country's fourth world title.\n- It was the first after German reunification in 1990, when as West Germany they also beat Argentina in the World Cup final.\n- Germany became the first European team to win a World Cup staged in the Americas.\n- This result marked the first time that nations from the same continent won three consecutive tournaments (following Italy in 2006 and Spain in 2010).\n\nWe need to produce triplets with subject, relation, object, qualifiers, subject_type, object_type.\n\nWe need to use Wikidata-style relations. Some possible relations: \"winner\", \"defeated\", \"score\", \"point in time\", \"competition\", \"title count\", \"first\", \"record\", \"participated in\", \"hosted in\", etc.\n\nLet's identify entities:\n\n- 2014 FIFA World Cup (event)\n- Germany (national football team / country)\n- Argentina (national football team / country)\n- final (match) maybe separate entity \"2014 FIFA World Cup final\".\n- \"fourth world title\" maybe relation \"title count\" or \"number of world titles\". Could be \"title count\" with object \"4\". But object_type maybe \"quantity\". Use relation \"number of world titles\" maybe \"world cup titles count\". Not sure. Could use \"title count\" generic.\n\n- German reunification in 1990 (event). West Germany (entity). They also beat Argentina in the World Cup final (1990). So fact: West Germany defeated Argentina in 1990 World Cup final. But we need to capture that as separate? The text says \"when as West Germany they also beat Argentina in the World Cup final.\" So we can have triplet: West Germany defeated Argentina (point in time 1990) in World Cup final. Could be separate.\n\n- Germany became the first European team to win a World Cup staged in the Americas. So relation: \"first to achieve\" maybe \"first European team to win World Cup in the Americas\". Could be expressed as: Germany, relation \"first to win\", object \"World Cup staged in the Americas\". Or \"first European team to win World Cup\" with qualifier \"location: Americas\". We'll create: (Germany, \"first to win\", \"FIFA World Cup\") with qualifier {\"relation\":\"location\",\"object\":\"Americas\"} and maybe qualifier {\"relation\":\"continent\",\"object\":\"European\"}? But relation \"first to win\" maybe not standard. Could use \"record holder\" but okay.\n\n- \"first time that nations from the same continent won three consecutive tournaments\". So record: \"three consecutive World Cups won by nations from same continent\". The result (Germany's win) marked that first time. So we could have triplet: (Germany, \"part of record\", \"three consecutive World Cups won by nations from same continent\") with qualifiers maybe \"point in time 2014\". Or (World Cup, \"record\", \"three consecutive tournaments won by nations from same continent\") with qualifier \"first occurrence 2014\". Might be complex.\n\nSimplify: produce key factual triplets:\n\n1. (2014 FIFA World Cup, \"winner\", Germany) - qualifiers: point in time 2014? Actually winner of tournament is Germany. object_type \"country\". subject_type \"sports tournament\".\n\n2. (Germany, \"defeated\", Argentina) - qualifiers: {\"relation\":\"point in time\",\"object\":\"2014 FIFA World Cup final\"} maybe also \"score\" qualifier.\n\nBut we need separate triplet for score: (Germany, \"score\", \"1\")? Not typical. Could have relation \"score\" with object \"1-0\". Or \"match result\" with object \"1–0\". We'll create a triplet: (Germany, \"match result\", \"1–0\") with qualifier point in time \"2014 FIFA World Cup final\". But maybe better: (Germany, \"defeated\", Argentina) with qualifier {\"relation\":\"score\",\"object\":\"1–0\"} and qualifier {\"relation\":\"point in time\",\"object\":\"2014\"}.\n\n3. (Germany, \"world cup titles count\", \"4\") - qualifier maybe \"as of 2014\". object_type \"quantity\". subject_type \"country\".\n\n4. (Germany, \"first European team to win World Cup staged in the Americas\") maybe relation \"first to achieve\". We'll use relation \"first European team to win World Cup in the Americas\". Could be \"record holder\". Let's use relation \"record holder\", object \"first European team to win World Cup in the Americas\". But object_type \"record\". Might be okay.\n\n5. (Germany, \"part of record\", \"three consecutive World Cups won by nations from same continent\") with qualifier point in time 2014.\n\n6. (West Germany, \"defeated\", Argentina) with qualifier {\"relation\":\"point in time\",\"object\":\"1990 FIFA World Cup final\"}.\n\n7. (Germany, \"first World Cup title after German reunification\", \"true\") maybe not needed.\n\nWe need subject_type and object_type for each.\n\nDefine types:\n\n- 2014 FIFA World Cup: \"sports tournament\"\n- Germany: \"country\" or \"national football team\". Use \"country\".\n- Argentina: \"country\".\n- \"first European team to win World Cup in the Americas\": object_type \"record\".\n- \"fourth world title\": object_type \"quantity\".\n- \"three consecutive World Cups won by nations from same continent\": object_type \"record\".\n- West Germany: \"historical country\".\n- Score \"1–0\": object_type \"score\" maybe \"string\". Use \"string\".\n\nQualifiers types: \"point in time\" object_type \"date\" or \"year\". Use \"year\". \"score\" object_type \"string\". \"location\" object_type \"region\". \"continent\" object_type \"continent\". \"approximation\" not needed.\n\nNow produce JSON.\n\nList each triplet with qualifiers list.\n\nTriplet 1:\nsubject: \"2014 FIFA World Cup\"\nrelation: \"winner\"\nobject: \"Germany\"\nqualifiers: [] (maybe point in time 2014 but tournament already includes year)\nsubject_type: \"sports tournament\"\nobject_type: \"country\"\n\nTriplet 2:\nsubject: \"Germany\"\nrelation: \"defeated\"\nobject: \"Argentina\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2014 FIFA World Cup final\"},{\"relation\":\"score\",\"object\":\"1–0\"}]\nsubject_type: \"country\"\nobject_type: \"country\"\n\nTriplet 3:\nsubject: \"Germany\"\nrelation: \"world cup titles count\"\nobject: \"4\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2014\"}]\nsubject_type: \"country\"\nobject_type: \"quantity\"\n\nTriplet 4:\nsubject: \"Germany\"\nrelation: \"record holder\"\nobject: \"first European team to win World Cup staged in the Americas\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2014\"}]\nsubject_type: \"country\"\nobject_type: \"record\"\n\nTriplet 5:\nsubject: \"Germany\"\nrelation: \"part of record\"\nobject: \"first time nations from same continent won three consecutive World Cups\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2014\"}]\nsubject_type: \"country\"\nobject_type: \"record\"\n\nTriplet 6:\nsubject: \"West Germany\"\nrelation: \"defeated\"\nobject: \"Argentina\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1990 FIFA World Cup final\"}]\nsubject_type: \"historical country\"\nobject_type: \"country\"\n\nTriplet 7:\nsubject: \"German reunification\"\nrelation: \"date\"\nobject: \"1990\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"year\"\n\nBut maybe not needed. The text says \"first after the German reunification in 1990\". Could capture that Germany's 2014 title is first after reunification. Triplet: (Germany, \"first world title after\", \"German reunification\") with qualifier point in time 2014. Might be optional.\n\nWe'll include:\n\nTriplet 7:\nsubject: \"Germany\"\nrelation: \"first world title after\"\nobject: \"German reunification\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2014\"}]\nsubject_type: \"country\"\nobject_type: \"event\"\n\nNow produce JSON.\n\nCheck qualifiers format: each qualifier dict has \"relation\" and \"object\". Good.\n\nNow output JSON with key \"triplets\". Ensure proper commas.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1689,
+      "total_tokens": 4052,
+      "completion_tokens": 2363,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2014 FIFA World Cup\",\n            \"relation\": \"winner\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"defeated\",\n            \"object\": \"Argentina\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014 FIFA World Cup final\"\n                },\n                {\n                    \"relation\": \"score\",\n                    \"object\": \"1–0\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"world cup titles count\",\n            \"object\": \"4\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"record holder\",\n            \"object\": \"first European team to win World Cup staged in the Americas\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"record\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"part of record\",\n            \"object\": \"first time nations from same continent won three consecutive World Cups\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"record\"\n        },\n        {\n            \"subject\": \"West Germany\",\n            \"relation\": \"defeated\",\n            \"object\": \"Argentina\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1990 FIFA World Cup final\"\n                }\n            ],\n            \"subject_type\": \"historical country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"first world title after\",\n            \"object\": \"German reunification\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "2014 FIFA World Cup",
+        "relation": "winner",
+        "object": "Germany",
+        "qualifiers": [],
+        "subject_type": "sports tournament",
+        "object_type": "country"
+      },
+      {
+        "subject": "Germany",
+        "relation": "defeated",
+        "object": "Argentina",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2014 FIFA World Cup final"
+          },
+          {
+            "relation": "score",
+            "object": "1–0"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Germany",
+        "relation": "world cup titles count",
+        "object": "4",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2014"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Germany",
+        "relation": "record holder",
+        "object": "first European team to win World Cup staged in the Americas",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2014"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "record"
+      },
+      {
+        "subject": "Germany",
+        "relation": "part of record",
+        "object": "first time nations from same continent won three consecutive World Cups",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2014"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "record"
+      },
+      {
+        "subject": "West Germany",
+        "relation": "defeated",
+        "object": "Argentina",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1990 FIFA World Cup final"
+          }
+        ],
+        "subject_type": "historical country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Germany",
+        "relation": "first world title after",
+        "object": "German reunification",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2014"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "event"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1689,
+    "total_tokens": 4052,
+    "completion_tokens": 2363,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 793,
+    "output_tokens_est": 700
+  },
+  "attempts": 1,
+  "latency_s": 25.822900513994682,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:46:57.264716+00:00",
+  "cache_key": "1354426fcc4ce892b03b8ca0662d120f"
+}

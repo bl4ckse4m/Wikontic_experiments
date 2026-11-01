@@ -1,0 +1,187 @@
+{
+  "task": {
+    "input_id": "9b16c1cc4a34d6c8",
+    "input_hash": "5ff9fc2f206dff2428bdec94ac8e97ecf2bfe0762e23c0ddfd65f8d4257f9250",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-eb8f144403f114fc8125fe822c1f9b8b",
+    "object": "chat.completion",
+    "created": 1791505382,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Saint Ambrose\",\n            \"relation\": \"influenced\",\n            \"object\": \"anti-paganism policy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"applies to\",\n                    \"object\": \"Gratian\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"policy\"\n        },\n        {\n            \"subject\": \"Saint Ambrose\",\n            \"relation\": \"influenced\",\n            \"object\": \"anti-paganism policy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"applies to\",\n                    \"object\": \"Valentinian II\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"policy\"\n        },\n        {\n            \"subject\": \"Saint Ambrose\",\n            \"relation\": \"influenced\",\n            \"object\": \"anti-paganism policy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"applies to\",\n                    \"object\": \"Theodosius I\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"policy\"\n        },\n        {\n            \"subject\": \"Theodosius I\",\n            \"relation\": \"issued\",\n            \"object\": \"Theodosian decrees\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"391\"\n                },\n                {\n                    \"relation\": \"influenced by\",\n                    \"object\": \"Saint Ambrose\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"decree\"\n        },\n        {\n            \"subject\": \"Gratian\",\n            \"relation\": \"removed\",\n            \"object\": \"Altar of Victory\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"altar\"\n        },\n        {\n            \"subject\": \"Gratian\",\n            \"relation\": \"rejected request to restore\",\n            \"object\": \"Altar of Victory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"influenced by\",\n                    \"object\": \"Saint Ambrose\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"altar\"\n        },\n        {\n            \"subject\": \"Valentinian II\",\n            \"relation\": \"rejected request to restore\",\n            \"object\": \"Altar of Victory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"influenced by\",\n                    \"object\": \"Saint Ambrose\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"altar\"\n        },\n        {\n            \"subject\": \"Theodosius I\",\n            \"relation\": \"rejected request to restore\",\n            \"object\": \"Altar of Victory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"influenced by\",\n                    \"object\": \"Saint Ambrose\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"altar\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nFirst, identify entities: Saint Ambrose, anti-paganism policy, late Roman emperors, Gratian, Valentinian II, Theodosius I, Theodosian decrees, Altar of Victory.\n\nRelations:\n\n- \"Saint Ambrose influenced the anti-paganism policy of several late Roman emperors including Gratian, Valentinian II and Theodosius I.\" So triplet: (Saint Ambrose, influenced, anti-paganism policy of Gratian) but need separate for each emperor? The policy of each emperor. Could be (Saint Ambrose, influenced, anti-paganism policy) with qualifier \"of\", but better: (Saint Ambrose, influenced, anti-paganism policy) with qualifier \"applies to\", but we need explicit. Maybe create three triplets: (Saint Ambrose, influenced, anti-paganism policy of Gratian) but object should be a concept: \"anti-paganism policy of Gratian\". Could treat as object \"anti-paganism policy\" with qualifier \"applies to\" Gratian. However guidelines: qualifiers attached to triplet. So we can have (Saint Ambrose, influenced, anti-paganism policy) with qualifier {\"relation\":\"applies to\",\"object\":\"Gratian\"} etc. But we need subject_type, object_type.\n\nLet's define relation \"influenced\" (subject_type: human, object_type: policy). Policy type: \"policy\". Qualifier \"applies to\" maybe \"applies to\" not defined but we can use \"target\" or \"applies to\". Not sure allowed. Use \"applies to\". It's okay.\n\nWe'll produce three separate triplets for each emperor.\n\n- \"Under the influence of Saint Ambrose, Theodosius issued, in the year 391, the 'Theodosian decrees,' a declaration of war on paganism\". So triplet: (Theodosius I, issued, Theodosian decrees). Qualifiers: point in time 391, \"under influence of\" Saint Ambrose maybe as qualifier \"influenced by\". Also \"declaration of war on paganism\" maybe as description but not needed. So we add qualifier {\"relation\":\"influenced by\",\"object\":\"Saint Ambrose\"}.\n\n- Also \"Theodosian decrees\" is a declaration of war on paganism. Could have (Theodosian decrees, purpose, war on paganism) but not explicit.\n\n- \"the Altar of Victory was removed by Gratian.\" Triplet: (Gratian, removed, Altar of Victory). No date given.\n\n- \"Ambrose prevailed upon Gratian, Valentinian and Theodosius to reject requests to restore the Altar.\" So (Saint Ambrose, prevailed upon, Gratian) with qualifier \"to reject requests to restore the Altar\". Might be better: (Saint Ambrose, persuaded, Gratian) but relation \"prevailed upon\" maybe map to \"influenced\". Use \"influenced\". Also include Valentinian II and Theodosius I similarly.\n\nThus three triplets: (Saint Ambrose, influenced, Gratian) with qualifier \"to reject requests to restore the Altar\". But object is person, not action. Could be (Saint Ambrose, influenced, Gratian) with qualifier \"action\", but maybe better to create triplet (Saint Ambrose, influenced, Gratian) and separate triplet (Gratian, rejected request to restore, Altar of Victory). However text says \"to reject requests to restore the Altar\". So we can create (Gratian, rejected request to restore, Altar of Victory) with qualifier \"influenced by Saint Ambrose\". But guidelines: extract factual relationships. So we can produce (Gratian, rejected request to restore, Altar of Victory). Similarly for Valentinian II and Theodosius I.\n\nLet's decide:\n\nTriplets list:\n\n1. (Saint Ambrose, influenced, anti-paganism policy) qualifiers: applies to Gratian.\n2. (Saint Ambrose, influenced, anti-paganism policy) qualifiers: applies to Valentinian II.\n3. (Saint Ambrose, influenced, anti-paganism policy) qualifiers: applies to Theodosius I.\n\n4. (Theodosius I, issued, Theodosian decrees) qualifiers: point in time 391, influenced by Saint Ambrose.\n\n5. (Gratian, removed, Altar of Victory) qualifiers: none.\n\n6. (Gratian, rejected request to restore, Altar of Victory) qualifiers: influenced by Saint Ambrose.\n\n7. (Valentinian II, rejected request to restore, Altar of Victory) qualifiers: influenced by Saint Ambrose.\n\n8. (Theodosius I, rejected request to restore, Altar of Victory) qualifiers: influenced by Saint Ambrose.\n\nPotentially also \"Theodosian decrees\" is a declaration of war on paganism. Could add (Theodosian decrees, purpose, war on paganism) but not necessary.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- Saint Ambrose: human\n- anti-paganism policy: policy\n- Gratian: human (Roman emperor)\n- Valentinian II: human\n- Theodosius I: human\n- Theodosian decrees: decree (document)\n- Altar of Victory: structure (altar)\n- \"rejected request to restore\" maybe relation type \"action\". Object type \"altar\". Could set object_type \"altar\". For relation \"rejected request to restore\" maybe treat as \"rejected request to restore\" as relation, object_type \"altar\". Accept.\n\nNow qualifiers types: \"applies to\" object_type human; \"point in time\" date; \"influenced by\" human; \"influenced by\" human.\n\nNow produce JSON.\n\nCheck qualifiers format: list of dicts with relation and object.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1696,
+      "total_tokens": 3587,
+      "completion_tokens": 1891,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Saint Ambrose\",\n            \"relation\": \"influenced\",\n            \"object\": \"anti-paganism policy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"applies to\",\n                    \"object\": \"Gratian\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"policy\"\n        },\n        {\n            \"subject\": \"Saint Ambrose\",\n            \"relation\": \"influenced\",\n            \"object\": \"anti-paganism policy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"applies to\",\n                    \"object\": \"Valentinian II\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"policy\"\n        },\n        {\n            \"subject\": \"Saint Ambrose\",\n            \"relation\": \"influenced\",\n            \"object\": \"anti-paganism policy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"applies to\",\n                    \"object\": \"Theodosius I\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"policy\"\n        },\n        {\n            \"subject\": \"Theodosius I\",\n            \"relation\": \"issued\",\n            \"object\": \"Theodosian decrees\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"391\"\n                },\n                {\n                    \"relation\": \"influenced by\",\n                    \"object\": \"Saint Ambrose\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"decree\"\n        },\n        {\n            \"subject\": \"Gratian\",\n            \"relation\": \"removed\",\n            \"object\": \"Altar of Victory\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"altar\"\n        },\n        {\n            \"subject\": \"Gratian\",\n            \"relation\": \"rejected request to restore\",\n            \"object\": \"Altar of Victory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"influenced by\",\n                    \"object\": \"Saint Ambrose\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"altar\"\n        },\n        {\n            \"subject\": \"Valentinian II\",\n            \"relation\": \"rejected request to restore\",\n            \"object\": \"Altar of Victory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"influenced by\",\n                    \"object\": \"Saint Ambrose\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"altar\"\n        },\n        {\n            \"subject\": \"Theodosius I\",\n            \"relation\": \"rejected request to restore\",\n            \"object\": \"Altar of Victory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"influenced by\",\n                    \"object\": \"Saint Ambrose\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"altar\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Saint Ambrose",
+        "relation": "influenced",
+        "object": "anti-paganism policy",
+        "qualifiers": [
+          {
+            "relation": "applies to",
+            "object": "Gratian"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "policy"
+      },
+      {
+        "subject": "Saint Ambrose",
+        "relation": "influenced",
+        "object": "anti-paganism policy",
+        "qualifiers": [
+          {
+            "relation": "applies to",
+            "object": "Valentinian II"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "policy"
+      },
+      {
+        "subject": "Saint Ambrose",
+        "relation": "influenced",
+        "object": "anti-paganism policy",
+        "qualifiers": [
+          {
+            "relation": "applies to",
+            "object": "Theodosius I"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "policy"
+      },
+      {
+        "subject": "Theodosius I",
+        "relation": "issued",
+        "object": "Theodosian decrees",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "391"
+          },
+          {
+            "relation": "influenced by",
+            "object": "Saint Ambrose"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "decree"
+      },
+      {
+        "subject": "Gratian",
+        "relation": "removed",
+        "object": "Altar of Victory",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "altar"
+      },
+      {
+        "subject": "Gratian",
+        "relation": "rejected request to restore",
+        "object": "Altar of Victory",
+        "qualifiers": [
+          {
+            "relation": "influenced by",
+            "object": "Saint Ambrose"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "altar"
+      },
+      {
+        "subject": "Valentinian II",
+        "relation": "rejected request to restore",
+        "object": "Altar of Victory",
+        "qualifiers": [
+          {
+            "relation": "influenced by",
+            "object": "Saint Ambrose"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "altar"
+      },
+      {
+        "subject": "Theodosius I",
+        "relation": "rejected request to restore",
+        "object": "Altar of Victory",
+        "qualifiers": [
+          {
+            "relation": "influenced by",
+            "object": "Saint Ambrose"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "altar"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1696,
+    "total_tokens": 3587,
+    "completion_tokens": 1891,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 876,
+    "output_tokens_est": 783
+  },
+  "attempts": 1,
+  "latency_s": 22.521105564002937,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:23:24.829770+00:00",
+  "cache_key": "e3252cf0527a64b422f815be5fc21d52"
+}

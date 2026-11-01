@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "7247aa8cb29537df",
+    "input_hash": "cca56b89b1a830a6e9267629433c56e3c0b051a5300622d1b0a37e621de077d7",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-4e76a68cafe5a277c6fc37d13cac1b4e",
+    "object": "chat.completion",
+    "created": 1791504090,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"instance of\",\n            \"object\": \"public school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"school type\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"educational level\",\n            \"object\": \"K-12\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"education level\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"location\",\n            \"object\": \"Fort Resolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"country\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"student population\",\n            \"object\": \"125 students\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"approximate\"\n                }\n            ],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"administered by\",\n            \"object\": \"South Slave Divisional Education Council\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"education council\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Deninu School\n\nDeninu School is a K-12 public school located in Fort Resolution, Northwest Territories, Canada. The school currently represents the only public education option for youth in the hamlet and serves a student population of approximately 125 students. The administration of the school is the responsibility of the South Slave Divisional Education Council (SSDEC).\"\n\nWe need to identify entities: Deninu School, Fort Resolution, Northwest Territories, Canada, South Slave Divisional Education Council (SSDEC). Also maybe \"public school\", \"K-12\", \"student population\", \"approximately 125 students\". Need to produce triplets with appropriate relations.\n\nPossible relations:\n\n- \"instance of\" or \"type\": Deninu School is a public school (or K-12 public school). Use relation \"instance of\" or \"type\". In examples they used occupation, award, etc. For school, maybe \"type of institution\" but we need a Wikidata-style predicate. Could use \"instance of\" with object \"public school\". Or \"educational institution type\". Let's use \"instance of\" with object \"public school\". Also \"educational level\" maybe \"K-12\". Could have relation \"educational level\" with object \"K-12\". Or \"grade range\". We'll include.\n\n- location: Deninu School located in Fort Resolution, Northwest Territories, Canada. Could have relation \"location\" with object \"Fort Resolution\". Could also have qualifiers for \"located in administrative territorial entity\" etc. We'll just have location = Fort Resolution. Could also have \"country\" = Canada. But location is enough.\n\n- \"serves\" maybe \"provides education to\" youth in the hamlet. Could have relation \"educational offering\" but maybe \"provides education for\" with object \"youth\". But we need to keep factual. The sentence: \"The school currently represents the only public education option for youth in the hamlet\". So we can have relation \"only public education option for\" with object \"youth in the hamlet\". Might be too complex. Simpler: \"has education level\" etc. Might skip.\n\n- \"student population\" approx 125 students. Relation \"student population\" with object \"125\". Use qualifier \"approximation\" maybe because \"approximately\". So object is \"125 students\". object_type \"quantity\". Qualifier approximation \"approximate\". Actually the rule: for approximation, use qualifier {\"relation\":\"approximation\",\"object\":\"approximate\"}? The spec: qualifier object is ... for \"about\", \"nearly\", \"over\". So we can add qualifier approximation with object \"approximate\". We'll set.\n\n- \"administration\" responsibility of South Slave Divisional Education Council. Relation \"administered by\" or \"administrative body\". Use relation \"administered by\". Object \"South Slave Divisional Education Council\". Also include abbreviation SSDEC maybe as alias but not needed.\n\nNow need subject_type and object_type.\n\n- Deninu School: subject_type \"educational institution\".\n- public school: object_type \"school type\" maybe \"public school\". We'll set \"school type\".\n- K-12: object_type \"education level\".\n- Fort Resolution: object_type \"settlement\" or \"town\". We'll set \"town\".\n- Canada: object_type \"country\".\n- youth in the hamlet: maybe \"demographic group\". Might skip.\n- student population: object_type \"quantity\".\n- South Slave Divisional Education Council: object_type \"government agency\" or \"education council\". We'll set \"education council\".\n\nNow produce JSON list.\n\nTriplets:\n\n1. Deninu School - instance of - public school\n2. Deninu School - educational level - K-12\n3. Deninu School - location - Fort Resolution\n4. Deninu School - country - Canada (maybe optional)\n5. Deninu School - student population - 125 students (qualifier approximation)\n6. Deninu School - administered by - South Slave Divisional Education Council\n\nAlso maybe \"only public education option for youth in the hamlet\". Could be relation \"only public education option for\" but maybe not needed.\n\nWe'll include 6 triplets.\n\nNow format JSON.\n\nEach triplet dict includes qualifiers list.\n\nFor triplet 5, qualifiers: [{\"relation\":\"approximation\",\"object\":\"approximate\"}].\n\nFor others, qualifiers empty.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1656,
+      "total_tokens": 2927,
+      "completion_tokens": 1271,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"instance of\",\n            \"object\": \"public school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"school type\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"educational level\",\n            \"object\": \"K-12\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"education level\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"location\",\n            \"object\": \"Fort Resolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"country\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"student population\",\n            \"object\": \"125 students\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"approximate\"\n                }\n            ],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"administered by\",\n            \"object\": \"South Slave Divisional Education Council\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"education council\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Deninu School",
+        "relation": "instance of",
+        "object": "public school",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "school type"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "educational level",
+        "object": "K-12",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "education level"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "location",
+        "object": "Fort Resolution",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "town"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "country",
+        "object": "Canada",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "country"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "student population",
+        "object": "125 students",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "approximate"
+          }
+        ],
+        "subject_type": "educational institution",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "administered by",
+        "object": "South Slave Divisional Education Council",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "education council"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1656,
+    "total_tokens": 2927,
+    "completion_tokens": 1271,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 536,
+    "output_tokens_est": 444
+  },
+  "attempts": 1,
+  "latency_s": 15.907447293997393,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:01:46.393037+00:00",
+  "cache_key": "47fd0d7502bead36262ce032d98a2273"
+}

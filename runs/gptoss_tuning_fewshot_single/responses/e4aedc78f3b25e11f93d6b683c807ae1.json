@@ -1,0 +1,156 @@
+{
+  "task": {
+    "input_id": "611e5a3dcf6e51f4",
+    "input_hash": "3e05b7a74fe849065f82166df8e7b71ab0d2780603865b10f1943346e08b6123",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c88d74366969c08dcf09a26016fa59e7",
+    "object": "chat.completion",
+    "created": 1791517972,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"date of birth\",\n            \"object\": \"September 7, 1960\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"member of\",\n            \"object\": \"Ohio House of Representatives\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2009\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        },\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"representative of\",\n            \"object\": \"28th District\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2009\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political district\"\n        },\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Ohio State Treasurer\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Ohio Governor\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2018\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Connie Pillich\n\nConnie Pillich (born September 7, 1960) is a former Democratic member of the Ohio House of Representatives, representing the 28th District since 2009. She was the Democratic candidate for Ohio State Treasurer in 2014 and Ohio Governor in 2018.\"\n\nWe need to parse.\n\nEntities: Connie Pillich (human). Ohio House of Representatives (institution). 28th District (political district). Ohio State Treasurer (office). Ohio Governor (office). Democratic (political party). Also \"Democratic candidate\" relation.\n\nTriplets:\n\n1. Connie Pillich - date of birth - September 7, 1960. qualifier none. subject_type human, object_type date.\n\n2. Connie Pillich - occupation? \"former Democratic member of the Ohio House of Representatives\". Could be relation \"member of\" with object \"Ohio House of Representatives\". Also qualifier \"political party\" maybe \"Democratic\". Also qualifier \"point in time\" start 2009? Actually \"representing the 28th District since 2009\". So membership started 2009 and maybe still? It's \"former\" indicates no longer. But we have explicit \"since 2009\". So we can create triplet: subject Connie Pillich, relation \"member of\", object \"Ohio House of Representatives\". qualifiers: {\"relation\":\"political party\",\"object\":\"Democratic\"}? Actually \"Democratic member\" indicates party affiliation. Could also be separate relation \"member of political party\". But we can include qualifier \"political party\". Also qualifier \"point in time\" start 2009. Also qualifier \"status\" maybe \"former\". Could use qualifier \"polarity\"? Not needed. Use qualifier \"point in time\" maybe \"since 2009\". Could also add qualifier \"end time\" unknown. We'll just include start.\n\n3. Connie Pillich - representing - \"28th District\". relation maybe \"representative of\". Use \"representative of\". qualifiers: point in time \"since 2009\". Also maybe \"political party\" Democratic? Not needed.\n\n4. Connie Pillich - candidate for - \"Ohio State Treasurer\". qualifier point in time 2014. Also qualifier \"political party\" Democratic? The phrase \"Democratic candidate\". So qualifier \"political party\" Democratic.\n\n5. Connie Pillich - candidate for - \"Ohio Governor\". qualifier point in time 2018. qualifier political party Democratic.\n\nWe need subject_type and object_type.\n\n- Connie Pillich: human.\n- Ohio House of Representatives: legislative body (institution). object_type \"legislative body\".\n- 28th District: political district (object_type \"political district\").\n- Ohio State Treasurer: political office (object_type \"political office\").\n- Ohio Governor: political office (object_type \"political office\").\n\nNow format JSON.\n\nEach triplet includes qualifiers list of dicts.\n\nQualifier relations: \"point in time\", \"political party\". Use \"political party\" as relation.\n\nMake sure qualifiers are attached correctly.\n\nTriplet 2: member of. qualifiers: political party Democratic, point in time 2009 (maybe \"since 2009\"). Use object \"2009\". Also maybe \"status\" \"former\". Could use qualifier \"polarity\" negative? Not needed. We'll just include \"point in time\". The phrase \"former\" indicates not current; but we don't have explicit end date. Could add qualifier \"status\" but not defined. We'll skip.\n\nTriplet 3: \"representative of\". qualifiers: point in time 2009, political party Democratic? Not explicit but could be inferred from \"Democratic member\". Might be okay to include. But to avoid over inference, we may not add party qualifier for representing district. The text says \"former Democratic member ... representing the 28th District\". So the party affiliation applies to the membership, not necessarily the representation. We'll include only point in time.\n\nTriplet 4 and 5: candidate for. qualifiers: point in time 2014/2018, political party Democratic.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1654,
+      "total_tokens": 2958,
+      "completion_tokens": 1304,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"date of birth\",\n            \"object\": \"September 7, 1960\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"member of\",\n            \"object\": \"Ohio House of Representatives\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2009\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        },\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"representative of\",\n            \"object\": \"28th District\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2009\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political district\"\n        },\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Ohio State Treasurer\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Connie Pillich\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Ohio Governor\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2018\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Connie Pillich",
+        "relation": "date of birth",
+        "object": "September 7, 1960",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Connie Pillich",
+        "relation": "member of",
+        "object": "Ohio House of Representatives",
+        "qualifiers": [
+          {
+            "relation": "political party",
+            "object": "Democratic"
+          },
+          {
+            "relation": "point in time",
+            "object": "2009"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "legislative body"
+      },
+      {
+        "subject": "Connie Pillich",
+        "relation": "representative of",
+        "object": "28th District",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2009"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political district"
+      },
+      {
+        "subject": "Connie Pillich",
+        "relation": "candidate for",
+        "object": "Ohio State Treasurer",
+        "qualifiers": [
+          {
+            "relation": "political party",
+            "object": "Democratic"
+          },
+          {
+            "relation": "point in time",
+            "object": "2014"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political office"
+      },
+      {
+        "subject": "Connie Pillich",
+        "relation": "candidate for",
+        "object": "Ohio Governor",
+        "qualifiers": [
+          {
+            "relation": "political party",
+            "object": "Democratic"
+          },
+          {
+            "relation": "point in time",
+            "object": "2018"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political office"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1654,
+    "total_tokens": 2958,
+    "completion_tokens": 1304,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 655,
+    "output_tokens_est": 562
+  },
+  "attempts": 1,
+  "latency_s": 16.289130975012085,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:53:09.001171+00:00",
+  "cache_key": "e4aedc78f3b25e11f93d6b683c807ae1"
+}

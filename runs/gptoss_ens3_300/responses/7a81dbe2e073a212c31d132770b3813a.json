@@ -1,0 +1,163 @@
+{
+  "task": {
+    "input_id": "033c1e10046ff5b3",
+    "input_hash": "c5c41a4b7bc0db7f2a09c98f88098cab3923c2ee3ce1d8cbdb4e650e26b6dbb0",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c3a82b5b4480ce4164fca6126a5bba45",
+    "object": "chat.completion",
+    "created": 1791542887,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical work\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"performer\",\n            \"object\": \"Bon Jovi\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical group\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"part of album\",\n            \"object\": \"Have a Nice Day\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2005\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"single release order\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"follows single\",\n            \"object\": \"Have a Nice Day\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"follows single\",\n            \"object\": \"Who Says You Can't Go Home\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"single release order\",\n            \"object\": \"2\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"worldwide\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Bon Jovi\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical group\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Welcome to Wherever You Are (song)\n\n\"Welcome to Wherever You Are\" is a song by American rock band Bon Jovi from their 2005 album, \"Have a Nice Day\". It was released as the album's third single in the US, following \"Have a Nice Day\" and \"Who Says You Can't Go Home\", while worldwide it was released as the album's second single.\"\n\nWe need to extract facts:\n\n- \"Welcome to Wherever You Are\" is a song. So (Welcome to Wherever You Are, instance of, song) maybe relation \"genre\"? but likely \"type\" or \"instance of\". Use \"instance of\" relation? In example they used \"occupation\". For song, could use \"instance of\" or \"type\". Let's use \"instance of\" with object \"song\". subject_type: \"song\". object_type: \"musical work\". But need consistent.\n\n- It is by American rock band Bon Jovi. So (Welcome to Wherever You Are, performer, Bon Jovi) relation maybe \"performer\". Use \"performer\". subject_type song, object_type musical group.\n\n- It is from their 2005 album \"Have a Nice Day\". So (Welcome to Wherever You Are, part of album, Have a Nice Day) relation \"album\". Could be \"recorded in album\". Use \"recorded in album\". We'll use relation \"recorded in album\". object_type \"album\". Also qualifier: point in time? The album is 2005. Could attach qualifier \"point in time\" 2005 to the album fact? But date of album is 2005. The text says \"from their 2005 album\". So add qualifier point in time 2005.\n\n- It was released as the album's third single in the US. So (Welcome to Wherever You Are, single release order in US, 3) maybe relation \"ranking\" but better \"single rank\". Could use \"single release order\". Let's use relation \"single release order\". object \"3\". qualifier \"location\" US. Or we could create separate triplet: (Welcome to Wherever You Are, release format, single) with qualifier \"point in time\" maybe not. Let's capture: (Welcome to Wherever You Are, release type, single) and qualifiers: {\"relation\":\"order\",\"object\":\"3\"} and {\"relation\":\"country\",\"object\":\"United States\"}.\n\nNeed to decide typical relations: Could be \"position in series\" etc. We'll approximate.\n\n- It was released following \"Have a Nice Day\" and \"Who Says You Can't Go Home\". That's a sequential relation: maybe \"follows single\". So (Welcome to Wherever You Are, follows single, Have a Nice Day) and another (Welcome to Wherever You Are, follows single, Who Says You Can't Go Home). Or \"preceded by\". Use \"follows\". subject_type song, object_type song.\n\n- While worldwide it was released as the album's second single. So (Welcome to Wherever You Are, single release order worldwide, 2). Could have qualifier location \"worldwide\". Or separate: (Welcome to Wherever You Are, release order worldwide, 2). Use relation \"single release order\". qualifier \"scope\" \"worldwide\". Also maybe \"country\" \"worldwide\". We'll put qualifier location \"worldwide\".\n\nWe need subject_type and object_type for each.\n\nDefine types: \"Welcome to Wherever You Are\" is a song -> subject_type \"song\". For objects like Bon Jovi: \"musical group\". Album: \"album\". For numbers: we can use type \"quantity\". For songs as objects: \"song\". For location US: \"country\". For \"worldwide\": maybe \"region\". But we can set object_type \"region\".\n\nNow qualifiers need list of dicts with relation and object.\n\nLet's construct list.\n\nTriplet 1:\nsubject: Welcome to Wherever You Are\nrelation: instance of\nobject: song\nqualifiers: []\nsubject_type: song\nobject_type: musical work (or \"song\"? but object_type maybe \"class\". Use \"song\". But they may want distinct. Use \"musical composition\". We'll use \"song\".\n\nTriplet 2:\nsubject: Welcome to Wherever You Are\nrelation: performer\nobject: Bon Jovi\nqualifiers: []\nsubject_type: song\nobject_type: musical group\n\nTriplet 3:\nsubject: Welcome to Wherever You Are\nrelation: part of album\nobject: Have a Nice Day\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2005\"}]\nsubject_type: song\nobject_type: album\n\nTriplet 4:\nsubject: Welcome to Wherever You Are\nrelation: single release order\nobject: \"3\"\nqualifiers: [{\"relation\":\"country\",\"object\":\"United States\"}]\nsubject_type: song\nobject_type: quantity (or \"ordinal number\"). Use \"quantity\".\n\nTriplet 5:\nsubject: Welcome to Wherever You Are\nrelation: follows single\nobject: Have a Nice Day\nqualifiers: []\nsubject_type: song\nobject_type: song\n\nTriplet 6:\nsubject: Welcome to Wherever You Are\nrelation: follows single\nobject: Who Says You Can't Go Home\nqualifiers: []\nsubject_type: song\nobject_type: song\n\nTriplet 7:\nsubject: Welcome to Wherever You Are\nrelation: single release order\nobject: \"2\"\nqualifiers: [{\"relation\":\"region\",\"object\":\"worldwide\"}]\nsubject_type: song\nobject_type: quantity\n\nCheck if any other facts: \"song by American rock band Bon Jovi\". Could also add relation \"country of origin\" for Bon Jovi: (Bon Jovi, country of origin, United States). But not explicit. It says \"American rock band\". So we could add (Bon Jovi, country of origin, United States) with qualifier \"type\" \"rock band\". But that's a fact about Bon Jovi, not about song. The instruction: extract factual relationships; we can include it. It's explicit: \"American rock band Bon Jovi\". So we can have relation \"country of origin\". We'll include.\n\nTriplet 8:\nsubject: Bon Jovi\nrelation: country of origin\nobject: United States\nqualifiers: [{\"relation\":\"genre\",\"object\":\"rock\"}] maybe not needed. Keep simple.\n\nBut ensure object_type \"country\". subject_type \"musical group\". Also maybe relation \"genre\" rock, but not required.\n\nAlso \"song is from their 2005 album\". Already captured.\n\nNow produce JSON.\n\nNeed to ensure each object string no extra quotes. For numbers, maybe keep as string.\n\nLet's produce output."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1665,
+      "total_tokens": 3560,
+      "completion_tokens": 1895,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical work\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"performer\",\n            \"object\": \"Bon Jovi\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical group\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"part of album\",\n            \"object\": \"Have a Nice Day\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2005\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"single release order\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"follows single\",\n            \"object\": \"Have a Nice Day\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"follows single\",\n            \"object\": \"Who Says You Can't Go Home\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Welcome to Wherever You Are\",\n            \"relation\": \"single release order\",\n            \"object\": \"2\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"worldwide\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Bon Jovi\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical group\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Welcome to Wherever You Are",
+        "relation": "instance of",
+        "object": "song",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "musical work"
+      },
+      {
+        "subject": "Welcome to Wherever You Are",
+        "relation": "performer",
+        "object": "Bon Jovi",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "musical group"
+      },
+      {
+        "subject": "Welcome to Wherever You Are",
+        "relation": "part of album",
+        "object": "Have a Nice Day",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2005"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "album"
+      },
+      {
+        "subject": "Welcome to Wherever You Are",
+        "relation": "single release order",
+        "object": "3",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Welcome to Wherever You Are",
+        "relation": "follows single",
+        "object": "Have a Nice Day",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "song"
+      },
+      {
+        "subject": "Welcome to Wherever You Are",
+        "relation": "follows single",
+        "object": "Who Says You Can't Go Home",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "song"
+      },
+      {
+        "subject": "Welcome to Wherever You Are",
+        "relation": "single release order",
+        "object": "2",
+        "qualifiers": [
+          {
+            "relation": "region",
+            "object": "worldwide"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Bon Jovi",
+        "relation": "country of origin",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "musical group",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1665,
+    "total_tokens": 3560,
+    "completion_tokens": 1895,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 713,
+    "output_tokens_est": 621
+  },
+  "attempts": 1,
+  "latency_s": 22.693412388005527,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T10:48:30.618241+00:00",
+  "cache_key": "7a81dbe2e073a212c31d132770b3813a"
+}

@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "8bc3b6ba299f1ea2",
+    "input_hash": "e70965d35598f8d41ee6aaeeae8c2acadd0281ce1923dc8ea30dd60c16ddd33d",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-f0de26db3f34a367afae1604c8a92f67",
+    "object": "chat.completion",
+    "created": 1791519384,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"located in\",\n            \"object\": \"Lubbock, Texas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"located on campus of\",\n            \"object\": \"Texas Tech University\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"university\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"home venue for\",\n            \"object\": \"Red Raider track and field\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"former home venue for\",\n            \"object\": \"women's soccer team\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"former\"\n                }\n            ],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"women's soccer team\",\n            \"relation\": \"moved to\",\n            \"object\": \"John Walker Soccer Complex\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"stadium\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"capacity\",\n            \"object\": \"3500\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"seats\"\n                }\n            ],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"also known as\",\n            \"object\": \"Linda and Terry Fuller Track\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"track\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Linda and Terry Fuller Track\n\nTerry and Linda Fuller Track & Field Complex is a multi-use stadium in Lubbock, Texas on the campus of Texas Tech University where it serves as home to Red Raider track and field. Formerly, it was also the home of the women's soccer team before they moved to the John Walker Soccer Complex. The stadium seats 3,500.\"\n\nFirst line \"Linda and Terry Fuller Track\" maybe title, but could be a name of something? Probably the name of the track. Might be considered a name of a facility. But we have \"Terry and Linda Fuller Track & Field Complex\" as the full name. So we can have entity \"Terry and Linda Fuller Track & Field Complex\". Relation: instance of stadium? \"type\" maybe \"stadium\". Use relation \"instance of\" or \"type\". But guidelines: use specific relations like \"instance of\" maybe not given but we can use \"type of\". However examples used \"occupation\", \"award received\". For facilities, maybe \"instance of\" is okay. But we need to keep to short unambiguous relation names. Could use \"subclass of\"? Might be okay.\n\nLet's extract facts:\n\n1. Subject: Terry and Linda Fuller Track & Field Complex; relation: location; object: Lubbock, Texas. Qualifiers: maybe \"place\". Use relation \"located in\". So:\n\n{\"subject\":\"Terry and Linda Fuller Track & Field Complex\",\"relation\":\"located in\",\"object\":\"Lubbock, Texas\",\"qualifiers\":[],\"subject_type\":\"stadium\",\"object_type\":\"city\"}\n\n2. Also \"on the campus of Texas Tech University\". So same subject, relation \"located on campus of\", object \"Texas Tech University\". Could be separate relation \"located in\" with qualifier \"place\" maybe but we can add separate triplet.\n\n3. It serves as home to Red Raider track and field. So relation \"home venue for\", object \"Red Raider track and field\". Subject_type stadium, object_type sports team (or sport). Use \"home venue for\". No qualifiers.\n\n4. Formerly, it was also the home of the women's soccer team before they moved to the John Walker Soccer Complex. So we have past home: relation \"former home venue for\", object \"women's soccer team\". Also we could add qualifier \"point in time\" maybe not given. The phrase \"Formerly\" indicates past. Could add qualifier \"polarity\"? Not. Use qualifier \"temporal qualifier\" maybe \"point in time\" with value \"former\". But guidelines: qualifiers include \"point in time\". Could set \"point in time\" \"former\". But maybe better to use qualifier \"temporal qualifier\" not defined. Could just include a qualifier \"point in time\" with object \"former\". Might be okay.\n\nAlso we have that women's soccer team moved to John Walker Soccer Complex. So we can have triplet: subject \"women's soccer team\", relation \"moved to\", object \"John Walker Soccer Complex\". No date.\n\n5. The stadium seats 3,500. So relation \"capacity\", object \"3500\". Qualifier \"unit\" \"seats\"? Actually capacity is number of seats. Use relation \"capacity\". object \"3500\". qualifier unit \"seats\". Could also treat object as number and qualifier unit.\n\nThus triplet: subject stadium, relation \"capacity\", object \"3500\", qualifiers [{\"relation\":\"unit\",\"object\":\"seats\"}].\n\n6. The first line \"Linda and Terry Fuller Track\" maybe an alternative name. Could add alias: relation \"also known as\". Subject same stadium, object \"Linda and Terry Fuller Track\". Qualifier maybe \"type\" \"track\". But maybe not needed.\n\nBut we can include: {\"subject\":\"Terry and Linda Fuller Track & Field Complex\",\"relation\":\"also known as\",\"object\":\"Linda and Terry Fuller Track\",\"qualifiers\":[],\"subject_type\":\"stadium\",\"object_type\":\"track\"}.\n\nNow need subject_type and object_type. Provide plausible types: stadium, city, university, sports team, sports team (women's soccer team), sports team (Red Raider track and field). For John Walker Soccer Complex: type stadium.\n\nNow produce JSON.\n\nCheck pronoun resolution: \"they moved\" refers to women's soccer team. So we captured.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1667,
+      "total_tokens": 3046,
+      "completion_tokens": 1379,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"located in\",\n            \"object\": \"Lubbock, Texas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"located on campus of\",\n            \"object\": \"Texas Tech University\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"university\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"home venue for\",\n            \"object\": \"Red Raider track and field\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"former home venue for\",\n            \"object\": \"women's soccer team\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"former\"\n                }\n            ],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"women's soccer team\",\n            \"relation\": \"moved to\",\n            \"object\": \"John Walker Soccer Complex\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"stadium\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"capacity\",\n            \"object\": \"3500\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"seats\"\n                }\n            ],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Terry and Linda Fuller Track & Field Complex\",\n            \"relation\": \"also known as\",\n            \"object\": \"Linda and Terry Fuller Track\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"track\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Terry and Linda Fuller Track & Field Complex",
+        "relation": "located in",
+        "object": "Lubbock, Texas",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "city"
+      },
+      {
+        "subject": "Terry and Linda Fuller Track & Field Complex",
+        "relation": "located on campus of",
+        "object": "Texas Tech University",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "university"
+      },
+      {
+        "subject": "Terry and Linda Fuller Track & Field Complex",
+        "relation": "home venue for",
+        "object": "Red Raider track and field",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "sports team"
+      },
+      {
+        "subject": "Terry and Linda Fuller Track & Field Complex",
+        "relation": "former home venue for",
+        "object": "women's soccer team",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "former"
+          }
+        ],
+        "subject_type": "stadium",
+        "object_type": "sports team"
+      },
+      {
+        "subject": "women's soccer team",
+        "relation": "moved to",
+        "object": "John Walker Soccer Complex",
+        "qualifiers": [],
+        "subject_type": "sports team",
+        "object_type": "stadium"
+      },
+      {
+        "subject": "Terry and Linda Fuller Track & Field Complex",
+        "relation": "capacity",
+        "object": "3500",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "seats"
+          }
+        ],
+        "subject_type": "stadium",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Terry and Linda Fuller Track & Field Complex",
+        "relation": "also known as",
+        "object": "Linda and Terry Fuller Track",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "track"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1667,
+    "total_tokens": 3046,
+    "completion_tokens": 1379,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 660,
+    "output_tokens_est": 568
+  },
+  "attempts": 1,
+  "latency_s": 17.392661735008005,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:16:42.294327+00:00",
+  "cache_key": "5b4ddc0cbec6166c2fabfea16be378a4"
+}

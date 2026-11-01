@@ -1,0 +1,145 @@
+{
+  "task": {
+    "input_id": "aad28cf9faec5da0",
+    "input_hash": "a940d24583dcbf783a9fd6f8e3a2329a0f3d4b5cb492ed66ae3999e3900627a6",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-1ee799239c62836abd7a2bbd1268d082",
+    "object": "chat.completion",
+    "created": 1791505896,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"alias\",\n            \"object\": \"Chrysler Shower of Stars\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"genre\",\n            \"object\": \"variety television series\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"broadcast by\",\n            \"object\": \"CBS\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1954\"\n                },\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"1958\"\n                },\n                {\n                    \"relation\": \"broadcast location\",\n                    \"object\": \"United States\"\n                },\n                {\n                    \"relation\": \"broadcast format\",\n                    \"object\": \"live\"\n                },\n                {\n                    \"relation\": \"color broadcast\",\n                    \"object\": \"true\"\n                }\n            ],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"broadcast in color\",\n            \"object\": \"true\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"boolean\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Shower of Stars\n\nShower of Stars (also known as Chrysler Shower of Stars) is an American variety television series broadcast live in the United States from 1954 to 1958 by CBS. The series was broadcast in color which was a departure from the usual programming broadcast by CBS.\"\n\nWe need to capture facts:\n\n- Shower of Stars also known as Chrysler Shower of Stars (alias). Relation: \"also known as\" maybe \"alias\" or \"alternative name\". Use relation \"alias\" or \"also known as\". Probably \"alias\". object: \"Chrysler Shower of Stars\". subject_type: \"television series\". object_type: \"television series\" maybe \"title\". We'll decide.\n\n- Shower of Stars is an American variety television series. So relation: \"instance of\" maybe \"genre\". Could be \"genre\" = \"variety television series\". Also \"country of origin\" = \"United States\". \"language\"? Not given. So we can have:\n\nsubject: \"Shower of Stars\", relation: \"country of origin\", object: \"United States\". subject_type: \"television series\". object_type: \"country\".\n\n- Also \"genre\" = \"variety television series\". Could be \"genre\" relation. object_type: \"genre\". We'll include.\n\n- Broadcast live in the United States from 1954 to 1958 by CBS. So we have an event: \"broadcast\". Could be relation \"broadcast by\" = CBS. Also \"broadcast in\" = United States (location). Also \"broadcast start date\" = 1954, \"broadcast end date\" = 1958. Could be qualifiers on \"broadcast by\". Or separate triplets: \"Shower of Stars\", \"broadcast by\", \"CBS\" with qualifiers point in time start and end? Usually we can have qualifiers: \"start time\" and \"end time\". Use \"point in time\" maybe for each? Might need two qualifiers: \"start time\": 1954, \"end time\": 1958. Also \"broadcast in\" = United States (location). Also \"broadcast format\" = \"live\". Could be relation \"broadcast format\". Also \"broadcast in color\". So relation \"broadcast in color\" maybe \"color broadcast\". Could be \"color broadcast\" = true. Use qualifier \"polarity\" negative? No, it's positive.\n\nBetter to create separate triplets:\n\n1) (Shower of Stars, broadcast by, CBS) qualifiers: start time 1954, end time 1958, location United States, format live, color true.\n\nBut qualifiers need relation and object. So we can have multiple qualifiers.\n\nDefine qualifiers:\n- {\"relation\": \"start time\", \"object\": \"1954\"}\n- {\"relation\": \"end time\", \"object\": \"1958\"}\n- {\"relation\": \"broadcast location\", \"object\": \"United States\"}\n- {\"relation\": \"broadcast format\", \"object\": \"live\"}\n- {\"relation\": \"color broadcast\", \"object\": \"true\"} maybe object_type boolean.\n\nAlternatively separate triplets for each attribute.\n\nThe instruction: \"Events: an event with participants, time, place and result is one core triplet plus qualifiers\". So we can treat broadcast as event.\n\nThus core triplet: subject \"Shower of Stars\", relation \"broadcast\", object \"CBS\". But \"broadcast\" relation expects object maybe \"CBS\" as broadcaster. We'll use \"broadcast by\". Let's use \"broadcast by\". Then qualifiers as above.\n\nAlso \"The series was broadcast in color which was a departure from the usual programming broadcast by CBS.\" So we have fact: \"Shower of Stars\" broadcast in color. Could be captured as qualifier already. Also \"departure from usual programming broadcast by CBS\" is a statement about being different. Could be relation \"deviation from usual programming\". Might be too complex; we can capture as \"broadcast in color\" as a separate triplet: (Shower of Stars, broadcast in color, true). But we already have that as qualifier. Might be okay.\n\nAlso \"also known as Chrysler Shower of Stars\". Provide alias.\n\nNow need subject_type and object_type.\n\nDefine types:\n- \"Shower of Stars\": television series (or \"television series\").\n- \"Chrysler Shower of Stars\": television series (title). Could be \"television series\" or \"title\". We'll set \"television series\".\n- \"United States\": country.\n- \"CBS\": television network (organization).\n- \"variety television series\": genre (maybe \"genre\").\n- \"live\": broadcast format (maybe \"broadcast format\" type \"format\").\n- \"true\": boolean.\n\nNow produce JSON.\n\nList of triplets:\n\n1) alias:\nsubject: \"Shower of Stars\"\nrelation: \"alias\"\nobject: \"Chrysler Shower of Stars\"\nqualifiers: []\nsubject_type: \"television series\"\nobject_type: \"television series\"\n\n2) instance of genre:\nsubject: \"Shower of Stars\"\nrelation: \"genre\"\nobject: \"variety television series\"\nqualifiers: []\nsubject_type: \"television series\"\nobject_type: \"genre\"\n\n3) country of origin:\nsubject: \"Shower of Stars\"\nrelation: \"country of origin\"\nobject: \"United States\"\nqualifiers: []\nsubject_type: \"television series\"\nobject_type: \"country\"\n\n4) broadcast by with qualifiers:\nsubject: \"Shower of Stars\"\nrelation: \"broadcast by\"\nobject: \"CBS\"\nqualifiers: [\n {\"relation\": \"start time\", \"object\": \"1954\"},\n {\"relation\": \"end time\", \"object\": \"1958\"},\n {\"relation\": \"broadcast location\", \"object\": \"United States\"},\n {\"relation\": \"broadcast format\", \"object\": \"live\"},\n {\"relation\": \"color broadcast\", \"object\": \"true\"}\n]\nsubject_type: \"television series\"\nobject_type: \"organization\"\n\n5) maybe separate triplet for color broadcast? Already captured. Could also have \"broadcast in color\" relation. But we have qualifier.\n\nPotential also \"broadcast in color\" as separate: (Shower of Stars, broadcast in color, true). But redundancy.\n\nWe'll include separate to be safe.\n\n5) broadcast in color:\nsubject: \"Shower of Stars\"\nrelation: \"broadcast in color\"\nobject: \"true\"\nqualifiers: []\nsubject_type: \"television series\"\nobject_type: \"boolean\"\n\nBut maybe not needed. We'll include.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1644,
+      "total_tokens": 3374,
+      "completion_tokens": 1730,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"alias\",\n            \"object\": \"Chrysler Shower of Stars\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"genre\",\n            \"object\": \"variety television series\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"broadcast by\",\n            \"object\": \"CBS\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1954\"\n                },\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"1958\"\n                },\n                {\n                    \"relation\": \"broadcast location\",\n                    \"object\": \"United States\"\n                },\n                {\n                    \"relation\": \"broadcast format\",\n                    \"object\": \"live\"\n                },\n                {\n                    \"relation\": \"color broadcast\",\n                    \"object\": \"true\"\n                }\n            ],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Shower of Stars\",\n            \"relation\": \"broadcast in color\",\n            \"object\": \"true\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"boolean\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Shower of Stars",
+        "relation": "alias",
+        "object": "Chrysler Shower of Stars",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "television series"
+      },
+      {
+        "subject": "Shower of Stars",
+        "relation": "genre",
+        "object": "variety television series",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "genre"
+      },
+      {
+        "subject": "Shower of Stars",
+        "relation": "country of origin",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "country"
+      },
+      {
+        "subject": "Shower of Stars",
+        "relation": "broadcast by",
+        "object": "CBS",
+        "qualifiers": [
+          {
+            "relation": "start time",
+            "object": "1954"
+          },
+          {
+            "relation": "end time",
+            "object": "1958"
+          },
+          {
+            "relation": "broadcast location",
+            "object": "United States"
+          },
+          {
+            "relation": "broadcast format",
+            "object": "live"
+          },
+          {
+            "relation": "color broadcast",
+            "object": "true"
+          }
+        ],
+        "subject_type": "television series",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Shower of Stars",
+        "relation": "broadcast in color",
+        "object": "true",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "boolean"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1644,
+    "total_tokens": 3374,
+    "completion_tokens": 1730,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 584,
+    "output_tokens_est": 492
+  },
+  "attempts": 1,
+  "latency_s": 21.38852813700214,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:31:58.139450+00:00",
+  "cache_key": "9e12fa7d775a006dc3a00bf0450f4c55"
+}

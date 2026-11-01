@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "22edb1b29209b789",
+    "input_hash": "51794cd34e6e57405952630a6eb078ade4226fdfa49325b4aa0515f1c94accc9",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d9f2fad0e7ddedda539a8723af29a17b",
+    "object": "chat.completion",
+    "created": 1791549386,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"instance of\",\n            \"object\": \"historic octagonal house\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building type\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"street address\",\n            \"object\": \"66425 Eight Mile Road\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"address\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"located in\",\n            \"object\": \"Northfield Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Northfield Township\",\n            \"relation\": \"located in\",\n            \"object\": \"Washtenaw County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Washtenaw County\",\n            \"relation\": \"located in\",\n            \"object\": \"Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"member of\",\n            \"object\": \"extant octagonal houses in Washtenaw County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"set\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"condition\",\n            \"object\": \"excellent and near original\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"condition\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"heritage designation\",\n            \"object\": \"National Register of Historic Places\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2003\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"heritage register\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text. Identify entities: \"Nathan B. Devereaux Octagon House\". Also \"Eight Mile Road\", \"Northfield Township\", \"Washtenaw County\", \"Michigan\". Also \"National Register of Historic Places\". Facts:\n\n- Nathan B. Devereaux Octagon House is a historic octagonal house.\n- located at 66425 Eight Mile Road in Northfield Township, Washtenaw County, Michigan.\n- It is one of only three extant octagonal houses in Washtenaw County.\n- It remains in excellent and near original condition. (maybe relation \"condition\" with object \"excellent and near original\". Could use \"condition\" relation)\n- It was placed on the National Register of Historic Places in 2003.\n\nWe need proper relations: \"instance of\" maybe? But use specific relations like \"type of building\" maybe \"building type\". Use \"architectural style\"? Not given. Use \"location\" relation: location of the house = address; maybe separate relations: \"street address\", \"located in\". We'll create:\n\n1. (Nathan B. Devereaux Octagon House, instance of, historic octagonal house) subject_type: building, object_type: building type? Could be \"historic octagonal house\". Use object_type \"building type\".\n\n2. (Nathan B. Devereaux Octagon House, street address, \"66425 Eight Mile Road\") object_type address.\n\n3. (Nathan B. Devereaux Octagon House, located in, Northfield Township) object_type: administrative territorial entity.\n\nOptionally also located in Washtenaw County, Michigan. Could add qualifiers: point in time? Not needed. Maybe separate relations: \"located in county\" etc.\n\nBetter: Use hierarchical location: \"located in\" with object \"Northfield Township\". Then a qualifier \"located in\" with object \"Washtenaw County\"? No, qualifiers attach to a triplet. Could add separate triplets.\n\n4. (Northfield Township, located in, Washtenaw County) but that's not about the house. Not required.\n\n5. (Nathan B. Devereaux Octagon House, number of extant octagonal houses in Washtenaw County, \"three\") Not typical relation. Could use \"count of similar structures in region\". Might be \"quantity\" relation: \"number of extant octagonal houses in Washtenaw County\" = 3. But it's about \"It is one of only three extant octagonal houses in Washtenaw County\". So relation: \"part of set\" maybe \"member of\". Could do (Nathan B. Devereaux Octagon House, member of, set of extant octagonal houses in Washtenaw County). But we need object entity. Let's phrase: object \"extant octagonal houses in Washtenaw County\". Might be okay.\n\n6. (Nathan B. Devereaux Octagon House, condition, \"excellent and near original\") object_type \"condition\".\n\n7. (Nathan B. Devereaux Octagon House, heritage designation, \"National Register of Historic Places\") with qualifier point in time 2003.\n\nNow decide subject_type: building (or \"structure\"). object_type: building type, address, administrative region, etc.\n\nLet's produce JSON.\n\nNeed qualifiers list for each. For house placed on NRHP, qualifier: point in time \"2003\". Use relation \"point in time\". For condition maybe no qualifier.\n\nNow produce."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1673,
+      "total_tokens": 2908,
+      "completion_tokens": 1235,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"instance of\",\n            \"object\": \"historic octagonal house\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building type\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"street address\",\n            \"object\": \"66425 Eight Mile Road\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"address\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"located in\",\n            \"object\": \"Northfield Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Northfield Township\",\n            \"relation\": \"located in\",\n            \"object\": \"Washtenaw County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Washtenaw County\",\n            \"relation\": \"located in\",\n            \"object\": \"Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"member of\",\n            \"object\": \"extant octagonal houses in Washtenaw County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"set\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"condition\",\n            \"object\": \"excellent and near original\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"condition\"\n        },\n        {\n            \"subject\": \"Nathan B. Devereaux Octagon House\",\n            \"relation\": \"heritage designation\",\n            \"object\": \"National Register of Historic Places\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2003\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"heritage register\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Nathan B. Devereaux Octagon House",
+        "relation": "instance of",
+        "object": "historic octagonal house",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "building type"
+      },
+      {
+        "subject": "Nathan B. Devereaux Octagon House",
+        "relation": "street address",
+        "object": "66425 Eight Mile Road",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "address"
+      },
+      {
+        "subject": "Nathan B. Devereaux Octagon House",
+        "relation": "located in",
+        "object": "Northfield Township",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Northfield Township",
+        "relation": "located in",
+        "object": "Washtenaw County",
+        "qualifiers": [],
+        "subject_type": "administrative territorial entity",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Washtenaw County",
+        "relation": "located in",
+        "object": "Michigan",
+        "qualifiers": [],
+        "subject_type": "administrative territorial entity",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Nathan B. Devereaux Octagon House",
+        "relation": "member of",
+        "object": "extant octagonal houses in Washtenaw County",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "set"
+      },
+      {
+        "subject": "Nathan B. Devereaux Octagon House",
+        "relation": "condition",
+        "object": "excellent and near original",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "condition"
+      },
+      {
+        "subject": "Nathan B. Devereaux Octagon House",
+        "relation": "heritage designation",
+        "object": "National Register of Historic Places",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2003"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "heritage register"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1673,
+    "total_tokens": 2908,
+    "completion_tokens": 1235,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 716,
+    "output_tokens_est": 623
+  },
+  "attempts": 1,
+  "latency_s": 15.386760560009861,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:36:41.808567+00:00",
+  "cache_key": "c275bd3b19ab7ad091e333b38b421143"
+}

@@ -1,0 +1,164 @@
+{
+  "task": {
+    "input_id": "1c3fec3e28a545ff",
+    "input_hash": "e4a7166b0575004f2619f5ce1fb10c6aa2da39972392f9930230394832695746",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a1ee35c2720a549384d3af08df0c0418",
+    "object": "chat.completion",
+    "created": 1791548805,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"Jackson County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Jackson County\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"Oregon\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Oregon\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"south of\",\n            \"object\": \"Ruch\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"located along\",\n            \"object\": \"Upper Applegate Road\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Upper Applegate Road\",\n            \"relation\": \"located off\",\n            \"object\": \"Oregon Route 238\",\n            \"qualifiers\": [],\n            \"subject_type\": \"road\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Applegate River\",\n            \"relation\": \"passes by\",\n            \"object\": \"McKee Bridge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"located in\",\n            \"object\": \"Rogue River – Siskiyou National Forest\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"national forest\"\n        },\n        {\n            \"subject\": \"Applegate River\",\n            \"relation\": \"located in\",\n            \"object\": \"Rogue River – Siskiyou National Forest\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"national forest\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText about \"McKee Bridge, Oregon\". It's an unincorporated community in Jackson County, Oregon, United States. It lies south of Ruch along Upper Applegate Road off Oregon Route 238. The Applegate River flows by the community, in the Rogue River – Siskiyou National Forest.\n\nWe need to produce triplets with subject_type and object_type.\n\nIdentify entities: McKee Bridge (community), Jackson County (county), Oregon (state), United States (country), Ruch (place), Upper Applegate Road (road), Oregon Route 238 (road), Applegate River (river), Rogue River – Siskiyou National Forest (national forest).\n\nRelations: \"instance of\" maybe, but we should use \"location\" or \"located in\". For community, relation could be \"located in administrative territorial entity\" (like \"located in\"). Use \"located in\" maybe. Also \"type\" relation: \"instance of\" = \"unincorporated community\". Might be \"type of settlement\". We'll follow examples: they used \"occupation\" etc. For location they used \"located in\". Let's decide.\n\nTriplets:\n\n1. (McKee Bridge, instance of, unincorporated community) subject_type human? No, community is a place. subject_type \"settlement\". object_type \"settlement type\". But we need classes; we can put \"human\"? No. We'll use \"settlement\". object_type \"settlement type\". Provide qualifiers none.\n\n2. (McKee Bridge, located in administrative territorial entity, Jackson County) qualifiers maybe also \"located in\" Oregon? Could represent hierarchy: It is in Jackson County, which is in Oregon. Provide separate triplet: McKee Bridge located in Jackson County. Also a triplet: Jackson County located in Oregon. Could also McKee Bridge located in United States. But we only extract from text. Text says \"in Jackson County, Oregon, United States.\" So we can have one triplet with object \"Jackson County, Oregon, United States\"? Better separate: (McKee Bridge, located in, Jackson County) and maybe also (Jackson County, located in, Oregon) and (Oregon, located in, United States). However these latter not directly about McKee Bridge but are facts within text. The text says \"Jackson County, Oregon, United States\". That's a phrase; we can interpret as hierarchical but it's okay to produce separate.\n\nWe'll produce triplet: McKee Bridge located in Jackson County. Also McKee Bridge located in Oregon (maybe). But text: \"in Jackson County, Oregon, United States.\" So McKee Bridge is in Jackson County, which is in Oregon, which is in United States. Might need separate triplets for each hierarchical. Provide each.\n\n3. (McKee Bridge, located south of, Ruch) relation \"south of\". object_type \"settlement\". Use qualifier none.\n\n4. (McKee Bridge, located along, Upper Applegate Road) relation \"located along\". object_type \"road\". Also note \"off Oregon Route 238\" indicates Upper Applegate Road is off Oregon Route 238. Could produce (Upper Applegate Road, connects to, Oregon Route 238) or \"off\" relation. Use \"off\" maybe \"connected to\". Provide separate: Upper Applegate Road located off Oregon Route 238. But subject must be Upper Applegate Road. We'll generate that.\n\n5. (Applegate River, flows by, McKee Bridge) relation \"flows by\". object_type \"settlement\". Also \"in the Rogue River – Siskiyou National Forest\" indicates location of Applegate River (or the community) in that forest. The sentence: \"The Applegate River flows by the community, in the Rogue River – Siskiyou National Forest.\" Could be read that the community is in the forest, or the river is in the forest. Likely the community is in the forest. We'll produce (McKee Bridge, located in, Rogue River – Siskiyou National Forest). Also (Applegate River, located in, Rogue River – Siskiyou National Forest). Use relation \"located in\".\n\nNow assign subject_type and object_type.\n\nDefine types:\n\n- McKee Bridge: \"settlement\"\n- unincorporated community: \"settlement type\"\n- Jackson County: \"county\"\n- Oregon: \"state\"\n- United States: \"country\"\n- Ruch: \"settlement\"\n- Upper Applegate Road: \"road\"\n- Oregon Route 238: \"road\"\n- Applegate River: \"river\"\n- Rogue River – Siskiyou National Forest: \"national forest\"\n\nNow build JSON.\n\nEach triplet includes qualifiers list (empty unless needed). None of these have qualifiers like dates.\n\nLet's list all triplets:\n\n1. McKee Bridge – instance of – unincorporated community\n2. McKee Bridge – located in – Jackson County\n3. Jackson County – located in – Oregon\n4. Oregon – located in – United States\n5. McKee Bridge – south of – Ruch\n6. McKee Bridge – located along – Upper Applegate Road\n7. Upper Applegate Road – off – Oregon Route 238 (relation maybe \"off\")\n8. Applegate River – flows by – McKee Bridge\n9. McKee Bridge – located in – Rogue River – Siskiyou National Forest\n10. Applegate River – located in – Rogue River – Siskiyou National Forest\n\nMake sure relation names are Wikidata-like: \"instance of\" (P31), \"located in the administrative territorial entity\" (P131), \"south of\" (P1332), \"located on street\" maybe \"located on\" but we can use \"located along\". \"off\" maybe \"located off\". Use \"located off\". \"flows by\" maybe \"passes by\". Use \"passes by\". We'll decide.\n\nLet's use:\n\n- relation: \"instance of\"\n- relation: \"located in administrative territorial entity\"\n- relation: \"south of\"\n- relation: \"located along\"\n- relation: \"located off\"\n- relation: \"passes by\"\n- relation: \"located in\" (for forest)\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1647,
+      "total_tokens": 3486,
+      "completion_tokens": 1839,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"Jackson County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Jackson County\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"Oregon\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Oregon\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"south of\",\n            \"object\": \"Ruch\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"located along\",\n            \"object\": \"Upper Applegate Road\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Upper Applegate Road\",\n            \"relation\": \"located off\",\n            \"object\": \"Oregon Route 238\",\n            \"qualifiers\": [],\n            \"subject_type\": \"road\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Applegate River\",\n            \"relation\": \"passes by\",\n            \"object\": \"McKee Bridge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"McKee Bridge\",\n            \"relation\": \"located in\",\n            \"object\": \"Rogue River – Siskiyou National Forest\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"national forest\"\n        },\n        {\n            \"subject\": \"Applegate River\",\n            \"relation\": \"located in\",\n            \"object\": \"Rogue River – Siskiyou National Forest\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"national forest\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "McKee Bridge",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "McKee Bridge",
+        "relation": "located in administrative territorial entity",
+        "object": "Jackson County",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Jackson County",
+        "relation": "located in administrative territorial entity",
+        "object": "Oregon",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "state"
+      },
+      {
+        "subject": "Oregon",
+        "relation": "located in administrative territorial entity",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "McKee Bridge",
+        "relation": "south of",
+        "object": "Ruch",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "settlement"
+      },
+      {
+        "subject": "McKee Bridge",
+        "relation": "located along",
+        "object": "Upper Applegate Road",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "road"
+      },
+      {
+        "subject": "Upper Applegate Road",
+        "relation": "located off",
+        "object": "Oregon Route 238",
+        "qualifiers": [],
+        "subject_type": "road",
+        "object_type": "road"
+      },
+      {
+        "subject": "Applegate River",
+        "relation": "passes by",
+        "object": "McKee Bridge",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "settlement"
+      },
+      {
+        "subject": "McKee Bridge",
+        "relation": "located in",
+        "object": "Rogue River – Siskiyou National Forest",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "national forest"
+      },
+      {
+        "subject": "Applegate River",
+        "relation": "located in",
+        "object": "Rogue River – Siskiyou National Forest",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "national forest"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1647,
+    "total_tokens": 3486,
+    "completion_tokens": 1839,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 755,
+    "output_tokens_est": 662
+  },
+  "attempts": 1,
+  "latency_s": 23.004504439988523,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:27:08.526024+00:00",
+  "cache_key": "5ac310cff253cc00a8a9ac3456002ec8"
+}

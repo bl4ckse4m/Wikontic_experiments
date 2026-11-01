@@ -1,0 +1,142 @@
+{
+  "task": {
+    "input_id": "c4908bf2f96c7520",
+    "input_hash": "e87759601121478ff3f2cf8925b32dafd7c4db841c2511eb24a2a089375a5a39",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-9a07690fe61d79c66be73d55c80260a4",
+    "object": "chat.completion",
+    "created": 1791521211,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"instance of\",\n            \"object\": \"country club\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"located in\",\n            \"object\": \"Westchester County, New York\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"administrative region\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"border with\",\n            \"object\": \"Pelham Manor\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"border with\",\n            \"object\": \"New Rochelle\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"hosted\",\n            \"object\": \"PGA Championship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1923\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"sports competition\"\n        },\n        {\n            \"subject\": \"PGA Championship\",\n            \"relation\": \"winner\",\n            \"object\": \"Gene Sarazen\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1923\"\n                }\n            ],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Pelham Country Club\n\nPelham Country Club is a country club located on the border of Pelham Manor and New Rochelle in Westchester County, New York. The club hosted the PGA Championship in 1923, which Gene Sarazen won.\"\n\nWe have entities: Pelham Country Club (subject). Relation: \"instance of\" maybe \"country club\". But we need specific relation: \"type\" maybe \"country club\". In examples they used \"occupation\", \"award received\". For organization type maybe \"instance of\" or \"type\". Not given but we can use \"instance of\" relation. However guidelines: use specific Wikidata-style relations; short unambiguous entity names. \"instance of\" is common.\n\nFirst sentence: \"Pelham Country Club is a country club located on the border of Pelham Manor and New Rochelle in Westchester County, New York.\"\n\nWe can extract:\n\n- Pelham Country Club — instance of — country club. subject_type: organization? maybe \"organization\". object_type: \"type of organization\" or \"organization type\". Use \"organization\". object_type: \"organization type\"? In examples they used \"profession\" for occupation. For \"country club\" maybe \"organization\". We'll set object_type \"organization\". subject_type \"organization\". Could also be \"club\". We'll decide.\n\n- Pelham Country Club — location — border of Pelham Manor and New Rochelle. But location is a place. Could be \"located on the border of Pelham Manor and New Rochelle\". So relation \"located in\" maybe with qualifiers? Actually \"located on the border of Pelham Manor and New Rochelle in Westchester County, New York.\" So location is Westchester County, New York. Also border of two places. Could create two location relations: one for \"Pelham Manor\" and one for \"New Rochelle\". Or one relation \"border of\" but that's not typical. Simpler: \"located in\" — Westchester County, New York. Also maybe \"located on border of\" as qualifier? But guidelines: qualifiers attach to claim they modify. The phrase \"on the border of Pelham Manor and New Rochelle\" modifies location. Could treat object as \"border of Pelham Manor and New Rochelle\". But maybe better to have two location relations: \"located in\" Westchester County, New York; \"border of\" Pelham Manor; \"border of\" New Rochelle. However \"border of\" is not a standard relation but we can still use \"border of\". Let's keep simple: one location relation with object \"Westchester County, New York\". Add qualifier \"border of\" with object \"Pelham Manor and New Rochelle\"? Might be messy.\n\nProbably best to produce:\n\n- Pelham Country Club — location — Westchester County, New York. qualifiers: maybe none.\n\n- Pelham Country Club — border with — Pelham Manor. relation \"border with\". object_type \"place\". qualifier maybe none.\n\n- Pelham Country Club — border with — New Rochelle.\n\nBut guidelines: do not infer beyond explicit. The text says \"located on the border of Pelham Manor and New Rochelle in Westchester County, New York.\" So we can capture location as Westchester County, New York, and also border of Pelham Manor and New Rochelle. Could produce two separate relations: \"located in\" Westchester County, New York; \"border of\" Pelham Manor; \"border of\" New Rochelle.\n\nNow second sentence: \"The club hosted the PGA Championship in 1923, which Gene Sarazen won.\"\n\n- Pelham Country Club — hosted — PGA Championship. qualifier: point in time 1923.\n\n- PGA Championship — winner — Gene Sarazen. Or \"won by\" relation. The phrase \"which Gene Sarazen won\" indicates Gene Sarazen won the PGA Championship. So relation \"winner\" maybe \"winner\". Subject PGA Championship, object Gene Sarazen. Could also be \"won\" relation with subject Gene Sarazen, object PGA Championship. In examples they used \"award received\" with subject human, object award. For event winner, we could use \"winner\" relation. Let's use \"winner\" relation: subject PGA Championship, object Gene Sarazen.\n\nAdd qualifier point in time 1923? The winning happened in 1923 as part of the same event. Could attach qualifier to winner relation: point in time 1923.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- Pelham Country Club: organization (or \"club\").\n\n- country club: maybe \"organization\". We'll set object_type \"organization\".\n\n- Westchester County, New York: place (administrative territorial entity). object_type \"administrative region\".\n\n- Pelham Manor: place (city/town). object_type \"place\".\n\n- New Rochelle: place.\n\n- PGA Championship: sports competition (event). object_type \"sports competition\".\n\n- Gene Sarazen: human.\n\nNow qualifiers list format: list of dicts with relation and object strings.\n\nFor location relation: no qualifiers.\n\nFor border with: maybe no qualifiers.\n\nFor hosted: qualifier point in time 1923.\n\nFor winner: qualifier point in time 1923.\n\nNow produce JSON.\n\nCheck for any other facts: \"Pelham Country Club is a country club\". Already captured.\n\nNow produce final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1640,
+      "total_tokens": 3104,
+      "completion_tokens": 1464,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"instance of\",\n            \"object\": \"country club\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"located in\",\n            \"object\": \"Westchester County, New York\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"administrative region\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"border with\",\n            \"object\": \"Pelham Manor\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"border with\",\n            \"object\": \"New Rochelle\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"hosted\",\n            \"object\": \"PGA Championship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1923\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"sports competition\"\n        },\n        {\n            \"subject\": \"PGA Championship\",\n            \"relation\": \"winner\",\n            \"object\": \"Gene Sarazen\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1923\"\n                }\n            ],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Pelham Country Club",
+        "relation": "instance of",
+        "object": "country club",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Pelham Country Club",
+        "relation": "located in",
+        "object": "Westchester County, New York",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "administrative region"
+      },
+      {
+        "subject": "Pelham Country Club",
+        "relation": "border with",
+        "object": "Pelham Manor",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "place"
+      },
+      {
+        "subject": "Pelham Country Club",
+        "relation": "border with",
+        "object": "New Rochelle",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "place"
+      },
+      {
+        "subject": "Pelham Country Club",
+        "relation": "hosted",
+        "object": "PGA Championship",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1923"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "sports competition"
+      },
+      {
+        "subject": "PGA Championship",
+        "relation": "winner",
+        "object": "Gene Sarazen",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1923"
+          }
+        ],
+        "subject_type": "sports competition",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1640,
+    "total_tokens": 3104,
+    "completion_tokens": 1464,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 557,
+    "output_tokens_est": 465
+  },
+  "attempts": 1,
+  "latency_s": 18.4198750200012,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:47:10.455675+00:00",
+  "cache_key": "66e4771f0cbd5c93880717637b2a0862"
+}

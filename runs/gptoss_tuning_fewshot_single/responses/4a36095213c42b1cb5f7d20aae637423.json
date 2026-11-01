@@ -1,0 +1,161 @@
+{
+  "task": {
+    "input_id": "2d3a2c333d430b3c",
+    "input_hash": "c873bca136c624f3bf4c73b813916841772cb0fcd23908311e23856d708a5427",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-1fb2477bd3b67ed7c0902a99d3264397",
+    "object": "chat.completion",
+    "created": 1791516217,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Institute of Chartered Accountants in England and Wales\",\n            \"relation\": \"established by\",\n            \"object\": \"royal charter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1880\"\n                }\n            ],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"legal document\"\n        },\n        {\n            \"subject\": \"Institute of Chartered Accountants in England and Wales\",\n            \"relation\": \"member count\",\n            \"object\": \"147,000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"over\"\n                },\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"people\"\n                }\n            ],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"members of Institute of Chartered Accountants in England and Wales\",\n            \"relation\": \"live and work in\",\n            \"object\": \"outside the United Kingdom\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"15,000\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"over\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"students of Institute of Chartered Accountants in England and Wales\",\n            \"relation\": \"joined\",\n            \"object\": \"Institute of Chartered Accountants in England and Wales\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2015\"\n                },\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"8,256\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"FTSE 100 companies\",\n            \"relation\": \"has board member with qualification\",\n            \"object\": \"ICAEW Chartered Accountant\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"82\"\n                }\n            ],\n            \"subject_type\": \"company\",\n            \"object_type\": \"occupation\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText includes:\n\n- Institute of Chartered Accountants in England and Wales (ICAEW) was established by royal charter in 1880.\n- It has over 147,000 members.\n- Over 15,000 of these members live and work outside the UK.\n- In 2015, 8,256 students joined ICAEW - the highest ever figure.\n- 82 of FTSE 100 (the leading UK) companies have an ICAEW Chartered Accountant on the board.\n\nWe need to produce triplets with qualifiers.\n\nIdentify entities:\n\n- Institute of Chartered Accountants in England and Wales (ICAEW) – organization type: \"organisation\" maybe \"professional association\".\n- Royal charter – maybe relation \"established by\" with qualifier \"point in time\" 1880? Actually \"was established by royal charter in 1880\". So relation: \"established by\" object \"royal charter\". qualifier point in time 1880.\n\n- It has over 147,000 members. Relation: \"has member count\" maybe \"member count\". object \"147,000\". qualifier \"approximation\" \"over\". Also maybe unit \"people\". We'll use relation \"member count\". object \"147,000\". qualifiers: approximation over, unit \"people\". subject_type organization, object_type quantity? maybe \"number\". We'll set object_type \"quantity\".\n\n- Over 15,000 of these members live and work outside the UK. This is about members (subset). Could create triplet: subject \"members of Institute of Chartered Accountants in England and Wales\" relation \"live and work in\" object \"outside the UK\". But better: \"member\" relation \"residence\" maybe \"outside the UK\". But we need explicit: \"Over 15,000 of these members live and work outside the UK.\" So subject: \"members of Institute of Chartered Accountants in England and Wales\". relation: \"live and work in\". object: \"outside the United Kingdom\". qualifiers: approximation \"over\", quantity \"15,000\". Could also have \"place\" qualifier \"outside the UK\". But we already have object as location. We'll include quantity as qualifier? Actually object is location, quantity is qualifier. Use qualifier \"quantity\" with object \"15,000\". Also \"approximation\" \"over\". Also maybe \"point in time\" not given.\n\n- In 2015, 8,256 students joined ICAEW - the highest ever figure. So relation: \"students joined\" maybe \"joined\". Subject: \"students\". But we need subject entity: \"students\". Could be \"students of Institute of Chartered Accountants in England and Wales\". Or \"students\". We'll phrase: \"students\" as generic human. Relation: \"joined\" object \"Institute of Chartered Accountants in England and Wales\". qualifiers: point in time \"2015\", quantity \"8,256\", approximation none (exact). Also \"highest ever figure\" maybe qualifier \"superlative\" but not required. Could use qualifier \"note\" but not defined. We'll ignore.\n\n- 82 of FTSE 100 (the leading UK) companies have an ICAIC? Actually \"ICAEW Chartered Accountant\". So relation: \"has board member\" maybe \"has board member with qualification\". Subject: \"FTSE 100 companies\". Relation: \"has board member with qualification\". Object: \"ICAEW Chartered Accountant\". qualifiers: quantity \"82\". Also maybe \"point in time\" not given.\n\nWe need subject_type and object_type.\n\nDefine types:\n\n- Institute of Chartered Accountants in England and Wales: \"organisation\".\n- royal charter: \"legal document\".\n- members: \"human\" maybe \"person\". But we treat as \"people\". We'll use \"human\".\n- location \"outside the United Kingdom\": \"place\".\n- students: \"human\".\n- FTSE 100 companies: \"company\".\n- ICAEW Chartered Accountant: \"profession\" or \"occupation\". Use \"occupation\".\n\nNow produce JSON list.\n\nTriplet 1:\nsubject: Institute of Chartered Accountants in England and Wales\nrelation: established by\nobject: royal charter\nqualifiers: point in time 1880\nsubject_type: organisation\nobject_type: legal document\n\nTriplet 2:\nsubject: Institute of Chartered Accountants in England and Wales\nrelation: member count\nobject: 147,000\nqualifiers: approximation over, unit people\nsubject_type: organisation\nobject_type: quantity\n\nTriplet 3:\nsubject: members of Institute of Chartered Accountants in England and Wales\nrelation: live and work in\nobject: outside the United Kingdom\nqualifiers: quantity 15,000, approximation over\nsubject_type: human\nobject_type: place\n\nTriplet 4:\nsubject: students of Institute of Chartered Accountants in England and Wales\nrelation: joined\nobject: Institute of Chartered Accountants in England and Wales\nqualifiers: point in time 2015, quantity 8,256\nsubject_type: human\nobject_type: organisation\n\nTriplet 5:\nsubject: FTSE 100 companies\nrelation: has board member with qualification\nobject: ICAEW Chartered Accountant\nqualifiers: quantity 82\nsubject_type: company\nobject_type: occupation\n\nCheck qualifiers naming: \"quantity\" not listed in allowed qualifiers list? The spec mentions qualifiers can be \"time, place, role, polarity, modality, attribution, condition, unit, approximation\". \"quantity\" not listed. But we can use \"unit\" for number? Actually \"unit\" is for units like \"kilograms\". For numbers we might embed quantity as object itself. In example they used \"quantity\" qualifier for unemployment figure. Actually example: qualifiers included {\"relation\": \"quantity\", \"object\": \"5.2%\"} . So \"quantity\" is allowed even though not listed earlier. So okay.\n\nThus include qualifier relation \"quantity\". Good.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1692,
+      "total_tokens": 3394,
+      "completion_tokens": 1702,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Institute of Chartered Accountants in England and Wales\",\n            \"relation\": \"established by\",\n            \"object\": \"royal charter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1880\"\n                }\n            ],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"legal document\"\n        },\n        {\n            \"subject\": \"Institute of Chartered Accountants in England and Wales\",\n            \"relation\": \"member count\",\n            \"object\": \"147,000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"over\"\n                },\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"people\"\n                }\n            ],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"members of Institute of Chartered Accountants in England and Wales\",\n            \"relation\": \"live and work in\",\n            \"object\": \"outside the United Kingdom\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"15,000\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"over\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"students of Institute of Chartered Accountants in England and Wales\",\n            \"relation\": \"joined\",\n            \"object\": \"Institute of Chartered Accountants in England and Wales\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2015\"\n                },\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"8,256\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"FTSE 100 companies\",\n            \"relation\": \"has board member with qualification\",\n            \"object\": \"ICAEW Chartered Accountant\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"82\"\n                }\n            ],\n            \"subject_type\": \"company\",\n            \"object_type\": \"occupation\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Institute of Chartered Accountants in England and Wales",
+        "relation": "established by",
+        "object": "royal charter",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1880"
+          }
+        ],
+        "subject_type": "organisation",
+        "object_type": "legal document"
+      },
+      {
+        "subject": "Institute of Chartered Accountants in England and Wales",
+        "relation": "member count",
+        "object": "147,000",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "over"
+          },
+          {
+            "relation": "unit",
+            "object": "people"
+          }
+        ],
+        "subject_type": "organisation",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "members of Institute of Chartered Accountants in England and Wales",
+        "relation": "live and work in",
+        "object": "outside the United Kingdom",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "15,000"
+          },
+          {
+            "relation": "approximation",
+            "object": "over"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "place"
+      },
+      {
+        "subject": "students of Institute of Chartered Accountants in England and Wales",
+        "relation": "joined",
+        "object": "Institute of Chartered Accountants in England and Wales",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2015"
+          },
+          {
+            "relation": "quantity",
+            "object": "8,256"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "FTSE 100 companies",
+        "relation": "has board member with qualification",
+        "object": "ICAEW Chartered Accountant",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "82"
+          }
+        ],
+        "subject_type": "company",
+        "object_type": "occupation"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1692,
+    "total_tokens": 3394,
+    "completion_tokens": 1702,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 737,
+    "output_tokens_est": 645
+  },
+  "attempts": 1,
+  "latency_s": 21.48025617901294,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:23:59.661448+00:00",
+  "cache_key": "4a36095213c42b1cb5f7d20aae637423"
+}

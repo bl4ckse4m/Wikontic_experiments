@@ -1,0 +1,159 @@
+{
+  "task": {
+    "input_id": "d47f53da9dd0eb43",
+    "input_hash": "6ae36f5ad1382ef5362c8fb58748f0e059cf8fe8808dd20c5e4027e73be1c7b7",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793212291-6Oe7tgZ5DWsKusED8cs6",
+    "object": "chat.completion",
+    "created": 1793212291,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DekaLLM",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Arno Brandner\",\n            \"relation\": \"instance of\",\n            \"object\": \"fictional character\",\n            \"qualifiers\": [],\n            \"subject_type\": \"character\",\n            \"object_type\": \"character\"\n        },\n        {\n            \"subject\": \"Arno Brandner\",\n            \"relation\": \"appears in\",\n            \"object\": \"Verbotene Liebe\",\n            \"qualifiers\": [],\n            \"subject_type\": \"character\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Arno Brandner\",\n            \"relation\": \"portrayed by\",\n            \"object\": \"Konrad Krauss\",\n            \"qualifiers\": [],\n            \"subject_type\": \"character\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Konrad Krauss\",\n            \"relation\": \"first appearance\",\n            \"object\": \"Verbotene Liebe\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2 January 1995\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Verbotene Liebe\",\n            \"relation\": \"instance of\",\n            \"object\": \"soap opera\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"genre\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Arno Brandner\n\nArno Brandner is a fictional character on German soap opera \"Verbotene Liebe (Forbidden Love)\". The character was portrayed by actor Konrad Krauss, who first appeared in the series premiere on 2 January 1995.\"\n\nWe need entities: Arno Brandner (fictional character), Verbotene Liebe (German soap opera), Konrad Krauss (actor), series premiere (event?), date 2 January 1995.\n\nTriplets:\n\n1. Arno Brandner - instance of - fictional character (subject_type: fictional character? maybe \"character\" class). object_type: \"character\". relation maybe \"instance of\" or \"character of\". Use \"character of\" maybe. But typical Wikidata: \"instance of\" (P31). We'll use relation \"instance of\". object: \"fictional character\". object_type: \"character\". subject_type: \"character\"? Actually subject is Arno Brandner, which is a fictional character, so subject_type: \"character\". object_type: \"character\". Could also have \"occupation\"? Not needed.\n\n2. Arno Brandner - appears in - Verbotene Liebe. relation \"appears in\" or \"part of\". Use \"appears in\". object_type: \"television series\". subject_type: \"character\". Also we can add qualifier: \"country\" maybe German, but not needed.\n\n3. Arno Brandner - portrayed by - Konrad Krauss. relation \"portrayer\" or \"portrayed by\". Use \"portrayer\". object_type: \"human\" (actor). subject_type: \"character\". Also qualifier: maybe \"first appearance\" date? Actually the sentence: \"The character was portrayed by actor Konrad Krauss, who first appeared in the series premiere on 2 January 1995.\" This could be interpreted as Konrad Krauss first appeared in the series premiere on that date, not the character. So we need separate triplet: Konrad Krauss - first appearance in - Verbotene Liebe (or series premiere). relation \"first appearance\". object_type: \"television series\". qualifier: point in time 2 January 1995.\n\nAlternatively, we could have: Konrad Krauss - first appearance date - 2 January 1995 (qualifier). But better: \"first appearance\" relation with object \"Verbotene Liebe\" and qualifier date.\n\nAlso maybe \"series premiere\" is an event, but we can treat as \"Verbotene Liebe\" with qualifier \"point in time\" 2 January 1995.\n\nThus triplets:\n\n- Arno Brandner, instance of, fictional character.\n- Arno Brandner, appears in, Verbotene Liebe (German soap opera). Could also have qualifier \"country\" Germany? Not needed.\n\n- Arno Brandner, portrayed by, Konrad Krauss.\n\n- Konrad Krauss, first appearance, Verbotene Liebe, qualifier point in time 2 January 1995.\n\n- Verbotene Liebe, instance of, soap opera (or television series). Could add but not required.\n\n- Verbotene Liebe, country of origin, Germany. Not required.\n\nBut we should extract all facts supported.\n\nAlso \"Verbotene Liebe (Forbidden Love)\" is the title, we can use \"Verbotene Liebe\". object_type: \"television series\". subject_type: \"character\". Good.\n\nNow format JSON list under \"triplets\". Each dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Arno Brandner: \"fictional character\" maybe type \"character\". Use \"character\".\n- fictional character: object_type \"character\".\n- Verbotene Liebe: object_type \"television series\".\n- Konrad Krauss: subject_type \"human\". object_type \"human\". For relation \"first appearance\", object is \"Verbotene Liebe\". object_type \"television series\". qualifier date object_type \"date\". relation \"point in time\".\n\n- For \"portrayed by\": object_type \"human\". subject_type \"character\".\n\n- For \"appears in\": object_type \"television series\". subject_type \"character\".\n\n- For \"instance of\": object_type \"character\". subject_type \"character\". Might be redundant but okay.\n\nNow produce JSON.\n\nCheck qualifiers: each qualifier dict includes \"relation\", \"object\", \"object_type\". For date qualifiers, object_type \"date\". For point in time, relation \"point in time\". Good.\n\nNow produce final answer.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text.\n\nText: \"Arno Brandner\n\nArno Brandner is a fictional character on German soap opera \"Verbotene Liebe (Forbidden Love)\". The character was portrayed by actor Konrad Krauss, who first appeared in the series premiere on 2 January 1995.\"\n\nWe need entities: Arno Brandner (fictional character), Verbotene Liebe (German soap opera), Konrad Krauss (actor), series premiere (event?), date 2 January 1995.\n\nTriplets:\n\n1. Arno Brandner - instance of - fictional character (subject_type: fictional character? maybe \"character\" class). object_type: \"character\". relation maybe \"instance of\" or \"character of\". Use \"character of\" maybe. But typical Wikidata: \"instance of\" (P31). We'll use relation \"instance of\". object: \"fictional character\". object_type: \"character\". subject_type: \"character\"? Actually subject is Arno Brandner, which is a fictional character, so subject_type: \"character\". object_type: \"character\". Could also have \"occupation\"? Not needed.\n\n2. Arno Brandner - appears in - Verbotene Liebe. relation \"appears in\" or \"part of\". Use \"appears in\". object_type: \"television series\". subject_type: \"character\". Also we can add qualifier: \"country\" maybe German, but not needed.\n\n3. Arno Brandner - portrayed by - Konrad Krauss. relation \"portrayer\" or \"portrayed by\". Use \"portrayer\". object_type: \"human\" (actor). subject_type: \"character\". Also qualifier: maybe \"first appearance\" date? Actually the sentence: \"The character was portrayed by actor Konrad Krauss, who first appeared in the series premiere on 2 January 1995.\" This could be interpreted as Konrad Krauss first appeared in the series premiere on that date, not the character. So we need separate triplet: Konrad Krauss - first appearance in - Verbotene Liebe (or series premiere). relation \"first appearance\". object_type: \"television series\". qualifier: point in time 2 January 1995.\n\nAlternatively, we could have: Konrad Krauss - first appearance date - 2 January 1995 (qualifier). But better: \"first appearance\" relation with object \"Verbotene Liebe\" and qualifier date.\n\nAlso maybe \"series premiere\" is an event, but we can treat as \"Verbotene Liebe\" with qualifier \"point in time\" 2 January 1995.\n\nThus triplets:\n\n- Arno Brandner, instance of, fictional character.\n- Arno Brandner, appears in, Verbotene Liebe (German soap opera). Could also have qualifier \"country\" Germany? Not needed.\n\n- Arno Brandner, portrayed by, Konrad Krauss.\n\n- Konrad Krauss, first appearance, Verbotene Liebe, qualifier point in time 2 January 1995.\n\n- Verbotene Liebe, instance of, soap opera (or television series). Could add but not required.\n\n- Verbotene Liebe, country of origin, Germany. Not required.\n\nBut we should extract all facts supported.\n\nAlso \"Verbotene Liebe (Forbidden Love)\" is the title, we can use \"Verbotene Liebe\". object_type: \"television series\". subject_type: \"character\". Good.\n\nNow format JSON list under \"triplets\". Each dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Arno Brandner: \"fictional character\" maybe type \"character\". Use \"character\".\n- fictional character: object_type \"character\".\n- Verbotene Liebe: object_type \"television series\".\n- Konrad Krauss: subject_type \"human\". object_type \"human\". For relation \"first appearance\", object is \"Verbotene Liebe\". object_type \"television series\". qualifier date object_type \"date\". relation \"point in time\".\n\n- For \"portrayed by\": object_type \"human\". subject_type \"character\".\n\n- For \"appears in\": object_type \"television series\". subject_type \"character\".\n\n- For \"instance of\": object_type \"character\". subject_type \"character\". Might be redundant but okay.\n\nNow produce JSON.\n\nCheck qualifiers: each qualifier dict includes \"relation\", \"object\", \"object_type\". For date qualifiers, object_type \"date\". For point in time, relation \"point in time\". Good.\n\nNow produce final answer.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1406,
+      "completion_tokens": 1266,
+      "total_tokens": 2672,
+      "cost": 0.00027006,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00027006,
+        "upstream_inference_prompt_cost": 4.218e-05,
+        "upstream_inference_completions_cost": 0.00022788
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 935,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Arno Brandner\",\n            \"relation\": \"instance of\",\n            \"object\": \"fictional character\",\n            \"qualifiers\": [],\n            \"subject_type\": \"character\",\n            \"object_type\": \"character\"\n        },\n        {\n            \"subject\": \"Arno Brandner\",\n            \"relation\": \"appears in\",\n            \"object\": \"Verbotene Liebe\",\n            \"qualifiers\": [],\n            \"subject_type\": \"character\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Arno Brandner\",\n            \"relation\": \"portrayed by\",\n            \"object\": \"Konrad Krauss\",\n            \"qualifiers\": [],\n            \"subject_type\": \"character\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Konrad Krauss\",\n            \"relation\": \"first appearance\",\n            \"object\": \"Verbotene Liebe\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2 January 1995\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Verbotene Liebe\",\n            \"relation\": \"instance of\",\n            \"object\": \"soap opera\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"genre\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Arno Brandner",
+        "relation": "instance of",
+        "object": "fictional character",
+        "qualifiers": [],
+        "subject_type": "character",
+        "object_type": "character"
+      },
+      {
+        "subject": "Arno Brandner",
+        "relation": "appears in",
+        "object": "Verbotene Liebe",
+        "qualifiers": [],
+        "subject_type": "character",
+        "object_type": "television series"
+      },
+      {
+        "subject": "Arno Brandner",
+        "relation": "portrayed by",
+        "object": "Konrad Krauss",
+        "qualifiers": [],
+        "subject_type": "character",
+        "object_type": "human"
+      },
+      {
+        "subject": "Konrad Krauss",
+        "relation": "first appearance",
+        "object": "Verbotene Liebe",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2 January 1995"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "television series"
+      },
+      {
+        "subject": "Verbotene Liebe",
+        "relation": "instance of",
+        "object": "soap opera",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "genre"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1406,
+    "completion_tokens": 1266,
+    "total_tokens": 2672,
+    "cost": 0.00027006,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00027006,
+      "upstream_inference_prompt_cost": 4.218e-05,
+      "upstream_inference_completions_cost": 0.00022788
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 935,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 498,
+    "output_tokens_est": 371
+  },
+  "attempts": 1,
+  "latency_s": 16.950975034000294,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:31:48.235843+00:00",
+  "cache_key": "b4640c2997ce6a90de327093f139e64c"
+}

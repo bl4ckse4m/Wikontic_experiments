@@ -1,0 +1,179 @@
+{
+  "task": {
+    "input_id": "c33a2c0e954adecb",
+    "input_hash": "b051854d66c318e435a4c83193328cbcd3fd2ee282c7862225760c39d04e10fd",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793210965-GIKn2SLmElGtapHJKjA6",
+    "object": "chat.completion",
+    "created": 1793210965,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DeepInfra",
+    "system_fingerprint": null,
+    "service_tier": "default",
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"location\",\n            \"object\": \"North Newton\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Kansas\",\n                    \"object_type\": \"state\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"operator\",\n            \"object\": \"Bethel College\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"college football\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"men's soccer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"women's soccer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"high school events\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"community events\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Thresher Stadium\n\nThresher Stadium is a sport stadium in North Newton, Kansas, United States. The facility is primarily used by the Bethel College for college football and men's and women's soccer teams. The stadium is also used for local high school and other community events.\"\n\nWe need to identify entities: Thresher Stadium (subject), sport stadium (type), North Newton (city), Kansas (state), United States (country). Bethel College (institution). College football (sport), men's soccer team, women's soccer team (sports). Also local high school (maybe generic). Community events (event type).\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine types: Thresher Stadium is a \"sport stadium\" (type: stadium). So we can have relation \"instance of\" or \"type\". But typical relation is \"instance of\". However example used \"occupation\", \"award received\". For location, they used \"location\". In example they didn't have location but we can use \"located in\". So:\n\nTriplet 1:\nsubject: Thresher Stadium\nrelation: instance of\nobject: sport stadium\nsubject_type: stadium (or \"sport stadium\"? maybe \"stadium\")\nobject_type: stadium type? Could be \"type of building\". But we need a class. Let's use \"stadium\". object_type: \"type of building\". But guidelines: object_type is the class the object is an instance of. So object \"sport stadium\" is a type, not an instance. Might be okay to set object_type: \"building type\". Or we can use relation \"location\" to North Newton.\n\nBetter: Use \"location\" relation: Thresher Stadium located in North Newton. Then also \"located in\" Kansas, \"located in\" United States. Could also have \"country\" relation.\n\nTriplet: Thresher Stadium - location - North Newton (subject_type: stadium, object_type: city). Then qualifiers maybe \"state\" Kansas? Could use qualifiers: \"state\" Kansas, \"country\" United States.\n\nBut qualifiers must be attached to a triplet. So we can have one main location triplet with qualifiers for state and country.\n\nThus:\n\n{\n \"subject\": \"Thresher Stadium\",\n \"relation\": \"location\",\n \"object\": \"North Newton\",\n \"qualifiers\": [\n   {\"relation\": \"state\", \"object\": \"Kansas\", \"object_type\": \"state\"},\n   {\"relation\": \"country\", \"object\": \"United States\", \"object_type\": \"country\"}\n ],\n \"subject_type\": \"stadium\",\n \"object_type\": \"city\"\n}\n\nNext: The facility is primarily used by Bethel College for college football and men's and women's soccer teams.\n\nSo relation: \"primary user\" maybe \"operator\". Use \"operator\" or \"owner\". Use \"primary user\". Let's use \"primary user\". Subject: Thresher Stadium, relation: \"primary user\", object: Bethel College. Qualifiers: \"sport\" \"college football\", \"men's soccer\", \"women's soccer\". Could have multiple qualifiers each with relation \"sport\". Or we could have separate triplets for each sport usage.\n\nBetter: separate triplets: Thresher Stadium - used for sport - college football (subject_type stadium, object_type sport). Also used for sport - men's soccer, women's soccer. Also used by Bethel College (maybe \"operator\").\n\nLet's produce:\n\nTriplet: Thresher Stadium - operator - Bethel College (subject_type stadium, object_type educational institution). Qualifiers maybe none.\n\nTriplet: Thresher Stadium - used for - college football (subject_type stadium, object_type sport). Qualifier maybe \"team type\" \"college\". But maybe not needed.\n\nTriplet: Thresher Stadium - used for - men's soccer (subject_type stadium, object_type sport). Triplet: Thresher Stadium - used for - women's soccer.\n\nBut \"men's and women's soccer teams\" indicates both genders. So we can have two separate.\n\nNext: The stadium is also used for local high school and other community events.\n\nTriplet: Thresher Stadium - used for - local high school events (object_type event). Could separate: used for - community events.\n\nBetter: object \"local high school events\" maybe \"high school event\". Use \"event\". So:\n\nTriplet: Thresher Stadium - used for - high school events (qualifier \"local\").\n\nTriplet: Thresher Stadium - used for - community events.\n\nNow we need to assign types.\n\nDefine types:\n\n- Thresher Stadium: stadium (type: stadium)\n- North Newton: city\n- Kansas: state\n- United States: country\n- Bethel College: educational institution (college)\n- college football: sport (football)\n- men's soccer: sport (soccer)\n- women's soccer: sport (soccer)\n- high school events: event\n- community events: event\n\nNow produce JSON list.\n\nMake sure each dictionary includes \"qualifiers\": [] if none.\n\nLet's craft.\n\nTriplets list:\n\n1 location with qualifiers.\n\n2 operator.\n\n3 used for college football.\n\n4 used for men's soccer.\n\n5 used for women's soccer.\n\n6 used for high school events (qualifier maybe \"local\").\n\n7 used for community events.\n\nCheck qualifiers: For high school events, we can add qualifier \"scope\" \"local\". So qualifier relation \"scope\" object \"local\". object_type maybe \"adjective\"? Could be \"local\". But object_type maybe \"qualifier\". Might be okay.\n\nBut guidelines: qualifier object_type must be class. \"local\" is not a class. Could use \"locality\". But maybe we skip qualifier and just have object \"high school events\". That's fine.\n\nThus we have 6 triplets (excluding location qualifiers). Actually location triplet includes qualifiers for state and country.\n\nNow produce JSON.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText:\n\n\"Thresher Stadium\n\nThresher Stadium is a sport stadium in North Newton, Kansas, United States. The facility is primarily used by the Bethel College for college football and men's and women's soccer teams. The stadium is also used for local high school and other community events.\"\n\nWe need to identify entities: Thresher Stadium (subject), sport stadium (type), North Newton (city), Kansas (state), United States (country). Bethel College (institution). College football (sport), men's soccer team, women's soccer team (sports). Also local high school (maybe generic). Community events (event type).\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine types: Thresher Stadium is a \"sport stadium\" (type: stadium). So we can have relation \"instance of\" or \"type\". But typical relation is \"instance of\". However example used \"occupation\", \"award received\". For location, they used \"location\". In example they didn't have location but we can use \"located in\". So:\n\nTriplet 1:\nsubject: Thresher Stadium\nrelation: instance of\nobject: sport stadium\nsubject_type: stadium (or \"sport stadium\"? maybe \"stadium\")\nobject_type: stadium type? Could be \"type of building\". But we need a class. Let's use \"stadium\". object_type: \"type of building\". But guidelines: object_type is the class the object is an instance of. So object \"sport stadium\" is a type, not an instance. Might be okay to set object_type: \"building type\". Or we can use relation \"location\" to North Newton.\n\nBetter: Use \"location\" relation: Thresher Stadium located in North Newton. Then also \"located in\" Kansas, \"located in\" United States. Could also have \"country\" relation.\n\nTriplet: Thresher Stadium - location - North Newton (subject_type: stadium, object_type: city). Then qualifiers maybe \"state\" Kansas? Could use qualifiers: \"state\" Kansas, \"country\" United States.\n\nBut qualifiers must be attached to a triplet. So we can have one main location triplet with qualifiers for state and country.\n\nThus:\n\n{\n \"subject\": \"Thresher Stadium\",\n \"relation\": \"location\",\n \"object\": \"North Newton\",\n \"qualifiers\": [\n   {\"relation\": \"state\", \"object\": \"Kansas\", \"object_type\": \"state\"},\n   {\"relation\": \"country\", \"object\": \"United States\", \"object_type\": \"country\"}\n ],\n \"subject_type\": \"stadium\",\n \"object_type\": \"city\"\n}\n\nNext: The facility is primarily used by Bethel College for college football and men's and women's soccer teams.\n\nSo relation: \"primary user\" maybe \"operator\". Use \"operator\" or \"owner\". Use \"primary user\". Let's use \"primary user\". Subject: Thresher Stadium, relation: \"primary user\", object: Bethel College. Qualifiers: \"sport\" \"college football\", \"men's soccer\", \"women's soccer\". Could have multiple qualifiers each with relation \"sport\". Or we could have separate triplets for each sport usage.\n\nBetter: separate triplets: Thresher Stadium - used for sport - college football (subject_type stadium, object_type sport). Also used for sport - men's soccer, women's soccer. Also used by Bethel College (maybe \"operator\").\n\nLet's produce:\n\nTriplet: Thresher Stadium - operator - Bethel College (subject_type stadium, object_type educational institution). Qualifiers maybe none.\n\nTriplet: Thresher Stadium - used for - college football (subject_type stadium, object_type sport). Qualifier maybe \"team type\" \"college\". But maybe not needed.\n\nTriplet: Thresher Stadium - used for - men's soccer (subject_type stadium, object_type sport). Triplet: Thresher Stadium - used for - women's soccer.\n\nBut \"men's and women's soccer teams\" indicates both genders. So we can have two separate.\n\nNext: The stadium is also used for local high school and other community events.\n\nTriplet: Thresher Stadium - used for - local high school events (object_type event). Could separate: used for - community events.\n\nBetter: object \"local high school events\" maybe \"high school event\". Use \"event\". So:\n\nTriplet: Thresher Stadium - used for - high school events (qualifier \"local\").\n\nTriplet: Thresher Stadium - used for - community events.\n\nNow we need to assign types.\n\nDefine types:\n\n- Thresher Stadium: stadium (type: stadium)\n- North Newton: city\n- Kansas: state\n- United States: country\n- Bethel College: educational institution (college)\n- college football: sport (football)\n- men's soccer: sport (soccer)\n- women's soccer: sport (soccer)\n- high school events: event\n- community events: event\n\nNow produce JSON list.\n\nMake sure each dictionary includes \"qualifiers\": [] if none.\n\nLet's craft.\n\nTriplets list:\n\n1 location with qualifiers.\n\n2 operator.\n\n3 used for college football.\n\n4 used for men's soccer.\n\n5 used for women's soccer.\n\n6 used for high school events (qualifier maybe \"local\").\n\n7 used for community events.\n\nCheck qualifiers: For high school events, we can add qualifier \"scope\" \"local\". So qualifier relation \"scope\" object \"local\". object_type maybe \"adjective\"? Could be \"local\". But object_type maybe \"qualifier\". Might be okay.\n\nBut guidelines: qualifier object_type must be class. \"local\" is not a class. Could use \"locality\". But maybe we skip qualifier and just have object \"high school events\". That's fine.\n\nThus we have 6 triplets (excluding location qualifiers). Actually location triplet includes qualifiers for state and country.\n\nNow produce JSON.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1396,
+      "completion_tokens": 1658,
+      "total_tokens": 3054,
+      "cost": 0.000333512,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000333512,
+        "upstream_inference_prompt_cost": 5.1652e-05,
+        "upstream_inference_completions_cost": 0.00028186
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1358,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"location\",\n            \"object\": \"North Newton\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Kansas\",\n                    \"object_type\": \"state\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"operator\",\n            \"object\": \"Bethel College\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"college football\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"men's soccer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"women's soccer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"high school events\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Thresher Stadium\",\n            \"relation\": \"used for\",\n            \"object\": \"community events\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Thresher Stadium",
+        "relation": "location",
+        "object": "North Newton",
+        "qualifiers": [
+          {
+            "relation": "state",
+            "object": "Kansas"
+          },
+          {
+            "relation": "country",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "stadium",
+        "object_type": "city"
+      },
+      {
+        "subject": "Thresher Stadium",
+        "relation": "operator",
+        "object": "Bethel College",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "educational institution"
+      },
+      {
+        "subject": "Thresher Stadium",
+        "relation": "used for",
+        "object": "college football",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "sport"
+      },
+      {
+        "subject": "Thresher Stadium",
+        "relation": "used for",
+        "object": "men's soccer",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "sport"
+      },
+      {
+        "subject": "Thresher Stadium",
+        "relation": "used for",
+        "object": "women's soccer",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "sport"
+      },
+      {
+        "subject": "Thresher Stadium",
+        "relation": "used for",
+        "object": "high school events",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "event"
+      },
+      {
+        "subject": "Thresher Stadium",
+        "relation": "used for",
+        "object": "community events",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "event"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1396,
+    "completion_tokens": 1658,
+    "total_tokens": 3054,
+    "cost": 0.000333512,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000333512,
+      "upstream_inference_prompt_cost": 5.1652e-05,
+      "upstream_inference_completions_cost": 0.00028186
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1358,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 652,
+    "output_tokens_est": 525
+  },
+  "attempts": 1,
+  "latency_s": 54.834628803997475,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:10:20.437219+00:00",
+  "cache_key": "87be7d6e694648d3e7ae1ea7d0a8e6a3"
+}

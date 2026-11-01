@@ -1,0 +1,163 @@
+{
+  "task": {
+    "input_id": "fe2bdbe5727918f7",
+    "input_hash": "de4f51cd43b103265122699341c2d2f2008092d4dcbbfa7680a12fffe158efd8",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-15cca92240c9b99e622c080db9ce8bb4",
+    "object": "chat.completion",
+    "created": 1791514632,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"instance of\",\n            \"object\": \"international association football competition\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"sport competition\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"organizer\",\n            \"object\": \"Fédération Internationale de Football Association\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"frequency\",\n            \"object\": \"four years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"time interval\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"inception\",\n            \"object\": \"1930\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"not held in\",\n            \"object\": \"1942\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"reason\",\n                    \"object\": \"Second World War\"\n                }\n            ],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"not held in\",\n            \"object\": \"1946\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"reason\",\n                    \"object\": \"Second World War\"\n                }\n            ],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"France\",\n            \"relation\": \"champion\",\n            \"object\": \"FIFA World Cup\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2018\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Russia\"\n                },\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"second\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"sport competition\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text. Identify entities: FIFA World Cup, World Cup (alias), international association football competition, senior men's national teams, members of FIFA, Fédération Internationale de Football Association (FIFA), sport's global governing body, championship, 1930 inaugural tournament, 1942, 1946, Second World War, current champion France, second title, 2018 tournament, Russia.\n\nWe need to produce triplets with subject_type and object_type.\n\nPotential relations:\n- \"instance of\" or \"type\": FIFA World Cup is an international association football competition.\n- \"has part\" maybe not needed.\n- \"organizer\": FIFA (Fédération Internationale de Football Association) organizes FIFA World Cup.\n- \"frequency\": awarded every four years.\n- \"inception\": inaugural tournament in 1930.\n- \"not held in\": 1942, 1946 because of Second World War.\n- \"current champion\": France.\n- \"won title\": France won its second title at 2018 tournament in Russia. So relation \"title count\" maybe \"number of titles\" but we can have \"won\" relation with qualifiers point in time 2018 and location Russia, and maybe \"title number\" second.\n\nSimplify: produce triplets:\n\n1. subject: FIFA World Cup, relation: \"instance of\", object: \"international association football competition\". subject_type: \"event\", object_type: \"sport competition\".\n\n2. subject: FIFA World Cup, relation: \"organizer\", object: \"Fédération Internationale de Football Association\". subject_type: \"event\", object_type: \"organization\".\n\n3. subject: FIFA World Cup, relation: \"frequency\", object: \"four years\". subject_type: \"event\", object_type: \"time interval\".\n\n4. subject: FIFA World Cup, relation: \"inaugural year\", object: \"1930\". subject_type: \"event\", object_type: \"date\". Could also use \"point in time\".\n\n5. subject: FIFA World Cup, relation: \"not held in\", object: \"1942\". qualifiers: maybe \"reason\": \"Second World War\". But we can have separate triplet: \"not held in\" 1942 with qualifier reason Second World War. Similarly for 1946.\n\n6. subject: FIFA World Cup, relation: \"not held in\", object: \"1946\", qualifier reason Second World War.\n\n7. subject: France, relation: \"current champion of\", object: \"FIFA World Cup\". subject_type: \"human? country\". object_type: \"event\". So subject_type \"country\", object_type \"event\".\n\n8. subject: France, relation: \"won title\", object: \"FIFA World Cup\". qualifiers: point in time 2018, location Russia, ordinal \"second\". Could have qualifier \"ordinal\" relation \"ordinal number\" object \"2\". But we can include qualifier \"title number\" maybe.\n\nWe'll produce qualifiers list.\n\nDefine relation names: Use typical Wikidata style: \"instance of\", \"organizer\", \"frequency\", \"inception\", \"not held in\", \"reason\", \"current champion\", \"award received\"? For champion maybe \"champion\". Use \"champion\" relation.\n\nLet's craft JSON.\n\nTriplet list:\n\n1. FIFA World Cup - instance of - international association football competition.\n\n2. FIFA World Cup - organizer - Fédération Internationale de Football Association.\n\n3. FIFA World Cup - frequency - four years.\n\n4. FIFA World Cup - inaugural tournament year - 1930 (or \"inception\").\n\n5. FIFA World Cup - not held in - 1942, qualifier reason Second World War.\n\n6. FIFA World Cup - not held in - 1946, qualifier reason Second World War.\n\n7. France - champion - FIFA World Cup, qualifier point in time 2018, qualifier location Russia, qualifier ordinal \"second title\". Could have qualifier \"title count\" but we can include \"ordinal\" relation.\n\nMake sure each triplet includes subject_type and object_type.\n\nDefine types:\n\n- FIFA World Cup: \"sport competition\" or \"event\".\n- international association football competition: \"sport competition\".\n- Fédération Internationale de Football Association: \"organization\".\n- four years: \"time interval\".\n- 1930: \"date\".\n- 1942, 1946: \"date\".\n- Second World War: \"conflict\".\n- France: \"country\".\n- Russia: \"country\".\n- 2018 tournament: maybe \"event\". But we can treat 2018 as date.\n\nQualifiers: each qualifier is dict with relation and object.\n\nFor triplet 7 qualifiers: point in time 2018, location Russia, ordinal \"second\". Use object types: date, country, ordinal number.\n\nLet's produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1042,
+      "total_tokens": 2520,
+      "completion_tokens": 1478,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"instance of\",\n            \"object\": \"international association football competition\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"sport competition\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"organizer\",\n            \"object\": \"Fédération Internationale de Football Association\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"frequency\",\n            \"object\": \"four years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"time interval\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"inception\",\n            \"object\": \"1930\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"not held in\",\n            \"object\": \"1942\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"reason\",\n                    \"object\": \"Second World War\"\n                }\n            ],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"FIFA World Cup\",\n            \"relation\": \"not held in\",\n            \"object\": \"1946\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"reason\",\n                    \"object\": \"Second World War\"\n                }\n            ],\n            \"subject_type\": \"sport competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"France\",\n            \"relation\": \"champion\",\n            \"object\": \"FIFA World Cup\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2018\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Russia\"\n                },\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"second\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"sport competition\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "FIFA World Cup",
+        "relation": "instance of",
+        "object": "international association football competition",
+        "qualifiers": [],
+        "subject_type": "sport competition",
+        "object_type": "sport competition"
+      },
+      {
+        "subject": "FIFA World Cup",
+        "relation": "organizer",
+        "object": "Fédération Internationale de Football Association",
+        "qualifiers": [],
+        "subject_type": "sport competition",
+        "object_type": "organization"
+      },
+      {
+        "subject": "FIFA World Cup",
+        "relation": "frequency",
+        "object": "four years",
+        "qualifiers": [],
+        "subject_type": "sport competition",
+        "object_type": "time interval"
+      },
+      {
+        "subject": "FIFA World Cup",
+        "relation": "inception",
+        "object": "1930",
+        "qualifiers": [],
+        "subject_type": "sport competition",
+        "object_type": "date"
+      },
+      {
+        "subject": "FIFA World Cup",
+        "relation": "not held in",
+        "object": "1942",
+        "qualifiers": [
+          {
+            "relation": "reason",
+            "object": "Second World War"
+          }
+        ],
+        "subject_type": "sport competition",
+        "object_type": "date"
+      },
+      {
+        "subject": "FIFA World Cup",
+        "relation": "not held in",
+        "object": "1946",
+        "qualifiers": [
+          {
+            "relation": "reason",
+            "object": "Second World War"
+          }
+        ],
+        "subject_type": "sport competition",
+        "object_type": "date"
+      },
+      {
+        "subject": "France",
+        "relation": "champion",
+        "object": "FIFA World Cup",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2018"
+          },
+          {
+            "relation": "location",
+            "object": "Russia"
+          },
+          {
+            "relation": "ordinal",
+            "object": "second"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "sport competition"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1042,
+    "total_tokens": 2520,
+    "completion_tokens": 1478,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 725,
+    "output_tokens_est": 626
+  },
+  "attempts": 1,
+  "latency_s": 17.42420101200696,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:57:29.840874+00:00",
+  "cache_key": "c8e417eab4148ee8742532ca8f5183d0"
+}

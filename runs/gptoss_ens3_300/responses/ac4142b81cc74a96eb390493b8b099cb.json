@@ -1,0 +1,174 @@
+{
+  "task": {
+    "input_id": "0335f1c3b4f8548c",
+    "input_hash": "66480cde6054d1af9e61579426ba19c654347b8d51c7f290e8e906285a7bc500",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-74be1664547b56ed18915cb33a9e301f",
+    "object": "chat.completion",
+    "created": 1791542857,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2018 Georgia gubernatorial election\",\n            \"relation\": \"date of election\",\n            \"object\": \"November 6, 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"2018 Georgia gubernatorial election\",\n            \"relation\": \"position contested\",\n            \"object\": \"Governor of Georgia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"office\"\n        },\n        {\n            \"subject\": \"Nathan Deal\",\n            \"relation\": \"position held\",\n            \"object\": \"Governor of Georgia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2018\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"office\"\n        },\n        {\n            \"subject\": \"Nathan Deal\",\n            \"relation\": \"political affiliation\",\n            \"object\": \"Republican Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Nathan Deal\",\n            \"relation\": \"eligible for\",\n            \"object\": \"reelection to a third consecutive term\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political action\"\n        },\n        {\n            \"subject\": \"Georgia primary elections\",\n            \"relation\": \"date\",\n            \"object\": \"May 22, 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Georgia primary runoff\",\n            \"relation\": \"date\",\n            \"object\": \"July 24, 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Georgia primary runoff\",\n            \"relation\": \"candidate\",\n            \"object\": \"Casey Cagle\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Georgia primary runoff\",\n            \"relation\": \"candidate\",\n            \"object\": \"Brian Kemp\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Democrats\",\n            \"relation\": \"nominated\",\n            \"object\": \"Stacey Abrams\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political party\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: 2018 Georgia gubernatorial election (event), November 6, 2018 (date), Georgia (U.S. state), Governor (office), Nathan Deal (person), Republican (political party), term-limited (status), cannot seek reelection (negated ability), third consecutive term (concept), primary elections (event) on May 22, 2018, primary runoff on July 24, 2018, Republican candidates Casey Cagle and Brian Kemp, Democrats (party) nominated Stacey Abrams.\n\nWe must produce triplets with subject_type and object_type.\n\nDefine relations: \"instance of\" maybe not needed but we can include \"election\" relation.\n\nLet's extract:\n\n1. (2018 Georgia gubernatorial election, instance of, gubernatorial election) maybe but not required. But we can include.\n\nBetter: (2018 Georgia gubernatorial election, election date, November 6, 2018). relation \"point in time\" maybe but need proper relation: \"date of election\". Use \"date of election\". object_type date.\n\n2. (2018 Georgia gubernatorial election, elected office, Governor of Georgia). relation \"elects\" maybe \"office contested\". Use \"elects office\". object_type \"office\".\n\n3. (Nathan Deal, position held, Governor of Georgia). But also \"incumbent\" and \"term-limited\". So:\n\n- (Nathan Deal, office held, Governor of Georgia) with qualifiers: {\"relation\": \"point in time\", \"object\": \"2018\"}? Not explicit. He is incumbent during election. Could add qualifier \"point in time\" \"2018\". but maybe not needed.\n\n- (Nathan Deal, political affiliation, Republican) object_type \"political party\".\n\n- (Nathan Deal, eligibility, re-election) with qualifier polarity negative, condition \"third consecutive term\". Actually text: \"cannot seek reelection to a third consecutive term\". So claim: Nathan Deal cannot seek reelection to a third consecutive term. Relation maybe \"eligible for\". Use \"eligible for\" with object \"reelection to a third consecutive term\". Add qualifier polarity negative.\n\n4. Primary elections: (Primary elections (Georgia), date, May 22, 2018). Could be \"primary election\" event.\n\nBetter: (Georgia Republican primary election 2018, date, May 22, 2018). Not named.\n\nBut we can have (2018 Georgia Republican primary, date, May 22, 2018). Might be too invented.\n\nSimplify: (Primary elections (Georgia), date, May 22, 2018). subject_type \"event\". object_type \"date\".\n\n5. (Primary runoff (Georgia), date, July 24, 2018). Also \"between Republican candidates Casey Cagle and Brian Kemp\". So we can have (Primary runoff, candidate, Casey Cagle) and (Primary runoff, candidate, Brian Kemp). Also candidate relation maybe \"candidate\".\n\n6. (Democrats, nominated, Stacey Abrams). Could be (Stacey Abrams, nominated by, Democrats) or (Democrats, nominee, Stacey Abrams). Use \"nominated\" relation.\n\n7. (Stacey Abrams, political affiliation, Democratic Party). Not explicit; only Democrats nominated her, implies affiliation but not stated. Avoid.\n\nWe also need subject_type and object_type.\n\nDefine types: \"2018 Georgia gubernatorial election\" -> event. \"Governor of Georgia\" -> office. \"Nathan Deal\" -> human. \"Republican\" -> political party. \"primary elections\" -> event. \"primary runoff\" -> event. \"Casey Cagle\" -> human. \"Brian Kemp\" -> human. \"Democrats\" -> political party. \"Stacey Abrams\" -> human.\n\nNow qualifiers: For primary runoff, qualifiers maybe \"point in time\" for date? Actually date is separate triplet.\n\nNow produce JSON with list.\n\nLet's craft each triplet.\n\nTriplet1:\nsubject: \"2018 Georgia gubernatorial election\"\nrelation: \"date of election\"\nobject: \"November 6, 2018\"\nqualifiers: []\nsubject_type: \"election\"\nobject_type: \"date\"\n\nTriplet2:\nsubject: \"2018 Georgia gubernatorial election\"\nrelation: \"elects office\"\nobject: \"Governor of Georgia\"\nqualifiers: []\nsubject_type: \"election\"\nobject_type: \"office\"\n\nTriplet3:\nsubject: \"Nathan Deal\"\nrelation: \"office held\"\nobject: \"Governor of Georgia\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2018\"}] maybe include. Could add but not mandatory. We'll include.\n\nsubject_type: \"human\"\nobject_type: \"office\"\n\nTriplet4:\nsubject: \"Nathan Deal\"\nrelation: \"political affiliation\"\nobject: \"Republican Party\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"political party\"\n\nTriplet5:\nsubject: \"Nathan Deal\"\nrelation: \"eligible for\"\nobject: \"reelection to a third consecutive term\"\nqualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"}]\nsubject_type: \"human\"\nobject_type: \"political right\" maybe \"political action\". Use \"political action\". Ok.\n\nTriplet6:\nsubject: \"Georgia primary elections\"\nrelation: \"date\"\nobject: \"May 22, 2018\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"date\"\n\nTriplet7:\nsubject: \"Georgia primary runoff\"\nrelation: \"date\"\nobject: \"July 24, 2018\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"date\"\n\nTriplet8:\nsubject: \"Georgia primary runoff\"\nrelation: \"candidate\"\nobject: \"Casey Cagle\"\nqualifiers: [{\"relation\":\"political affiliation\",\"object\":\"Republican Party\"}] maybe not needed. Keep simple.\n\nsubject_type: \"event\"\nobject_type: \"human\"\n\nTriplet9:\nsubject: \"Georgia primary runoff\"\nrelation: \"candidate\"\nobject: \"Brian Kemp\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"human\"\n\nTriplet10:\nsubject: \"Democrats\"\nrelation: \"nominated\"\nobject: \"Stacey Abrams\"\nqualifiers: []\nsubject_type: \"political party\"\nobject_type: \"human\"\n\nTriplet11:\nsubject: \"Stacey Abrams\"\nrelation: \"political affiliation\"\nobject: \"Democratic Party\"\nBut not explicit; skip.\n\nAlso maybe \"Republican candidates Casey Cagle and Brian Kemp\" indicates they are Republican. Could add qualifier to each candidate: \"political affiliation\" but not required.\n\nWe need to ensure relation names are Wikidata-like: \"date of election\" exists? could use \"point in time\" qualifier instead. But example used \"award received\" with qualifier point in time. For election date, we can use \"date of election\" as relation.\n\nAlso \"elects office\" maybe \"position contested\". Use \"position contested\". Let's use \"position contested\". object_type \"office\".\n\n\"office held\" relation is \"position held\".\n\nOk.\n\nNow output JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1695,
+      "total_tokens": 3768,
+      "completion_tokens": 2073,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2018 Georgia gubernatorial election\",\n            \"relation\": \"date of election\",\n            \"object\": \"November 6, 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"2018 Georgia gubernatorial election\",\n            \"relation\": \"position contested\",\n            \"object\": \"Governor of Georgia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"election\",\n            \"object_type\": \"office\"\n        },\n        {\n            \"subject\": \"Nathan Deal\",\n            \"relation\": \"position held\",\n            \"object\": \"Governor of Georgia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2018\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"office\"\n        },\n        {\n            \"subject\": \"Nathan Deal\",\n            \"relation\": \"political affiliation\",\n            \"object\": \"Republican Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Nathan Deal\",\n            \"relation\": \"eligible for\",\n            \"object\": \"reelection to a third consecutive term\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political action\"\n        },\n        {\n            \"subject\": \"Georgia primary elections\",\n            \"relation\": \"date\",\n            \"object\": \"May 22, 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Georgia primary runoff\",\n            \"relation\": \"date\",\n            \"object\": \"July 24, 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Georgia primary runoff\",\n            \"relation\": \"candidate\",\n            \"object\": \"Casey Cagle\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Georgia primary runoff\",\n            \"relation\": \"candidate\",\n            \"object\": \"Brian Kemp\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Democrats\",\n            \"relation\": \"nominated\",\n            \"object\": \"Stacey Abrams\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political party\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "2018 Georgia gubernatorial election",
+        "relation": "date of election",
+        "object": "November 6, 2018",
+        "qualifiers": [],
+        "subject_type": "election",
+        "object_type": "date"
+      },
+      {
+        "subject": "2018 Georgia gubernatorial election",
+        "relation": "position contested",
+        "object": "Governor of Georgia",
+        "qualifiers": [],
+        "subject_type": "election",
+        "object_type": "office"
+      },
+      {
+        "subject": "Nathan Deal",
+        "relation": "position held",
+        "object": "Governor of Georgia",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2018"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "office"
+      },
+      {
+        "subject": "Nathan Deal",
+        "relation": "political affiliation",
+        "object": "Republican Party",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "political party"
+      },
+      {
+        "subject": "Nathan Deal",
+        "relation": "eligible for",
+        "object": "reelection to a third consecutive term",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political action"
+      },
+      {
+        "subject": "Georgia primary elections",
+        "relation": "date",
+        "object": "May 22, 2018",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "date"
+      },
+      {
+        "subject": "Georgia primary runoff",
+        "relation": "date",
+        "object": "July 24, 2018",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "date"
+      },
+      {
+        "subject": "Georgia primary runoff",
+        "relation": "candidate",
+        "object": "Casey Cagle",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "human"
+      },
+      {
+        "subject": "Georgia primary runoff",
+        "relation": "candidate",
+        "object": "Brian Kemp",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "human"
+      },
+      {
+        "subject": "Democrats",
+        "relation": "nominated",
+        "object": "Stacey Abrams",
+        "qualifiers": [],
+        "subject_type": "political party",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1695,
+    "total_tokens": 3768,
+    "completion_tokens": 2073,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 806,
+    "output_tokens_est": 714
+  },
+  "attempts": 1,
+  "latency_s": 24.463538209995022,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T10:48:02.464094+00:00",
+  "cache_key": "ac4142b81cc74a96eb390493b8b099cb"
+}

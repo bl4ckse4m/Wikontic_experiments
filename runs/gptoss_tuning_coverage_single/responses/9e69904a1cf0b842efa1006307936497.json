@@ -1,0 +1,145 @@
+{
+  "task": {
+    "input_id": "ca59ba5a70ea3167",
+    "input_hash": "c90123ce5c00b158ac028bde5e44e0b02f9bc034a6ef912ce05a95aa9f5d083e",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-e001ba684eab6c5a7021281f5b8dff94",
+    "object": "chat.completion",
+    "created": 1791506815,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Leader of the House\",\n            \"relation\": \"leads\",\n            \"object\": \"majority\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"political group\"\n        },\n        {\n            \"subject\": \"Leader of the Opposition\",\n            \"relation\": \"leads\",\n            \"object\": \"opposition parties\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"political parties\"\n        },\n        {\n            \"subject\": \"Leader of the Opposition\",\n            \"relation\": \"recognized in\",\n            \"object\": \"Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1977\"\n                }\n            ],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"law\"\n        },\n        {\n            \"subject\": \"Leader of the Opposition\",\n            \"relation\": \"leader of\",\n            \"object\": \"largest non-government party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Leader of the Opposition\",\n            \"relation\": \"recognized by\",\n            \"object\": \"Chairman\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"political position\"\n        },\n        {\n            \"subject\": \"Rajya Sabha\",\n            \"relation\": \"has position\",\n            \"object\": \"Leader of the House\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legislative body\",\n            \"object_type\": \"political position\"\n        },\n        {\n            \"subject\": \"Rajya Sabha\",\n            \"relation\": \"has position\",\n            \"object\": \"Leader of the Opposition\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legislative body\",\n            \"object_type\": \"political position\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Rajya Sabha\n\nBesides the Leader of the House, who is leading the majority, there is also a Leader of the Opposition (LOP) – leading the opposition parties. The function was only recognized in the Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977. This is commonly the leader of the largest non-government party, and is recognized as such by the Chairman.\"\n\nWe need to parse facts.\n\nEntities: Rajya Sabha (upper house of Indian Parliament). Leader of the House (position). Leader of the Opposition (LOP). Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977 (law). Chairman (position). Also \"largest non-government party\" (concept). \"function\" refers to the role of Leader of the Opposition.\n\nWe need to produce triplets.\n\nPossible facts:\n\n1. Rajya Sabha has a Leader of the House. But text: \"Besides the Leader of the House, who is leading the majority, there is also a Leader of the Opposition (LOP) – leading the opposition parties.\" So we can extract: Leader of the House leads the majority. Relation: \"leads\" maybe \"leadership of\". Use relation \"leadership of\" or \"role\". In Wikidata, there is \"position held\" but we need generic. Could use \"function\" but better: (Leader of the House, leads, majority). Subject type: position. Object type: group? \"majority\" is a concept (political majority). So object_type: \"political group\" maybe.\n\n2. Leader of the Opposition leads the opposition parties. So (Leader of the Opposition, leads, opposition parties). object_type: \"political party\" (plural). Could be \"political parties\".\n\n3. The function (of Leader of the Opposition) was only recognized in the Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977. So (Leader of the Opposition, recognized in, Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977). Or (function of Leader of the Opposition, recognized in, ...). Probably better: (Leader of the Opposition, recognized in, Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977). Relation: \"recognized in\". object_type: \"law\". subject_type: \"position\".\n\n4. The Leader of the Opposition is commonly the leader of the largest non-government party. So (Leader of the Opposition, is leader of, largest non-government party). Relation: \"leader of\". object_type: \"political party\". subject_type: \"position\". Also \"largest non-government party\" is a concept.\n\n5. The Leader of the Opposition is recognized as such by the Chairman. So (Leader of the Opposition, recognized by, Chairman). Relation: \"recognized by\". object_type: \"position\". subject_type: \"position\". Could also be \"recognized by\" qualifier.\n\n6. The Leader of the House leads the majority. Already captured.\n\nPotential also: \"Rajya Sabha\" includes Leader of the House and Leader of the Opposition. Could be (Rajya Sabha, has position, Leader of the House) and (Rajya Sabha, has position, Leader of the Opposition). But not explicit; text says \"Besides the Leader of the House... there is also a Leader of the Opposition\". Implies both exist in Rajya Sabha. Could extract: (Rajya Sabha, has position, Leader of the House) and (Rajya Sabha, has position, Leader of the Opposition). Might be acceptable.\n\nWe need to ensure qualifiers: maybe the act year 1977 as point in time qualifier for recognized in. Could add qualifier: point in time 1977.\n\nAlso \"Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977\" includes date. Could treat as object with date included.\n\nLet's produce triplets list.\n\nDefine relation names:\n\n- \"leads\" (maybe \"leadership of\" but we can use \"leads\").\n- \"recognized in\" (maybe \"legislation recognized\" but okay).\n- \"leader of\" (position leads group).\n- \"recognized by\" (recognition).\n- \"has position\" (for Rajya Sabha).\n\nNow assign subject_type and object_type.\n\nSubject types:\n\n- \"Leader of the House\": position (maybe \"political position\").\n- \"Leader of the Opposition\": position.\n- \"Rajya Sabha\": legislative body (institution).\n- \"Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977\": law (legislation).\n- \"Chairman\": position.\n\nObject types:\n\n- \"majority\": political group (maybe \"political majority\").\n- \"opposition parties\": political parties.\n- \"largest non-government party\": political party.\n- \"Chairman\": position.\n- \"Leader of the House\": position.\n- \"Leader of the Opposition\": position.\n\nNow qualifiers: For recognized in act, add qualifier point in time 1977.\n\nAlso for recognized by Chairman maybe qualifier \"point in time\" not given.\n\nNow produce JSON.\n\nCheck each triplet includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nLet's craft.\n\nTriplet 1:\nsubject: \"Leader of the House\"\nrelation: \"leads\"\nobject: \"majority\"\nqualifiers: []\nsubject_type: \"political position\"\nobject_type: \"political group\"\n\nTriplet 2:\nsubject: \"Leader of the Opposition\"\nrelation: \"leads\"\nobject: \"opposition parties\"\nqualifiers: []\nsubject_type: \"political position\"\nobject_type: \"political parties\"\n\nTriplet 3:\nsubject: \"Leader of the Opposition\"\nrelation: \"recognized in\"\nobject: \"Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1977\"}]\nsubject_type: \"political position\"\nobject_type: \"law\"\n\nTriplet 4:\nsubject: \"Leader of the Opposition\"\nrelation: \"leader of\"\nobject: \"largest non-government party\"\nqualifiers: []\nsubject_type: \"political position\"\nobject_type: \"political party\"\n\nTriplet 5:\nsubject: \"Leader of the Opposition\"\nrelation: \"recognized by\"\nobject: \"Chairman\"\nqualifiers: []\nsubject_type: \"political position\"\nobject_type: \"political position\"\n\nTriplet 6:\nsubject: \"Rajya Sabha\"\nrelation: \"has position\"\nobject: \"Leader of the House\"\nqualifiers: []\nsubject_type: \"legislative body\"\nobject_type: \"political position\"\n\nTriplet 7:\nsubject: \"Rajya Sabha\"\nrelation: \"has position\"\nobject: \"Leader of the Opposition\"\nqualifiers: []\nsubject_type: \"legislative body\"\nobject_type: \"political position\"\n\nCheck if any other facts: \"function was only recognized in the ... Act, 1977.\" Could also have qualifier \"only\" but not needed.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1665,
+      "total_tokens": 3574,
+      "completion_tokens": 1909,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Leader of the House\",\n            \"relation\": \"leads\",\n            \"object\": \"majority\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"political group\"\n        },\n        {\n            \"subject\": \"Leader of the Opposition\",\n            \"relation\": \"leads\",\n            \"object\": \"opposition parties\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"political parties\"\n        },\n        {\n            \"subject\": \"Leader of the Opposition\",\n            \"relation\": \"recognized in\",\n            \"object\": \"Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1977\"\n                }\n            ],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"law\"\n        },\n        {\n            \"subject\": \"Leader of the Opposition\",\n            \"relation\": \"leader of\",\n            \"object\": \"largest non-government party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Leader of the Opposition\",\n            \"relation\": \"recognized by\",\n            \"object\": \"Chairman\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political position\",\n            \"object_type\": \"political position\"\n        },\n        {\n            \"subject\": \"Rajya Sabha\",\n            \"relation\": \"has position\",\n            \"object\": \"Leader of the House\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legislative body\",\n            \"object_type\": \"political position\"\n        },\n        {\n            \"subject\": \"Rajya Sabha\",\n            \"relation\": \"has position\",\n            \"object\": \"Leader of the Opposition\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legislative body\",\n            \"object_type\": \"political position\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Leader of the House",
+        "relation": "leads",
+        "object": "majority",
+        "qualifiers": [],
+        "subject_type": "political position",
+        "object_type": "political group"
+      },
+      {
+        "subject": "Leader of the Opposition",
+        "relation": "leads",
+        "object": "opposition parties",
+        "qualifiers": [],
+        "subject_type": "political position",
+        "object_type": "political parties"
+      },
+      {
+        "subject": "Leader of the Opposition",
+        "relation": "recognized in",
+        "object": "Salary and Allowances of Leaders of the Opposition in Parliament Act, 1977",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1977"
+          }
+        ],
+        "subject_type": "political position",
+        "object_type": "law"
+      },
+      {
+        "subject": "Leader of the Opposition",
+        "relation": "leader of",
+        "object": "largest non-government party",
+        "qualifiers": [],
+        "subject_type": "political position",
+        "object_type": "political party"
+      },
+      {
+        "subject": "Leader of the Opposition",
+        "relation": "recognized by",
+        "object": "Chairman",
+        "qualifiers": [],
+        "subject_type": "political position",
+        "object_type": "political position"
+      },
+      {
+        "subject": "Rajya Sabha",
+        "relation": "has position",
+        "object": "Leader of the House",
+        "qualifiers": [],
+        "subject_type": "legislative body",
+        "object_type": "political position"
+      },
+      {
+        "subject": "Rajya Sabha",
+        "relation": "has position",
+        "object": "Leader of the Opposition",
+        "qualifiers": [],
+        "subject_type": "legislative body",
+        "object_type": "political position"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1665,
+    "total_tokens": 3574,
+    "completion_tokens": 1909,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 625,
+    "output_tokens_est": 532
+  },
+  "attempts": 1,
+  "latency_s": 21.224204951999127,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:47:16.560399+00:00",
+  "cache_key": "9e69904a1cf0b842efa1006307936497"
+}

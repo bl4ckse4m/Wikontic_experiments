@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "eb6899fb8a1cd870",
+    "input_hash": "2bd61f50d36e88eeb9f49075a871f14e2493e9d9c62361e7fe97becc6d59daf1",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d01ea40aac2c89cd1078fe5c4d0b39e4",
+    "object": "chat.completion",
+    "created": 1791507854,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"instance of\",\n            \"object\": \"mountain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"mountain range\",\n            \"object\": \"Lepontine Alps\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"border with\",\n            \"object\": \"Graubünden\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"canton\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"border with\",\n            \"object\": \"Ticino\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"canton\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"overlooks\",\n            \"object\": \"Lake Curnera\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"lake\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"overlooks\",\n            \"object\": \"Lake Nalps\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"lake\"\n        },\n        {\n            \"subject\": \"Lake Curnera\",\n            \"relation\": \"drainage basin\",\n            \"object\": \"Rhine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"lake\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Lake Nalps\",\n            \"relation\": \"drainage basin\",\n            \"object\": \"Rhine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"lake\",\n            \"object_type\": \"river\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Piz Denter\n\nPiz Denter is a mountain of the Lepontine Alps, located on the border between the Swiss cantons of Graubünden and Ticino. On its northern side (Graubünden), it overlooks the valleys of Lake Curnera and Lake Nalps, both drained by tributaries of the Rhine.\"\n\nWe need to identify entities: Piz Denter (mountain), Lepontine Alps (mountain range), Swiss cantons of Graubünden and Ticino (administrative regions), Lake Curnera, Lake Nalps, Rhine (river). Relations: instance of (mountain), part of (mountain range), location (border between...), located in (maybe \"border between\" is relation \"border with\"? Use \"located on the border between\" relation maybe \"border location\". We'll use relation \"located on border between\". Also \"overlooks\" relation maybe \"overlooks\". Also \"drained by tributaries of the Rhine\" indicates that the lakes are drained by tributaries of the Rhine. So relation: \"drainage basin\" maybe \"drained by\". We'll capture: Lake Curnera - \"drainage basin\" - Rhine (via tributaries). But the text says \"both drained by tributaries of the Rhine\". So we can have triplet: Lake Curnera - \"drainage basin\" - Rhine, with qualifier \"via tributary\". But maybe simpler: Lake Curnera - \"drained by\" - Rhine. Similarly for Lake Nalps.\n\nAlso \"overlooks the valleys of Lake Curnera and Lake Nalps\". Actually \"overlooks the valleys of Lake Curnera and Lake Nalps\". The valleys of those lakes? It says \"overlooks the valleys of Lake Curnera and Lake Nalps\". So relation: Piz Denter - \"overlooks\" - valleys of Lake Curnera. But we might treat object as \"Lake Curnera valley\". But we can keep object as \"Lake Curnera\". Might be okay.\n\nSubject types: Piz Denter is a mountain (geographic feature). Lepontine Alps is a mountain range (geographic feature). Graubünden and Ticino are cantons (administrative territorial entity). Lake Curnera and Lake Nalps are lakes (body of water). Rhine is a river.\n\nDefine relations: \"instance of\" maybe \"mountain\". But example used \"occupation\" etc. For geographic, we can use \"instance of\". Use \"instance of\" relation.\n\nTriplets:\n\n1. (Piz Denter, instance of, mountain) subject_type: mountain, object_type: class? maybe \"geographic feature\". We'll set object_type \"mountain\".\n\n2. (Piz Denter, part of, Lepontine Alps) maybe relation \"mountain range\". Use \"mountain range\". So relation \"mountain range\". object_type \"mountain range\".\n\n3. (Piz Denter, located on border between, Graubünden) and also between Ticino. Could split into two: (Piz Denter, located on border with, Graubünden) and (Piz Denter, located on border with, Ticino). Use relation \"border with\". object_type \"canton\". subject_type \"mountain\". qualifiers none.\n\n4. (Piz Denter, located on border with, Ticino) similar.\n\n5. (Piz Denter, overlooks, Lake Curnera) maybe \"overlooks\". qualifiers maybe \"side\" = \"northern side (Graubünden)\". Could add qualifier: {\"relation\":\"side\",\"object\":\"northern\"} but not required. We'll just have triplet.\n\n6. (Piz Denter, overlooks, Lake Nalps).\n\n7. (Lake Curnera, drainage basin, Rhine) maybe relation \"drainage basin\". object_type \"river\". qualifiers maybe \"via tributary\". Could add qualifier \"via\", but not needed.\n\n8. (Lake Nalps, drainage basin, Rhine).\n\nAlso maybe \"Lake Curnera\" and \"Lake Nalps\" are \"lake\". Could add instance of but not in text.\n\nAlso \"Graubünden\" is a canton of Switzerland. Could add \"located in country Switzerland\". Not in text.\n\nThus produce JSON.\n\nNeed qualifiers list for each triplet (empty if none). Provide subject_type and object_type.\n\nDefine types: \"mountain\", \"mountain range\", \"canton\", \"lake\", \"river\". Use those.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1653,
+      "total_tokens": 3054,
+      "completion_tokens": 1401,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"instance of\",\n            \"object\": \"mountain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"mountain range\",\n            \"object\": \"Lepontine Alps\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"border with\",\n            \"object\": \"Graubünden\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"canton\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"border with\",\n            \"object\": \"Ticino\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"canton\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"overlooks\",\n            \"object\": \"Lake Curnera\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"lake\"\n        },\n        {\n            \"subject\": \"Piz Denter\",\n            \"relation\": \"overlooks\",\n            \"object\": \"Lake Nalps\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"lake\"\n        },\n        {\n            \"subject\": \"Lake Curnera\",\n            \"relation\": \"drainage basin\",\n            \"object\": \"Rhine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"lake\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Lake Nalps\",\n            \"relation\": \"drainage basin\",\n            \"object\": \"Rhine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"lake\",\n            \"object_type\": \"river\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Piz Denter",
+        "relation": "instance of",
+        "object": "mountain",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "geographic feature"
+      },
+      {
+        "subject": "Piz Denter",
+        "relation": "mountain range",
+        "object": "Lepontine Alps",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "mountain range"
+      },
+      {
+        "subject": "Piz Denter",
+        "relation": "border with",
+        "object": "Graubünden",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "canton"
+      },
+      {
+        "subject": "Piz Denter",
+        "relation": "border with",
+        "object": "Ticino",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "canton"
+      },
+      {
+        "subject": "Piz Denter",
+        "relation": "overlooks",
+        "object": "Lake Curnera",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "lake"
+      },
+      {
+        "subject": "Piz Denter",
+        "relation": "overlooks",
+        "object": "Lake Nalps",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "lake"
+      },
+      {
+        "subject": "Lake Curnera",
+        "relation": "drainage basin",
+        "object": "Rhine",
+        "qualifiers": [],
+        "subject_type": "lake",
+        "object_type": "river"
+      },
+      {
+        "subject": "Lake Nalps",
+        "relation": "drainage basin",
+        "object": "Rhine",
+        "qualifiers": [],
+        "subject_type": "lake",
+        "object_type": "river"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1653,
+    "total_tokens": 3054,
+    "completion_tokens": 1401,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 577,
+    "output_tokens_est": 485
+  },
+  "attempts": 1,
+  "latency_s": 17.138578585989308,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:04:31.603015+00:00",
+  "cache_key": "15277ebd6496f6e4cab92f743f18a1c6"
+}

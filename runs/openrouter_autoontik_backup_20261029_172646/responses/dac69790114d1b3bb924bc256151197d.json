@@ -1,0 +1,183 @@
+{
+  "task": {
+    "input_id": "f69d39d638dcc110",
+    "input_hash": "1211520724838844596cf7608452a094a0169d727737e1c8832b80dee7519754",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793214827-8bmZZxemLoEsk8PHwHlC",
+    "object": "chat.completion",
+    "created": 1793214827,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DekaLLM",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"headquarters location\",\n            \"object\": \"Arcadia, Wisconsin\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"owner\",\n            \"object\": \"Ron Wanek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"owner\",\n            \"object\": \"Todd Wanek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"industry\",\n            \"object\": \"home furnishings manufacturing\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"industry\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"industry\",\n            \"object\": \"retail\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"industry\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"produces\",\n            \"object\": \"home furniture\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"product\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"distributes\",\n            \"object\": \"home furniture\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"geographic scope\",\n                    \"object\": \"world\",\n                    \"object_type\": \"planet\"\n                }\n            ],\n            \"subject_type\": \"company\",\n            \"object_type\": \"product\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Ashley Furniture Industries\n\nAshley Furniture Industries, Inc. is an American home furnishings manufacturer and retailer, headquartered in Arcadia, Wisconsin. The company is owned by father and son team Ron and Todd Wanek. Ashley Furniture manufactures and distributes home furniture products throughout the world.\"\n\nWe need to parse entities:\n\n- Ashley Furniture Industries, Inc. (entity: Ashley Furniture Industries) – type: company (maybe \"company\" or \"business\" or \"manufacturer\"? We'll use \"company\".)\n- It is an American home furnishings manufacturer and retailer. So relations: \"country of origin\" or \"location\" maybe \"headquarters location\". Also \"industry\" or \"sector\". Let's break:\n\n1. Subject: Ashley Furniture Industries (or Ashley Furniture Industries, Inc.) – relation: \"instance of\" maybe not needed. But we need factual relations.\n\n- \"is an American home furnishings manufacturer and retailer\" => we can have two relations: \"industry\" or \"sector\" = \"home furnishings manufacturing\" and \"industry\" = \"retail\". Or \"occupation\"? For a company, we can use \"industry\" relation. Also \"country\" = \"United States\". So:\n\nTriplet: subject: Ashley Furniture Industries, relation: \"country\", object: United States (type: country). Or \"headquarters location\": Arcadia, Wisconsin (type: city). Also \"headquarters location\" maybe with qualifiers: \"state\" etc.\n\n- \"headquartered in Arcadia, Wisconsin.\" So relation: \"headquarters location\" object: Arcadia, Wisconsin (type: city). Could also have qualifier \"state\" but not needed.\n\n- \"The company is owned by father and son team Ron and Todd Wanek.\" So relation: \"owner\" object: Ron Wanek (type: human) and also \"owner\" object: Todd Wanek (type: human). Also maybe \"owner\" relation with qualifier \"relationship\" = \"father and son team\"? But we can just have two owner relations.\n\n- \"Ashley Furniture manufactures and distributes home furniture products throughout the world.\" So relation: \"product\" maybe \"home furniture\" (type: product). Or \"manufactures\" relation: \"manufactured product\" = \"home furniture\". Also \"distributes\" relation: \"distribution area\" = \"world\". Could have two separate relations: \"produces\" and \"distributes\". We'll create:\n\nTriplet: subject: Ashley Furniture Industries, relation: \"produces\", object: \"home furniture\", object_type: \"product\". Qualifier maybe \"scope\" = \"worldwide\"? But we have separate \"distributes\" relation.\n\nTriplet: subject: Ashley Furniture Industries, relation: \"distributes\", object: \"home furniture\", object_type: \"product\". Qualifier: \"geographic scope\" = \"world\". Or we could have object \"world\" type \"planet\". Use qualifier.\n\nBetter: relation \"distribution area\" object \"world\". But we need to tie to product. Could use \"distributes\" with qualifier \"geographic scope\". We'll do:\n\nsubject: Ashley Furniture Industries, relation: \"distributes\", object: \"home furniture\", qualifiers: [{\"relation\":\"geographic scope\",\"object\":\"world\",\"object_type\":\"planet\"}].\n\nNow define types:\n\n- Ashley Furniture Industries: company (type: \"company\").\n- United States: country.\n- Arcadia, Wisconsin: city (maybe \"city\").\n- Ron Wanek: human.\n- Todd Wanek: human.\n- home furniture: product (type: \"product\").\n- world: planet.\n\nAlso \"American\" indicates nationality: United States.\n\nNow produce JSON format:\n\n{\n \"triplets\": [\n   {subject..., relation..., object..., qualifiers: [], subject_type, object_type},\n   ...\n ]\n}\n\nMake sure each dict includes qualifiers list (empty if none). Provide object_type.\n\nLet's list all triplets:\n\n1. Ashley Furniture Industries – relation: \"country of origin\" (or \"country\") – object: United States – qualifiers [] – subject_type \"company\" – object_type \"country\".\n\n2. Ashley Furniture Industries – relation: \"headquarters location\" – object: Arcadia, Wisconsin – qualifiers [] – subject_type \"company\" – object_type \"city\".\n\n3. Ashley Furniture Industries – relation: \"owner\" – object: Ron Wanek – qualifiers [] – subject_type \"company\" – object_type \"human\".\n\n4. Ashley Furniture Industries – relation: \"owner\" – object: Todd Wanek – qualifiers [] – subject_type \"company\" – object_type \"human\".\n\n5. Ashley Furniture Industries – relation: \"industry\" – object: \"home furnishings manufacturing\" – qualifiers [] – subject_type \"company\" – object_type \"industry\". Might also have \"industry\" = \"retail\". Could separate.\n\nBetter: two industry relations:\n\n5a. industry: \"home furnishings manufacturing\" (type: \"industry\").\n\n5b. industry: \"retail\" (type: \"industry\").\n\nBut the phrase \"home furnishings manufacturer and retailer\". So we can have two.\n\n6. Ashley Furniture Industries – relation: \"produces\" – object: \"home furniture\" – qualifiers [] – subject_type \"company\" – object_type \"product\".\n\n7. Ashley Furniture Industries – relation: \"distributes\" – object: \"home furniture\" – qualifiers [{\"relation\":\"geographic scope\",\"object\":\"world\",\"object_type\":\"planet\"}] – subject_type \"company\" – object_type \"product\".\n\nPotential also \"distribution area\" relation: \"world\". But we already have qualifier.\n\nNow ensure each object_type appropriate.\n\n- \"home furnishings manufacturing\" maybe type \"industry\". \"retail\" type \"industry\". Could also be \"sector\". We'll use \"industry\".\n\n- \"home furniture\" type \"product\".\n\nNow produce JSON.\n\nCheck format: top-level key \"triplets\": list.\n\nEach dict includes keys: \"subject\", \"relation\", \"object\", \"qualifiers\", \"subject_type\", \"object_type\". Qualifiers list of dicts each with \"relation\",\"object\",\"object_type\". Ensure no extra keys.\n\nNow produce final answer.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText:\n\n\"Ashley Furniture Industries\n\nAshley Furniture Industries, Inc. is an American home furnishings manufacturer and retailer, headquartered in Arcadia, Wisconsin. The company is owned by father and son team Ron and Todd Wanek. Ashley Furniture manufactures and distributes home furniture products throughout the world.\"\n\nWe need to parse entities:\n\n- Ashley Furniture Industries, Inc. (entity: Ashley Furniture Industries) – type: company (maybe \"company\" or \"business\" or \"manufacturer\"? We'll use \"company\".)\n- It is an American home furnishings manufacturer and retailer. So relations: \"country of origin\" or \"location\" maybe \"headquarters location\". Also \"industry\" or \"sector\". Let's break:\n\n1. Subject: Ashley Furniture Industries (or Ashley Furniture Industries, Inc.) – relation: \"instance of\" maybe not needed. But we need factual relations.\n\n- \"is an American home furnishings manufacturer and retailer\" => we can have two relations: \"industry\" or \"sector\" = \"home furnishings manufacturing\" and \"industry\" = \"retail\". Or \"occupation\"? For a company, we can use \"industry\" relation. Also \"country\" = \"United States\". So:\n\nTriplet: subject: Ashley Furniture Industries, relation: \"country\", object: United States (type: country). Or \"headquarters location\": Arcadia, Wisconsin (type: city). Also \"headquarters location\" maybe with qualifiers: \"state\" etc.\n\n- \"headquartered in Arcadia, Wisconsin.\" So relation: \"headquarters location\" object: Arcadia, Wisconsin (type: city). Could also have qualifier \"state\" but not needed.\n\n- \"The company is owned by father and son team Ron and Todd Wanek.\" So relation: \"owner\" object: Ron Wanek (type: human) and also \"owner\" object: Todd Wanek (type: human). Also maybe \"owner\" relation with qualifier \"relationship\" = \"father and son team\"? But we can just have two owner relations.\n\n- \"Ashley Furniture manufactures and distributes home furniture products throughout the world.\" So relation: \"product\" maybe \"home furniture\" (type: product). Or \"manufactures\" relation: \"manufactured product\" = \"home furniture\". Also \"distributes\" relation: \"distribution area\" = \"world\". Could have two separate relations: \"produces\" and \"distributes\". We'll create:\n\nTriplet: subject: Ashley Furniture Industries, relation: \"produces\", object: \"home furniture\", object_type: \"product\". Qualifier maybe \"scope\" = \"worldwide\"? But we have separate \"distributes\" relation.\n\nTriplet: subject: Ashley Furniture Industries, relation: \"distributes\", object: \"home furniture\", object_type: \"product\". Qualifier: \"geographic scope\" = \"world\". Or we could have object \"world\" type \"planet\". Use qualifier.\n\nBetter: relation \"distribution area\" object \"world\". But we need to tie to product. Could use \"distributes\" with qualifier \"geographic scope\". We'll do:\n\nsubject: Ashley Furniture Industries, relation: \"distributes\", object: \"home furniture\", qualifiers: [{\"relation\":\"geographic scope\",\"object\":\"world\",\"object_type\":\"planet\"}].\n\nNow define types:\n\n- Ashley Furniture Industries: company (type: \"company\").\n- United States: country.\n- Arcadia, Wisconsin: city (maybe \"city\").\n- Ron Wanek: human.\n- Todd Wanek: human.\n- home furniture: product (type: \"product\").\n- world: planet.\n\nAlso \"American\" indicates nationality: United States.\n\nNow produce JSON format:\n\n{\n \"triplets\": [\n   {subject..., relation..., object..., qualifiers: [], subject_type, object_type},\n   ...\n ]\n}\n\nMake sure each dict includes qualifiers list (empty if none). Provide object_type.\n\nLet's list all triplets:\n\n1. Ashley Furniture Industries – relation: \"country of origin\" (or \"country\") – object: United States – qualifiers [] – subject_type \"company\" – object_type \"country\".\n\n2. Ashley Furniture Industries – relation: \"headquarters location\" – object: Arcadia, Wisconsin – qualifiers [] – subject_type \"company\" – object_type \"city\".\n\n3. Ashley Furniture Industries – relation: \"owner\" – object: Ron Wanek – qualifiers [] – subject_type \"company\" – object_type \"human\".\n\n4. Ashley Furniture Industries – relation: \"owner\" – object: Todd Wanek – qualifiers [] – subject_type \"company\" – object_type \"human\".\n\n5. Ashley Furniture Industries – relation: \"industry\" – object: \"home furnishings manufacturing\" – qualifiers [] – subject_type \"company\" – object_type \"industry\". Might also have \"industry\" = \"retail\". Could separate.\n\nBetter: two industry relations:\n\n5a. industry: \"home furnishings manufacturing\" (type: \"industry\").\n\n5b. industry: \"retail\" (type: \"industry\").\n\nBut the phrase \"home furnishings manufacturer and retailer\". So we can have two.\n\n6. Ashley Furniture Industries – relation: \"produces\" – object: \"home furniture\" – qualifiers [] – subject_type \"company\" – object_type \"product\".\n\n7. Ashley Furniture Industries – relation: \"distributes\" – object: \"home furniture\" – qualifiers [{\"relation\":\"geographic scope\",\"object\":\"world\",\"object_type\":\"planet\"}] – subject_type \"company\" – object_type \"product\".\n\nPotential also \"distribution area\" relation: \"world\". But we already have qualifier.\n\nNow ensure each object_type appropriate.\n\n- \"home furnishings manufacturing\" maybe type \"industry\". \"retail\" type \"industry\". Could also be \"sector\". We'll use \"industry\".\n\n- \"home furniture\" type \"product\".\n\nNow produce JSON.\n\nCheck format: top-level key \"triplets\": list.\n\nEach dict includes keys: \"subject\", \"relation\", \"object\", \"qualifiers\", \"subject_type\", \"object_type\". Qualifiers list of dicts each with \"relation\",\"object\",\"object_type\". Ensure no extra keys.\n\nNow produce final answer.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1406,
+      "completion_tokens": 1712,
+      "total_tokens": 3118,
+      "cost": 0.00035034,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00035034,
+        "upstream_inference_prompt_cost": 4.218e-05,
+        "upstream_inference_completions_cost": 0.00030816
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1267,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"headquarters location\",\n            \"object\": \"Arcadia, Wisconsin\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"owner\",\n            \"object\": \"Ron Wanek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"owner\",\n            \"object\": \"Todd Wanek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"industry\",\n            \"object\": \"home furnishings manufacturing\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"industry\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"industry\",\n            \"object\": \"retail\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"industry\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"produces\",\n            \"object\": \"home furniture\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"product\"\n        },\n        {\n            \"subject\": \"Ashley Furniture Industries\",\n            \"relation\": \"distributes\",\n            \"object\": \"home furniture\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"geographic scope\",\n                    \"object\": \"world\",\n                    \"object_type\": \"planet\"\n                }\n            ],\n            \"subject_type\": \"company\",\n            \"object_type\": \"product\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Ashley Furniture Industries",
+        "relation": "country",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "company",
+        "object_type": "country"
+      },
+      {
+        "subject": "Ashley Furniture Industries",
+        "relation": "headquarters location",
+        "object": "Arcadia, Wisconsin",
+        "qualifiers": [],
+        "subject_type": "company",
+        "object_type": "city"
+      },
+      {
+        "subject": "Ashley Furniture Industries",
+        "relation": "owner",
+        "object": "Ron Wanek",
+        "qualifiers": [],
+        "subject_type": "company",
+        "object_type": "human"
+      },
+      {
+        "subject": "Ashley Furniture Industries",
+        "relation": "owner",
+        "object": "Todd Wanek",
+        "qualifiers": [],
+        "subject_type": "company",
+        "object_type": "human"
+      },
+      {
+        "subject": "Ashley Furniture Industries",
+        "relation": "industry",
+        "object": "home furnishings manufacturing",
+        "qualifiers": [],
+        "subject_type": "company",
+        "object_type": "industry"
+      },
+      {
+        "subject": "Ashley Furniture Industries",
+        "relation": "industry",
+        "object": "retail",
+        "qualifiers": [],
+        "subject_type": "company",
+        "object_type": "industry"
+      },
+      {
+        "subject": "Ashley Furniture Industries",
+        "relation": "produces",
+        "object": "home furniture",
+        "qualifiers": [],
+        "subject_type": "company",
+        "object_type": "product"
+      },
+      {
+        "subject": "Ashley Furniture Industries",
+        "relation": "distributes",
+        "object": "home furniture",
+        "qualifiers": [
+          {
+            "relation": "geographic scope",
+            "object": "world"
+          }
+        ],
+        "subject_type": "company",
+        "object_type": "product"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1406,
+    "completion_tokens": 1712,
+    "total_tokens": 3118,
+    "cost": 0.00035034,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00035034,
+      "upstream_inference_prompt_cost": 4.218e-05,
+      "upstream_inference_completions_cost": 0.00030816
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1267,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 695,
+    "output_tokens_est": 568
+  },
+  "attempts": 1,
+  "latency_s": 29.86158096299914,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T19:14:16.770905+00:00",
+  "cache_key": "dac69790114d1b3bb924bc256151197d"
+}

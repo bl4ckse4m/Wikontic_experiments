@@ -1,0 +1,139 @@
+{
+  "task": {
+    "input_id": "c401858af9e3c3c0",
+    "input_hash": "ef1b148b85e9ce5c4f4ea117c4897079dd7063dc7cfbe3ffcc35ddebf7a69f4f",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-37dd8e4f5c85e16d65af112f20485dd8",
+    "object": "chat.completion",
+    "created": 1791521180,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"located in\",\n            \"object\": \"Orchard Central #02-02\",\n            \"qualifiers\": [],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"shopping mall\"\n        },\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"moved out of\",\n            \"object\": \"Caldecott Hill\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"20 August 2009\"\n                }\n            ],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"last day of tenancy at\",\n            \"object\": \"Orchard Central\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"7 July 2012\"\n                }\n            ],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"shopping mall\"\n        },\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"moved to\",\n            \"object\": \"Caldecott Hill\",\n            \"qualifiers\": [],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"moved to\",\n            \"object\": \"Mediacorp Campus, Mediapolis @ one-north\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"17 January 2017\"\n                }\n            ],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"campus\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need extract explicit facts.\n\nEntities: Lush 99.5FM (radio station). Orchard Central (shopping mall). Caldecott Hill (location). MediaCorp (organisation). Mediacorp Campus, Mediapolis @ one-north (location). Dates.\n\nSentences:\n\n1. \"Lush 99.5FM was the first English radio station in Singapore to be located in a shopping mall (Orchard Central #02-02), and was also the first MediaCorp radio station to move out of Caldecott Hill on 20 August 2009.\"\n\nFacts:\n\n- Lush 99.5FM - relation: \"first English radio station in Singapore to be located in a shopping mall\". That's a claim about being first. Could map to relation \"first to be located in\" with object \"shopping mall\". But we need simple relation. Maybe \"first location\" not typical. Could use \"first English radio station in Singapore\" as attribute? Might break into two: (subject Lush 99.5FM, relation \"country of operation\" or \"location\", object \"Singapore\") but not explicit. The explicit claim: \"first English radio station in Singapore to be located in a shopping mall (Orchard Central #02-02)\". So we can create triplet: subject Lush 99.5FM, relation \"first location\", object \"Orchard Central #02-02\". Qualifier: \"point in time\"? Not given. Could add qualifier \"type\" maybe not needed. Also relation \"first English radio station in Singapore\" maybe separate: subject Lush 99.5FM, relation \"first English radio station in Singapore\", object \"true\". That's weird.\n\nBetter to capture: Lush 99.5FM - relation \"located in\" - object \"Orchard Central #02-02\". Qualifier: \"first English radio station in Singapore\" as qualifier maybe \"first\" but we have qualifier type \"first\" not defined. Could use \"qualifier\": {\"relation\":\"first\", \"object\":\"true\"}? Not defined.\n\nMaybe we treat as two facts: (Lush 99.5FM, relation \"located in\", object \"Orchard Central #02-02\") with qualifier \"point in time\": unknown (maybe initial location). Also (Lush 99.5FM, relation \"owned by\", object \"MediaCorp\")? Not explicit but \"first MediaCorp radio station to move out of Caldecott Hill\". Implies MediaCorp radio station. So Lush 99.5FM is a MediaCorp radio station. Could have relation \"owner\" or \"parent organization\". Not explicit but \"MediaCorp radio station\" suggests it's part of MediaCorp. Might be safe to include.\n\nSecond part: \"first MediaCorp radio station to move out of Caldecott Hill on 20 August 2009.\"\n\nTriplet: Lush 99.5FM - relation \"moved out of\" - object \"Caldecott Hill\". Qualifier: point in time \"20 August 2009\". Also qualifier \"first\" maybe but not required.\n\n2. \"Lush 99.5FM's last day of tenancy at Orchard Central was 7 July 2012; the station has since moved back to Caldecott Hill.\"\n\nTriplet: Lush 99.5FM - relation \"last day of tenancy at\" - object \"Orchard Central\". Qualifier: point in time \"7 July 2012\". Also \"moved back to\" - relation \"moved to\" - object \"Caldecott Hill\". Qualifier: \"point in time\": after 7 July 2012 (not exact). Could maybe not include time.\n\n3. \"Lush 99.5FM moved again to the brand new Mediacorp Campus, Mediapolis @ one-north, on 17 January 2017.\"\n\nTriplet: Lush 99.5FM - relation \"moved to\" - object \"Mediacorp Campus, Mediapolis @ one-north\". Qualifier: point in time \"17 January 2017\".\n\nAlso we may need entity types: Lush 99.5FM - radio station (type \"radio station\"). Orchard Central - shopping mall (type \"shopping mall\"). Caldecott Hill - location (maybe \"area\" or \"place\"). Mediacorp Campus, Mediapolis @ one-north - location (maybe \"campus\").\n\nNow produce JSON list.\n\nWe need qualifiers list for each triplet.\n\nLet's craft:\n\n1. {\"subject\":\"Lush 99.5FM\",\"relation\":\"located in\",\"object\":\"Orchard Central #02-02\",\"qualifiers\":[{\"relation\":\"first English radio station in Singapore\",\"object\":\"true\"}],\"subject_type\":\"radio station\",\"object_type\":\"shopping mall\"}\n\nBut qualifier relation not standard. Maybe we can use \"qualifier\": {\"relation\":\"first\", \"object\":\"true\"} but not defined. The spec says qualifiers can be any relation like \"point in time\", \"place\", \"polarity\", etc. \"first\" not listed. Might be okay to use custom? Probably not. Safer to not include that qualifier; just capture location fact. The \"first\" claim is a separate fact: Lush 99.5FM - relation \"first English radio station in Singapore to be located in a shopping mall\". Could treat as relation \"first English radio station in Singapore to be located in a shopping mall\" with object \"true\". But that's weird.\n\nMaybe we can create a relation \"first to be located in\" with object \"shopping mall\". Qualifier \"place\": \"Orchard Central #02-02\". That captures first claim.\n\nLet's do:\n\nTriplet: subject Lush 99.5FM, relation \"first to be located in\", object \"shopping mall\", qualifiers [{\"relation\":\"place\",\"object\":\"Orchard Central #02-02\"}].\n\nSecond: Lush 99.5FM, relation \"first MediaCorp radio station to move out of\", object \"Caldecott Hill\", qualifiers [{\"relation\":\"point in time\",\"object\":\"20 August 2009\"}].\n\nBut maybe better to separate: relation \"moved out of\" with qualifier \"first MediaCorp radio station\". Use qualifier \"first\" not allowed. Hmm.\n\nGiven constraints, we may keep simple factual statements without \"first\" qualifiers.\n\nThus produce:\n\n- located in Orchard Central #02-02 (no time)\n- moved out of Caldecott Hill (point in time 20 August 2009)\n- last day of tenancy at Orchard Central (point in time 7 July 2012)\n- moved to Caldecott Hill (no time)\n- moved to Mediacorp Campus, Mediapolis @ one-north (point in time 17 January 2017)\n\nAlso maybe include that Orchard Central is a shopping mall (type). Not required.\n\nLet's craft JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1725,
+      "total_tokens": 3560,
+      "completion_tokens": 1835,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"located in\",\n            \"object\": \"Orchard Central #02-02\",\n            \"qualifiers\": [],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"shopping mall\"\n        },\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"moved out of\",\n            \"object\": \"Caldecott Hill\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"20 August 2009\"\n                }\n            ],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"last day of tenancy at\",\n            \"object\": \"Orchard Central\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"7 July 2012\"\n                }\n            ],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"shopping mall\"\n        },\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"moved to\",\n            \"object\": \"Caldecott Hill\",\n            \"qualifiers\": [],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Lush 99.5FM\",\n            \"relation\": \"moved to\",\n            \"object\": \"Mediacorp Campus, Mediapolis @ one-north\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"17 January 2017\"\n                }\n            ],\n            \"subject_type\": \"radio station\",\n            \"object_type\": \"campus\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Lush 99.5FM",
+        "relation": "located in",
+        "object": "Orchard Central #02-02",
+        "qualifiers": [],
+        "subject_type": "radio station",
+        "object_type": "shopping mall"
+      },
+      {
+        "subject": "Lush 99.5FM",
+        "relation": "moved out of",
+        "object": "Caldecott Hill",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "20 August 2009"
+          }
+        ],
+        "subject_type": "radio station",
+        "object_type": "place"
+      },
+      {
+        "subject": "Lush 99.5FM",
+        "relation": "last day of tenancy at",
+        "object": "Orchard Central",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "7 July 2012"
+          }
+        ],
+        "subject_type": "radio station",
+        "object_type": "shopping mall"
+      },
+      {
+        "subject": "Lush 99.5FM",
+        "relation": "moved to",
+        "object": "Caldecott Hill",
+        "qualifiers": [],
+        "subject_type": "radio station",
+        "object_type": "place"
+      },
+      {
+        "subject": "Lush 99.5FM",
+        "relation": "moved to",
+        "object": "Mediacorp Campus, Mediapolis @ one-north",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "17 January 2017"
+          }
+        ],
+        "subject_type": "radio station",
+        "object_type": "campus"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1725,
+    "total_tokens": 3560,
+    "completion_tokens": 1835,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 531,
+    "output_tokens_est": 439
+  },
+  "attempts": 1,
+  "latency_s": 22.262194366994663,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:46:42.800985+00:00",
+  "cache_key": "c7c2b9034045a65f78a68e8570f59e61"
+}

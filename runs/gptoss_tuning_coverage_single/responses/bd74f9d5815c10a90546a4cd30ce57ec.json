@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "0f1cf4013a0127c8",
+    "input_hash": "1dfd0bcf860dceeb165400c42f32432d5cb804818325492edc026b3dddecf640",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a617fda466f52bf81545e83511d6d644",
+    "object": "chat.completion",
+    "created": 1791501050,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"type of\",\n            \"object\": \"international agreement\",\n            \"qualifiers\": [],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"agreement type\"\n        },\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"signatory\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"signatory\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"allows implementation of\",\n            \"object\": \"Foreign Account Tax Compliance Act\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Canada\"\n                }\n            ],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"law\"\n        },\n        {\n            \"subject\": \"Foreign Account Tax Compliance Act\",\n            \"relation\": \"enacted by\",\n            \"object\": \"U.S. Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"law\",\n            \"object_type\": \"government body\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"concluded\",\n            \"object\": \"intergovernmental agreement\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"30\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"agreement\"\n        },\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"instance of\",\n            \"object\": \"intergovernmental agreement\",\n            \"qualifiers\": [],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"agreement\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"FATCA agreement between Canada and the United States\n\nThe FATCA agreement is an international agreement signed between Canada and the United States that allows the implementation of the Foreign Account Tax Compliance Act (an Act of the U.S. Congress) in Canada. It is one of 30 intergovernmental agreements the US has concluded ...\"\n\nWe need entities: FATCA agreement (maybe \"FATCA agreement (Canada–United States)\"?), Canada, United States, Foreign Account Tax Compliance Act, U.S. Congress, intergovernmental agreements, US (United States). Relations: type: international agreement, signatory, allows implementation of, implementation location, number of agreements, concluded by.\n\nLet's produce triplets:\n\n1. (FATCA agreement (Canada–United States), instance of, international agreement) maybe relation \"instance of\" or \"type\". Use \"type of\" maybe. Use \"type of\" relation.\n\n2. (FATCA agreement (Canada–United States), signatory, Canada) and also signatory United States. Could be separate triplets.\n\n3. (FATCA agreement (Canada–United States), signatory, United States).\n\n4. (FATCA agreement (Canada–United States), enables, implementation of Foreign Account Tax Compliance Act) maybe relation \"allows implementation of\". Use \"enables\" or \"allows implementation of\". We'll use \"allows implementation of\".\n\n5. (Foreign Account Tax Compliance Act, instance of, act) maybe \"type of\". Also \"legislated by\", \"U.S. Congress\". So (Foreign Account Tax Compliance Act, enacted by, U.S. Congress).\n\n6. (implementation of Foreign Account Tax Compliance Act, location, Canada). But we can phrase: (Foreign Account Tax Compliance Act, implemented in, Canada) with qualifier maybe \"point in time\"? Not given. So separate triplet: (Foreign Account Tax Compliance Act, implemented in, Canada). However the text says \"allows the implementation ... in Canada\". So we can have (FATCA agreement (Canada–United States), allows implementation of, Foreign Account Tax Compliance Act) with qualifier location Canada. But qualifiers are attached to triplet. So we can have qualifier: {\"relation\":\"location\",\"object\":\"Canada\"}.\n\n7. (United States, concluded, intergovernmental agreements) but the text: \"It is one of 30 intergovernmental agreements the US has concluded with other countries\". So we need a triplet: (FATCA agreement (Canada–United States), instance of, intergovernmental agreement) maybe. Also (United States, concluded, intergovernmental agreements) with qualifier count 30? Actually \"one of 30 intergovernmental agreements the US has concluded\". So we can have (United States, concluded, intergovernmental agreement) with qualifier {\"relation\":\"quantity\",\"object\":\"30\"}? Not sure relation name. Could use \"count\" but not defined. Maybe \"quantity\" is okay. Use \"quantity\" relation.\n\nBut we need to follow allowed qualifiers: relation names like \"point in time\", \"location\", \"polarity\", \"modality\", etc. Not defined for quantity. Might just make a separate triplet: (United States, concluded, intergovernmental agreement) and another triplet: (United States, number of concluded intergovernmental agreements, 30). But relation \"number of\" maybe.\n\nBetter: (United States, concluded, intergovernmental agreement) with qualifier {\"relation\":\"quantity\",\"object\":\"30\"} but \"quantity\" not listed. However guidelines didn't restrict qualifiers to a set; they gave examples but not exhaustive. So we can use \"quantity\". Might be okay.\n\nAlso need subject_type and object_type.\n\nDefine types: FATCA agreement (Canada–United States) -> \"agreement\". Canada -> \"country\". United States -> \"country\". Foreign Account Tax Compliance Act -> \"law\". U.S. Congress -> \"government body\". Intergovernmental agreement -> \"agreement\". Implementation location -> \"country\". etc.\n\nLet's construct list.\n\nTriplet 1:\nsubject: \"FATCA agreement (Canada–United States)\"\nrelation: \"type of\"\nobject: \"international agreement\"\nqualifiers: []\nsubject_type: \"agreement\"\nobject_type: \"agreement type\"\n\nTriplet 2:\nsubject: \"FATCA agreement (Canada–United States)\"\nrelation: \"signatory\"\nobject: \"Canada\"\nqualifiers: []\nsubject_type: \"agreement\"\nobject_type: \"country\"\n\nTriplet 3:\nsubject: \"FATCA agreement (Canada–United States)\"\nrelation: \"signatory\"\nobject: \"United States\"\nqualifiers: []\nsubject_type: \"agreement\"\nobject_type: \"country\"\n\nTriplet 4:\nsubject: \"FATCA agreement (Canada–United States)\"\nrelation: \"allows implementation of\"\nobject: \"Foreign Account Tax Compliance Act\"\nqualifiers: [{\"relation\":\"location\",\"object\":\"Canada\"}]\nsubject_type: \"agreement\"\nobject_type: \"law\"\n\nTriplet 5:\nsubject: \"Foreign Account Tax Compliance Act\"\nrelation: \"enacted by\"\nobject: \"U.S. Congress\"\nqualifiers: []\nsubject_type: \"law\"\nobject_type: \"government body\"\n\nTriplet 6:\nsubject: \"United States\"\nrelation: \"concluded\"\nobject: \"intergovernmental agreement\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"30\"}]\nsubject_type: \"country\"\nobject_type: \"agreement\"\n\nTriplet 7:\nsubject: \"FATCA agreement (Canada–United States)\"\nrelation: \"instance of\"\nobject: \"intergovernmental agreement\"\nqualifiers: []\nsubject_type: \"agreement\"\nobject_type: \"agreement\"\n\nBut maybe duplicate with type of. Could keep both.\n\nAlso maybe \"intergovernmental agreements the US has concluded with other countries\" indicates that US concluded 30 agreements including this one. So we could have (United States, concluded, \"intergovernmental agreement\") with qualifier quantity 30. Good.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1658,
+      "total_tokens": 3357,
+      "completion_tokens": 1699,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"type of\",\n            \"object\": \"international agreement\",\n            \"qualifiers\": [],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"agreement type\"\n        },\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"signatory\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"signatory\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"allows implementation of\",\n            \"object\": \"Foreign Account Tax Compliance Act\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Canada\"\n                }\n            ],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"law\"\n        },\n        {\n            \"subject\": \"Foreign Account Tax Compliance Act\",\n            \"relation\": \"enacted by\",\n            \"object\": \"U.S. Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"law\",\n            \"object_type\": \"government body\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"concluded\",\n            \"object\": \"intergovernmental agreement\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"30\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"agreement\"\n        },\n        {\n            \"subject\": \"FATCA agreement (Canada–United States)\",\n            \"relation\": \"instance of\",\n            \"object\": \"intergovernmental agreement\",\n            \"qualifiers\": [],\n            \"subject_type\": \"agreement\",\n            \"object_type\": \"agreement\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "FATCA agreement (Canada–United States)",
+        "relation": "type of",
+        "object": "international agreement",
+        "qualifiers": [],
+        "subject_type": "agreement",
+        "object_type": "agreement type"
+      },
+      {
+        "subject": "FATCA agreement (Canada–United States)",
+        "relation": "signatory",
+        "object": "Canada",
+        "qualifiers": [],
+        "subject_type": "agreement",
+        "object_type": "country"
+      },
+      {
+        "subject": "FATCA agreement (Canada–United States)",
+        "relation": "signatory",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "agreement",
+        "object_type": "country"
+      },
+      {
+        "subject": "FATCA agreement (Canada–United States)",
+        "relation": "allows implementation of",
+        "object": "Foreign Account Tax Compliance Act",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Canada"
+          }
+        ],
+        "subject_type": "agreement",
+        "object_type": "law"
+      },
+      {
+        "subject": "Foreign Account Tax Compliance Act",
+        "relation": "enacted by",
+        "object": "U.S. Congress",
+        "qualifiers": [],
+        "subject_type": "law",
+        "object_type": "government body"
+      },
+      {
+        "subject": "United States",
+        "relation": "concluded",
+        "object": "intergovernmental agreement",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "30"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "agreement"
+      },
+      {
+        "subject": "FATCA agreement (Canada–United States)",
+        "relation": "instance of",
+        "object": "intergovernmental agreement",
+        "qualifiers": [],
+        "subject_type": "agreement",
+        "object_type": "agreement"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1658,
+    "total_tokens": 3357,
+    "completion_tokens": 1699,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 648,
+    "output_tokens_est": 555
+  },
+  "attempts": 1,
+  "latency_s": 20.858274040998367,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:11:11.528188+00:00",
+  "cache_key": "bd74f9d5815c10a90546a4cd30ce57ec"
+}

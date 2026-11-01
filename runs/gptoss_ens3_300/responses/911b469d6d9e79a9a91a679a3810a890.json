@@ -1,0 +1,162 @@
+{
+  "task": {
+    "input_id": "16942cb24a0e3092",
+    "input_hash": "a22eb7bb12ad128d2e7b1b271b5ad5cda48e272c89504c98980044e05f77ae5e",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-98327e768332a0b101f1fdff63993ca6",
+    "object": "chat.completion",
+    "created": 1791548222,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"date of birth\",\n            \"object\": \"June 19, 1946\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"date of death\",\n            \"object\": \"August 4, 2014\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"occupation\",\n            \"object\": \"politician\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"political party\",\n            \"object\": \"Republican Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"position held\",\n            \"object\": \"Member of Arizona Senate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"January 14, 2013\"\n                },\n                {\n                    \"relation\": \"electoral district\",\n                    \"object\": \"Arizona Senate District 6\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"position held\",\n            \"object\": \"Member of Arizona House of Representatives\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"January 10, 2011\"\n                },\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"January 14, 2013\"\n                },\n                {\n                    \"relation\": \"electoral district\",\n                    \"object\": \"Arizona House District 5\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nIdentify entities: Chester J. Crandell (also Chester Crandell). Subject type human. Relations:\n\n- date of birth: June 19, 1946\n- date of death: August 4, 2014\n- occupation: politician (maybe also \"American politician\"? occupation: politician)\n- nationality: American? Could use relation \"country of citizenship\" maybe but not required. Not explicit \"American\" as adjective; it's \"was an American politician\". Could extract \"country of citizenship\" or \"nationality\". Use \"country of citizenship\" relation, object \"United States\". but we need to be careful: It's explicit \"American\". So we can have relation \"country of citizenship\" with object \"United States\". We'll assign object_type \"country\".\n\n- political affiliation: Republican (member of Republican). relation \"political party\" object \"Republican Party\". subject_type human, object_type political party.\n\n- position: member of the Arizona Senate representing District 6 since January 14, 2013. So relation \"position held\" object \"Member of Arizona Senate\". Could also split: \"legislative body\" but we need object as entity. Use \"position held\" with qualifiers: point in time start \"January 14, 2013\". Also maybe \"district represented\" as qualifier \"District 6\". Could also have separate relation \"electoral district\" or \"representative of\". Use qualifier \"electoral district\" object \"Arizona Senate District 6\". We'll include qualifier.\n\n- served consecutively in the Arizona State Legislature from Jan 10 2011 until Jan 14 2013 in the Arizona House of Representatives District 5 seat.\n\nSo another position held: \"Member of Arizona House of Representatives\". qualifiers: point in time start \"January 10, 2011\", point in time end \"January 14, 2013\", and district \"District 5\". Also maybe \"legislative body\" but okay.\n\nWe need to include \"member of Arizona Senate\" as position. Also \"member of Arizona House of Representatives\". Also \"member of Arizona State Legislature\" is generic but we have specifics.\n\nNow format.\n\nEach triplet dict fields: subject, relation, object, qualifiers (list of dicts), subject_type, object_type.\n\nDefine relation names: \"date of birth\", \"date of death\", \"occupation\", \"country of citizenship\", \"political party\", \"position held\", maybe \"electoral district\" as qualifier? But qualifiers must have relation and object. For qualifiers we can use \"point in time\", \"end time\", \"electoral district\". Use \"electoral district\" relation.\n\nMake sure object_type appropriate: date, profession, country, political party, position (maybe \"political office\"), district (maybe \"electoral district\").\n\nNow produce JSON list.\n\nLet's craft.\n\nTriplet 1: subject \"Chester J. Crandell\", relation \"date of birth\", object \"June 19, 1946\", qualifiers [], subject_type \"human\", object_type \"date\".\n\nTriplet 2: \"date of death\": \"August 4, 2014\".\n\nTriplet 3: occupation \"politician\". subject_type human, object_type \"profession\".\n\nTriplet 4: country of citizenship \"United States\". object_type \"country\".\n\nTriplet 5: political party \"Republican Party\". object_type \"political party\".\n\nTriplet 6: position held \"Member of Arizona Senate\". qualifiers: point in time start \"January 14, 2013\". Also maybe \"electoral district\" \"Arizona Senate District 6\". So qualifiers list two dicts.\n\nobject_type: \"political office\".\n\nTriplet 7: position held \"Member of Arizona House of Representatives\". qualifiers: point in time start \"January 10, 2011\", end time \"January 14, 2013\", electoral district \"Arizona House District 5\". object_type \"political office\".\n\nCheck that \"electoral district\" may be object_type \"electoral district\".\n\nNow output JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1678,
+      "total_tokens": 3074,
+      "completion_tokens": 1396,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"date of birth\",\n            \"object\": \"June 19, 1946\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"date of death\",\n            \"object\": \"August 4, 2014\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"occupation\",\n            \"object\": \"politician\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"political party\",\n            \"object\": \"Republican Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"position held\",\n            \"object\": \"Member of Arizona Senate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"January 14, 2013\"\n                },\n                {\n                    \"relation\": \"electoral district\",\n                    \"object\": \"Arizona Senate District 6\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Chester J. Crandell\",\n            \"relation\": \"position held\",\n            \"object\": \"Member of Arizona House of Representatives\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"January 10, 2011\"\n                },\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"January 14, 2013\"\n                },\n                {\n                    \"relation\": \"electoral district\",\n                    \"object\": \"Arizona House District 5\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Chester J. Crandell",
+        "relation": "date of birth",
+        "object": "June 19, 1946",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Chester J. Crandell",
+        "relation": "date of death",
+        "object": "August 4, 2014",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Chester J. Crandell",
+        "relation": "occupation",
+        "object": "politician",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Chester J. Crandell",
+        "relation": "country of citizenship",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Chester J. Crandell",
+        "relation": "political party",
+        "object": "Republican Party",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "political party"
+      },
+      {
+        "subject": "Chester J. Crandell",
+        "relation": "position held",
+        "object": "Member of Arizona Senate",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "January 14, 2013"
+          },
+          {
+            "relation": "electoral district",
+            "object": "Arizona Senate District 6"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political office"
+      },
+      {
+        "subject": "Chester J. Crandell",
+        "relation": "position held",
+        "object": "Member of Arizona House of Representatives",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "January 10, 2011"
+          },
+          {
+            "relation": "end time",
+            "object": "January 14, 2013"
+          },
+          {
+            "relation": "electoral district",
+            "object": "Arizona House District 5"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political office"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1678,
+    "total_tokens": 3074,
+    "completion_tokens": 1396,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 736,
+    "output_tokens_est": 644
+  },
+  "attempts": 1,
+  "latency_s": 17.66911090600479,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:17:19.839649+00:00",
+  "cache_key": "911b469d6d9e79a9a91a679a3810a890"
+}

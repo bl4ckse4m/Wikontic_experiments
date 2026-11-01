@@ -1,0 +1,151 @@
+{
+  "task": {
+    "input_id": "935b7705d9cb1286",
+    "input_hash": "e51739ab72f3ded9b4341451b6c3a236def1b9ac79c6cfb99e9a3ac86bd02fea",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-bd8610f54da8324c855e8c4c72f9e8a3",
+    "object": "chat.completion",
+    "created": 1791512058,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"type of school\",\n            \"object\": \"public high school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"school type\"\n        },\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"located in\",\n            \"object\": \"Charlotte, Texas, USA\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"classification\",\n            \"object\": \"2A school\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"by\",\n                    \"object\": \"University Interscholastic League\"\n                }\n            ],\n            \"subject_type\": \"school\",\n            \"object_type\": \"school classification\"\n        },\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"part of\",\n            \"object\": \"Charlotte Independent School District\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"school district\"\n        },\n        {\n            \"subject\": \"Charlotte Independent School District\",\n            \"relation\": \"located in\",\n            \"object\": \"Atascosa County\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"central\"\n                }\n            ],\n            \"subject_type\": \"school district\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"rated\",\n            \"object\": \"Met Standard\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2015\"\n                },\n                {\n                    \"relation\": \"by\",\n                    \"object\": \"Texas Education Agency\"\n                }\n            ],\n            \"subject_type\": \"school\",\n            \"object_type\": \"rating\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: Charlotte High School (Texas) – school. Also Charlotte, Texas (city). Charlotte Independent School District. Atascosa County. Texas Education Agency. Also classification: 2A school by the UIL (University Interscholastic League). It's a public high school. Located in Charlotte, Texas, USA. Part of Charlotte Independent School District located in central Atascosa County. In 2015, the school was rated \"Met Standard\" by the Texas Education Agency.\n\nWe need subject_type and object_type. For school: \"human\"? No, it's an educational institution. So subject_type: \"educational institution\" or \"school\". Use \"school\". object types: \"public high school\" is type \"school type\"? Might be \"public high school\". For location: object is \"Charlotte, Texas, USA\" – type \"city\" or \"place\". Use \"city\". For classification: \"2A school\" – maybe object_type \"school classification\". For UIL: object_type \"organization\". For district: \"Charlotte Independent School District\" – type \"school district\". For county: \"Atascosa County\" – type \"county\". For rating: object \"Met Standard\" – type \"rating\". Agency: \"Texas Education Agency\" – type \"government agency\".\n\nNow create triplets:\n\n1. Subject: Charlotte High School (Texas) – relation: instance of / type – maybe \"type\" but not required. Could include \"school type\" as \"public high school\". Use relation \"type\" or \"school type\". In example they used \"occupation\". For school, maybe \"type of school\". We'll use relation \"type of school\". object: \"public high school\". qualifiers none.\n\n2. Subject: Charlotte High School (Texas) – relation: \"located in\" – object: \"Charlotte, Texas, USA\". qualifiers none.\n\n3. Subject: Charlotte High School (Texas) – relation: \"classification\" – object: \"2A school\". qualifiers maybe relation \"by\" with object \"University Interscholastic League\". But qualifiers must be attached to triplet. So main triplet: classification \"2A school\". qualifier: \"by\" -> \"University Interscholastic League\". So qualifiers list with one dict.\n\n4. Subject: Charlotte High School (Texas) – relation: \"part of\" – object: \"Charlotte Independent School District\". qualifiers none.\n\n5. Subject: Charlotte Independent School District – relation: \"located in\" – object: \"central Atascosa County\". Could also separate \"Atascosa County\". Use \"located in\" with qualifier \"region\" maybe \"central\". But we can include qualifier \"region\" relation \"central\". However qualifiers must be attached to triplet. So main triplet: district located in Atascosa County. qualifier: \"region\" -> \"central\". We'll do that.\n\n6. Subject: Charlotte High School (Texas) – relation: \"rated\" – object: \"Met Standard\". qualifiers: point in time 2015, by Texas Education Agency. Actually rating given by agency. Could have two qualifiers: \"point in time\": \"2015\", \"by\": \"Texas Education Agency\". Use qualifiers list.\n\n7. Possibly \"school is public\" but already captured in type.\n\nNow need subject_type and object_type.\n\nDefine:\n\n- subject_type for school: \"school\".\n- object_type for \"public high school\": \"school type\".\n- object_type for location: \"city\".\n- object_type for classification: \"school classification\".\n- object_type for UIL: \"organization\".\n- object_type for district: \"school district\".\n- object_type for county: \"county\".\n- object_type for rating: \"rating\".\n- object_type for agency: \"government agency\".\n\nNow produce JSON.\n\nCheck formatting: list of dicts with keys subject, relation, object, qualifiers (list of dicts), subject_type, object_type.\n\nMake sure qualifiers dicts have relation and object.\n\nLet's craft.\n\nTriplet 1:\n{\n \"subject\":\"Charlotte High School (Texas)\",\n \"relation\":\"type of school\",\n \"object\":\"public high school\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"school type\"\n}\n\nTriplet 2:\n{\n \"subject\":\"Charlotte High School (Texas)\",\n \"relation\":\"located in\",\n \"object\":\"Charlotte, Texas, USA\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"city\"\n}\n\nTriplet 3:\n{\n \"subject\":\"Charlotte High School (Texas)\",\n \"relation\":\"classification\",\n \"object\":\"2A school\",\n \"qualifiers\":[{\"relation\":\"by\",\"object\":\"University Interscholastic League\"}],\n \"subject_type\":\"school\",\n \"object_type\":\"school classification\"\n}\n\nTriplet 4:\n{\n \"subject\":\"Charlotte High School (Texas)\",\n \"relation\":\"part of\",\n \"object\":\"Charlotte Independent School District\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"school district\"\n}\n\nTriplet 5:\n{\n \"subject\":\"Charlotte Independent School District\",\n \"relation\":\"located in\",\n \"object\":\"Atascosa County\",\n \"qualifiers\":[{\"relation\":\"region\",\"object\":\"central\"}],\n \"subject_type\":\"school district\",\n \"object_type\":\"county\"\n}\n\nTriplet 6:\n{\n \"subject\":\"Charlotte High School (Texas)\",\n \"relation\":\"rated\",\n \"object\":\"Met Standard\",\n \"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"2015\"},{\"relation\":\"by\",\"object\":\"Texas Education Agency\"}],\n \"subject_type\":\"school\",\n \"object_type\":\"rating\"\n}\n\nPotential also include \"school is public\" but not needed.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1004,
+      "total_tokens": 2599,
+      "completion_tokens": 1595,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"type of school\",\n            \"object\": \"public high school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"school type\"\n        },\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"located in\",\n            \"object\": \"Charlotte, Texas, USA\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"classification\",\n            \"object\": \"2A school\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"by\",\n                    \"object\": \"University Interscholastic League\"\n                }\n            ],\n            \"subject_type\": \"school\",\n            \"object_type\": \"school classification\"\n        },\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"part of\",\n            \"object\": \"Charlotte Independent School District\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"school district\"\n        },\n        {\n            \"subject\": \"Charlotte Independent School District\",\n            \"relation\": \"located in\",\n            \"object\": \"Atascosa County\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"central\"\n                }\n            ],\n            \"subject_type\": \"school district\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Charlotte High School (Texas)\",\n            \"relation\": \"rated\",\n            \"object\": \"Met Standard\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2015\"\n                },\n                {\n                    \"relation\": \"by\",\n                    \"object\": \"Texas Education Agency\"\n                }\n            ],\n            \"subject_type\": \"school\",\n            \"object_type\": \"rating\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Charlotte High School (Texas)",
+        "relation": "type of school",
+        "object": "public high school",
+        "qualifiers": [],
+        "subject_type": "school",
+        "object_type": "school type"
+      },
+      {
+        "subject": "Charlotte High School (Texas)",
+        "relation": "located in",
+        "object": "Charlotte, Texas, USA",
+        "qualifiers": [],
+        "subject_type": "school",
+        "object_type": "city"
+      },
+      {
+        "subject": "Charlotte High School (Texas)",
+        "relation": "classification",
+        "object": "2A school",
+        "qualifiers": [
+          {
+            "relation": "by",
+            "object": "University Interscholastic League"
+          }
+        ],
+        "subject_type": "school",
+        "object_type": "school classification"
+      },
+      {
+        "subject": "Charlotte High School (Texas)",
+        "relation": "part of",
+        "object": "Charlotte Independent School District",
+        "qualifiers": [],
+        "subject_type": "school",
+        "object_type": "school district"
+      },
+      {
+        "subject": "Charlotte Independent School District",
+        "relation": "located in",
+        "object": "Atascosa County",
+        "qualifiers": [
+          {
+            "relation": "region",
+            "object": "central"
+          }
+        ],
+        "subject_type": "school district",
+        "object_type": "county"
+      },
+      {
+        "subject": "Charlotte High School (Texas)",
+        "relation": "rated",
+        "object": "Met Standard",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2015"
+          },
+          {
+            "relation": "by",
+            "object": "Texas Education Agency"
+          }
+        ],
+        "subject_type": "school",
+        "object_type": "rating"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1004,
+    "total_tokens": 2599,
+    "completion_tokens": 1595,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 648,
+    "output_tokens_est": 550
+  },
+  "attempts": 1,
+  "latency_s": 18.919820631999755,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:14:38.087870+00:00",
+  "cache_key": "8c5fd725caeaf47bb66261a08df5bcdb"
+}

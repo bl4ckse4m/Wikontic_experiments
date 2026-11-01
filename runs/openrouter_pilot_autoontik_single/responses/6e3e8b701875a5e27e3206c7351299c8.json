@@ -1,0 +1,171 @@
+{
+  "task": {
+    "input_id": "e58b236742858282",
+    "input_hash": "21e6e5f77fabbef7affa011b91ea3a99b8166c6204db0da70ff13209dfe4eae5",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793213201-GRhJ2wMXtM7mOpBg2uyz",
+    "object": "chat.completion",
+    "created": 1793213201,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Near AI",
+    "system_fingerprint": "vllm-0.31.0-5e5536ce",
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"date of birth\",\n            \"object\": \"June 15, 1984\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Freetown\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"nationality\",\n            \"object\": \"Sierra Leone\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"occupation\",\n            \"object\": \"footballer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"member of sports team\",\n            \"object\": \"Ports Authority F.C.\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"league\",\n                    \"object\": \"Sierra Leone National Premier League\",\n                    \"object_type\": \"sports league\"\n                },\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"striker\",\n                    \"object_type\": \"sports position\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"football club\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"position\",\n            \"object\": \"striker\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports position\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Muwahid Sesay\\n\\nMuwahid Sesay (born June 15, 1984 in Freetown) is a Sierra Leonean international footballer who plays as a striker for Ports Authority F.C. in the Sierra Leone National Premier League.\"\n\nWe need to parse facts:\n\n- Subject: Muwahid Sesay, type human.\n- date of birth: June 15, 1984 (date)\n- place of birth: Freetown (city, location)\n- nationality: Sierra Leonean (country)\n- occupation: footballer (profession) maybe \"international footballer\" but occupation is footballer.\n- sport: football (maybe not needed)\n- position: striker (role)\n- employer/team: Ports Authority F.C. (football club)\n- league: Sierra Leone National Premier League (league) – relation maybe \"league\" or \"competition\". Could be qualifier on team: plays for team in league. So we can have a triplet: Muwahid Sesay - member of sports team - Ports Authority F.C. with qualifier league = Sierra Leone National Premier League. Or separate: Ports Authority F.C. - participates in - Sierra Leone National Premier League. But we need facts about subject. So we can include qualifier.\n\nAlso \"international footballer\" indicates he is a member of Sierra Leone national football team. Could be \"member of sports team\" - Sierra Leone national football team. But not explicitly mentioned, just \"Sierra Leonean international footballer\". That phrase usually means he has played for national team. Could extract: Muwahid Sesay - member of sports team - Sierra Leone national football team. But not explicitly named. Might be okay to include \"Sierra Leone national football team\". However we need to stick to text. \"Sierra Leonean international footballer\" implies nationality and that he is an international footballer. Could treat \"international footballer\" as occupation? Might be okay to have \"occupation\" = \"footballer\". We'll include \"nationality\" relation.\n\nNow format: JSON with key \"triplets\": list.\n\nEach triplet dict includes qualifiers list (maybe empty). Also include subject_type and object_type.\n\nDefine types:\n\n- subject_type: human\n- object_type for date: date\n- object_type for place: city (or location). Use \"city\".\n- object_type for nationality: country\n- object_type for occupation: profession\n- object_type for position: position (maybe \"sports position\")\n- object_type for team: football club (or sports team)\n- object_type for league: sports league\n\nQualifiers: For team membership, qualifier \"league\" with object \"Sierra Leone National Premier League\", object_type \"sports league\".\n\nAlso maybe qualifier \"position\" on team membership? Actually we have separate triplet for position: Muwahid Sesay - position - striker (object_type \"sports position\").\n\nBut we could also include qualifier \"position\" on team membership. However guidelines: qualifiers attached to a triplet. Could have triplet: Muwahid Sesay - member of sports team - Ports Authority F.C. with qualifier position = striker. That would combine. But we also need separate position fact? Could be redundant. We can do both: separate position triplet, and also qualifier on team membership. Might be okay.\n\nLet's produce:\n\nTriplet 1: subject Muwahid Sesay, relation \"date of birth\", object \"June 15, 1984\", qualifiers [], subject_type \"human\", object_type \"date\".\n\nTriplet 2: subject Muwahid Sesay, relation \"place of birth\", object \"Freetown\", qualifiers [], subject_type \"human\", object_type \"city\".\n\nTriplet 3: subject Muwahid Sesay, relation \"nationality\", object \"Sierra Leone\", qualifiers [], subject_type \"human\", object_type \"country\". (Note: \"Sierra Leonean\" -> country Sierra Leone.)\n\nTriplet 4: subject Muwahid Sesay, relation \"occupation\", object \"footballer\", qualifiers [], subject_type \"human\", object_type \"profession\".\n\nTriplet 5: subject Muwahid Sesay, relation \"member of sports team\", object \"Ports Authority F.C.\", qualifiers [{\"relation\":\"league\",\"object\":\"Sierra Leone National Premier League\",\"object_type\":\"sports league\"},{\"relation\":\"position\",\"object\":\"striker\",\"object_type\":\"sports position\"}], subject_type \"human\", object_type \"football club\".\n\nTriplet 6: maybe separate position: but we already have qualifier. Might still include separate: subject Muwahid Sesay, relation \"position\", object \"striker\", qualifiers [], subject_type \"human\", object_type \"sports position\". Could be okay.\n\nBut guidelines: avoid duplication? Not specified. It's fine.\n\nLet's produce JSON.\n\nMake sure to include \"triplets\": [ ... ].\n\nCheck formatting: each dict includes keys: \"subject\",\"relation\",\"object\",\"qualifiers\",\"subject_type\",\"object_type\". Qualifiers list of dicts with \"relation\",\"object\",\"object_type\". No extra fields.\n\nLet's craft final answer.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nText: \"Muwahid Sesay\\n\\nMuwahid Sesay (born June 15, 1984 in Freetown) is a Sierra Leonean international footballer who plays as a striker for Ports Authority F.C. in the Sierra Leone National Premier League.\"\n\nWe need to parse facts:\n\n- Subject: Muwahid Sesay, type human.\n- date of birth: June 15, 1984 (date)\n- place of birth: Freetown (city, location)\n- nationality: Sierra Leonean (country)\n- occupation: footballer (profession) maybe \"international footballer\" but occupation is footballer.\n- sport: football (maybe not needed)\n- position: striker (role)\n- employer/team: Ports Authority F.C. (football club)\n- league: Sierra Leone National Premier League (league) – relation maybe \"league\" or \"competition\". Could be qualifier on team: plays for team in league. So we can have a triplet: Muwahid Sesay - member of sports team - Ports Authority F.C. with qualifier league = Sierra Leone National Premier League. Or separate: Ports Authority F.C. - participates in - Sierra Leone National Premier League. But we need facts about subject. So we can include qualifier.\n\nAlso \"international footballer\" indicates he is a member of Sierra Leone national football team. Could be \"member of sports team\" - Sierra Leone national football team. But not explicitly mentioned, just \"Sierra Leonean international footballer\". That phrase usually means he has played for national team. Could extract: Muwahid Sesay - member of sports team - Sierra Leone national football team. But not explicitly named. Might be okay to include \"Sierra Leone national football team\". However we need to stick to text. \"Sierra Leonean international footballer\" implies nationality and that he is an international footballer. Could treat \"international footballer\" as occupation? Might be okay to have \"occupation\" = \"footballer\". We'll include \"nationality\" relation.\n\nNow format: JSON with key \"triplets\": list.\n\nEach triplet dict includes qualifiers list (maybe empty). Also include subject_type and object_type.\n\nDefine types:\n\n- subject_type: human\n- object_type for date: date\n- object_type for place: city (or location). Use \"city\".\n- object_type for nationality: country\n- object_type for occupation: profession\n- object_type for position: position (maybe \"sports position\")\n- object_type for team: football club (or sports team)\n- object_type for league: sports league\n\nQualifiers: For team membership, qualifier \"league\" with object \"Sierra Leone National Premier League\", object_type \"sports league\".\n\nAlso maybe qualifier \"position\" on team membership? Actually we have separate triplet for position: Muwahid Sesay - position - striker (object_type \"sports position\").\n\nBut we could also include qualifier \"position\" on team membership. However guidelines: qualifiers attached to a triplet. Could have triplet: Muwahid Sesay - member of sports team - Ports Authority F.C. with qualifier position = striker. That would combine. But we also need separate position fact? Could be redundant. We can do both: separate position triplet, and also qualifier on team membership. Might be okay.\n\nLet's produce:\n\nTriplet 1: subject Muwahid Sesay, relation \"date of birth\", object \"June 15, 1984\", qualifiers [], subject_type \"human\", object_type \"date\".\n\nTriplet 2: subject Muwahid Sesay, relation \"place of birth\", object \"Freetown\", qualifiers [], subject_type \"human\", object_type \"city\".\n\nTriplet 3: subject Muwahid Sesay, relation \"nationality\", object \"Sierra Leone\", qualifiers [], subject_type \"human\", object_type \"country\". (Note: \"Sierra Leonean\" -> country Sierra Leone.)\n\nTriplet 4: subject Muwahid Sesay, relation \"occupation\", object \"footballer\", qualifiers [], subject_type \"human\", object_type \"profession\".\n\nTriplet 5: subject Muwahid Sesay, relation \"member of sports team\", object \"Ports Authority F.C.\", qualifiers [{\"relation\":\"league\",\"object\":\"Sierra Leone National Premier League\",\"object_type\":\"sports league\"},{\"relation\":\"position\",\"object\":\"striker\",\"object_type\":\"sports position\"}], subject_type \"human\", object_type \"football club\".\n\nTriplet 6: maybe separate position: but we already have qualifier. Might still include separate: subject Muwahid Sesay, relation \"position\", object \"striker\", qualifiers [], subject_type \"human\", object_type \"sports position\". Could be okay.\n\nBut guidelines: avoid duplication? Not specified. It's fine.\n\nLet's produce JSON.\n\nMake sure to include \"triplets\": [ ... ].\n\nCheck formatting: each dict includes keys: \"subject\",\"relation\",\"object\",\"qualifiers\",\"subject_type\",\"object_type\". Qualifiers list of dicts with \"relation\",\"object\",\"object_type\". No extra fields.\n\nLet's craft final answer.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1405,
+      "completion_tokens": 1461,
+      "total_tokens": 2866,
+      "cost": 0.00026058,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 48,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00026058,
+        "upstream_inference_prompt_cost": 4.143e-05,
+        "upstream_inference_completions_cost": 0.00021915
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1048,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"date of birth\",\n            \"object\": \"June 15, 1984\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Freetown\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"nationality\",\n            \"object\": \"Sierra Leone\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"occupation\",\n            \"object\": \"footballer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"member of sports team\",\n            \"object\": \"Ports Authority F.C.\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"league\",\n                    \"object\": \"Sierra Leone National Premier League\",\n                    \"object_type\": \"sports league\"\n                },\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"striker\",\n                    \"object_type\": \"sports position\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"football club\"\n        },\n        {\n            \"subject\": \"Muwahid Sesay\",\n            \"relation\": \"position\",\n            \"object\": \"striker\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports position\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Muwahid Sesay",
+        "relation": "date of birth",
+        "object": "June 15, 1984",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Muwahid Sesay",
+        "relation": "place of birth",
+        "object": "Freetown",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Muwahid Sesay",
+        "relation": "nationality",
+        "object": "Sierra Leone",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Muwahid Sesay",
+        "relation": "occupation",
+        "object": "footballer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Muwahid Sesay",
+        "relation": "member of sports team",
+        "object": "Ports Authority F.C.",
+        "qualifiers": [
+          {
+            "relation": "league",
+            "object": "Sierra Leone National Premier League"
+          },
+          {
+            "relation": "position",
+            "object": "striker"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "football club"
+      },
+      {
+        "subject": "Muwahid Sesay",
+        "relation": "position",
+        "object": "striker",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "sports position"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1405,
+    "completion_tokens": 1461,
+    "total_tokens": 2866,
+    "cost": 0.00026058,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 48,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00026058,
+      "upstream_inference_prompt_cost": 4.143e-05,
+      "upstream_inference_completions_cost": 0.00021915
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1048,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 598,
+    "output_tokens_est": 471
+  },
+  "attempts": 1,
+  "latency_s": 35.93468812399806,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:47:13.796283+00:00",
+  "cache_key": "6e3e8b701875a5e27e3206c7351299c8"
+}

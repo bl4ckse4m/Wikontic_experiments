@@ -1,0 +1,145 @@
+{
+  "task": {
+    "input_id": "c76772669ad54e4f",
+    "input_hash": "4b65b72fc109a9906f8e8d33e0e97e9c215077c5de0dab313c6cd560f881dda4",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-72472bcc45ac3fd9ff2a6c30239bb008",
+    "object": "chat.completion",
+    "created": 1791506701,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"instance of\",\n            \"object\": \"secondary school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"school type\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"former name\",\n            \"object\": \"Copsewood College\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"location\",\n            \"object\": \"Pallaskenry, County Limerick, Ireland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College campus\",\n            \"relation\": \"owner\",\n            \"object\": \"Salesians\",\n            \"qualifiers\": [],\n            \"subject_type\": \"campus\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College campus\",\n            \"relation\": \"shared with\",\n            \"object\": \"Pallaskenry Agricultural College\",\n            \"qualifiers\": [],\n            \"subject_type\": \"campus\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"number of students\",\n            \"object\": \"500\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"approximately\"\n                }\n            ],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"principal\",\n            \"object\": \"Paddy O Neill\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Salesian Secondary College\n\nSalesian Secondary College, formerly Copsewood College, is a secondary school located outside the village of Pallaskenry, County Limerick, Ireland. The school campus is owned by the Salesians and shared with Pallaskenry Agricultural College. There are approximately 500 students enrolled in the schools co-educational program. The principal is Mr. Paddy O Neill.\"\n\nWe need to extract facts:\n\n- Salesian Secondary College is a secondary school. Relation: \"instance of\" maybe? Use \"type\" or \"educational institution type\". In examples they used occupation, award, etc. For school, maybe relation \"instance of\" with object \"secondary school\". We'll use \"instance of\". subject_type: \"educational institution\". object_type: \"school type\" maybe \"secondary school\". We'll set.\n\n- Salesian Secondary College formerly Copsewood College. Relation: \"former name\". object: \"Copsewood College\". subject_type: \"educational institution\". object_type: \"educational institution\" (or \"name\").\n\n- Location: located outside the village of Pallaskenry, County Limerick, Ireland. So relation \"location\". object: \"Pallaskenry, County Limerick, Ireland\". Could be \"outside the village of Pallaskenry\". We'll capture location as \"Pallaskenry, County Limerick, Ireland\". subject_type: \"educational institution\". object_type: \"settlement\" or \"place\". We'll use \"village\".\n\n- The school campus is owned by the Salesians. Relation: \"owner\". object: \"Salesians\". subject_type: \"campus\". But we have \"school campus\". Could treat subject as \"Salesian Secondary College campus\". But we can just use subject \"Salesian Secondary College campus\". However we don't have explicit entity name. We'll use subject \"Salesian Secondary College campus\". relation \"owner\". object \"Salesians\". subject_type \"campus\". object_type \"organization\".\n\n- The school campus is shared with Pallaskenry Agricultural College. Relation \"shared with\". object \"Pallaskenry Agricultural College\". subject_type \"campus\". object_type \"educational institution\".\n\n- There are approximately 500 students enrolled in the school's co-educational program. So relation \"student count\" maybe \"number of students\". object \"500\". qualifier \"approximation\". Also \"co-educational program\" maybe attribute \"program type\". But main fact: number of students approx 500. We'll create triplet: subject \"Salesian Secondary College\", relation \"number of students\", object \"500\". qualifiers: {\"relation\":\"approximation\",\"object\":\"approximately\"} maybe \"approximation\" with object \"approximately\". The spec says qualifier object should be entity; we can put \"approximately\". We'll include qualifier.\n\n- The principal is Mr. Paddy O Neill. Relation \"head of school\" or \"principal\". Use \"principal\". object \"Paddy O Neill\". subject_type \"educational institution\". object_type \"human\". Also maybe include title \"Mr.\" but name is \"Paddy O Neill\". We'll use that.\n\nAlso note \"formerly Copsewood College\" is an apposition. Use relation \"former name\". Good.\n\nNow produce JSON with list of triplets, each with qualifiers list.\n\nDefine subject_type and object_type strings.\n\nLet's list:\n\n1. (Salesian Secondary College, instance of, secondary school)\n qualifiers: []\n subject_type: \"educational institution\"\n object_type: \"school type\"\n\n2. (Salesian Secondary College, former name, Copsewood College)\n qualifiers: []\n subject_type: \"educational institution\"\n object_type: \"educational institution\"\n\n3. (Salesian Secondary College, location, Pallaskenry, County Limerick, Ireland)\n qualifiers: []\n subject_type: \"educational institution\"\n object_type: \"settlement\"\n\n4. (Salesian Secondary College campus, owner, Salesians)\n qualifiers: []\n subject_type: \"campus\"\n object_type: \"organization\"\n\n5. (Salesian Secondary College campus, shared with, Pallaskenry Agricultural College)\n qualifiers: []\n subject_type: \"campus\"\n object_type: \"educational institution\"\n\n6. (Salesian Secondary College, number of students, 500)\n qualifiers: [{\"relation\":\"approximation\",\"object\":\"approximately\"}]\n subject_type: \"educational institution\"\n object_type: \"quantity\"\n\n7. (Salesian Secondary College, principal, Paddy O Neill)\n qualifiers: []\n subject_type: \"educational institution\"\n object_type: \"human\"\n\nCheck for any other facts: \"co-educational program\" maybe relation \"program type\". Could add (Salesian Secondary College, program type, co-educational). But not explicitly a fact? It says \"enrolled in the schools co-educational program\". So we could have relation \"program type\" with object \"co-educational\". But maybe not needed. We'll keep.\n\nNow produce JSON. Ensure proper quoting, no extra text."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1667,
+      "total_tokens": 3155,
+      "completion_tokens": 1488,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"instance of\",\n            \"object\": \"secondary school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"school type\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"former name\",\n            \"object\": \"Copsewood College\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"location\",\n            \"object\": \"Pallaskenry, County Limerick, Ireland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College campus\",\n            \"relation\": \"owner\",\n            \"object\": \"Salesians\",\n            \"qualifiers\": [],\n            \"subject_type\": \"campus\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College campus\",\n            \"relation\": \"shared with\",\n            \"object\": \"Pallaskenry Agricultural College\",\n            \"qualifiers\": [],\n            \"subject_type\": \"campus\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"number of students\",\n            \"object\": \"500\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"approximately\"\n                }\n            ],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Salesian Secondary College\",\n            \"relation\": \"principal\",\n            \"object\": \"Paddy O Neill\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Salesian Secondary College",
+        "relation": "instance of",
+        "object": "secondary school",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "school type"
+      },
+      {
+        "subject": "Salesian Secondary College",
+        "relation": "former name",
+        "object": "Copsewood College",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "educational institution"
+      },
+      {
+        "subject": "Salesian Secondary College",
+        "relation": "location",
+        "object": "Pallaskenry, County Limerick, Ireland",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "settlement"
+      },
+      {
+        "subject": "Salesian Secondary College campus",
+        "relation": "owner",
+        "object": "Salesians",
+        "qualifiers": [],
+        "subject_type": "campus",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Salesian Secondary College campus",
+        "relation": "shared with",
+        "object": "Pallaskenry Agricultural College",
+        "qualifiers": [],
+        "subject_type": "campus",
+        "object_type": "educational institution"
+      },
+      {
+        "subject": "Salesian Secondary College",
+        "relation": "number of students",
+        "object": "500",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "approximately"
+          }
+        ],
+        "subject_type": "educational institution",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Salesian Secondary College",
+        "relation": "principal",
+        "object": "Paddy O Neill",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1667,
+    "total_tokens": 3155,
+    "completion_tokens": 1488,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 628,
+    "output_tokens_est": 535
+  },
+  "attempts": 1,
+  "latency_s": 18.31145423000271,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:45:20.228514+00:00",
+  "cache_key": "bd348d5411fdd7d8f983161cda0fb600"
+}

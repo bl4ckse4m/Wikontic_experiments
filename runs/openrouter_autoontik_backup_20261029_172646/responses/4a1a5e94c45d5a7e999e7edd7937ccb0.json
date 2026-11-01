@@ -1,0 +1,164 @@
+{
+  "task": {
+    "input_id": "206a750fc371273a",
+    "input_hash": "a2cf4deb213be36af4b1c8b66ac64f74fd2e6767182304505057aa16cdd62ed8",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793197002-BJJVVPEyHyMEzVK1OwSI",
+    "object": "chat.completion",
+    "created": 1793197002,
+    "model": "openai/gpt-oss-120b",
+    "provider": "BaseTen",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"composer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"writer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Linda Ronstadt\",\n            \"relation\": \"performer\",\n            \"object\": \"Love Is a Rose\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"popularized by\",\n            \"object\": \"Linda Ronstadt\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": " need to extract triplets.\n\nText: \"Love Is a Rose\n\n``Love Is a Rose ''is a song written and composed by Neil Young. It first became popular in 1975 when Linda Ronstadt had a country hit with her version.`` Love Is a Rose'' has also been covered ...\"\n\nWe need entities: \"Love Is a Rose\" (song), \"Neil Young\" (human, musician/composer), \"Linda Ronstadt\" (human), \"1975\" (year), maybe \"country hit\" (maybe chart? but we can treat as \"hit\" event). Also \"cover version\" by other artists (unspecified). We'll extract facts:\n\n1. Love Is a Rose — instance of song (object_type: song). Relation: \"instance of\" maybe \"genre\"? But we need relation \"type\" maybe \"instance of\". However guidelines: relation should be predicate like \"composer\", \"writer\", \"original artist\". Use \"composer\" and \"lyricist\"? The text says \"written and composed by Neil Young\". So we can have two relations: \"author\" or \"writer\" and \"composer\". Could combine but separate.\n\nTriplet: subject \"Love Is a Rose\", relation \"composer\", object \"Neil Young\". subject_type: \"song\", object_type: \"human\". Also \"writer\" maybe same.\n\n2. Love Is a Rose — \"original performer\"? Not given. But \"Linda Ronstadt had a country hit with her version\". So we can have relation \"performer\" or \"artist\" for Linda Ronstadt's version. Could be \"performer\" with qualifier \"point in time\" 1975. Or \"hit\" relation. Let's do: subject \"Love Is a Rose\", relation \"performer\", object \"Linda Ronstadt\", qualifiers: point in time 1975, maybe \"chart type\" country hit. But we can include qualifier \"chart type\" with object \"country\". object_type: \"music chart genre\"? Might be too detailed. Simpler: relation \"hit version\" maybe \"popularized by\". Use \"popularized by\". Qualifier \"point in time\" 1975.\n\nTriplet: subject \"Love Is a Rose\", relation \"popularized by\", object \"Linda Ronstadt\", qualifiers: point in time 1975, object_type: human.\n\n3. Linda Ronstadt — \"hit\" with version of Love Is a Rose. Could also have relation \"hit song\" linking Linda Ronstadt to Love Is a Rose with qualifier \"point in time\" 1975. But we already have.\n\n4. Love Is a Rose — \"cover version\" by other artists (unspecified). Could have relation \"cover version by\" with object \"other artists\". But \"other artists\" is vague; maybe we skip.\n\nWe also need \"song\" type for Love Is a Rose.\n\nAlso \"Neil Young\" — \"occupation\" maybe \"musician\". Not required.\n\nLet's produce JSON list.\n\nNeed each dict includes qualifiers list (maybe empty). Also include subject_type and object_type.\n\nDefine types: \"song\" for Love Is a Rose, \"human\" for Neil Young, Linda Ronstadt, \"year\" for 1975.\n\nRelations: \"composer\", \"writer\", \"popularized by\". Use \"composer\" and \"writer\" separate.\n\nAlso maybe \"original writer\" but okay.\n\nLet's craft.\n\nTriplets:\n\n1. Love Is a Rose – composer – Neil Young (qualifiers none)\n2. Love Is a Rose – writer – Neil Young (qualifiers none) (since written and composed)\n3. Love Is a Rose – popularized by – Linda Ronstadt (qualifier point in time 1975)\n4. Love Is a Rose – instance of – song (maybe not needed but could include). But we need object_type \"song\". Could have relation \"instance of\". Provide.\n\nBut guidelines: subject and object should be entities, not classes? They allow class as object_type. Example they used \"occupation\" relation with object \"physicist\" (object_type profession). So we can have \"instance of\" with object \"song\". object_type \"song\". That is fine.\n\nAdd also \"Linda Ronstadt – hit – Love Is a Rose\" maybe redundant.\n\nBut we can include \"Linda Ronstadt – performed – Love Is a Rose\" with qualifier point in time 1975. That might be clearer.\n\nLet's produce both: popularized by and performed. Might be duplicate but okay.\n\nBetter to have \"performer\" relation.\n\nTriplet: Linda Ronstadt – performer – Love Is a Rose (qualifier point in time 1975). But subject should be Linda Ronstadt, object Love Is a Rose. That is fine.\n\nThus we have:\n\n- Love Is a Rose – composer – Neil Young\n- Love Is a Rose – writer – Neil Young\n- Love Is a Rose – instance of – song\n- Linda Ronstadt – performer – Love Is a Rose (qualifier point in time 1975)\n- Love Is a Rose – popularized by – Linda Ronstadt (qualifier point in time 1975) (maybe duplicate but okay)\n\nWe might avoid duplicate. Choose one direction. Let's keep both for completeness.\n\nNow produce JSON with key \"triplets\". Ensure each dict includes qualifiers list (empty or with qualifier dict). Qualifier dict includes relation, object, object_type.\n\nFor point in time qualifier: relation \"point in time\", object \"1975\", object_type \"year\".\n\nNow produce final.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": " need to extract triplets.\n\nText: \"Love Is a Rose\n\n``Love Is a Rose ''is a song written and composed by Neil Young. It first became popular in 1975 when Linda Ronstadt had a country hit with her version.`` Love Is a Rose'' has also been covered ...\"\n\nWe need entities: \"Love Is a Rose\" (song), \"Neil Young\" (human, musician/composer), \"Linda Ronstadt\" (human), \"1975\" (year), maybe \"country hit\" (maybe chart? but we can treat as \"hit\" event). Also \"cover version\" by other artists (unspecified). We'll extract facts:\n\n1. Love Is a Rose — instance of song (object_type: song). Relation: \"instance of\" maybe \"genre\"? But we need relation \"type\" maybe \"instance of\". However guidelines: relation should be predicate like \"composer\", \"writer\", \"original artist\". Use \"composer\" and \"lyricist\"? The text says \"written and composed by Neil Young\". So we can have two relations: \"author\" or \"writer\" and \"composer\". Could combine but separate.\n\nTriplet: subject \"Love Is a Rose\", relation \"composer\", object \"Neil Young\". subject_type: \"song\", object_type: \"human\". Also \"writer\" maybe same.\n\n2. Love Is a Rose — \"original performer\"? Not given. But \"Linda Ronstadt had a country hit with her version\". So we can have relation \"performer\" or \"artist\" for Linda Ronstadt's version. Could be \"performer\" with qualifier \"point in time\" 1975. Or \"hit\" relation. Let's do: subject \"Love Is a Rose\", relation \"performer\", object \"Linda Ronstadt\", qualifiers: point in time 1975, maybe \"chart type\" country hit. But we can include qualifier \"chart type\" with object \"country\". object_type: \"music chart genre\"? Might be too detailed. Simpler: relation \"hit version\" maybe \"popularized by\". Use \"popularized by\". Qualifier \"point in time\" 1975.\n\nTriplet: subject \"Love Is a Rose\", relation \"popularized by\", object \"Linda Ronstadt\", qualifiers: point in time 1975, object_type: human.\n\n3. Linda Ronstadt — \"hit\" with version of Love Is a Rose. Could also have relation \"hit song\" linking Linda Ronstadt to Love Is a Rose with qualifier \"point in time\" 1975. But we already have.\n\n4. Love Is a Rose — \"cover version\" by other artists (unspecified). Could have relation \"cover version by\" with object \"other artists\". But \"other artists\" is vague; maybe we skip.\n\nWe also need \"song\" type for Love Is a Rose.\n\nAlso \"Neil Young\" — \"occupation\" maybe \"musician\". Not required.\n\nLet's produce JSON list.\n\nNeed each dict includes qualifiers list (maybe empty). Also include subject_type and object_type.\n\nDefine types: \"song\" for Love Is a Rose, \"human\" for Neil Young, Linda Ronstadt, \"year\" for 1975.\n\nRelations: \"composer\", \"writer\", \"popularized by\". Use \"composer\" and \"writer\" separate.\n\nAlso maybe \"original writer\" but okay.\n\nLet's craft.\n\nTriplets:\n\n1. Love Is a Rose – composer – Neil Young (qualifiers none)\n2. Love Is a Rose – writer – Neil Young (qualifiers none) (since written and composed)\n3. Love Is a Rose – popularized by – Linda Ronstadt (qualifier point in time 1975)\n4. Love Is a Rose – instance of – song (maybe not needed but could include). But we need object_type \"song\". Could have relation \"instance of\". Provide.\n\nBut guidelines: subject and object should be entities, not classes? They allow class as object_type. Example they used \"occupation\" relation with object \"physicist\" (object_type profession). So we can have \"instance of\" with object \"song\". object_type \"song\". That is fine.\n\nAdd also \"Linda Ronstadt – hit – Love Is a Rose\" maybe redundant.\n\nBut we can include \"Linda Ronstadt – performed – Love Is a Rose\" with qualifier point in time 1975. That might be clearer.\n\nLet's produce both: popularized by and performed. Might be duplicate but okay.\n\nBetter to have \"performer\" relation.\n\nTriplet: Linda Ronstadt – performer – Love Is a Rose (qualifier point in time 1975). But subject should be Linda Ronstadt, object Love Is a Rose. That is fine.\n\nThus we have:\n\n- Love Is a Rose – composer – Neil Young\n- Love Is a Rose – writer – Neil Young\n- Love Is a Rose – instance of – song\n- Linda Ronstadt – performer – Love Is a Rose (qualifier point in time 1975)\n- Love Is a Rose – popularized by – Linda Ronstadt (qualifier point in time 1975) (maybe duplicate but okay)\n\nWe might avoid duplicate. Choose one direction. Let's keep both for completeness.\n\nNow produce JSON with key \"triplets\". Ensure each dict includes qualifiers list (empty or with qualifier dict). Qualifier dict includes relation, object, object_type.\n\nFor point in time qualifier: relation \"point in time\", object \"1975\", object_type \"year\".\n\nNow produce final.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1415,
+      "completion_tokens": 1464,
+      "total_tokens": 2879,
+      "cost": 0.0008735,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0008735,
+        "upstream_inference_prompt_cost": 0.0001415,
+        "upstream_inference_completions_cost": 0.000732
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"composer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"writer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Linda Ronstadt\",\n            \"relation\": \"performer\",\n            \"object\": \"Love Is a Rose\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"popularized by\",\n            \"object\": \"Linda Ronstadt\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Love Is a Rose",
+        "relation": "composer",
+        "object": "Neil Young",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "writer",
+        "object": "Neil Young",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "instance of",
+        "object": "song",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "song"
+      },
+      {
+        "subject": "Linda Ronstadt",
+        "relation": "performer",
+        "object": "Love Is a Rose",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1975"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "song"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "popularized by",
+        "object": "Linda Ronstadt",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1975"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1415,
+    "completion_tokens": 1464,
+    "total_tokens": 2879,
+    "cost": 0.0008735,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0008735,
+      "upstream_inference_prompt_cost": 0.0001415,
+      "upstream_inference_completions_cost": 0.000732
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 518,
+    "output_tokens_est": 391
+  },
+  "attempts": 1,
+  "latency_s": 14.245398588998796,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T14:16:56.494879+00:00",
+  "cache_key": "4a1a5e94c45d5a7e999e7edd7937ccb0"
+}

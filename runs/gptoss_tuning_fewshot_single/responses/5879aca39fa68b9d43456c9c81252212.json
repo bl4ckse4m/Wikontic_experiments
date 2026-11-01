@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "e29ed124b807d0ba",
+    "input_hash": "4afbab9d693af303fea4886eb72add0be1b0e2491063338b05a1b8e5feea0c9d",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-f7ed0344f07926f9ddaf0e1ded0123f2",
+    "object": "chat.completion",
+    "created": 1791522249,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"type of settlement\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"located in\",\n            \"object\": \"Independence County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Independence County\",\n            \"relation\": \"located in\",\n            \"object\": \"Arkansas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Arkansas\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"located on\",\n            \"object\": \"Highway 25S\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"located relative to\",\n            \"object\": \"Batesville\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"east-northeast\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"human settlement\"\n        },\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"has facility\",\n            \"object\": \"post office\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"post office\",\n            \"relation\": \"ZIP code\",\n            \"object\": \"72522\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"postal code\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Charlotte, Arkansas\n\nCharlotte is an unincorporated community in Independence County, Arkansas, United States. Charlotte is located on Highway 25S, east-northeast of Batesville. Charlotte has a post office with ZIP code 72522.\"\n\nEntities: Charlotte (place), Independence County, Arkansas, United States, Highway 25S, Batesville, post office, ZIP code 72522.\n\nTriplets:\n\n1. Charlotte - instance of? relation maybe \"type of settlement\" or \"unincorporated community\". Use relation \"instance of\" or \"subclass of\"? In examples they used occupation, etc. For places, maybe \"type of settlement\". We'll use relation \"type of settlement\" with object \"unincorporated community\". subject_type \"human settlement\"? object_type \"settlement type\". Could also use \"location\" relation. We'll follow pattern: subject \"Charlotte\" relation \"type of settlement\" object \"unincorporated community\". qualifiers none.\n\n2. Charlotte - located in - Independence County. relation \"located in\". object \"Independence County\". qualifiers maybe \"place\". subject_type \"human settlement\", object_type \"administrative territorial entity\". Also could add \"state\" Arkansas, but we have \"Independence County, Arkansas, United States\". Could create separate triplets: Charlotte located in Independence County; Independence County located in Arkansas; Arkansas located in United States. But only explicit statements: \"in Independence County, Arkansas, United States\". That's a chain. We can produce three separate location relations.\n\n3. Charlotte - located on - Highway 25S. relation \"located on\". object \"Highway 25S\". qualifiers none. subject_type \"human settlement\", object_type \"road\".\n\n4. Charlotte - direction from - Batesville? The phrase \"east-northeast of Batesville\". Could represent relation \"direction\" with qualifier \"relative location\". Use relation \"relative location\" maybe \"direction\". We'll create triplet: Charlotte - direction from - Batesville, with qualifier \"direction\" \"east-northeast\". But guidelines: qualifiers attach to claim they modify. So we could have relation \"located relative to\" object \"Batesville\" with qualifier direction \"east-northeast\". Let's do: relation \"located relative to\". object \"Batesville\". qualifier {\"relation\":\"direction\",\"object\":\"east-northeast\"}.\n\n5. Charlotte - has facility - post office. relation \"has facility\". object \"post office\". qualifiers none.\n\n6. post office - ZIP code - 72522. relation \"ZIP code\". object \"72522\". qualifiers none. subject_type \"facility\", object_type \"postal code\". Also need subject_type for post office maybe \"post office\". We'll set subject_type \"post office\". object_type \"postal code\".\n\nAlso maybe \"ZIP code\" is attribute of Charlotte? The sentence: \"Charlotte has a post office with ZIP code 72522.\" So we could also have Charlotte - ZIP code - 72522 with qualifier \"via post office\". But better to capture as post office has ZIP code.\n\nWe need subject_type and object_type for each.\n\nDefine types:\n\n- Charlotte: \"human settlement\" (or \"unincorporated community\").\n- unincorporated community: \"settlement type\".\n- Independence County: \"county\".\n- Arkansas: \"state\".\n- United States: \"country\".\n- Highway 25S: \"road\".\n- Batesville: \"human settlement\".\n- post office: \"facility\".\n- 72522: \"postal code\".\n\nNow produce JSON.\n\nCheck qualifiers: For direction, we add qualifier relation \"direction\" object \"east-northeast\". Also maybe \"point in time\" none.\n\nMake sure each triplet includes qualifiers list (empty if none).\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1641,
+      "total_tokens": 2878,
+      "completion_tokens": 1237,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"type of settlement\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"located in\",\n            \"object\": \"Independence County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Independence County\",\n            \"relation\": \"located in\",\n            \"object\": \"Arkansas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Arkansas\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"located on\",\n            \"object\": \"Highway 25S\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"located relative to\",\n            \"object\": \"Batesville\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"east-northeast\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"human settlement\"\n        },\n        {\n            \"subject\": \"Charlotte\",\n            \"relation\": \"has facility\",\n            \"object\": \"post office\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"post office\",\n            \"relation\": \"ZIP code\",\n            \"object\": \"72522\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"postal code\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Charlotte",
+        "relation": "type of settlement",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Charlotte",
+        "relation": "located in",
+        "object": "Independence County",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Independence County",
+        "relation": "located in",
+        "object": "Arkansas",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "state"
+      },
+      {
+        "subject": "Arkansas",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "Charlotte",
+        "relation": "located on",
+        "object": "Highway 25S",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "road"
+      },
+      {
+        "subject": "Charlotte",
+        "relation": "located relative to",
+        "object": "Batesville",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "east-northeast"
+          }
+        ],
+        "subject_type": "human settlement",
+        "object_type": "human settlement"
+      },
+      {
+        "subject": "Charlotte",
+        "relation": "has facility",
+        "object": "post office",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "facility"
+      },
+      {
+        "subject": "post office",
+        "relation": "ZIP code",
+        "object": "72522",
+        "qualifiers": [],
+        "subject_type": "facility",
+        "object_type": "postal code"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1641,
+    "total_tokens": 2878,
+    "completion_tokens": 1237,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 635,
+    "output_tokens_est": 542
+  },
+  "attempts": 1,
+  "latency_s": 15.526267267006915,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T05:04:25.689873+00:00",
+  "cache_key": "5879aca39fa68b9d43456c9c81252212"
+}

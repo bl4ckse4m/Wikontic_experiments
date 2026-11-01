@@ -1,0 +1,179 @@
+{
+  "task": {
+    "input_id": "bd930b1479f0ab3d",
+    "input_hash": "cc4f8ac5080322473e8de6194fadda09120f84a6e2541de058b8e29034a538c3",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-9611ef8cb2d08d6c2056c1bb6ba4ee6b",
+    "object": "chat.completion",
+    "created": 1791513022,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kiran Bedi\",\n            \"relation\": \"occupation\",\n            \"object\": \"social activist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Kiran Bedi\",\n            \"relation\": \"occupation\",\n            \"object\": \"Indian Police Service officer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Kiran Bedi\",\n            \"relation\": \"refused to participate in\",\n            \"object\": \"2008 Summer Olympics torch relay\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Kiran Bedi\",\n            \"relation\": \"statement\",\n            \"object\": \"she doesn’t want to run in the event as ‘caged woman’\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quote\"\n        },\n        {\n            \"subject\": \"Soha Ali Khan\",\n            \"relation\": \"occupation\",\n            \"object\": \"Bollywood actress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Soha Ali Khan\",\n            \"relation\": \"pulled out of\",\n            \"object\": \"2008 Summer Olympics torch relay\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 15\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Soha Ali Khan\",\n            \"relation\": \"reason\",\n            \"object\": \"very strong personal reasons\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"reason\"\n        },\n        {\n            \"subject\": \"Protest\",\n            \"relation\": \"organized in\",\n            \"object\": \"Delhi\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 16\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Protest\",\n            \"relation\": \"cause\",\n            \"object\": \"Chinese repression in Tibet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"political issue\"\n        },\n        {\n            \"subject\": \"Police\",\n            \"relation\": \"broke up\",\n            \"object\": \"Protest\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Delhi\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nIdentify entities: 2008 Summer Olympics torch relay (event), Kiran Bedi (human), Indian Police Service (organization), Soha Ali Khan (human), Olympic torch relay (event), protest (event), Delhi (place), Chinese repression in Tibet (issue), police (organization). Also dates: April 15, April 16.\n\nRelations: refused to participate (action), said something (statement), pulled out (action), citing reasons (reason), protest organized (event), broken up by police (action). Need to map to Wikidata-like predicates: \"refused to participate in\", \"participated in\", \"date of event\", \"location\", \"organizer\", \"cause\", \"statement\", \"reason\". Also \"occupation\" maybe for Kiran Bedi: social activist, retired IPS officer. But text says \"noted Indian social activist and a retired Indian Police Service (IPS) officer\". So we can have occupation relations.\n\nWe need subject_type and object_type.\n\nLet's list possible triplets:\n\n1. Kiran Bedi - occupation - social activist (subject_type human, object_type profession)\n2. Kiran Bedi - occupation - Indian Police Service officer (maybe \"police officer\") (object_type profession)\n3. Kiran Bedi - refused to participate in - 2008 Summer Olympics torch relay (subject_type human, object_type event)\n4. Kiran Bedi - statement - \"she doesn’t want to run in the event as ‘caged woman’.\" (object_type string/quote). Could be relation \"statement\" with object as quote. Might include qualifier point in time? Not given.\n\n5. Soha Ali Khan - occupation - Bollywood actress (human, profession)\n6. Soha Ali Khan - pulled out of - 2008 Summer Olympics torch relay (human, event) with qualifier point in time April 15.\n7. Soha Ali Khan - reason - \"very strong personal reasons\" (object_type reason)\n8. Protest - organized in - Delhi (event location)\n9. Protest - cause - Chinese repression in Tibet (object_type political issue)\n10. Protest - date - April 16 (object_type date)\n11. Police - broke up - protest (organization, event) with qualifier location Delhi maybe.\n\nBut we need to ensure each triplet has qualifiers list possibly empty.\n\nAlso \"2008 Summer Olympics torch relay\" is an event; we might have relation \"instance of\" but not needed.\n\nLet's craft JSON.\n\nWe need each dictionary with keys: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nDefine types: human, profession, event, date, location, political issue, organization, quote, reason.\n\nNow produce list.\n\nTriplet 1:\nsubject: \"Kiran Bedi\"\nrelation: \"occupation\"\nobject: \"social activist\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"profession\"\n\nTriplet 2:\nsubject: \"Kiran Bedi\"\nrelation: \"occupation\"\nobject: \"Indian Police Service officer\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"profession\"\n\nTriplet 3:\nsubject: \"Kiran Bedi\"\nrelation: \"refused to participate in\"\nobject: \"2008 Summer Olympics torch relay\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"event\"\n\nTriplet 4:\nsubject: \"Kiran Bedi\"\nrelation: \"statement\"\nobject: \"she doesn’t want to run in the event as ‘caged woman’\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"quote\"\n\nTriplet 5:\nsubject: \"Soha Ali Khan\"\nrelation: \"occupation\"\nobject: \"Bollywood actress\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"profession\"\n\nTriplet 6:\nsubject: \"Soha Ali Khan\"\nrelation: \"pulled out of\"\nobject: \"2008 Summer Olympics torch relay\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"April 15\"}]\nsubject_type: \"human\"\nobject_type: \"event\"\n\nTriplet 7:\nsubject: \"Soha Ali Khan\"\nrelation: \"reason\"\nobject: \"very strong personal reasons\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"reason\"\n\nTriplet 8:\nsubject: \"Protest\"\nrelation: \"organized in\"\nobject: \"Delhi\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"April 16\"}]\nsubject_type: \"event\"\nobject_type: \"location\"\n\nTriplet 9:\nsubject: \"Protest\"\nrelation: \"cause\"\nobject: \"Chinese repression in Tibet\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"political issue\"\n\nTriplet 10:\nsubject: \"Police\"\nrelation: \"broke up\"\nobject: \"Protest\"\nqualifiers: [{\"relation\":\"location\",\"object\":\"Delhi\"}]\nsubject_type: \"organization\"\nobject_type: \"event\"\n\nWe might also include \"2008 Summer Olympics torch relay\" - date? Not needed.\n\nMake sure JSON format correct.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1032,
+      "total_tokens": 2716,
+      "completion_tokens": 1684,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kiran Bedi\",\n            \"relation\": \"occupation\",\n            \"object\": \"social activist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Kiran Bedi\",\n            \"relation\": \"occupation\",\n            \"object\": \"Indian Police Service officer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Kiran Bedi\",\n            \"relation\": \"refused to participate in\",\n            \"object\": \"2008 Summer Olympics torch relay\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Kiran Bedi\",\n            \"relation\": \"statement\",\n            \"object\": \"she doesn’t want to run in the event as ‘caged woman’\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quote\"\n        },\n        {\n            \"subject\": \"Soha Ali Khan\",\n            \"relation\": \"occupation\",\n            \"object\": \"Bollywood actress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Soha Ali Khan\",\n            \"relation\": \"pulled out of\",\n            \"object\": \"2008 Summer Olympics torch relay\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 15\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Soha Ali Khan\",\n            \"relation\": \"reason\",\n            \"object\": \"very strong personal reasons\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"reason\"\n        },\n        {\n            \"subject\": \"Protest\",\n            \"relation\": \"organized in\",\n            \"object\": \"Delhi\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 16\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Protest\",\n            \"relation\": \"cause\",\n            \"object\": \"Chinese repression in Tibet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"political issue\"\n        },\n        {\n            \"subject\": \"Police\",\n            \"relation\": \"broke up\",\n            \"object\": \"Protest\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Delhi\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Kiran Bedi",
+        "relation": "occupation",
+        "object": "social activist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Kiran Bedi",
+        "relation": "occupation",
+        "object": "Indian Police Service officer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Kiran Bedi",
+        "relation": "refused to participate in",
+        "object": "2008 Summer Olympics torch relay",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "Kiran Bedi",
+        "relation": "statement",
+        "object": "she doesn’t want to run in the event as ‘caged woman’",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "quote"
+      },
+      {
+        "subject": "Soha Ali Khan",
+        "relation": "occupation",
+        "object": "Bollywood actress",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Soha Ali Khan",
+        "relation": "pulled out of",
+        "object": "2008 Summer Olympics torch relay",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "April 15"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "Soha Ali Khan",
+        "relation": "reason",
+        "object": "very strong personal reasons",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "reason"
+      },
+      {
+        "subject": "Protest",
+        "relation": "organized in",
+        "object": "Delhi",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "April 16"
+          }
+        ],
+        "subject_type": "event",
+        "object_type": "location"
+      },
+      {
+        "subject": "Protest",
+        "relation": "cause",
+        "object": "Chinese repression in Tibet",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "political issue"
+      },
+      {
+        "subject": "Police",
+        "relation": "broke up",
+        "object": "Protest",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Delhi"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "event"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1032,
+    "total_tokens": 2716,
+    "completion_tokens": 1684,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 839,
+    "output_tokens_est": 740
+  },
+  "attempts": 1,
+  "latency_s": 19.13098511598946,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:30:41.879321+00:00",
+  "cache_key": "ffb66c7d0d010534d4d798f5a6c77d8d"
+}

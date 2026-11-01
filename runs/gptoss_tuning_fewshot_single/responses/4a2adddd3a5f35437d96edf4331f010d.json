@@ -1,0 +1,145 @@
+{
+  "task": {
+    "input_id": "2061224be697c715",
+    "input_hash": "0f5e75247d712a1f7f0dd73345d87cc3c30f0c843bc50965819460ed1423c30b",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-658fc73299b7f291a21ca896437c3664",
+    "object": "chat.completion",
+    "created": 1791515778,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"type\",\n            \"object\": \"weekly newspaper\",\n            \"qualifiers\": [],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"newspaper\"\n        },\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"founder\",\n            \"object\": \"Louis Bonnet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"distributed in\",\n            \"object\": \"France\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2009\"\n                }\n            ],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"subtitle\",\n            \"object\": \"From the Massif Central and proud to be so\",\n            \"qualifiers\": [],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"text\"\n        },\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"covers\",\n            \"object\": \"Paris restaurants and brasseries\",\n            \"qualifiers\": [],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"industry\"\n        },\n        {\n            \"subject\": \"Auvergnat\",\n            \"relation\": \"origin\",\n            \"object\": \"Auvergne province\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Auvergnat\",\n            \"relation\": \"origin\",\n            \"object\": \"Auvergne region\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"region\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"L'Auvergnat de Paris\n\nL'Auvergnat de Paris is a French weekly newspaper started on by Louis Bonnet, and, until 2009, distributed ...\"\n\nThere is missing dates and numbers (placeholders). The text seems incomplete: \"started on by Louis Bonnet\" missing date. \"circulation of around , falling in its last years to around before going into administration.\" Missing numbers. So we only extract explicit facts that are present.\n\nLet's parse:\n\n- L'Auvergnat de Paris is a French weekly newspaper. So subject: L'Auvergnat de Paris, relation: \"instance of\" maybe \"newspaper\". But we need specific relation: \"type\" maybe \"newspaper\". In examples they used \"occupation\", \"award received\". For newspaper, could use \"instance of\" or \"type\". Use \"type of\" maybe \"newspaper\". We'll use relation \"type\" with object \"weekly newspaper\". subject_type: \"newspaper\". object_type: \"publication type\"? Could be \"periodical\". We'll choose object_type \"newspaper\". Might be okay.\n\n- It was started by Louis Bonnet. So subject: L'Auvergnat de Paris, relation: \"founded by\" or \"founder\". Use \"founder\". object: Louis Bonnet. qualifiers none. subject_type \"newspaper\", object_type \"human\".\n\n- It was distributed throughout France until 2009. So we have distribution period. Could create triplet: L'Auvergnat de Paris - \"distribution area\" - France, with qualifier \"point in time\" maybe \"until 2009\". Actually distribution lasted until 2009. So we can have qualifier \"end time\" maybe \"point in time\" with object \"2009\". Use qualifier relation \"end time\". But allowed qualifiers list includes \"point in time\". Could use that with object \"2009\". Also maybe \"start time\" not given. We'll create triplet: subject L'Auvergnat de Paris, relation \"distributed in\", object \"France\". qualifiers: [{\"relation\":\"point in time\",\"object\":\"2009\"}] but that indicates time of distribution? Might be ambiguous. Could also use qualifier \"until\" but not allowed. We'll use point in time \"2009\" indicating until that year.\n\n- It had a circulation of around (missing number). Not extract.\n\n- It had the sub-title (\"From the Massif Central and proud to be so\"). So triplet: L'Auvergnat de Paris - \"subtitle\" - \"From the Massif Central and proud to be so\". qualifiers none. object_type \"string\" maybe \"subtitle\". We'll set object_type \"text\".\n\n- It was a trade journal for Paris restaurants and brasseries. So relation: \"type\" maybe \"trade journal\". Or \"focus\" \"Paris restaurants and brasseries\". Could create: L'Auvergnat de Paris - \"focus\" - \"Paris restaurants and brasseries\". object_type \"industry\". Or \"subject area\". We'll use relation \"covers\" with object \"Paris restaurants and brasseries\". object_type \"industry\". qualifiers maybe none.\n\n- Definition: \"An Auvergnat is someone who comes from the Auvergne province or Auvergne region of France.\" So we have entity \"Auvergnat\". Relation: \"instance of\" maybe \"person\". But statement: \"someone who comes from the Auvergne province or Auvergne region of France.\" So we can create: Auvergnat - \"origin\" - Auvergne province. Also Auvergnat - \"origin\" - Auvergne region. Could also have relation \"country of origin\" but region. We'll create two triplets.\n\n- Auvergne province is a region of France. Not needed.\n\n- Also \"Auvergne region of France\". Could treat as same.\n\nWe need subject_type and object_type. For \"Auvergnat\" subject_type \"ethnic group\" maybe \"person\". We'll set \"human\". Object_type \"region\". For province vs region both region.\n\nNow ensure qualifiers: none besides distribution time.\n\nCheck pronoun resolution: \"It\" refers to L'Auvergnat de Paris.\n\nNow produce JSON.\n\nList of triplets:\n\n1. L'Auvergnat de Paris - \"type\" - \"weekly newspaper\". qualifiers [].\n\nsubject_type \"newspaper\", object_type \"publication type\". Might be \"newspaper\". We'll set object_type \"newspaper\".\n\n2. L'Auvergnat de Paris - \"founder\" - \"Louis Bonnet\". qualifiers [].\n\nsubject_type \"newspaper\", object_type \"human\".\n\n3. L'Auvergnat de Paris - \"distributed in\" - \"France\". qualifiers [{\"relation\":\"point in time\",\"object\":\"2009\"}].\n\nsubject_type \"newspaper\", object_type \"country\".\n\n4. L'Auvergnat de Paris - \"subtitle\" - \"From the Massif Central and proud to be so\". qualifiers [].\n\nsubject_type \"newspaper\", object_type \"text\".\n\n5. L'Auvergnat de Paris - \"covers\" - \"Paris restaurants and brasseries\". qualifiers [].\n\nsubject_type \"newspaper\", object_type \"industry\".\n\n6. Auvergnat - \"origin\" - \"Auvergne province\". qualifiers [].\n\nsubject_type \"human\", object_type \"province\".\n\n7. Auvergnat - \"origin\" - \"Auvergne region\". qualifiers [].\n\nsubject_type \"human\", object_type \"region\".\n\nPotential also \"Auvergne province\" - \"part of\" - \"France\". Not required.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1703,
+      "total_tokens": 3328,
+      "completion_tokens": 1625,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"type\",\n            \"object\": \"weekly newspaper\",\n            \"qualifiers\": [],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"newspaper\"\n        },\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"founder\",\n            \"object\": \"Louis Bonnet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"distributed in\",\n            \"object\": \"France\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2009\"\n                }\n            ],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"subtitle\",\n            \"object\": \"From the Massif Central and proud to be so\",\n            \"qualifiers\": [],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"text\"\n        },\n        {\n            \"subject\": \"L'Auvergnat de Paris\",\n            \"relation\": \"covers\",\n            \"object\": \"Paris restaurants and brasseries\",\n            \"qualifiers\": [],\n            \"subject_type\": \"newspaper\",\n            \"object_type\": \"industry\"\n        },\n        {\n            \"subject\": \"Auvergnat\",\n            \"relation\": \"origin\",\n            \"object\": \"Auvergne province\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Auvergnat\",\n            \"relation\": \"origin\",\n            \"object\": \"Auvergne region\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"region\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "L'Auvergnat de Paris",
+        "relation": "type",
+        "object": "weekly newspaper",
+        "qualifiers": [],
+        "subject_type": "newspaper",
+        "object_type": "newspaper"
+      },
+      {
+        "subject": "L'Auvergnat de Paris",
+        "relation": "founder",
+        "object": "Louis Bonnet",
+        "qualifiers": [],
+        "subject_type": "newspaper",
+        "object_type": "human"
+      },
+      {
+        "subject": "L'Auvergnat de Paris",
+        "relation": "distributed in",
+        "object": "France",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2009"
+          }
+        ],
+        "subject_type": "newspaper",
+        "object_type": "country"
+      },
+      {
+        "subject": "L'Auvergnat de Paris",
+        "relation": "subtitle",
+        "object": "From the Massif Central and proud to be so",
+        "qualifiers": [],
+        "subject_type": "newspaper",
+        "object_type": "text"
+      },
+      {
+        "subject": "L'Auvergnat de Paris",
+        "relation": "covers",
+        "object": "Paris restaurants and brasseries",
+        "qualifiers": [],
+        "subject_type": "newspaper",
+        "object_type": "industry"
+      },
+      {
+        "subject": "Auvergnat",
+        "relation": "origin",
+        "object": "Auvergne province",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "province"
+      },
+      {
+        "subject": "Auvergnat",
+        "relation": "origin",
+        "object": "Auvergne region",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "region"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1703,
+    "total_tokens": 3328,
+    "completion_tokens": 1625,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 574,
+    "output_tokens_est": 482
+  },
+  "attempts": 1,
+  "latency_s": 20.343189254999743,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:16:39.192745+00:00",
+  "cache_key": "4a2adddd3a5f35437d96edf4331f010d"
+}

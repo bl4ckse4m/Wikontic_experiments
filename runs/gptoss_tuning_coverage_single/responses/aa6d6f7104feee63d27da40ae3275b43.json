@@ -1,0 +1,149 @@
+{
+  "task": {
+    "input_id": "540d4ad85590d411",
+    "input_hash": "6448caa7d862b0276de0b17b7be3c1fca04965a00cdcb4e7f7f1baf950ccd461",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-4a161acb9fee1e76d78ebf8748d68f50",
+    "object": "chat.completion",
+    "created": 1791503191,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Korolyov\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"Moscow Oblast\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"administrative region\"\n        },\n        {\n            \"subject\": \"Korolyov\",\n            \"relation\": \"renamed on\",\n            \"object\": \"July 1996\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Korolyov\",\n            \"relation\": \"named after\",\n            \"object\": \"Sergei Korolev\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Sergei Korolev\",\n            \"relation\": \"date of death\",\n            \"object\": \"1966\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Sergei Korolev\",\n            \"relation\": \"father of\",\n            \"object\": \"Soviet/Russian space program\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"space program\"\n        },\n        {\n            \"subject\": \"Korolyov\",\n            \"relation\": \"host of\",\n            \"object\": \"International Space Olympics\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1997\"\n                },\n                {\n                    \"relation\": \"frequency\",\n                    \"object\": \"annual\"\n                },\n                {\n                    \"relation\": \"target group\",\n                    \"object\": \"young people\"\n                },\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"promote space related research\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"competition\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Korolyov, Moscow Oblast\n\nIn July 1996, the city was renamed in commemoration of Sergei Korolev, the father of the Soviet/Russian space program, who died in 1966. Since 1997, Korolyov has hosted the International Space Olympics, an annual competition for young people, to promote space related research.\"\n\nWe need to parse.\n\nFirst, \"Korolyov, Moscow Oblast\" indicates Korolyov is a city in Moscow Oblast. So triplet: (Korolyov, located in administrative territorial entity, Moscow Oblast) maybe relation \"located in administrative territorial entity\". Subject_type: city (human? no, location). object_type: administrative region.\n\nSecond: \"In July 1996, the city was renamed in commemoration of Sergei Korolev\". So triplet: (Korolyov, renamed as, Sergei Korolev?) Actually renamed in commemoration of Sergei Korolev. The new name is Korolyov (the city). It was renamed in July 1996. So we can have (Korolyov, rename date, July 1996) or (Korolyov, renamed after, Sergei Korolev). Let's produce two: rename date and named after.\n\nTriplet: (Korolyov, rename date, July 1996) with qualifier maybe point in time? Actually rename date is date. Use relation \"renamed on\" maybe \"renaming date\". We'll use \"renamed on\". object_type date.\n\nTriplet: (Korolyov, named after, Sergei Korolev). object_type human.\n\nAlso note Sergei Korolev died in 1966. So (Sergei Korolev, date of death, 1966). subject_type human, object_type date.\n\nAlso \"father of the Soviet/Russian space program\". Could be (Sergei Korolev, occupation, rocket engineer) but not explicit. It says \"father of the Soviet/Russian space program\". So relation \"significant role\" maybe \"father of\". Use relation \"father of\". object_type \"Soviet/Russian space program\". We'll include.\n\nThird: \"Since 1997, Korolyov has hosted the International Space Olympics, an annual competition for young people, to promote space related research.\"\n\nTriplet: (Korolyov, host of, International Space Olympics). qualifiers: point in time start 1997, maybe \"point in time\" qualifier. Also \"annual competition\" maybe type. Also \"purpose\" promote space related research. Could add qualifier \"purpose\" with object \"promote space related research\". Use relation \"purpose\". Also \"target audience\" maybe \"young people\". Could add qualifier \"target group\". But not required.\n\nWe'll include qualifiers: start date 1997, frequency annual, purpose promote space related research, participant group young people.\n\nNow produce JSON.\n\nNeed subject_type and object_type.\n\nDefine types: Korolyov - city (human? no). Use \"city\". Moscow Oblast - administrative region. Sergei Korolev - human. International Space Olympics - competition. Young people - demographic group. Space related research - field of research.\n\nNow qualifiers list format: each qualifier dict with relation and object.\n\nFor host triplet: qualifiers: {\"relation\":\"point in time\",\"object\":\"1997\"} maybe \"start date\". Use \"point in time\". Also {\"relation\":\"frequency\",\"object\":\"annual\"} maybe \"frequency\". Also {\"relation\":\"target group\",\"object\":\"young people\"} and {\"relation\":\"purpose\",\"object\":\"promote space related research\"}.\n\nCheck allowed qualifier relations: not limited, can use generic but should be meaningful. Use \"frequency\", \"target group\", \"purpose\". Accept.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1659,
+      "total_tokens": 2882,
+      "completion_tokens": 1223,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Korolyov\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"Moscow Oblast\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"administrative region\"\n        },\n        {\n            \"subject\": \"Korolyov\",\n            \"relation\": \"renamed on\",\n            \"object\": \"July 1996\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Korolyov\",\n            \"relation\": \"named after\",\n            \"object\": \"Sergei Korolev\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Sergei Korolev\",\n            \"relation\": \"date of death\",\n            \"object\": \"1966\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Sergei Korolev\",\n            \"relation\": \"father of\",\n            \"object\": \"Soviet/Russian space program\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"space program\"\n        },\n        {\n            \"subject\": \"Korolyov\",\n            \"relation\": \"host of\",\n            \"object\": \"International Space Olympics\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1997\"\n                },\n                {\n                    \"relation\": \"frequency\",\n                    \"object\": \"annual\"\n                },\n                {\n                    \"relation\": \"target group\",\n                    \"object\": \"young people\"\n                },\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"promote space related research\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"competition\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Korolyov",
+        "relation": "located in administrative territorial entity",
+        "object": "Moscow Oblast",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "administrative region"
+      },
+      {
+        "subject": "Korolyov",
+        "relation": "renamed on",
+        "object": "July 1996",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "date"
+      },
+      {
+        "subject": "Korolyov",
+        "relation": "named after",
+        "object": "Sergei Korolev",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "human"
+      },
+      {
+        "subject": "Sergei Korolev",
+        "relation": "date of death",
+        "object": "1966",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Sergei Korolev",
+        "relation": "father of",
+        "object": "Soviet/Russian space program",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "space program"
+      },
+      {
+        "subject": "Korolyov",
+        "relation": "host of",
+        "object": "International Space Olympics",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1997"
+          },
+          {
+            "relation": "frequency",
+            "object": "annual"
+          },
+          {
+            "relation": "target group",
+            "object": "young people"
+          },
+          {
+            "relation": "purpose",
+            "object": "promote space related research"
+          }
+        ],
+        "subject_type": "city",
+        "object_type": "competition"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1659,
+    "total_tokens": 2882,
+    "completion_tokens": 1223,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 605,
+    "output_tokens_est": 513
+  },
+  "attempts": 1,
+  "latency_s": 15.110005249996902,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:46:46.551573+00:00",
+  "cache_key": "aa6d6f7104feee63d27da40ae3275b43"
+}

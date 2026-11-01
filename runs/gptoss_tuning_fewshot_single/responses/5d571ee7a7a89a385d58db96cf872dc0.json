@@ -1,0 +1,163 @@
+{
+  "task": {
+    "input_id": "cce871f6f72feff4",
+    "input_hash": "cf4d5ccca198cd9f3c26021f6daf532239dfb62cee23c3e6300750a844f2e9a7",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-1490aa639fcac7fbb5351da50eb54231",
+    "object": "chat.completion",
+    "created": 1791521544,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"date of birth\",\n            \"object\": \"May 19, 1970\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Saint-Georges-de-Cacouna, Quebec\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"occupation\",\n            \"object\": \"television personality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"occupation\",\n            \"object\": \"politician\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"member of\",\n            \"object\": \"National Assembly of Quebec\",\n            \"qualifiers\": [\n                {\"relation\": \"start time\", \"object\": \"1994\"},\n                {\"relation\": \"end time\", \"object\": \"2009\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"leader of\",\n            \"object\": \"Action démocratique du Québec\",\n            \"qualifiers\": [\n                {\"relation\": \"start time\", \"object\": \"1994\"},\n                {\"relation\": \"end time\", \"object\": \"2009\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"position held\",\n            \"object\": \"Leader of the Opposition in the National Assembly\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"2007\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political position\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText:\n\n\"Mario Dumont\n\nMario Dumont (born May 19, 1970 in Saint-Georges-de-Cacouna, Quebec) is a television personality and former politician in Quebec, Canada. He was a Member of the National Assembly of Quebec (MNA), and the leader of the Action démocratique du Québec (ADQ), from 1994 to 2009. After the 2007 Quebec election, Dumont obtained the post of Leader of the Opposition in the National Assembly.\"\n\nWe need triplets.\n\nFirst: subject Mario Dumont, relation date of birth, object May 19, 1970. qualifiers maybe place of birth? The text says \"born ... in Saint-Georges-de-Cacouna, Quebec\". So we can have a separate triplet: place of birth. Or we can attach qualifier to date of birth? Usually place of birth is separate relation. We'll create two triplets: date of birth and place of birth.\n\nPlace of birth: Saint-Georges-de-Cacouna, Quebec. object type: location (city). subject_type human.\n\nSecond: occupation: television personality. relation occupation, object television personality, subject_type human, object_type profession? maybe \"television personality\" is occupation. We'll use \"occupation\". Also \"former politician\". So occupation politician? Since \"former politician\" indicates past role. Could capture as occupation with qualifier \"point in time\" maybe? But text says \"former politician\". Could treat as occupation with qualifier \"polarity\" negative? Actually \"former\" indicates past, not current. Could create occupation \"politician\" with qualifier \"point in time\" maybe? But not given date. Simpler: create occupation \"politician\" with qualifier \"polarity\" maybe not. We'll just have occupation \"politician\". Might be okay.\n\nThird: member of the National Assembly of Quebec (MNA). relation member of, object National Assembly of Quebec. qualifiers: point in time start 1994, end 2009. Could use qualifiers \"start time\" and \"end time\"? The spec only mentions \"point in time\". Could use two qualifiers: \"start time\" and \"end time\". Not defined but we can use \"point in time\" with range? Might be okay to have two qualifiers: \"start time\": 1994, \"end time\": 2009. Use relation names \"start time\" and \"end time\". Acceptable.\n\nAlso \"leader of the Action démocratique du Québec (ADQ)\" from 1994 to 2009. So relation leader of, object Action démocratique du Québec, qualifiers same time.\n\nFourth: After the 2007 Quebec election, Dumont obtained the post of Leader of the Opposition in the National Assembly. So relation position held? \"Leader of the Opposition in the National Assembly\". Could be \"position held\". object \"Leader of the Opposition in the National Assembly\". qualifier point in time \"2007\" maybe after election. Could also include \"point in time\" 2007. We'll add.\n\nAlso \"2007 Quebec election\" is an event. Could have relation \"participated in\" but not needed.\n\nNow define subject_type and object_type.\n\n- Mario Dumont: human.\n- date: date.\n- Saint-Georges-de-Cacouna, Quebec: location (city).\n- television personality: profession.\n- politician: profession.\n- National Assembly of Quebec: legislative body (organisation?).\n- Action démocratique du Québec: political party (organisation).\n- Leader of the Opposition in the National Assembly: position (political position). object_type \"political position\".\n\nNow qualifiers list.\n\nFor member of: qualifiers start time 1994, end time 2009.\n\nFor leader of ADQ: same qualifiers.\n\nFor position held: point in time 2007 (or after 2007). Use \"point in time\" 2007.\n\nNow produce JSON.\n\nCheck format: each dict includes \"qualifiers\": list of {\"relation\": \"...\", \"object\": \"...\"}.\n\nNow produce final."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1690,
+      "total_tokens": 3003,
+      "completion_tokens": 1313,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"date of birth\",\n            \"object\": \"May 19, 1970\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Saint-Georges-de-Cacouna, Quebec\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"occupation\",\n            \"object\": \"television personality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"occupation\",\n            \"object\": \"politician\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"member of\",\n            \"object\": \"National Assembly of Quebec\",\n            \"qualifiers\": [\n                {\"relation\": \"start time\", \"object\": \"1994\"},\n                {\"relation\": \"end time\", \"object\": \"2009\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"leader of\",\n            \"object\": \"Action démocratique du Québec\",\n            \"qualifiers\": [\n                {\"relation\": \"start time\", \"object\": \"1994\"},\n                {\"relation\": \"end time\", \"object\": \"2009\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Mario Dumont\",\n            \"relation\": \"position held\",\n            \"object\": \"Leader of the Opposition in the National Assembly\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"2007\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political position\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Mario Dumont",
+        "relation": "date of birth",
+        "object": "May 19, 1970",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Mario Dumont",
+        "relation": "place of birth",
+        "object": "Saint-Georges-de-Cacouna, Quebec",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "location"
+      },
+      {
+        "subject": "Mario Dumont",
+        "relation": "occupation",
+        "object": "television personality",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Mario Dumont",
+        "relation": "occupation",
+        "object": "politician",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Mario Dumont",
+        "relation": "member of",
+        "object": "National Assembly of Quebec",
+        "qualifiers": [
+          {
+            "relation": "start time",
+            "object": "1994"
+          },
+          {
+            "relation": "end time",
+            "object": "2009"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "Mario Dumont",
+        "relation": "leader of",
+        "object": "Action démocratique du Québec",
+        "qualifiers": [
+          {
+            "relation": "start time",
+            "object": "1994"
+          },
+          {
+            "relation": "end time",
+            "object": "2009"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "Mario Dumont",
+        "relation": "position held",
+        "object": "Leader of the Opposition in the National Assembly",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2007"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political position"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1690,
+    "total_tokens": 3003,
+    "completion_tokens": 1313,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 637,
+    "output_tokens_est": 545
+  },
+  "attempts": 1,
+  "latency_s": 16.621057305004797,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:52:41.238814+00:00",
+  "cache_key": "5d571ee7a7a89a385d58db96cf872dc0"
+}

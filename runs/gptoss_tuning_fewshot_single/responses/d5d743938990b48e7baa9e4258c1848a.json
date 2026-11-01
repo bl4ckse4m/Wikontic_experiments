@@ -1,0 +1,158 @@
+{
+  "task": {
+    "input_id": "c0ec9710f3a07580",
+    "input_hash": "9d19283be6fc73ca1b791dbb188cd8cc8a81fff3dd4ac29a111cbf677c7f8b77",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-39dc52650efdf734e25a89c37cf123d1",
+    "object": "chat.completion",
+    "created": 1791521090,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Baldwin\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"unincorporated community\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Baldwin\",\n            \"relation\": \"located in\",\n            \"object\": \"Baltimore County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"unincorporated community\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Baltimore County\",\n            \"relation\": \"located in\",\n            \"object\": \"Maryland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Maryland\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Baldwin\",\n            \"relation\": \"postal code\",\n            \"object\": \"21013\",\n            \"qualifiers\": [],\n            \"subject_type\": \"unincorporated community\",\n            \"object_type\": \"postal code\"\n        },\n        {\n            \"subject\": \"Baldwin\",\n            \"relation\": \"served by\",\n            \"object\": \"Maryland and Pennsylvania Railroad\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1958\"\n                },\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"until\"\n                },\n                {\n                    \"relation\": \"milepost\",\n                    \"object\": \"18.4\"\n                }\n            ],\n            \"subject_type\": \"unincorporated community\",\n            \"object_type\": \"railroad\"\n        },\n        {\n            \"subject\": \"Hidden Valley Farm\",\n            \"relation\": \"listed on\",\n            \"object\": \"National Register of Historic Places\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1983\"\n                }\n            ],\n            \"subject_type\": \"farm\",\n            \"object_type\": \"heritage register\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText:\n\n\"Baldwin, Maryland\n\nBaldwin is an unincorporated community in Baltimore County, Maryland, United States. The United States Postal Service has assigned Baldwin the ZIP Code 21013. Until 1958, this community was served by the Maryland and Pennsylvania Railroad at milepost 18.4. Hidden Valley Farm was listed on the National Register of Historic Places in 1983.\"\n\nWe need to produce triplets.\n\nEntities: Baldwin (probably a place). Maryland (state). Baltimore County (county). United States (country). United States Postal Service (organization). ZIP Code 21013 (code). Maryland and Pennsylvania Railroad (organization). Hidden Valley Farm (place/building). National Register of Historic Places (registry). Year 1958, 1983.\n\nRelations:\n\n- Baldwin is an unincorporated community (type). So relation \"instance of\" maybe \"unincorporated community\". But we need relation like \"instance of\" or \"type\". In examples they used \"occupation\", \"award received\". For places, maybe \"instance of\". Use \"instance of\" relation. object_type \"unincorporated community\". subject_type \"place\". Could also use \"location in administrative territorial entity\". But we can produce multiple: \"Baldwin\" \"located in\" \"Baltimore County\". Also \"Baltimore County\" \"located in\" \"Maryland\". \"Maryland\" \"located in\" \"United States\". Also \"Baldwin\" \"has postal code\" \"21013\". Use relation \"postal code\". object_type \"postal code\". Also \"United States Postal Service\" \"assigned postal code\" maybe \"assigned\". But we can capture as \"United States Postal Service\" \"assigned\" \"ZIP Code 21013\" to \"Baldwin\". But relation \"assigned\" with object \"ZIP Code 21013\". Need qualifiers maybe \"subject\" is USPS, object is ZIP Code, qualifier \"recipient\" Baldwin? Not typical. Simpler: \"Baldwin\" \"postal code\" \"21013\". Provide qualifier \"assigned by\" maybe not needed.\n\n- \"Until 1958, this community was served by the Maryland and Pennsylvania Railroad at milepost 18.4.\" So relation: \"served by\" (or \"service provider\") \"Maryland and Pennsylvania Railroad\". Qualifier: \"point in time\" \"until 1958\". Also qualifier \"milepost\" maybe \"unit\" or \"point in time\"? Use qualifier \"unit\" maybe \"milepost 18.4\". Could use qualifier relation \"milepost\" with object \"18.4\". Provide \"point in time\" qualifier \"until 1958\". Also \"subject_type\" \"place\", \"object_type\" \"organization\". Also \"service\" maybe \"rail service\". We'll use relation \"served by\". Provide qualifiers.\n\n- \"Hidden Valley Farm was listed on the National Register of Historic Places in 1983.\" So relation: \"listed on\" (or \"heritage register\") \"National Register of Historic Places\". Qualifier: \"point in time\" \"1983\". Subject_type \"building\" or \"farm\". Use \"farm\". Object_type \"heritage register\". Provide.\n\nAlso \"Baldwin\" \"located in\" \"Baltimore County\". \"Baltimore County\" \"located in\" \"Maryland\". \"Maryland\" \"located in\" \"United States\". Could also include \"Baldwin\" \"located in\" \"Maryland\" directly but hierarchical.\n\nNow produce JSON.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- Baldwin: \"unincorporated community\" (subject_type \"unincorporated community\"? but they used \"human\" for people. For place, maybe \"settlement\". We'll use \"unincorporated community\". object_type for location: \"county\". So \"Baltimore County\" type \"county\". \"Maryland\" type \"state\". \"United States\" type \"country\". \"ZIP Code 21013\" type \"postal code\". \"Maryland and Pennsylvania Railroad\" type \"railroad\". \"Hidden Valley Farm\" type \"farm\". \"National Register of Historic Places\" type \"heritage register\".\n\nNow list triplets:\n\n1. Baldwin - instance of - unincorporated community. qualifiers [].\n\n2. Baldwin - located in - Baltimore County. qualifiers [].\n\n3. Baltimore County - located in - Maryland.\n\n4. Maryland - located in - United States.\n\n5. Baldwin - postal code - 21013. qualifiers [].\n\n6. Baldwin - served by - Maryland and Pennsylvania Railroad. qualifiers: point in time \"until 1958\", milepost \"18.4\". Use qualifier relation \"milepost\" with object \"18.4\". Provide as string.\n\n7. Hidden Valley Farm - listed on - National Register of Historic Places. qualifiers: point in time \"1983\".\n\nPotential also \"Maryland and Pennsylvania Railroad\" - type \"railroad\". Not needed.\n\nNow produce JSON list.\n\nCheck qualifiers format: list of {\"relation\": \"...\", \"object\": \"...\"}.\n\nFor milepost, maybe relation \"milepost\". Provide object \"18.4\". For point in time, \"until 1958\". Should we include \"until\" as qualifier? Use \"point in time\" with object \"1958\" and maybe \"qualifier\" \"until\". But spec says qualifiers can be \"point in time\". We'll just put \"point in time\" \"1958\" and maybe also \"condition\" \"until\". But they said qualifiers include condition. Could use condition \"until\". But simpler: \"point in time\" \"1958\". However \"until 1958\" indicates service existed up to that date, not at that date. Could use condition \"until\". We'll include both: point in time \"1958\" and condition \"until\". But condition expects object string. We'll do condition \"until\". Might be okay.\n\nBut spec: qualifiers list of {\"relation\": string, \"object\": string}. So we can include both.\n\nThus qualifiers for triplet 6: [{\"relation\":\"point in time\",\"object\":\"1958\"},{\"relation\":\"condition\",\"object\":\"until\"},{\"relation\":\"milepost\",\"object\":\"18.4\"}].\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1671,
+      "total_tokens": 3445,
+      "completion_tokens": 1774,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Baldwin\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"unincorporated community\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Baldwin\",\n            \"relation\": \"located in\",\n            \"object\": \"Baltimore County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"unincorporated community\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Baltimore County\",\n            \"relation\": \"located in\",\n            \"object\": \"Maryland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Maryland\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Baldwin\",\n            \"relation\": \"postal code\",\n            \"object\": \"21013\",\n            \"qualifiers\": [],\n            \"subject_type\": \"unincorporated community\",\n            \"object_type\": \"postal code\"\n        },\n        {\n            \"subject\": \"Baldwin\",\n            \"relation\": \"served by\",\n            \"object\": \"Maryland and Pennsylvania Railroad\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1958\"\n                },\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"until\"\n                },\n                {\n                    \"relation\": \"milepost\",\n                    \"object\": \"18.4\"\n                }\n            ],\n            \"subject_type\": \"unincorporated community\",\n            \"object_type\": \"railroad\"\n        },\n        {\n            \"subject\": \"Hidden Valley Farm\",\n            \"relation\": \"listed on\",\n            \"object\": \"National Register of Historic Places\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1983\"\n                }\n            ],\n            \"subject_type\": \"farm\",\n            \"object_type\": \"heritage register\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Baldwin",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "unincorporated community",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Baldwin",
+        "relation": "located in",
+        "object": "Baltimore County",
+        "qualifiers": [],
+        "subject_type": "unincorporated community",
+        "object_type": "county"
+      },
+      {
+        "subject": "Baltimore County",
+        "relation": "located in",
+        "object": "Maryland",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "state"
+      },
+      {
+        "subject": "Maryland",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "Baldwin",
+        "relation": "postal code",
+        "object": "21013",
+        "qualifiers": [],
+        "subject_type": "unincorporated community",
+        "object_type": "postal code"
+      },
+      {
+        "subject": "Baldwin",
+        "relation": "served by",
+        "object": "Maryland and Pennsylvania Railroad",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1958"
+          },
+          {
+            "relation": "condition",
+            "object": "until"
+          },
+          {
+            "relation": "milepost",
+            "object": "18.4"
+          }
+        ],
+        "subject_type": "unincorporated community",
+        "object_type": "railroad"
+      },
+      {
+        "subject": "Hidden Valley Farm",
+        "relation": "listed on",
+        "object": "National Register of Historic Places",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1983"
+          }
+        ],
+        "subject_type": "farm",
+        "object_type": "heritage register"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1671,
+    "total_tokens": 3445,
+    "completion_tokens": 1774,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 679,
+    "output_tokens_est": 587
+  },
+  "attempts": 1,
+  "latency_s": 21.416599201998906,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:45:12.626775+00:00",
+  "cache_key": "d5d743938990b48e7baa9e4258c1848a"
+}

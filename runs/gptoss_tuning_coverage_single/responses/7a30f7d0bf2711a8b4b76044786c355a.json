@@ -1,0 +1,139 @@
+{
+  "task": {
+    "input_id": "8d1942cf5ac8329b",
+    "input_hash": "8b2895c8d5d6077c7073ac85a374fc3f8c3e1151391e93c2abef2be6d385b19c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-ef30306f22c3e0173c9c8d7a014c5886",
+    "object": "chat.completion",
+    "created": 1791504924,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mersey Hospital\",\n            \"relation\": \"location\",\n            \"object\": \"Latrobe\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Tasmania\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Mersey Hospital\",\n            \"relation\": \"near\",\n            \"object\": \"Devonport\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Tasmania\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Mersey Hospital\",\n            \"relation\": \"campus of\",\n            \"object\": \"North West Regional Hospital\",\n            \"qualifiers\": [],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"hospital\"\n        },\n        {\n            \"subject\": \"North West Regional Hospital\",\n            \"relation\": \"main healthcare facility for\",\n            \"object\": \"North Western region of Tasmania\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"region\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Mersey Community Hospital\n\nThe Mersey Hospital, at Lathe near Devonport in Tasmania is a campus of the North West Regional Hospital, the main healthcare facility for the North Western region of Tasmania, Australia.\"\n\nActually text: \"Mersey Community Hospital\n\nThe Mersey Hospital, at Latrobe near Devonport in Tasmania is a campus of the North West Regional Hospital, the main healthcare facility for the North Western region of Tasmania, Australia.\"\n\nWe need to parse.\n\nEntities: Mersey Community Hospital (maybe same as Mersey Hospital?). The text says \"The Mersey Hospital, at Latrobe near Devonport in Tasmania is a campus of the North West Regional Hospital, the main healthcare facility for the North Western region of Tasmania, Australia.\"\n\nSo we have:\n\n- Mersey Hospital (subject) location: at Latrobe near Devonport in Tasmania. So relation: location, object: Latrobe (or \"Latrobe, Tasmania\"?). Could be \"Latrobe\" as place. Also \"near Devonport\". Could capture both? Might create two location relations: \"located in\" Latrobe, \"near\" Devonport. But we need explicit facts. The phrase \"at Latrobe near Devonport in Tasmania\" indicates location is Latrobe, which is near Devonport, in Tasmania. We could have location qualifiers: point in time? Not needed. So we can create:\n\n(subject: Mersey Hospital, relation: location, object: Latrobe, qualifiers: [{\"relation\":\"located in country\",\"object\":\"Australia\"}]? Not explicit. Better: location: Latrobe. Also maybe \"located in\" Tasmania. Could add qualifier \"state\" etc. But we need to follow explicit statements.\n\n- Mersey Hospital is a campus of the North West Regional Hospital. So relation: \"subunit of\" or \"campus of\". Use \"campus of\". So (Mersey Hospital, campus of, North West Regional Hospital). subject_type: hospital, object_type: hospital.\n\n- North West Regional Hospital is the main healthcare facility for the North Western region of Tasmania, Australia. So relation: \"main healthcare facility for\" maybe \"primary healthcare facility for\". Use \"main healthcare facility for\". So (North West Regional Hospital, main healthcare facility for, North Western region of Tasmania). object_type: region. Also could add qualifier \"country\": Australia.\n\n- Also \"Mersey Community Hospital\" appears as heading. Could be same as Mersey Hospital? Not explicit. Might treat as separate entity with no relation. Could have \"Mersey Community Hospital\" is a hospital (type). But not explicit. Might ignore.\n\nWe need subject_type and object_type. Use generic types: \"hospital\", \"city\", \"region\", \"state\", \"country\". For location we need object_type \"city\" or \"town\". Latrobe is a town. Devonport is a city. Tasmania is a state. Australia is a country.\n\nWe can also capture \"near Devonport\". Relation \"near\" maybe \"proximity\". Use \"near\". So (Mersey Hospital, near, Devonport). qualifiers none.\n\nAlso \"in Tasmania\". Could add qualifier to location: \"state\". But we can also have separate relation \"located in\" Tasmania. But phrase \"at Latrobe near Devonport in Tasmania\". So we can have location: Latrobe, and qualifier \"state\" = Tasmania. But qualifiers are attached to triplet. So we could have (Mersey Hospital, location, Latrobe) with qualifier {\"relation\":\"state\",\"object\":\"Tasmania\"}.\n\nBetter to produce separate triplet for location in Tasmania: (Mersey Hospital, located in, Tasmania). But that might be redundant. But it's explicit: \"in Tasmania\". So we can include.\n\nNow produce JSON.\n\nTriplet list:\n\n1. Mersey Hospital - location - Latrobe (qualifier state Tasmania). subject_type hospital, object_type city/town.\n\n2. Mersey Hospital - near - Devonport (object_type city). subject_type hospital.\n\n3. Mersey Hospital - campus of - North West Regional Hospital (subject_type hospital, object_type hospital).\n\n4. North West Regional Hospital - main healthcare facility for - North Western region of Tasmania (object_type region). Could also add qualifier country Australia.\n\nAdd qualifier: {\"relation\":\"country\",\"object\":\"Australia\"}.\n\nNow also maybe \"North Western region of Tasmania, Australia\" includes both region and country. So we can have object \"North Western region of Tasmania\". object_type region. Qualifier country Australia.\n\nNow also \"Mersey Community Hospital\" maybe is same as Mersey Hospital but not explicit. Could add type: Mersey Community Hospital - instance of - hospital. But not explicit. Might skip.\n\nReturn JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1627,
+      "total_tokens": 2925,
+      "completion_tokens": 1298,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mersey Hospital\",\n            \"relation\": \"location\",\n            \"object\": \"Latrobe\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Tasmania\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Mersey Hospital\",\n            \"relation\": \"near\",\n            \"object\": \"Devonport\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Tasmania\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Mersey Hospital\",\n            \"relation\": \"campus of\",\n            \"object\": \"North West Regional Hospital\",\n            \"qualifiers\": [],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"hospital\"\n        },\n        {\n            \"subject\": \"North West Regional Hospital\",\n            \"relation\": \"main healthcare facility for\",\n            \"object\": \"North Western region of Tasmania\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"region\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Mersey Hospital",
+        "relation": "location",
+        "object": "Latrobe",
+        "qualifiers": [
+          {
+            "relation": "state",
+            "object": "Tasmania"
+          },
+          {
+            "relation": "country",
+            "object": "Australia"
+          }
+        ],
+        "subject_type": "hospital",
+        "object_type": "town"
+      },
+      {
+        "subject": "Mersey Hospital",
+        "relation": "near",
+        "object": "Devonport",
+        "qualifiers": [
+          {
+            "relation": "state",
+            "object": "Tasmania"
+          },
+          {
+            "relation": "country",
+            "object": "Australia"
+          }
+        ],
+        "subject_type": "hospital",
+        "object_type": "city"
+      },
+      {
+        "subject": "Mersey Hospital",
+        "relation": "campus of",
+        "object": "North West Regional Hospital",
+        "qualifiers": [],
+        "subject_type": "hospital",
+        "object_type": "hospital"
+      },
+      {
+        "subject": "North West Regional Hospital",
+        "relation": "main healthcare facility for",
+        "object": "North Western region of Tasmania",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "Australia"
+          }
+        ],
+        "subject_type": "hospital",
+        "object_type": "region"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1627,
+    "total_tokens": 2925,
+    "completion_tokens": 1298,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 516,
+    "output_tokens_est": 423
+  },
+  "attempts": 1,
+  "latency_s": 16.267936015996384,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:15:41.382315+00:00",
+  "cache_key": "7a30f7d0bf2711a8b4b76044786c355a"
+}

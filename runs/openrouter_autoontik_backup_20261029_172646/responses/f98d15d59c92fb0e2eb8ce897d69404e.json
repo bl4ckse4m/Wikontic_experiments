@@ -1,0 +1,176 @@
+{
+  "task": {
+    "input_id": "c50a2e8ec97560c2",
+    "input_hash": "c0f56853b9021ea6a1187dd2e0bb3b97abe5b31b54931137d0eb3833d0339496",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793211075-tAIzdoIsKfOj4H3in2nt",
+    "object": "chat.completion",
+    "created": 1793211075,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Near AI",
+    "system_fingerprint": "vllm-0.31.0-5e5536ce",
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"instance of\",\n            \"object\": \"television program\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"class\"\n        },\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"topic\",\n            \"object\": \"Canadian Football League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"sports league\"\n        },\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"broadcast on\",\n            \"object\": \"CTV Television Network\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1962\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"1986\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"CTV Television Network\",\n            \"relation\": \"coverage ended\",\n            \"object\": \"Canadian Football League\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1986\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"television network\",\n            \"object_type\": \"sports league\"\n        },\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"replaced by\",\n            \"object\": \"TSN\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"replaced by\",\n            \"object\": \"Canadian Football Network\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"television network\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nEntities: CFL on CTV (a program/presentation). Canadian Football League (league). CTV Television Network (TV network). 1962 (year). 1986 (year). TSN (network). Canadian Football Network (network). Also \"coverage\" maybe relation.\n\nFirst sentence: \"CFL on CTV was a presentation of Canadian Football League football aired on the CTV Television Network from 1962 to 1986.\"\n\nTriplets:\n- subject: CFL on CTV\n  relation: instance of (maybe \"television program\" or \"presentation\") but we need type. Could use \"type\" relation? Not defined. We can use \"instance of\" relation. object: presentation. object_type: \"television program\" maybe. But we need to follow examples: they used \"occupation\" etc. For program, maybe \"type\" relation. But we can use \"instance of\". Let's do.\n\n- subject: CFL on CTV\n  relation: \"topic\"\n  object: Canadian Football League\n  object_type: \"sports league\"\n\n- subject: CFL on CTV\n  relation: \"broadcast on\"\n  object: CTV Television Network\n  object_type: \"television network\"\n  qualifiers: start time 1962, end time 1986.\n\nWe need qualifiers list with relation \"start time\" and \"end time\". object_type for qualifiers: year.\n\nSecond sentence: \"CTV dropped coverage of the CFL after the 1986 season.\"\n\nTriplet: subject: CTV Television Network, relation: \"coverage ended\" or \"dropped coverage of\". object: CFL (or Canadian Football League). Use \"coverage ended\". qualifiers: point in time 1986 (or after 1986 season). Use \"point in time\" qualifier.\n\nThird: \"CTV's coverage was replaced by TSN and the newly created Canadian Football Network.\"\n\nTwo objects: TSN, Canadian Football Network. Relation: \"replaced by\". Subject: CTV's coverage (maybe same as coverage of CFL). Could use subject: CFL (or CTV coverage). Let's treat subject: CFL (or Canadian Football League). But better: \"CTV's coverage of the CFL\" is the thing replaced. So subject: CFL on CTV (the program). relation: \"replaced by\". object: TSN. Also another triplet with object: Canadian Football Network.\n\nAdd qualifiers maybe \"point in time\" after 1986? Not specified. Could add \"point in time\" 1986? Not needed.\n\nAlso need types: TSN is \"television network\". Canadian Football Network is \"television network\". CFL on CTV is \"television program\". CTV Television Network is \"television network\". Canadian Football League is \"sports league\". Year types.\n\nNow format JSON with \"triplets\": [ ... ].\n\nEach dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nLet's craft.\n\nTriplet 1:\nsubject: \"CFL on CTV\"\nrelation: \"instance of\"\nobject: \"television program\"\nsubject_type: \"television program\"? Actually subject_type is class of subject: \"television program\". object_type: \"type\" maybe \"class\". But we can set object_type: \"class\". But they used object_type like \"award\". For instance of, object is a class. So object_type: \"class\". We'll set.\n\nTriplet 2:\nsubject: \"CFL on CTV\"\nrelation: \"topic\"\nobject: \"Canadian Football League\"\nsubject_type: \"television program\"\nobject_type: \"sports league\"\n\nTriplet 3:\nsubject: \"CFL on CTV\"\nrelation: \"broadcast on\"\nobject: \"CTV Television Network\"\nqualifiers: start time 1962, end time 1986.\nsubject_type: \"television program\"\nobject_type: \"television network\"\n\nTriplet 4:\nsubject: \"CTV Television Network\"\nrelation: \"coverage ended\"\nobject: \"Canadian Football League\"\nqualifiers: point in time 1986\nsubject_type: \"television network\"\nobject_type: \"sports league\"\n\nTriplet 5:\nsubject: \"CFL on CTV\"\nrelation: \"replaced by\"\nobject: \"TSN\"\nsubject_type: \"television program\"\nobject_type: \"television network\"\n\nTriplet 6:\nsubject: \"CFL on CTV\"\nrelation: \"replaced by\"\nobject: \"Canadian Football Network\"\nsubject_type: \"television program\"\nobject_type: \"television network\"\n\nCheck if need qualifier for replacement time? Not given.\n\nNow produce JSON.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nEntities: CFL on CTV (a program/presentation). Canadian Football League (league). CTV Television Network (TV network). 1962 (year). 1986 (year). TSN (network). Canadian Football Network (network). Also \"coverage\" maybe relation.\n\nFirst sentence: \"CFL on CTV was a presentation of Canadian Football League football aired on the CTV Television Network from 1962 to 1986.\"\n\nTriplets:\n- subject: CFL on CTV\n  relation: instance of (maybe \"television program\" or \"presentation\") but we need type. Could use \"type\" relation? Not defined. We can use \"instance of\" relation. object: presentation. object_type: \"television program\" maybe. But we need to follow examples: they used \"occupation\" etc. For program, maybe \"type\" relation. But we can use \"instance of\". Let's do.\n\n- subject: CFL on CTV\n  relation: \"topic\"\n  object: Canadian Football League\n  object_type: \"sports league\"\n\n- subject: CFL on CTV\n  relation: \"broadcast on\"\n  object: CTV Television Network\n  object_type: \"television network\"\n  qualifiers: start time 1962, end time 1986.\n\nWe need qualifiers list with relation \"start time\" and \"end time\". object_type for qualifiers: year.\n\nSecond sentence: \"CTV dropped coverage of the CFL after the 1986 season.\"\n\nTriplet: subject: CTV Television Network, relation: \"coverage ended\" or \"dropped coverage of\". object: CFL (or Canadian Football League). Use \"coverage ended\". qualifiers: point in time 1986 (or after 1986 season). Use \"point in time\" qualifier.\n\nThird: \"CTV's coverage was replaced by TSN and the newly created Canadian Football Network.\"\n\nTwo objects: TSN, Canadian Football Network. Relation: \"replaced by\". Subject: CTV's coverage (maybe same as coverage of CFL). Could use subject: CFL (or CTV coverage). Let's treat subject: CFL (or Canadian Football League). But better: \"CTV's coverage of the CFL\" is the thing replaced. So subject: CFL on CTV (the program). relation: \"replaced by\". object: TSN. Also another triplet with object: Canadian Football Network.\n\nAdd qualifiers maybe \"point in time\" after 1986? Not specified. Could add \"point in time\" 1986? Not needed.\n\nAlso need types: TSN is \"television network\". Canadian Football Network is \"television network\". CFL on CTV is \"television program\". CTV Television Network is \"television network\". Canadian Football League is \"sports league\". Year types.\n\nNow format JSON with \"triplets\": [ ... ].\n\nEach dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nLet's craft.\n\nTriplet 1:\nsubject: \"CFL on CTV\"\nrelation: \"instance of\"\nobject: \"television program\"\nsubject_type: \"television program\"? Actually subject_type is class of subject: \"television program\". object_type: \"type\" maybe \"class\". But we can set object_type: \"class\". But they used object_type like \"award\". For instance of, object is a class. So object_type: \"class\". We'll set.\n\nTriplet 2:\nsubject: \"CFL on CTV\"\nrelation: \"topic\"\nobject: \"Canadian Football League\"\nsubject_type: \"television program\"\nobject_type: \"sports league\"\n\nTriplet 3:\nsubject: \"CFL on CTV\"\nrelation: \"broadcast on\"\nobject: \"CTV Television Network\"\nqualifiers: start time 1962, end time 1986.\nsubject_type: \"television program\"\nobject_type: \"television network\"\n\nTriplet 4:\nsubject: \"CTV Television Network\"\nrelation: \"coverage ended\"\nobject: \"Canadian Football League\"\nqualifiers: point in time 1986\nsubject_type: \"television network\"\nobject_type: \"sports league\"\n\nTriplet 5:\nsubject: \"CFL on CTV\"\nrelation: \"replaced by\"\nobject: \"TSN\"\nsubject_type: \"television program\"\nobject_type: \"television network\"\n\nTriplet 6:\nsubject: \"CFL on CTV\"\nrelation: \"replaced by\"\nobject: \"Canadian Football Network\"\nsubject_type: \"television program\"\nobject_type: \"television network\"\n\nCheck if need qualifier for replacement time? Not given.\n\nNow produce JSON.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1419,
+      "completion_tokens": 1404,
+      "total_tokens": 2823,
+      "cost": 0.00023325,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1328,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00023325,
+        "upstream_inference_prompt_cost": 2.265e-05,
+        "upstream_inference_completions_cost": 0.0002106
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 953,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"instance of\",\n            \"object\": \"television program\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"class\"\n        },\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"topic\",\n            \"object\": \"Canadian Football League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"sports league\"\n        },\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"broadcast on\",\n            \"object\": \"CTV Television Network\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1962\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"1986\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"CTV Television Network\",\n            \"relation\": \"coverage ended\",\n            \"object\": \"Canadian Football League\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1986\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"television network\",\n            \"object_type\": \"sports league\"\n        },\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"replaced by\",\n            \"object\": \"TSN\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"CFL on CTV\",\n            \"relation\": \"replaced by\",\n            \"object\": \"Canadian Football Network\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"television network\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "CFL on CTV",
+        "relation": "instance of",
+        "object": "television program",
+        "qualifiers": [],
+        "subject_type": "television program",
+        "object_type": "class"
+      },
+      {
+        "subject": "CFL on CTV",
+        "relation": "topic",
+        "object": "Canadian Football League",
+        "qualifiers": [],
+        "subject_type": "television program",
+        "object_type": "sports league"
+      },
+      {
+        "subject": "CFL on CTV",
+        "relation": "broadcast on",
+        "object": "CTV Television Network",
+        "qualifiers": [
+          {
+            "relation": "start time",
+            "object": "1962"
+          },
+          {
+            "relation": "end time",
+            "object": "1986"
+          }
+        ],
+        "subject_type": "television program",
+        "object_type": "television network"
+      },
+      {
+        "subject": "CTV Television Network",
+        "relation": "coverage ended",
+        "object": "Canadian Football League",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1986"
+          }
+        ],
+        "subject_type": "television network",
+        "object_type": "sports league"
+      },
+      {
+        "subject": "CFL on CTV",
+        "relation": "replaced by",
+        "object": "TSN",
+        "qualifiers": [],
+        "subject_type": "television program",
+        "object_type": "television network"
+      },
+      {
+        "subject": "CFL on CTV",
+        "relation": "replaced by",
+        "object": "Canadian Football Network",
+        "qualifiers": [],
+        "subject_type": "television program",
+        "object_type": "television network"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1419,
+    "completion_tokens": 1404,
+    "total_tokens": 2823,
+    "cost": 0.00023325,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1328,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00023325,
+      "upstream_inference_prompt_cost": 2.265e-05,
+      "upstream_inference_completions_cost": 0.0002106
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 953,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 664,
+    "output_tokens_est": 537
+  },
+  "attempts": 1,
+  "latency_s": 20.752353263997065,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:11:35.776260+00:00",
+  "cache_key": "f98d15d59c92fb0e2eb8ce897d69404e"
+}

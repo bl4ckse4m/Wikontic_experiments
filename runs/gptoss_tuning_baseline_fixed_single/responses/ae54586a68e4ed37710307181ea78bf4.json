@@ -1,0 +1,155 @@
+{
+  "task": {
+    "input_id": "20f3a8caf91eab58",
+    "input_hash": "02aac20c19a8cf868e7ea97b7b0e6f36a6d78975950bc857f0711de173d2b755",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-83a80429da60ba183babde28143a6c5f",
+    "object": "chat.completion",
+    "created": 1791509284,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"declares independence of\",\n            \"object\": \"Republic of Texas\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2, 1836\"\n                }\n            ],\n            \"subject_type\": \"document\",\n            \"object_type\": \"political entity\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"declares independence from\",\n            \"object\": \"Mexico\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2, 1836\"\n                }\n            ],\n            \"subject_type\": \"document\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"adopted at\",\n            \"object\": \"Convention of 1836\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2, 1836\"\n                }\n            ],\n            \"subject_type\": \"document\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Convention of 1836\",\n            \"relation\": \"location\",\n            \"object\": \"Washington-on-the-Brazos\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"signed on\",\n            \"object\": \"March 3, 1836\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"part of\",\n            \"object\": \"Texas Revolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"conflict\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"instance of\",\n            \"object\": \"declaration\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"document type\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: Texas Declaration of Independence (document), Republic of Texas (state), Mexico (country), Texas Revolution (event), Convention of 1836 (event), Washington-on-the-Brazos (place), March 2, 1836 (date), \"the following day\" (date maybe March 3, 1836). Also \"formal declaration of independence\" relation.\n\nTriplets:\n\n1. Texas Declaration of Independence — instance of — document (type). Could be \"document\" or \"declaration\". But we need factual relationships.\n\n- subject: Texas Declaration of Independence\n- relation: \"declares independence of\"\n- object: Republic of Texas (or maybe \"Republic of Texas\" is the entity that declares independence). Actually the declaration is the formal declaration of independence of the Republic of Texas from Mexico. So relation could be \"declares independence of\" with object \"Republic of Texas\". But also relation \"from\" with object \"Mexico\". Might split.\n\nBetter: Use relation \"declares independence of\" (subject: Texas Declaration of Independence, object: Republic of Texas). And qualifier \"point in time\": March 2, 1836? Actually adoption date.\n\nAlso relation \"has participant\" maybe.\n\nLet's produce:\n\nTriplet 1:\nsubject: Texas Declaration of Independence\nrelation: \"declares independence of\"\nobject: Republic of Texas\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"March 2, 1836\"}] (adopted date)\nsubject_type: \"document\"\nobject_type: \"political entity\"\n\nTriplet 2:\nsubject: Texas Declaration of Independence\nrelation: \"declares independence from\"\nobject: Mexico\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"March 2, 1836\"}]\nsubject_type: \"document\"\nobject_type: \"country\"\n\nTriplet 3:\nsubject: Texas Declaration of Independence\nrelation: \"adopted at\"\nobject: Convention of 1836\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"March 2, 1836\"}]\nsubject_type: \"document\"\nobject_type: \"event\"\n\nTriplet 4:\nsubject: Convention of 1836\nrelation: \"location\"\nobject: Washington-on-the-Brazos\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"place\"\n\nTriplet 5:\nsubject: Texas Declaration of Independence\nrelation: \"signed on\"\nobject: \"March 3, 1836\" (the following day). Could use date.\n\nBut we need object entity as date. So object: March 3, 1836 (derived). Provide qualifier maybe \"point in time\". Actually relation \"signed on\" already includes date.\n\nsubject_type: document, object_type: date.\n\nTriplet 6:\nsubject: Texas Declaration of Independence\nrelation: \"part of\"\nobject: Texas Revolution\nqualifiers: []\nsubject_type: document, object_type: \"conflict\"\n\nAlso maybe \"formal declaration of independence\" is a type: \"declaration\". Could add type.\n\nTriplet: Texas Declaration of Independence — instance of — declaration. subject_type: document, object_type: \"document type\". But not necessary.\n\nWe need to ensure each triplet includes qualifiers list (empty if none). Provide subject_type and object_type.\n\nDefine types: \"document\", \"political entity\", \"country\", \"event\", \"place\", \"date\", \"conflict\", \"document type\".\n\nLet's craft JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1003,
+      "total_tokens": 2210,
+      "completion_tokens": 1207,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"declares independence of\",\n            \"object\": \"Republic of Texas\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2, 1836\"\n                }\n            ],\n            \"subject_type\": \"document\",\n            \"object_type\": \"political entity\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"declares independence from\",\n            \"object\": \"Mexico\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2, 1836\"\n                }\n            ],\n            \"subject_type\": \"document\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"adopted at\",\n            \"object\": \"Convention of 1836\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2, 1836\"\n                }\n            ],\n            \"subject_type\": \"document\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Convention of 1836\",\n            \"relation\": \"location\",\n            \"object\": \"Washington-on-the-Brazos\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"signed on\",\n            \"object\": \"March 3, 1836\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"part of\",\n            \"object\": \"Texas Revolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"conflict\"\n        },\n        {\n            \"subject\": \"Texas Declaration of Independence\",\n            \"relation\": \"instance of\",\n            \"object\": \"declaration\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"document type\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Texas Declaration of Independence",
+        "relation": "declares independence of",
+        "object": "Republic of Texas",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "March 2, 1836"
+          }
+        ],
+        "subject_type": "document",
+        "object_type": "political entity"
+      },
+      {
+        "subject": "Texas Declaration of Independence",
+        "relation": "declares independence from",
+        "object": "Mexico",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "March 2, 1836"
+          }
+        ],
+        "subject_type": "document",
+        "object_type": "country"
+      },
+      {
+        "subject": "Texas Declaration of Independence",
+        "relation": "adopted at",
+        "object": "Convention of 1836",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "March 2, 1836"
+          }
+        ],
+        "subject_type": "document",
+        "object_type": "event"
+      },
+      {
+        "subject": "Convention of 1836",
+        "relation": "location",
+        "object": "Washington-on-the-Brazos",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "place"
+      },
+      {
+        "subject": "Texas Declaration of Independence",
+        "relation": "signed on",
+        "object": "March 3, 1836",
+        "qualifiers": [],
+        "subject_type": "document",
+        "object_type": "date"
+      },
+      {
+        "subject": "Texas Declaration of Independence",
+        "relation": "part of",
+        "object": "Texas Revolution",
+        "qualifiers": [],
+        "subject_type": "document",
+        "object_type": "conflict"
+      },
+      {
+        "subject": "Texas Declaration of Independence",
+        "relation": "instance of",
+        "object": "declaration",
+        "qualifiers": [],
+        "subject_type": "document",
+        "object_type": "document type"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1003,
+    "total_tokens": 2210,
+    "completion_tokens": 1207,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 684,
+    "output_tokens_est": 585
+  },
+  "attempts": 1,
+  "latency_s": 14.839651141999639,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:28:19.607902+00:00",
+  "cache_key": "ae54586a68e4ed37710307181ea78bf4"
+}

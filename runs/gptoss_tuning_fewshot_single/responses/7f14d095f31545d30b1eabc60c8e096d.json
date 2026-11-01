@@ -1,0 +1,154 @@
+{
+  "task": {
+    "input_id": "c47b646a09045e02",
+    "input_hash": "72813e697160c3d884fbb1e89c9755ddeaf2f66978b606c7ea83727c39b9ca65",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-0a134a8de04a49b0c881328b0487d6c7",
+    "object": "chat.completion",
+    "created": 1791521180,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"alias\",\n            \"object\": \"R7\",\n            \"qualifiers\": [],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"string\"\n        },\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"body style\",\n            \"object\": \"4-door saloon\",\n            \"qualifiers\": [],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"body style\"\n        },\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"variant of\",\n            \"object\": \"Renault 5\",\n            \"qualifiers\": [],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"car model\"\n        },\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"produced by\",\n            \"object\": \"FASA-Renault\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1974\"},\n                {\"relation\": \"point in time\", \"object\": \"1984\"},\n                {\"relation\": \"place\", \"object\": \"Spain\"}\n            ],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"sold in\",\n            \"object\": \"Spain\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1974\"},\n                {\"relation\": \"point in time\", \"object\": \"1984\"}\n            ],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FASA-Renault\",\n            \"relation\": \"subsidiary of\",\n            \"object\": \"Renault\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"organisation\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Renault 7\n\nThe Renault 7 (or \"R7\") is a 4-door saloon version of the Renault 5 supermini, produced and sold in Spain by Renault's subsidiary, FASA-Renault from 1974 to 1984.\"\n\nEntities: Renault 7 (also called R7). Relation: instance of car model? But we need specific relations like \"subclass of\", \"type\", \"has variant\". The text says \"is a 4-door saloon version of the Renault 5 supermini\". So we can have:\n\n- subject: Renault 7, relation: \"type of vehicle\", object: \"saloon\". But maybe \"vehicle type\" relation. Could use \"body style\" = \"4-door saloon\". Also \"variant of\" relation to Renault 5 (supermini). So:\n\nTriplet: Renault 7 - \"body style\" - \"4-door saloon\". object_type: \"body style\". subject_type: \"car model\".\n\nTriplet: Renault 7 - \"variant of\" - Renault 5. object_type: \"car model\". qualifier: maybe \"vehicle class\" = \"supermini\"? Actually phrase \"Renault 5 supermini\" indicates Renault 5 is a supermini class. Could have qualifier \"class\" but not needed.\n\nAlso production: \"produced and sold in Spain by Renault's subsidiary, FASA-Renault from 1974 to 1984.\"\n\nSo triplet: Renault 7 - \"manufacturer\" - FASA-Renault (or \"produced by\"). object_type: \"organisation\". qualifier: point in time start 1974, end 1984? We can have two qualifiers: \"point in time\" maybe start and end? Could use \"start time\" and \"end time\" but spec only mentions \"point in time\". Could include two qualifiers: {\"relation\":\"point in time\",\"object\":\"1974\"} and {\"relation\":\"point in time\",\"object\":\"1984\"}? Might be ambiguous. Could use \"point in time\" with range? Probably separate qualifiers: \"start time\" and \"end time\" not defined. Use \"point in time\" with \"1974–1984\". But better to have two qualifiers: \"point in time\" \"1974\" and \"point in time\" \"1984\". Acceptable.\n\nAlso \"produced and sold in Spain\". So we can have two relations: \"produced by\" and \"sold in\". Or combine: \"produced and sold in\" but better separate.\n\nTriplet: Renault 7 - \"produced by\" - FASA-Renault, qualifiers: point in time 1974, point in time 1984, place Spain.\n\nTriplet: Renault 7 - \"sold in\" - Spain, qualifiers: point in time 1974, point in time 1984, maybe \"seller\" FASA-Renault? But we can just have \"sold in\" relation.\n\nAlso \"Renault's subsidiary, FASA-Renault\". So FASA-Renault is subsidiary of Renault. Could add that but not in text? It says \"Renault's subsidiary, FASA-Renault\". So we can have triplet: FASA-Renault - \"subsidary of\" - Renault. subject_type organization, object_type organization.\n\nAlso \"Renault 7 (or \"R7\")\". So alias: \"Renault 7\" has alias \"R7\". Could represent as \"also known as\". Triplet: Renault 7 - \"alias\" - R7.\n\nNow need subject_type and object_type. Define:\n\n- Renault 7: car model (type \"car model\").\n- body style: maybe \"body style\".\n- Renault 5: car model.\n- FASA-Renault: organisation (automobile manufacturer subsidiary).\n- Spain: country.\n- Renault: organisation (automobile manufacturer).\n\nNow produce JSON.\n\nList of triplets:\n\n1. Renault 7 - \"alias\" - R7. qualifiers none. subject_type \"car model\", object_type \"string\"? maybe \"alias\". Use \"string\". But maybe object_type \"identifier\". We'll use \"string\".\n\n2. Renault 7 - \"body style\" - \"4-door saloon\". qualifiers none. subject_type \"car model\", object_type \"body style\".\n\n3. Renault 7 - \"variant of\" - Renault 5. qualifiers none. subject_type \"car model\", object_type \"car model\".\n\n4. Renault 7 - \"produced by\" - FASA-Renault. qualifiers: point in time 1974, point in time 1984, place Spain. subject_type \"car model\", object_type \"organisation\".\n\n5. Renault 7 - \"sold in\" - Spain. qualifiers: point in time 1974, point in time 1984. subject_type \"car model\", object_type \"country\".\n\n6. FASA-Renault - \"subsidary of\" - Renault. qualifiers none. subject_type \"organisation\", object_type \"organisation\".\n\nCheck spelling: \"subsidary of\" maybe \"subsidiary of\". Use \"subsidiary of\".\n\nNow output JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1646,
+      "total_tokens": 3155,
+      "completion_tokens": 1509,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"alias\",\n            \"object\": \"R7\",\n            \"qualifiers\": [],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"string\"\n        },\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"body style\",\n            \"object\": \"4-door saloon\",\n            \"qualifiers\": [],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"body style\"\n        },\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"variant of\",\n            \"object\": \"Renault 5\",\n            \"qualifiers\": [],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"car model\"\n        },\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"produced by\",\n            \"object\": \"FASA-Renault\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1974\"},\n                {\"relation\": \"point in time\", \"object\": \"1984\"},\n                {\"relation\": \"place\", \"object\": \"Spain\"}\n            ],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Renault 7\",\n            \"relation\": \"sold in\",\n            \"object\": \"Spain\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1974\"},\n                {\"relation\": \"point in time\", \"object\": \"1984\"}\n            ],\n            \"subject_type\": \"car model\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FASA-Renault\",\n            \"relation\": \"subsidiary of\",\n            \"object\": \"Renault\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"organisation\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Renault 7",
+        "relation": "alias",
+        "object": "R7",
+        "qualifiers": [],
+        "subject_type": "car model",
+        "object_type": "string"
+      },
+      {
+        "subject": "Renault 7",
+        "relation": "body style",
+        "object": "4-door saloon",
+        "qualifiers": [],
+        "subject_type": "car model",
+        "object_type": "body style"
+      },
+      {
+        "subject": "Renault 7",
+        "relation": "variant of",
+        "object": "Renault 5",
+        "qualifiers": [],
+        "subject_type": "car model",
+        "object_type": "car model"
+      },
+      {
+        "subject": "Renault 7",
+        "relation": "produced by",
+        "object": "FASA-Renault",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1974"
+          },
+          {
+            "relation": "point in time",
+            "object": "1984"
+          },
+          {
+            "relation": "place",
+            "object": "Spain"
+          }
+        ],
+        "subject_type": "car model",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "Renault 7",
+        "relation": "sold in",
+        "object": "Spain",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1974"
+          },
+          {
+            "relation": "point in time",
+            "object": "1984"
+          }
+        ],
+        "subject_type": "car model",
+        "object_type": "country"
+      },
+      {
+        "subject": "FASA-Renault",
+        "relation": "subsidiary of",
+        "object": "Renault",
+        "qualifiers": [],
+        "subject_type": "organisation",
+        "object_type": "organisation"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1646,
+    "total_tokens": 3155,
+    "completion_tokens": 1509,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 543,
+    "output_tokens_est": 451
+  },
+  "attempts": 1,
+  "latency_s": 18.70992946300248,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:46:39.250112+00:00",
+  "cache_key": "7f14d095f31545d30b1eabc60c8e096d"
+}

@@ -1,0 +1,173 @@
+{
+  "task": {
+    "input_id": "69caa2293e718cc4",
+    "input_hash": "51ea37203a61f33c8d5705e316952575b005cfe0d356a3effd34b1358d38b36c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-3b5955664ab4041cc72742f085248621",
+    "object": "chat.completion",
+    "created": 1791511003,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1866\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Istanbul\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"educated at\",\n            \"object\": \"primary school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"educated at\",\n            \"object\": \"Fatih Rüştiyesi\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Istanbul\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"family moved to\",\n            \"object\": \"Izmir\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1879\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"educated at\",\n            \"object\": \"İzmir Atatürk Lisesi\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Izmir\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"educated at\",\n            \"object\": \"Armenian Catholic school\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"French\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"work created\",\n            \"object\": \"first translation works\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"language\",\n                    \"object\": \"French\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"literary work\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: Halid Ziya Uşaklıgil (human). Istanbul (city). 1866 (date). Primary school (type of school). Fatih Rüştiyesi (school). Izmir (city). 1879 (date). İzmir Atatürk Lisesi (school). Armenian Catholic school (type of school). French (language). translation works (maybe works). Also \"family\" moved.\n\nWe need relations: place of birth, date of birth, educated at, location of education, moved to, date of move, etc.\n\nLet's parse sentences:\n\n\"Halid Ziya Uşaklıgil was born in Istanbul in 1866.\" => Triplet: subject Halid Ziya Uşaklıgil, relation \"place of birth\", object Istanbul. qualifiers: point in time 1866? Actually date of birth separate. Could have two triplets: date of birth and place of birth. Use date of birth: relation \"date of birth\", object \"1866\". Place of birth: relation \"place of birth\", object \"Istanbul\". Both qualifiers empty.\n\n\"He went to primary school and then attended the secondary school Fatih Rüştiyesi in the same city.\" => Triplet: Halid Ziya Uşaklıgil, relation \"educated at\", object \"primary school\". qualifiers maybe none. Also \"educated at\" with object \"Fatih Rüştiyesi\". Also maybe \"educational institution type\" but not needed. Also \"location\" of Fatih Rüştiyesi is Istanbul (same city). Could add qualifier \"location\" but qualifiers are attached to triplet. Could add qualifier relation \"location\" object \"Istanbul\". But typical pattern: \"educated at\" with qualifier \"point in time\" unknown. Probably just two triplets.\n\n\"His family moved to Izmir in 1879.\" => Triplet: Halid Ziya Uşaklıgil's family? But subject is family (entity). Could treat as \"family of Halid Ziya Uşaklıgil\" but maybe we just capture \"family moved to\" as event. Could create triplet: \"Halid Ziya Uşaklıgil\" relation \"family moved to\" object \"Izmir\" with qualifier point in time 1879. But better: \"Halid Ziya Uşaklıgil\" relation \"place of residence\" object \"Izmir\" qualifier point in time 1879. However text says family moved, not him. Might still capture as \"family moved to\". Simpler: create triplet: \"Halid Ziya Uşaklıgil\" relation \"family moved to\" object \"Izmir\" qualifiers point in time 1879. But relation may be odd. Could use \"family relocation\" but not standard. Maybe \"family moved to\" is okay.\n\n\"He completed his secondary education in Izmir attending the school which now is known as İzmir Atatürk Lisesi.\" => Triplet: Halid Ziya Uşaklıgil, relation \"educated at\", object \"İzmir Atatürk Lisesi\". qualifier location \"Izmir\". Also maybe \"education level\" secondary education.\n\n\"He later attended an Armenian Catholic school to learn French where he completed his first translation works.\" => Triplet: Halid Ziya Uşaklıgil, relation \"educated at\", object \"Armenian Catholic school\". qualifier \"purpose\" \"learn French\". Also maybe \"produced\" \"first translation works\". Could have triplet: Halid Ziya Uşaklıgil, relation \"work created\", object \"first translation works\". qualifier \"language\" \"French\". But text says he completed translation works while attending school. We'll include.\n\nNow need subject_type and object_type.\n\nDefine types: human, city, date, school (educational institution), language, literary work (translation works). For \"family\" maybe \"family\". But we might avoid that.\n\nLet's list triplets:\n\n1. subject: Halid Ziya Uşaklıgil, relation: date of birth, object: 1866, qualifiers [], subject_type: human, object_type: date.\n\n2. subject: Halid Ziya Uşaklıgil, relation: place of birth, object: Istanbul, qualifiers [], subject_type: human, object_type: city.\n\n3. subject: Halid Ziya Uşaklıgil, relation: educated at, object: primary school, qualifiers [], subject_type: human, object_type: educational institution.\n\n4. subject: Halid Ziya Uşaklıgil, relation: educated at, object: Fatih Rüştiyesi, qualifiers [ {relation: location, object: Istanbul} ], subject_type: human, object_type: educational institution.\n\n5. subject: Halid Ziya Uşaklıgil, relation: family moved to, object: Izmir, qualifiers [{relation: point in time, object: 1879}], subject_type: human, object_type: city. (maybe family as subject? but okay.)\n\n6. subject: Halid Ziya Uşaklıgil, relation: educated at, object: İzmir Atatürk Lisesi, qualifiers [{relation: location, object: Izmir}], subject_type: human, object_type: educational institution.\n\n7. subject: Halid Ziya Uşaklıgil, relation: educated at, object: Armenian Catholic school, qualifiers [{relation: purpose, object: French}], subject_type: human, object_type: educational institution.\n\n8. subject: Halid Ziya Uşaklıgil, relation: work created, object: first translation works, qualifiers [{relation: language, object: French}], subject_type: human, object_type: literary work.\n\nCheck qualifiers relation names: \"point in time\", \"location\", \"purpose\", \"language\". Acceptable.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1038,
+      "total_tokens": 2864,
+      "completion_tokens": 1826,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1866\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Istanbul\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"educated at\",\n            \"object\": \"primary school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"educated at\",\n            \"object\": \"Fatih Rüştiyesi\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Istanbul\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"family moved to\",\n            \"object\": \"Izmir\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1879\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"educated at\",\n            \"object\": \"İzmir Atatürk Lisesi\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Izmir\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"educated at\",\n            \"object\": \"Armenian Catholic school\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"French\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        },\n        {\n            \"subject\": \"Halid Ziya Uşaklıgil\",\n            \"relation\": \"work created\",\n            \"object\": \"first translation works\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"language\",\n                    \"object\": \"French\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"literary work\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Halid Ziya Uşaklıgil",
+        "relation": "date of birth",
+        "object": "1866",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Halid Ziya Uşaklıgil",
+        "relation": "place of birth",
+        "object": "Istanbul",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Halid Ziya Uşaklıgil",
+        "relation": "educated at",
+        "object": "primary school",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "educational institution"
+      },
+      {
+        "subject": "Halid Ziya Uşaklıgil",
+        "relation": "educated at",
+        "object": "Fatih Rüştiyesi",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Istanbul"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "educational institution"
+      },
+      {
+        "subject": "Halid Ziya Uşaklıgil",
+        "relation": "family moved to",
+        "object": "Izmir",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1879"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Halid Ziya Uşaklıgil",
+        "relation": "educated at",
+        "object": "İzmir Atatürk Lisesi",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Izmir"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "educational institution"
+      },
+      {
+        "subject": "Halid Ziya Uşaklıgil",
+        "relation": "educated at",
+        "object": "Armenian Catholic school",
+        "qualifiers": [
+          {
+            "relation": "purpose",
+            "object": "French"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "educational institution"
+      },
+      {
+        "subject": "Halid Ziya Uşaklıgil",
+        "relation": "work created",
+        "object": "first translation works",
+        "qualifiers": [
+          {
+            "relation": "language",
+            "object": "French"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "literary work"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1038,
+    "total_tokens": 2864,
+    "completion_tokens": 1826,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 790,
+    "output_tokens_est": 692
+  },
+  "attempts": 1,
+  "latency_s": 19.996145269993576,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:57:03.566037+00:00",
+  "cache_key": "d3592fff42bcc7cdaf387087afd36329"
+}

@@ -1,0 +1,118 @@
+{
+  "task": {
+    "input_id": "2d5809b9d4c6e39d",
+    "input_hash": "10f765450e34f4e8a5a92cc60416f5f7e7c2844b0a1e5c7d82bd23f2b5ffa3ed",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-df089dff3636ece35767f5c81c3ee737",
+    "object": "chat.completion",
+    "created": 1791516217,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Code of Federal Regulations\",\n            \"relation\": \"codification of\",\n            \"object\": \"general and permanent rules and regulations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal document\",\n            \"object_type\": \"legal rule\"\n        },\n        {\n            \"subject\": \"general and permanent rules and regulations\",\n            \"relation\": \"published in\",\n            \"object\": \"Federal Register\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"publisher\",\n                    \"object\": \"executive departments and agencies of the United States federal government\"\n                }\n            ],\n            \"subject_type\": \"legal rule\",\n            \"object_type\": \"government publication\"\n        },\n        {\n            \"subject\": \"Code of Federal Regulations\",\n            \"relation\": \"has part\",\n            \"object\": \"title\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"50\"\n                }\n            ],\n            \"subject_type\": \"legal document\",\n            \"object_type\": \"title\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Code of Federal Regulations\n\nThe Code of Federal Regulations (CFR) is the codification of the general and permanent rules and regulations (sometimes called administrative law) published in the Federal Register by the executive departments and agencies of the federal government of the United States. The CFR is divided into 50 titles that represent broad areas subject to federal regulation.\"\n\nWe need triplets.\n\nEntities: Code of Federal Regulations (CFR). Relation: \"instance of\" maybe? But we need explicit statements.\n\nSentence: \"The Code of Federal Regulations (CFR) is the codification of the general and permanent rules and regulations (sometimes called administrative law) published in the Federal Register by the executive departments and agencies of the federal government of the United States.\"\n\nSo we can have:\n\n- subject: Code of Federal Regulations, relation: \"instance of\" or \"type\"? Not explicit. It says \"is the codification of ...\". So relation: \"codification of\" maybe \"codification of\" as relation? Could be \"codification of\" as relation, object: \"general and permanent rules and regulations\". Also note parenthetical \"sometimes called administrative law\". Could capture as qualifier? It says rules and regulations sometimes called administrative law. Could add qualifier \"alternative name\" but not needed.\n\nBetter to produce triplet: {\"subject\":\"Code of Federal Regulations\",\"relation\":\"codification of\",\"object\":\"general and permanent rules and regulations\",\"qualifiers\":[],\"subject_type\":\"legal document\",\"object_type\":\"legal rule set\"}.\n\nBut we need to be careful with entity types. \"general and permanent rules and regulations\" maybe type \"legal rule\". We'll choose \"legal rule\". Also mention \"published in the Federal Register\". So we could have another triplet: \"general and permanent rules and regulations\" relation \"published in\" object \"Federal Register\". But the sentence says the rules are published in the Federal Register by the executive departments and agencies. So we can have:\n\n- subject: general and permanent rules and regulations, relation: \"published in\", object: Federal Register, qualifiers: maybe \"by\" executive departments and agencies. That's a qualifier \"agent\" maybe \"by\". But we have qualifier relation \"by\" not defined. Could use \"publisher\". So qualifier: {\"relation\":\"publisher\",\"object\":\"executive departments and agencies of the federal government of the United States\"}.\n\nBut qualifiers must be attached to the claim they modify. The claim is \"published in the Federal Register\". The publisher is \"executive departments and agencies of the federal government of the United States\". So we attach qualifier.\n\nAlso we have \"executive departments and agencies of the federal government of the United States\" as an entity. Could be type \"government agency\". We'll treat as \"government agency\".\n\nNext sentence: \"The CFR is divided into 50 titles that represent broad areas subject to federal regulation.\"\n\nTriplet: subject: Code of Federal Regulations, relation: \"has part\", object: \"50 titles\". Or \"divided into\" relation. Use \"has part\". object_type \"title\". Also qualifiers: maybe \"quantity\": 50. Could also have separate triplet: \"Code of Federal Regulations\" relation \"number of titles\" object \"50\". But we can embed quantity qualifier.\n\nBetter: {\"subject\":\"Code of Federal Regulations\",\"relation\":\"has part\",\"object\":\"title\",\"qualifiers\":[{\"relation\":\"quantity\",\"object\":\"50\"}],...}. But object is generic \"title\". Might be okay.\n\nAlso \"titles represent broad areas subject to federal regulation.\" Could have triplet: \"title\" relation \"represents\" object \"broad areas subject to federal regulation\". Might be too detailed.\n\nSimplify: produce three main triplets:\n\n1. CFR codification of rules.\n2. General and permanent rules and regulations published in Federal Register, publisher executive departments and agencies of US federal government.\n3. CFR has part title, quantity 50.\n\nAdd types: CFR type \"legal document\". Rules type \"legal rule\". Federal Register type \"government publication\". Executive departments and agencies type \"government agency\". Title type \"title\". Could also include \"United States\" as country.\n\nLet's craft JSON.\n\nNeed qualifiers list for each.\n\nTriplet 1:\n\nsubject: \"Code of Federal Regulations\"\nrelation: \"codification of\"\nobject: \"general and permanent rules and regulations\"\nqualifiers: [] (maybe note alternative name \"administrative law\" as qualifier \"alternative name\"? Not required.)\n\nsubject_type: \"legal document\"\nobject_type: \"legal rule\"\n\nTriplet 2:\n\nsubject: \"general and permanent rules and regulations\"\nrelation: \"published in\"\nobject: \"Federal Register\"\nqualifiers: [{\"relation\":\"publisher\",\"object\":\"executive departments and agencies of the United States federal government\"}]\n\nsubject_type: \"legal rule\"\nobject_type: \"government publication\"\n\nTriplet 3:\n\nsubject: \"Code of Federal Regulations\"\nrelation: \"has part\"\nobject: \"title\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"50\"}]\n\nsubject_type: \"legal document\"\nobject_type: \"title\"\n\nPotential also include \"executive departments and agencies\" as entity type \"government agency\". But not needed.\n\nMake sure qualifiers use allowed relation names: \"publisher\" is okay? The spec mentions qualifiers like \"point in time\", \"place\", \"polarity\", \"modality\", \"attribution\", \"condition\", \"unit\", \"approximation\". \"publisher\" not listed but qualifiers can be any relation? It says qualifiers are relations like those, but not limited. Probably okay.\n\nBut maybe better to use \"by\" as qualifier relation \"by\". Not defined. Use \"publisher\". Accept.\n\nReturn JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1660,
+      "total_tokens": 3059,
+      "completion_tokens": 1399,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Code of Federal Regulations\",\n            \"relation\": \"codification of\",\n            \"object\": \"general and permanent rules and regulations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal document\",\n            \"object_type\": \"legal rule\"\n        },\n        {\n            \"subject\": \"general and permanent rules and regulations\",\n            \"relation\": \"published in\",\n            \"object\": \"Federal Register\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"publisher\",\n                    \"object\": \"executive departments and agencies of the United States federal government\"\n                }\n            ],\n            \"subject_type\": \"legal rule\",\n            \"object_type\": \"government publication\"\n        },\n        {\n            \"subject\": \"Code of Federal Regulations\",\n            \"relation\": \"has part\",\n            \"object\": \"title\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"50\"\n                }\n            ],\n            \"subject_type\": \"legal document\",\n            \"object_type\": \"title\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Code of Federal Regulations",
+        "relation": "codification of",
+        "object": "general and permanent rules and regulations",
+        "qualifiers": [],
+        "subject_type": "legal document",
+        "object_type": "legal rule"
+      },
+      {
+        "subject": "general and permanent rules and regulations",
+        "relation": "published in",
+        "object": "Federal Register",
+        "qualifiers": [
+          {
+            "relation": "publisher",
+            "object": "executive departments and agencies of the United States federal government"
+          }
+        ],
+        "subject_type": "legal rule",
+        "object_type": "government publication"
+      },
+      {
+        "subject": "Code of Federal Regulations",
+        "relation": "has part",
+        "object": "title",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "50"
+          }
+        ],
+        "subject_type": "legal document",
+        "object_type": "title"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1660,
+    "total_tokens": 3059,
+    "completion_tokens": 1399,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 394,
+    "output_tokens_est": 302
+  },
+  "attempts": 1,
+  "latency_s": 17.819597858004272,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:23:56.001241+00:00",
+  "cache_key": "9a890828c66a6c4f62e402abe5d05bc2"
+}

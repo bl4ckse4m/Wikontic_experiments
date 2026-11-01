@@ -1,0 +1,170 @@
+{
+  "task": {
+    "input_id": "604bdc8c1875cf60",
+    "input_hash": "263b121ef8cc08709679ab5dedc719932f85b76a017d925e10d9cc2148b16814",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793202724-kyTazuIPdQMyTQ3J7Jnt",
+    "object": "chat.completion",
+    "created": 1793202724,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DekaLLM",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"instance of\",\n            \"object\": \"university of applied sciences\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"institution type\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"country\",\n            \"object\": \"Finland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"owner\",\n            \"object\": \"local municipalities\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"located in city\",\n            \"object\": \"Kuopio\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"located in city\",\n            \"object\": \"Iisalmi\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"located in city\",\n            \"object\": \"Varkaus\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"native name\",\n            \"object\": \"Savonia-ammattikorkeakoulu\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"name\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Savonia University of Applied Sciences\n\nSavonia University of Applied Sciences (Finnish: Savonia-ammattikorkeakoulu) is a local municipality-owned Finnish institution of higher education based in the cities of Kuopio, Iisalmi and Varkaus.\"\n\nWe need to parse facts:\n\n- Savonia University of Applied Sciences is a Finnish institution of higher education.\n- It is local municipality-owned.\n- It is based in the cities of Kuopio, Iisalmi and Varkaus.\n- Its Finnish name is \"Savonia-ammattikorkeakoulu\". Could be a \"native name\" relation.\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine entities:\n\nSubject: Savonia University of Applied Sciences (type: university? \"institution of higher education\" maybe \"university\" or \"higher education institution\". Use \"higher education institution\").\n\nObject: Finnish institution of higher education (type: institution). But maybe we separate: relation \"country\" = Finland, relation \"type\" = institution of higher education.\n\nBetter: \"institution of higher education\" is a type, not an object. So we could have relation \"instance of\" or \"type\" linking subject to object \"institution of higher education\". But guidelines: relation should be short predicate like \"instance of\". Use \"instance of\" or \"type\". In examples they used \"occupation\" etc. For institutions, typical Wikidata uses \"instance of\" (P31). So we can have:\n\n- subject: Savonia University of Applied Sciences, relation: \"instance of\", object: \"university of applied sciences\" (type: \"institution of higher education\"?). But the text says \"institution of higher education\". Could be \"university of applied sciences\". We'll use \"university of applied sciences\" as object_type \"type of institution\". But we need object_type field: maybe \"type of institution\". We'll set object_type: \"institution type\".\n\nAlso relation \"owned by\" maybe \"owner\". It says \"local municipality-owned\". So relation: \"owner\" object: \"local municipalities\". Or \"ownership\" qualifier? Could be \"ownership type\". Simpler: relation \"ownership\" object \"municipality\". But we need object_type: \"organization\". We'll use \"owner\" relation.\n\nAlso relation \"located in city\" for each city: Kuopio, Iisalmi, Varkaus. So three triplets.\n\nAlso relation \"native name\" linking to Finnish name \"Savonia-ammattikorkeakoulu\". object_type: \"name\". Or \"official name\". Use \"native name\". object_type: \"string\"? But they expect class like \"name\". We'll use \"name\".\n\nAlso relation \"country\" = Finland. object_type \"country\". Could also have \"located in country\". But we have \"Finnish institution\". So we can have relation \"country\" object \"Finland\". object_type \"country\".\n\nNow produce JSON list.\n\nNeed qualifiers list empty unless we have qualifiers. Could add qualifier for \"ownership\" maybe \"ownership type\" but not needed.\n\nLet's craft triplets:\n\n1. subject: Savonia University of Applied Sciences, relation: \"instance of\", object: \"university of applied sciences\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"institution type\".\n\n2. subject: Savonia University of Applied Sciences, relation: \"country\", object: \"Finland\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"country\".\n\n3. subject: Savonia University of Applied Sciences, relation: \"owner\", object: \"local municipalities\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"organization\".\n\n4. subject: Savonia University of Applied Sciences, relation: \"located in city\", object: \"Kuopio\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"city\".\n\n5. same for Iisalmi.\n\n6. same for Varkaus.\n\n7. subject: Savonia University of Applied Sciences, relation: \"native name\", object: \"Savonia-ammattikorkeakoulu\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"name\".\n\nMake sure JSON format: {\"triplets\": [ { ... }, ... ] }\n\nNow ensure each dict includes keys: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nLet's produce.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"Savonia University of Applied Sciences\n\nSavonia University of Applied Sciences (Finnish: Savonia-ammattikorkeakoulu) is a local municipality-owned Finnish institution of higher education based in the cities of Kuopio, Iisalmi and Varkaus.\"\n\nWe need to parse facts:\n\n- Savonia University of Applied Sciences is a Finnish institution of higher education.\n- It is local municipality-owned.\n- It is based in the cities of Kuopio, Iisalmi and Varkaus.\n- Its Finnish name is \"Savonia-ammattikorkeakoulu\". Could be a \"native name\" relation.\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine entities:\n\nSubject: Savonia University of Applied Sciences (type: university? \"institution of higher education\" maybe \"university\" or \"higher education institution\". Use \"higher education institution\").\n\nObject: Finnish institution of higher education (type: institution). But maybe we separate: relation \"country\" = Finland, relation \"type\" = institution of higher education.\n\nBetter: \"institution of higher education\" is a type, not an object. So we could have relation \"instance of\" or \"type\" linking subject to object \"institution of higher education\". But guidelines: relation should be short predicate like \"instance of\". Use \"instance of\" or \"type\". In examples they used \"occupation\" etc. For institutions, typical Wikidata uses \"instance of\" (P31). So we can have:\n\n- subject: Savonia University of Applied Sciences, relation: \"instance of\", object: \"university of applied sciences\" (type: \"institution of higher education\"?). But the text says \"institution of higher education\". Could be \"university of applied sciences\". We'll use \"university of applied sciences\" as object_type \"type of institution\". But we need object_type field: maybe \"type of institution\". We'll set object_type: \"institution type\".\n\nAlso relation \"owned by\" maybe \"owner\". It says \"local municipality-owned\". So relation: \"owner\" object: \"local municipalities\". Or \"ownership\" qualifier? Could be \"ownership type\". Simpler: relation \"ownership\" object \"municipality\". But we need object_type: \"organization\". We'll use \"owner\" relation.\n\nAlso relation \"located in city\" for each city: Kuopio, Iisalmi, Varkaus. So three triplets.\n\nAlso relation \"native name\" linking to Finnish name \"Savonia-ammattikorkeakoulu\". object_type: \"name\". Or \"official name\". Use \"native name\". object_type: \"string\"? But they expect class like \"name\". We'll use \"name\".\n\nAlso relation \"country\" = Finland. object_type \"country\". Could also have \"located in country\". But we have \"Finnish institution\". So we can have relation \"country\" object \"Finland\". object_type \"country\".\n\nNow produce JSON list.\n\nNeed qualifiers list empty unless we have qualifiers. Could add qualifier for \"ownership\" maybe \"ownership type\" but not needed.\n\nLet's craft triplets:\n\n1. subject: Savonia University of Applied Sciences, relation: \"instance of\", object: \"university of applied sciences\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"institution type\".\n\n2. subject: Savonia University of Applied Sciences, relation: \"country\", object: \"Finland\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"country\".\n\n3. subject: Savonia University of Applied Sciences, relation: \"owner\", object: \"local municipalities\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"organization\".\n\n4. subject: Savonia University of Applied Sciences, relation: \"located in city\", object: \"Kuopio\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"city\".\n\n5. same for Iisalmi.\n\n6. same for Varkaus.\n\n7. subject: Savonia University of Applied Sciences, relation: \"native name\", object: \"Savonia-ammattikorkeakoulu\", qualifiers: [], subject_type: \"higher education institution\", object_type: \"name\".\n\nMake sure JSON format: {\"triplets\": [ { ... }, ... ] }\n\nNow ensure each dict includes keys: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nLet's produce.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1408,
+      "completion_tokens": 1346,
+      "total_tokens": 2754,
+      "cost": 0.00028452,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00028452,
+        "upstream_inference_prompt_cost": 4.224e-05,
+        "upstream_inference_completions_cost": 0.00024228
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 941,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"instance of\",\n            \"object\": \"university of applied sciences\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"institution type\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"country\",\n            \"object\": \"Finland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"owner\",\n            \"object\": \"local municipalities\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"located in city\",\n            \"object\": \"Kuopio\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"located in city\",\n            \"object\": \"Iisalmi\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"located in city\",\n            \"object\": \"Varkaus\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Savonia University of Applied Sciences\",\n            \"relation\": \"native name\",\n            \"object\": \"Savonia-ammattikorkeakoulu\",\n            \"qualifiers\": [],\n            \"subject_type\": \"higher education institution\",\n            \"object_type\": \"name\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Savonia University of Applied Sciences",
+        "relation": "instance of",
+        "object": "university of applied sciences",
+        "qualifiers": [],
+        "subject_type": "higher education institution",
+        "object_type": "institution type"
+      },
+      {
+        "subject": "Savonia University of Applied Sciences",
+        "relation": "country",
+        "object": "Finland",
+        "qualifiers": [],
+        "subject_type": "higher education institution",
+        "object_type": "country"
+      },
+      {
+        "subject": "Savonia University of Applied Sciences",
+        "relation": "owner",
+        "object": "local municipalities",
+        "qualifiers": [],
+        "subject_type": "higher education institution",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Savonia University of Applied Sciences",
+        "relation": "located in city",
+        "object": "Kuopio",
+        "qualifiers": [],
+        "subject_type": "higher education institution",
+        "object_type": "city"
+      },
+      {
+        "subject": "Savonia University of Applied Sciences",
+        "relation": "located in city",
+        "object": "Iisalmi",
+        "qualifiers": [],
+        "subject_type": "higher education institution",
+        "object_type": "city"
+      },
+      {
+        "subject": "Savonia University of Applied Sciences",
+        "relation": "located in city",
+        "object": "Varkaus",
+        "qualifiers": [],
+        "subject_type": "higher education institution",
+        "object_type": "city"
+      },
+      {
+        "subject": "Savonia University of Applied Sciences",
+        "relation": "native name",
+        "object": "Savonia-ammattikorkeakoulu",
+        "qualifiers": [],
+        "subject_type": "higher education institution",
+        "object_type": "name"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1408,
+    "completion_tokens": 1346,
+    "total_tokens": 2754,
+    "cost": 0.00028452,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00028452,
+      "upstream_inference_prompt_cost": 4.224e-05,
+      "upstream_inference_completions_cost": 0.00024228
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 941,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 647,
+    "output_tokens_est": 519
+  },
+  "attempts": 1,
+  "latency_s": 12.891097246996651,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T15:52:16.755062+00:00",
+  "cache_key": "696eaab47d8f4ab36b473ab60597a036"
+}

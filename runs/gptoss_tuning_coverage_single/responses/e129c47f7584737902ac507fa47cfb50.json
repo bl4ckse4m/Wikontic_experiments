@@ -1,0 +1,151 @@
+{
+  "task": {
+    "input_id": "d03bc07a20e508a7",
+    "input_hash": "797b68929a6462024c6fd8bfc921fbf6ef4a430a7cc6ed660f25b44fb3fd6199",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-20c626fac3b3e4156f4b0705d1c85c01",
+    "object": "chat.completion",
+    "created": 1791507068,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical work\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"writer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"composer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"popular\",\n            \"object\": \"true\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"boolean\"\n        },\n        {\n            \"subject\": \"Linda Ronstadt\",\n            \"relation\": \"performer\",\n            \"object\": \"Love Is a Rose\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\"\n                },\n                {\n                    \"relation\": \"genre\",\n                    \"object\": \"country\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"cover artist\",\n            \"object\": \"other artists\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"time period\",\n                    \"object\": \"over the years\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"artist\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"\\\"Love Is a Rose\\\" is a song written and composed by Neil Young. It first became popular in 1975 when Linda Ronstadt had a country hit with her version. \\\"Love Is a Rose\\\" has also been covered by other artists over the years.\"\n\nEntities: Love Is a Rose (song), Neil Young (person), Linda Ronstadt (person), other artists (group? maybe \"artist\" generic). Also \"1975\" date.\n\nTriplets:\n\n1. Love Is a Rose – instance of – song (relation: \"instance of\" or \"type\"? Use \"instance of\" maybe. object_type: \"song\". subject_type: \"song\"? Actually subject is song, object is \"song\". Could use \"genre\"? But we need relation \"instance of\" or \"type\". In example they used occupation etc. Not given. Use \"instance of\". subject_type: \"song\". object_type: \"musical work\". Might be okay.\n\n2. Love Is a Rose – writer – Neil Young. Relation \"writer\". object_type: \"human\". subject_type: \"song\". Also \"composer\" maybe separate: \"composer\". Could combine both as separate triplets: writer and composer.\n\n3. Love Is a Rose – first became popular – 1975. Relation \"point in time\" maybe? Could be \"popularity peak\" but not standard. Use \"point in time\" qualifier on a claim \"popular\". Could create triplet: Love Is a Rose – popular – true, with qualifier point in time 1975. But better: \"date of popularity\" not standard. Use \"point in time\" qualifier on \"popular\". So triplet: subject Love Is a Rose, relation \"popular\", object \"true\"? But object should be entity. Could use \"popularity\" as object? Not ideal. Maybe use \"first popular\" as relation \"first popular\". But guidelines: use specific Wikidata-style predicates. There is \"first performed\" etc. For popularity, maybe \"date of first chart appearance\". Not given. Simpler: create triplet: Love Is a Rose – point in time – 1975 with qualifier \"event\" \"became popular\". But guidelines: date can be object of standalone relation like \"date of birth\". So we could have relation \"date of first popularity\". Not standard but okay.\n\nBetter: Use \"point in time\" qualifier on a triplet: Love Is a Rose – popular – true, qualifier point in time 1975. We'll need object \"true\" type maybe \"boolean\". Acceptable.\n\n4. Linda Ronstadt – performed – Love Is a Rose (her version). Relation \"performer\" or \"performer of\". Use \"performer\". object_type: \"song\". subject_type: \"human\". Also \"had a country hit\" indicates chart success. Could have triplet: Linda Ronstadt – chart hit – Love Is a Rose, qualifier \"genre\" \"country\". But maybe just \"performer\". Also \"had a country hit with her version\" indicates the song was a hit. Could capture: Love Is a Rose – chart success – true, qualifier \"artist\" Linda Ronstadt, \"genre\" country, \"point in time\" 1975. But maybe too complex.\n\nSimplify: Linda Ronstadt – performed – Love Is a Rose. Add qualifier \"point in time\" 1975, \"genre\" country.\n\n5. Love Is a Rose – covered by – other artists. Relation \"cover version\". object \"other artists\". Could be \"cover artist\". Use \"cover artist\". object_type: \"artist\". subject_type: \"song\". Qualifier \"point in time\" maybe \"over the years\" not specific date. Could add qualifier \"time period\" \"over the years\". Use qualifier relation \"time period\". object \"over the years\". Not a standard but okay.\n\nAlso \"over the years\" is a phrase indicating duration. Could use qualifier \"duration\" \"over the years\". We'll include.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- Love Is a Rose: \"song\" (musical work)\n- Neil Young: \"human\"\n- Linda Ronstadt: \"human\"\n- other artists: \"artist\" (group of humans) maybe \"artist\". Use \"artist\".\n\nNow produce JSON.\n\nTriplet list:\n\n1. subject \"Love Is a Rose\", relation \"instance of\", object \"song\", qualifiers [], subject_type \"song\", object_type \"musical work\"? Actually object_type \"musical work\". But maybe \"song\". Use \"musical work\".\n\n2. subject \"Love Is a Rose\", relation \"writer\", object \"Neil Young\", qualifiers [], subject_type \"song\", object_type \"human\".\n\n3. subject \"Love Is a Rose\", relation \"composer\", object \"Neil Young\", qualifiers [], subject_type \"song\", object_type \"human\".\n\n4. subject \"Love Is a Rose\", relation \"popular\", object \"true\", qualifiers [{\"relation\":\"point in time\",\"object\":\"1975\"}], subject_type \"song\", object_type \"boolean\".\n\n5. subject \"Linda Ronstadt\", relation \"performer\", object \"Love Is a Rose\", qualifiers [{\"relation\":\"point in time\",\"object\":\"1975\"},{\"relation\":\"genre\",\"object\":\"country\"}], subject_type \"human\", object_type \"song\".\n\n6. subject \"Love Is a Rose\", relation \"cover artist\", object \"other artists\", qualifiers [{\"relation\":\"time period\",\"object\":\"over the years\"}], subject_type \"song\", object_type \"artist\".\n\nCheck qualifiers: \"genre\" maybe object_type \"genre\". \"time period\" object_type \"time period\". Accept.\n\nNow output JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1643,
+      "total_tokens": 3228,
+      "completion_tokens": 1585,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical work\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"writer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"composer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"popular\",\n            \"object\": \"true\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"boolean\"\n        },\n        {\n            \"subject\": \"Linda Ronstadt\",\n            \"relation\": \"performer\",\n            \"object\": \"Love Is a Rose\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\"\n                },\n                {\n                    \"relation\": \"genre\",\n                    \"object\": \"country\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"cover artist\",\n            \"object\": \"other artists\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"time period\",\n                    \"object\": \"over the years\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"artist\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Love Is a Rose",
+        "relation": "instance of",
+        "object": "song",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "musical work"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "writer",
+        "object": "Neil Young",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "composer",
+        "object": "Neil Young",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "popular",
+        "object": "true",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1975"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "boolean"
+      },
+      {
+        "subject": "Linda Ronstadt",
+        "relation": "performer",
+        "object": "Love Is a Rose",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1975"
+          },
+          {
+            "relation": "genre",
+            "object": "country"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "song"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "cover artist",
+        "object": "other artists",
+        "qualifiers": [
+          {
+            "relation": "time period",
+            "object": "over the years"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "artist"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1643,
+    "total_tokens": 3228,
+    "completion_tokens": 1585,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 586,
+    "output_tokens_est": 494
+  },
+  "attempts": 1,
+  "latency_s": 19.825148353003897,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:51:28.866158+00:00",
+  "cache_key": "e129c47f7584737902ac507fa47cfb50"
+}

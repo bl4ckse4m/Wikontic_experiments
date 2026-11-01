@@ -1,0 +1,176 @@
+{
+  "task": {
+    "input_id": "4b547a905e31bbe1",
+    "input_hash": "9f59fabf112d22fe62531d53869f8fdec2d6e1b89f4fad5350bab4ed9c3ed3ac",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-0fdb2032cac8397dbc11fddb4f2f1cb5",
+    "object": "chat.completion",
+    "created": 1791510297,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"date of birth\",\n            \"object\": \"8 October 1966\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"nationality\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"occupation\",\n            \"object\": \"actress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"character portrayed\",\n            \"object\": \"Hilary Banks\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"in work\",\n                    \"object\": \"The Fresh Prince of Bel-Air\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1990–1996\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"fictional character\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"notable work\",\n            \"object\": \"The Fresh Prince of Bel-Air\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1990–1996\"\n                },\n                {\n                    \"relation\": \"medium\",\n                    \"object\": \"television series\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"acted in\",\n            \"object\": \"Major Payne\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                },\n                {\n                    \"relation\": \"medium\",\n                    \"object\": \"film\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"film\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"co-starred with\",\n            \"object\": \"Damon Wayans\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"in work\",\n                    \"object\": \"Major Payne\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: Karyn Parsons, October 8, 1966 (date of birth), American (nationality), actress (occupation), role as Hilary Banks (character), NBC sitcom The Fresh Prince of Bel-Air (TV series), ran from 1990-96 (time period), film Major Payne (film), 1995 (year), Damon Wayans (co-star). Also maybe \"Rockwell\" as maiden name? The text says \"Karyn Parsons -- Rockwell (born October 8, 1966)\". Could treat \"Rockwell\" as maiden name, but maybe not needed.\n\nTriplets:\n\n1. Karyn Parsons - date of birth - 8 October 1966 (or October 8, 1966). subject_type human, object_type date.\n\n2. Karyn Parsons - nationality - American. object_type country? but \"American\" is demonym; type \"country\". We'll set object_type \"country\".\n\n3. Karyn Parsons - occupation - actress. object_type profession.\n\n4. Karyn Parsons - notable role - Hilary Banks. object_type fictional character.\n\nAdd qualifier: \"point in time\" maybe not needed. Could add qualifier linking role to TV series.\n\nBetter: relation \"character portrayed\" linking Karyn Parsons to Hilary Banks, qualifier \"in work\" -> The Fresh Prince of Bel-Air, qualifier \"point in time\" -> 1990-1996.\n\nBut we need qualifiers as list of dicts each with relation and object.\n\nSo triplet: subject Karyn Parsons, relation \"character portrayed\", object \"Hilary Banks\", qualifiers: {\"relation\":\"in work\",\"object\":\"The Fresh Prince of Bel-Air\"}, {\"relation\":\"point in time\",\"object\":\"1990–1996\"}.\n\nAlso maybe \"work\" relation: Karyn Parsons - notable work - The Fresh Prince of Bel-Air (TV series). object_type television series.\n\nAlso film: Karyn Parsons - acted in - Major Payne. object_type film. qualifier point in time 1995.\n\nAlso co-star: Karyn Parsons - co-starred with - Damon Wayans. object_type human. qualifier \"in work\" \"Major Payne\". Also maybe \"point in time\" 1995.\n\nLet's produce list.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- date: date\n- country: country\n- profession: profession\n- fictional character: fictional character\n- television series: television series\n- film: film\n- human: human\n\nNow produce JSON.\n\nCheck qualifiers format: list of dicts with relation and object.\n\nOk.\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1005,
+      "total_tokens": 2116,
+      "completion_tokens": 1111,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"date of birth\",\n            \"object\": \"8 October 1966\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"nationality\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"occupation\",\n            \"object\": \"actress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"character portrayed\",\n            \"object\": \"Hilary Banks\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"in work\",\n                    \"object\": \"The Fresh Prince of Bel-Air\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1990–1996\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"fictional character\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"notable work\",\n            \"object\": \"The Fresh Prince of Bel-Air\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1990–1996\"\n                },\n                {\n                    \"relation\": \"medium\",\n                    \"object\": \"television series\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"acted in\",\n            \"object\": \"Major Payne\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                },\n                {\n                    \"relation\": \"medium\",\n                    \"object\": \"film\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"film\"\n        },\n        {\n            \"subject\": \"Karyn Parsons\",\n            \"relation\": \"co-starred with\",\n            \"object\": \"Damon Wayans\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"in work\",\n                    \"object\": \"Major Payne\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Karyn Parsons",
+        "relation": "date of birth",
+        "object": "8 October 1966",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Karyn Parsons",
+        "relation": "nationality",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Karyn Parsons",
+        "relation": "occupation",
+        "object": "actress",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Karyn Parsons",
+        "relation": "character portrayed",
+        "object": "Hilary Banks",
+        "qualifiers": [
+          {
+            "relation": "in work",
+            "object": "The Fresh Prince of Bel-Air"
+          },
+          {
+            "relation": "point in time",
+            "object": "1990–1996"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "fictional character"
+      },
+      {
+        "subject": "Karyn Parsons",
+        "relation": "notable work",
+        "object": "The Fresh Prince of Bel-Air",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1990–1996"
+          },
+          {
+            "relation": "medium",
+            "object": "television series"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "television series"
+      },
+      {
+        "subject": "Karyn Parsons",
+        "relation": "acted in",
+        "object": "Major Payne",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1995"
+          },
+          {
+            "relation": "medium",
+            "object": "film"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "film"
+      },
+      {
+        "subject": "Karyn Parsons",
+        "relation": "co-starred with",
+        "object": "Damon Wayans",
+        "qualifiers": [
+          {
+            "relation": "in work",
+            "object": "Major Payne"
+          },
+          {
+            "relation": "point in time",
+            "object": "1995"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1005,
+    "total_tokens": 2116,
+    "completion_tokens": 1111,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 803,
+    "output_tokens_est": 704
+  },
+  "attempts": 1,
+  "latency_s": 13.360631153002032,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:45:11.167910+00:00",
+  "cache_key": "d99d85ba72ff682a0947447c8dd55ff8"
+}

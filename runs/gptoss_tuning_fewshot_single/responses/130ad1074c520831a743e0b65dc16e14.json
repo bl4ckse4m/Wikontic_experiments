@@ -1,0 +1,147 @@
+{
+  "task": {
+    "input_id": "cfa458bd7ea6fc39",
+    "input_hash": "73b6d0a584d9a23956a82960f05ce3e2df8e38f68f5a19b21871f1e6a414ecba",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-fd6772c1399c44ab6c9372bfb703995e",
+    "object": "chat.completion",
+    "created": 1791521692,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"species\",\n            \"object\": \"Norway spruce\",\n            \"qualifiers\": [],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"plant\"\n        },\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"height\",\n            \"object\": \"69 to 100\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"feet\"\n                }\n            ],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"height\",\n            \"object\": \"21 to 30\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"meters\"\n                }\n            ],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"has tradition\",\n            \"object\": \"national tradition\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1933\"\n                }\n            ],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"tradition\"\n        },\n        {\n            \"subject\": \"2017 Christmas Tree Lighting\",\n            \"relation\": \"point in time\",\n            \"object\": \"November 29, 2017\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"display end date\",\n            \"object\": \"January 7, 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Rockefeller Center Christmas Tree\n\nThe tree, usually a Norway spruce 69 to 100 feet (21 to 30 m) tall, has been a national tradition each year since 1933. The 2017 Christmas Tree Lighting took place on November 29, 2017; the tree remains on display until January 7, 2018.\"\n\nWe need to identify entities: Rockefeller Center Christmas Tree (subject). Also \"tree\" refers to same. Also \"Norway spruce\" is species. Height: 69 to 100 feet (21 to 30 m). That's a range; we may need two statements? Could capture as object \"Norway spruce\" with qualifier \"height\" maybe relation \"has height\". But we need relation types. Could use \"species\" relation? \"tree\" is a Norway spruce. So relation: \"taxon\" or \"species\". Use \"species\" maybe.\n\nAlso \"has been a national tradition each year since 1933.\" So relation: \"tradition\" maybe \"instance of tradition\". Could be \"has tradition\" but we need something like \"national tradition\". Could use relation \"tradition\" with object \"national tradition\". Might be okay.\n\nBetter: \"Rockefeller Center Christmas Tree\" \"instance of\" \"national tradition\" with qualifier \"point in time\" start 1933? Actually \"has been a national tradition each year since 1933\". So we can have triplet: subject: Rockefeller Center Christmas Tree, relation: \"national tradition\", object: \"yes\"? Not good.\n\nMaybe we treat as \"tradition started\" relation: \"tradition started\" object: \"1933\". But we need relation type.\n\nSimplify: create triplet: subject \"Rockefeller Center Christmas Tree\", relation \"start date\", object \"1933\". But that's not exactly start date of tradition. Could be \"point in time\" qualifier on \"tradition\" relation.\n\nLet's produce:\n\n1. Subject: Rockefeller Center Christmas Tree, relation: \"species\", object: \"Norway spruce\", qualifiers: [], types: subject_type \"structure\" maybe \"festival decoration\"? Use \"structure\". object_type \"plant\". We'll set subject_type \"festival decoration\" maybe \"event object\". Use \"structure\". Accept.\n\n2. Height: relation \"height\". object: \"69 to 100 feet\". qualifiers: unit \"feet\". Also maybe also metric. Could create two separate qualifiers: one for range? Use object \"69 to 100\". But we need object string. We'll put object \"69 to 100\". qualifiers: unit \"feet\". Also maybe another qualifier \"approximation\" none. We'll also add second qualifier for metric: object \"21 to 30\". unit \"meters\". But maybe combine? Could have two separate triplets for each unit.\n\n3. Tradition: relation \"national tradition\". object \"yes\"? Not good. Better: relation \"has tradition\", object \"national tradition\". qualifiers: point in time \"1933\". But we need object_type \"tradition\". We'll do that.\n\n4. 2017 Christmas Tree Lighting event: subject \"2017 Christmas Tree Lighting\", relation \"date\", object \"November 29, 2017\". Also relation \"location\" maybe \"Rockefeller Center\". Not in text. We'll just capture event date.\n\nBut we need subject_type \"event\". object_type \"date\".\n\n5. Tree display until: relation \"display end date\" maybe \"until\". Subject \"Rockefeller Center Christmas Tree\", relation \"display end date\", object \"January 7, 2018\". qualifiers maybe none.\n\nAlso maybe \"display start date\" is same as lighting date? Not explicit.\n\nLet's craft JSON.\n\nNeed qualifiers list for each.\n\nTriplet list:\n\n- {\"subject\":\"Rockefeller Center Christmas Tree\",\"relation\":\"species\",\"object\":\"Norway spruce\",\"qualifiers\":[],\"subject_type\":\"structure\",\"object_type\":\"plant\"}\n\n- {\"subject\":\"Rockefeller Center Christmas Tree\",\"relation\":\"height\",\"object\":\"69 to 100\",\"qualifiers\":[{\"relation\":\"unit\",\"object\":\"feet\"}],\"subject_type\":\"structure\",\"object_type\":\"quantity\"}\n\n- {\"subject\":\"Rockefeller Center Christmas Tree\",\"relation\":\"height\",\"object\":\"21 to 30\",\"qualifiers\":[{\"relation\":\"unit\",\"object\":\"meters\"}],\"subject_type\":\"structure\",\"object_type\":\"quantity\"}\n\n- {\"subject\":\"Rockefeller Center Christmas Tree\",\"relation\":\"has tradition\",\"object\":\"national tradition\",\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"1933\"}],\"subject_type\":\"structure\",\"object_type\":\"tradition\"}\n\n- {\"subject\":\"2017 Christmas Tree Lighting\",\"relation\":\"point in time\",\"object\":\"November 29, 2017\",\"qualifiers\":[],\"subject_type\":\"event\",\"object_type\":\"date\"}\n\n- {\"subject\":\"Rockefeller Center Christmas Tree\",\"relation\":\"display end date\",\"object\":\"January 7, 2018\",\"qualifiers\":[],\"subject_type\":\"structure\",\"object_type\":\"date\"}\n\nCheck pronoun resolution: \"The tree\" refers to Rockefeller Center Christmas Tree.\n\nAll good.\n\nReturn JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1663,
+      "total_tokens": 3119,
+      "completion_tokens": 1456,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"species\",\n            \"object\": \"Norway spruce\",\n            \"qualifiers\": [],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"plant\"\n        },\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"height\",\n            \"object\": \"69 to 100\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"feet\"\n                }\n            ],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"height\",\n            \"object\": \"21 to 30\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"meters\"\n                }\n            ],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"has tradition\",\n            \"object\": \"national tradition\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1933\"\n                }\n            ],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"tradition\"\n        },\n        {\n            \"subject\": \"2017 Christmas Tree Lighting\",\n            \"relation\": \"point in time\",\n            \"object\": \"November 29, 2017\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Rockefeller Center Christmas Tree\",\n            \"relation\": \"display end date\",\n            \"object\": \"January 7, 2018\",\n            \"qualifiers\": [],\n            \"subject_type\": \"structure\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Rockefeller Center Christmas Tree",
+        "relation": "species",
+        "object": "Norway spruce",
+        "qualifiers": [],
+        "subject_type": "structure",
+        "object_type": "plant"
+      },
+      {
+        "subject": "Rockefeller Center Christmas Tree",
+        "relation": "height",
+        "object": "69 to 100",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "feet"
+          }
+        ],
+        "subject_type": "structure",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Rockefeller Center Christmas Tree",
+        "relation": "height",
+        "object": "21 to 30",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "meters"
+          }
+        ],
+        "subject_type": "structure",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Rockefeller Center Christmas Tree",
+        "relation": "has tradition",
+        "object": "national tradition",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1933"
+          }
+        ],
+        "subject_type": "structure",
+        "object_type": "tradition"
+      },
+      {
+        "subject": "2017 Christmas Tree Lighting",
+        "relation": "point in time",
+        "object": "November 29, 2017",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "date"
+      },
+      {
+        "subject": "Rockefeller Center Christmas Tree",
+        "relation": "display end date",
+        "object": "January 7, 2018",
+        "qualifiers": [],
+        "subject_type": "structure",
+        "object_type": "date"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1663,
+    "total_tokens": 3119,
+    "completion_tokens": 1456,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 592,
+    "output_tokens_est": 500
+  },
+  "attempts": 1,
+  "latency_s": 17.804119727996294,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:55:10.908664+00:00",
+  "cache_key": "130ad1074c520831a743e0b65dc16e14"
+}

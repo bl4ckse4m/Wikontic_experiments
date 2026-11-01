@@ -1,0 +1,160 @@
+{
+  "task": {
+    "input_id": "4c1fed0237bf11e8",
+    "input_hash": "e6e198570f14dba964adbe97eecdc5133a58a0769b8fec16340926ea84161e6f",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-b1850ca8271dc80ebda966baa406ccf3",
+    "object": "chat.completion",
+    "created": 1791502926,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Kentucky\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"moved to\",\n            \"object\": \"California\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1850\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"occupation\",\n            \"object\": \"attorney\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1853\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"El Dorado County\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"occupation\",\n            \"object\": \"attorney\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1854\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Jackson, Amador County\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"position held\",\n            \"object\": \"California State Assembly\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"October 1858\"\n                },\n                {\n                    \"relation\": \"electoral district\",\n                    \"object\": \"Amador\"\n                },\n                {\n                    \"relation\": \"political affiliation\",\n                    \"object\": \"Democrat\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Warner Cope\n\nBorn in Kentucky, Cope came to California in 1850 and tried mining, but found little success. In 1853 he resumed work as an attorney, first in El Dorado County and the next year in Jackson, Amador County. In October 1858, he was elected to the California State Assembly from Amador as a Democrat.\"\n\nWe need to identify entities: Warner Cope (human). Kentucky (place). California (place). 1850 (date). Mining (occupation? activity). 1853 (date). Attorney (occupation). El Dorado County (place). 1854 (next year) maybe 1854. Jackson, Amador County (place). October 1858 (date). California State Assembly (institution). Amador (likely Amador County, but text says \"from Amador\". Could be \"Amador\" as district). Democrat (political party).\n\nTriplets:\n\n1. Warner Cope - place of birth - Kentucky. Relation: \"place of birth\". object_type: \"place\". subject_type: \"human\". No qualifiers.\n\n2. Warner Cope - migration - California (came to). Could use relation \"moved to\" or \"place of residence\". Use \"moved to\". object_type place. qualifier point in time 1850.\n\n3. Warner Cope - occupation - miner? He tried mining but found little success. Not exactly occupation, but activity. Could use \"occupation\" = \"miner\". But text says \"tried mining\". Might be \"activity\". Might be better to use relation \"occupation\" with object \"miner\" but it's not stated he was a miner, just tried. Could use \"activity\" relation? Not in list. Maybe we skip because not explicit occupation. Could use \"attempted activity\" but not defined. Probably skip.\n\n4. Warner Cope - occupation - attorney. He resumed work as an attorney in 1853. So relation \"occupation\" = \"attorney\". qualifier point in time 1853. Also location qualifier \"location\" = \"El Dorado County\" for first year, and \"Jackson, Amador County\" for next year (1854). Could split into two separate triplets: one for 1853 in El Dorado County, one for 1854 in Jackson, Amador County.\n\nThus:\n\n- Warner Cope - occupation - attorney (qualifiers: point in time 1853, location El Dorado County).\n\n- Warner Cope - occupation - attorney (qualifiers: point in time 1854, location Jackson, Amador County).\n\n5. Warner Cope - elected to - California State Assembly (qualifiers: point in time October 1858, electoral district Amador, political affiliation Democrat). Relation \"position held\" maybe \"member of\". Use \"position held\". object_type \"legislative body\". qualifiers: point in time, electoral district, party affiliation.\n\nWe need relation for party affiliation: \"political party\" = Democrat. Could be separate triplet: Warner Cope - member of political party - Democrat (qualifier point in time October 1858 maybe). But the sentence says \"as a Democrat\". So we can add qualifier \"political affiliation\" to the election triplet. Use qualifier relation \"political affiliation\". object \"Democrat\". Also qualifier \"electoral district\" = Amador.\n\nThus final list.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- human\n- place\n- occupation (profession)\n- legislative body\n- political party\n\nNow construct JSON.\n\nCheck qualifiers format: list of dicts with relation and object.\n\nFor date qualifiers: relation \"point in time\". For location: \"location\". For political affiliation: \"political affiliation\". For electoral district: \"electoral district\".\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1661,
+      "total_tokens": 2914,
+      "completion_tokens": 1253,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Kentucky\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"moved to\",\n            \"object\": \"California\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1850\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"occupation\",\n            \"object\": \"attorney\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1853\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"El Dorado County\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"occupation\",\n            \"object\": \"attorney\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1854\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Jackson, Amador County\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Warner Cope\",\n            \"relation\": \"position held\",\n            \"object\": \"California State Assembly\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"October 1858\"\n                },\n                {\n                    \"relation\": \"electoral district\",\n                    \"object\": \"Amador\"\n                },\n                {\n                    \"relation\": \"political affiliation\",\n                    \"object\": \"Democrat\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Warner Cope",
+        "relation": "place of birth",
+        "object": "Kentucky",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "place"
+      },
+      {
+        "subject": "Warner Cope",
+        "relation": "moved to",
+        "object": "California",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1850"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "place"
+      },
+      {
+        "subject": "Warner Cope",
+        "relation": "occupation",
+        "object": "attorney",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1853"
+          },
+          {
+            "relation": "location",
+            "object": "El Dorado County"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Warner Cope",
+        "relation": "occupation",
+        "object": "attorney",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1854"
+          },
+          {
+            "relation": "location",
+            "object": "Jackson, Amador County"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Warner Cope",
+        "relation": "position held",
+        "object": "California State Assembly",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "October 1858"
+          },
+          {
+            "relation": "electoral district",
+            "object": "Amador"
+          },
+          {
+            "relation": "political affiliation",
+            "object": "Democrat"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "legislative body"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1661,
+    "total_tokens": 2914,
+    "completion_tokens": 1253,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 671,
+    "output_tokens_est": 578
+  },
+  "attempts": 1,
+  "latency_s": 15.727721909999673,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:42:22.342678+00:00",
+  "cache_key": "2f531857d966b9cdd03f767b7391e963"
+}

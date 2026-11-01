@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "16cece7ebe3eb887",
+    "input_hash": "9235b64651dd13ea4777cc8de48594cf1ffc5c77409f101acafb5cc2e63aabb6",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-799d2151bf899ae085c1a492d98ceeb5",
+    "object": "chat.completion",
+    "created": 1791548275,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"McAfee\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"McAfee\",\n            \"relation\": \"located in\",\n            \"object\": \"Vernon Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"township\"\n        },\n        {\n            \"subject\": \"Vernon Township\",\n            \"relation\": \"located in\",\n            \"object\": \"Sussex County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"township\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Sussex County\",\n            \"relation\": \"located in\",\n            \"object\": \"New Jersey\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"New Jersey\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"McAfee\",\n            \"relation\": \"postal code\",\n            \"object\": \"07428\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"service provider\",\n                    \"object\": \"United States Postal Service\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"postal code\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"McAfee, New Jersey\n\nMcAfee is an unincorporated community located within Vernon Township in Sussex County, New Jersey, United States. The area is served as United States Postal Service ZIP Code 07428.\"\n\nWe have entities: McAfee (likely a place), Vernon Township, Sussex County, New Jersey, United States, United States Postal Service, ZIP Code 07428.\n\nFacts:\n\n1. McAfee is an unincorporated community. So (McAfee, instance of, unincorporated community) or (McAfee, subclass of?). Use relation \"instance of\" maybe \"type\". Use \"type of settlement\"? In example they used occupation etc. For places they'd likely use \"instance of\" with object \"unincorporated community\". We'll set relation \"instance of\". subject_type: \"human settlement\"? object_type: \"settlement type\".\n\n2. McAfee located within Vernon Township. So (McAfee, location within, Vernon Township). relation could be \"located in\". We'll use \"located in\". subject_type: \"human settlement\". object_type: \"municipality\" or \"township\". Use \"township\".\n\n3. Vernon Township is in Sussex County. Not directly stated but \"within Vernon Township in Sussex County\". So we can infer that McAfee is in Sussex County via location chain? The text says \"located within Vernon Township in Sussex County, New Jersey\". So we can extract (Vernon Township, located in, Sussex County). But is that directly stated? Yes \"Vernon Township in Sussex County\". So treat as (Vernon Township, located in, Sussex County). Also (McAfee, located in, Sussex County) maybe not directly; but the phrase \"within Vernon Township in Sussex County\" implies location hierarchy. The clause \"McAfee is an unincorporated community located within Vernon Township in Sussex County, New Jersey, United States.\" So the location chain: McAfee located within Vernon Township; Vernon Township is in Sussex County; Sussex County is in New Jersey; New Jersey is in United States.\n\nWe can extract each explicit phrase:\n\n- \"Vernon Township in Sussex County\" => relation \"located in\". So (Vernon Township, located in, Sussex County).\n\n- \"Sussex County, New Jersey\" => (Sussex County, located in, New Jersey).\n\n- \"New Jersey, United States\" => (New Jersey, located in, United States).\n\nAlso \"The area is served as United States Postal Service ZIP Code 07428.\" This phrasing: The area (McAfee) is served as USPS ZIP Code 07428. So relation: \"postal code\". So (McAfee, postal code, 07428). Could also have qualifier \"served by\" US Postal Service. But we can express (McAfee, ZIP code, 07428) and maybe add qualifier relation \"service provider\" \"United States Postal Service\". But spec says qualifiers attach to triplet. So we could have main triplet (McAfee, postal code, 07428) with qualifier (service provider, United States Postal Service). Use relation \"service provider\". Or \"served by\". Let's do qualifier.\n\nWe need subject_type and object_type. For McAfee: subject_type \"human settlement\". For object types: unincorporated community (settlement type). For location relations, object_type \"township\", \"county\", \"state\", \"country\". For postal code: object_type \"postal code\". For qualifier service provider: object_type \"organization\".\n\nNow create JSON.\n\nTriplets list:\n\n1. subject McAfee, relation \"instance of\", object \"unincorporated community\". qualifiers [].\n\n2. subject McAfee, relation \"located in\", object \"Vernon Township\". qualifiers [].\n\n3. subject Vernon Township, relation \"located in\", object \"Sussex County\". qualifiers [].\n\n4. subject Sussex County, relation \"located in\", object \"New Jersey\". qualifiers [].\n\n5. subject New Jersey, relation \"located in\", object \"United States\". qualifiers [].\n\n6. subject McAfee, relation \"postal code\", object \"07428\". qualifiers: [{\"relation\":\"service provider\",\"object\":\"United States Postal Service\"}].\n\nCheck for other facts: \"McAfee, New Jersey\" maybe indicates that McAfee is in New Jersey. Already covered by chain, but could be explicit: \"McAfee, New Jersey\" as heading, but not a sentence. Might treat as location. However we already have chain establishing location in New Jersey via Sussex County. Could also include direct (McAfee, located in, New Jersey). But that's not explicitly said; it's implied by chain. The text: \"McAfee is an unincorporated community located within Vernon Township in Sussex County, New Jersey, United States.\" This includes \"New Jersey\" after Sussex County, but it's part of the list of larger locations. So we could also have (McAfee, located in, New Jersey). The phrase \"located within Vernon Township in Sussex County, New Jersey, United States.\" The phrase \"in Sussex County, New Jersey, United States\" modifies location of Vernon Township, not necessarily McAfee directly. However it's typical to parse as McAfee located in Vernon Township, which is in Sussex County, which is in New Jersey, which is in United States. The direct mention of New Jersey after Sussex County may be considered part of the hierarchical location of Vernon Township. They didn't say \"McAfee is in New Jersey\". But we could still extract (McAfee, located in, New Jersey) as a fact? Might be considered derived, not directly stated. The instruction: extract only facts explicitly reported. The phrase \"McAfee is an unincorporated community located within Vernon Township in Sussex County, New Jersey, United States.\" The phrase \"in Sussex County, New Jersey, United States\" is attached to Vernon Township phrase, not McAfee. But the grammar: \"located within Vernon Township in Sussex County, New Jersey, United States.\" The prepositional phrase \"in Sussex County, New Jersey, United States\" modifies \"Vernon Township\". So we shouldn't add direct McAfee->New Jersey. We keep chain.\n\nNow subject_type and object_type:\n\nDefine types:\n\n- unincorporated community: \"settlement type\".\n- Vernon Township: \"township\".\n- Sussex County: \"county\".\n- New Jersey: \"state\".\n- United States: \"country\".\n- postal code: \"postal code\".\n- United States Postal Service: \"organization\".\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1629,
+      "total_tokens": 3334,
+      "completion_tokens": 1705,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"McAfee\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"McAfee\",\n            \"relation\": \"located in\",\n            \"object\": \"Vernon Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"township\"\n        },\n        {\n            \"subject\": \"Vernon Township\",\n            \"relation\": \"located in\",\n            \"object\": \"Sussex County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"township\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Sussex County\",\n            \"relation\": \"located in\",\n            \"object\": \"New Jersey\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"New Jersey\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"McAfee\",\n            \"relation\": \"postal code\",\n            \"object\": \"07428\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"service provider\",\n                    \"object\": \"United States Postal Service\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"postal code\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "McAfee",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "McAfee",
+        "relation": "located in",
+        "object": "Vernon Township",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "township"
+      },
+      {
+        "subject": "Vernon Township",
+        "relation": "located in",
+        "object": "Sussex County",
+        "qualifiers": [],
+        "subject_type": "township",
+        "object_type": "county"
+      },
+      {
+        "subject": "Sussex County",
+        "relation": "located in",
+        "object": "New Jersey",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "state"
+      },
+      {
+        "subject": "New Jersey",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "McAfee",
+        "relation": "postal code",
+        "object": "07428",
+        "qualifiers": [
+          {
+            "relation": "service provider",
+            "object": "United States Postal Service"
+          }
+        ],
+        "subject_type": "human settlement",
+        "object_type": "postal code"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1629,
+    "total_tokens": 3334,
+    "completion_tokens": 1705,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 509,
+    "output_tokens_est": 417
+  },
+  "attempts": 1,
+  "latency_s": 20.712009024005965,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:18:16.407161+00:00",
+  "cache_key": "3b85285dc905a3a106bf881322b245e5"
+}

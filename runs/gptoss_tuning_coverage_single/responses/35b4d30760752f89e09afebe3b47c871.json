@@ -1,0 +1,171 @@
+{
+  "task": {
+    "input_id": "7f3530b757f8bd80",
+    "input_hash": "fec385be5ac92074f235741da95e730f2e15b25bcb93a748120c8ed6fdc924c6",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-4c25e2df86c45d32ed14abdc9e5ee098",
+    "object": "chat.completion",
+    "created": 1791504479,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"first attested\",\n            \"object\": \"1631\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Gasquet\"\n                }\n            ],\n            \"subject_type\": \"term\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"first attested in work\",\n            \"object\": \"book on Danish history\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"author\",\n                    \"object\": \"J.I. Pontanus\"\n                },\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Gasquet\"\n                }\n            ],\n            \"subject_type\": \"term\",\n            \"object_type\": \"book\"\n        },\n        {\n            \"subject\": \"book on Danish history\",\n            \"relation\": \"author\",\n            \"object\": \"J.I. Pontanus\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"means\",\n            \"object\": \"Black Death\",\n            \"qualifiers\": [],\n            \"subject_type\": \"term\",\n            \"object_type\": \"disease\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"spread to\",\n            \"object\": \"Scandinavia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"term\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"spread to\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"term\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"associated with\",\n            \"object\": \"mid 14th-century epidemic\",\n            \"qualifiers\": [],\n            \"subject_type\": \"term\",\n            \"object_type\": \"epidemic\"\n        },\n        {\n            \"subject\": \"medieval epidemic\",\n            \"relation\": \"named\",\n            \"object\": \"Black Death\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1823\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"England\"\n                }\n            ],\n            \"subject_type\": \"epidemic\",\n            \"object_type\": \"disease\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nFirst, identify entities: \"Gasquet (1908)\", \"Latin name atra mors (Black Death)\", \"14th-century epidemic\", \"1631\", \"book on Danish history\", \"J.I. Pontanus\", \"Scandinavia\", \"Germany\", \"mid 14th-century epidemic\", \"England\", \"1823\", \"medieval epidemic\", \"Black Death\".\n\nWe need to capture claims: Gasquet claimed that the Latin name ... first appeared in modern times in 1631 in a book on Danish history by J.I. Pontanus.\n\nSo triplet: Gasquet (subject) - claim - (maybe relation \"stated that\")? We need to represent factual claim: \"Latin name atra mors (Black Death) first appeared in modern times in 1631 in a book on Danish history by J.I. Pontanus\". Could be broken into: \"Latin name atra mors\" - \"first appeared in modern times\" - \"1631\". Also \"first appeared in modern times\" - \"in book on Danish history\" - \"by J.I. Pontanus\". Also \"book on Danish history\" - \"author\" - \"J.I. Pontanus\". Also \"Latin name atra mors\" - \"means\" - \"Black Death\". Also \"name spread through Scandinavia\" - \"spread through\" - \"Scandinavia\". Also \"name spread through Scandinavia and then Germany\" - separate: \"Latin name atra mors\" - \"spread through\" - \"Scandinavia\". And \"Latin name atra mors\" - \"spread through\" - \"Germany\". Also \"name gradually becoming attached to the mid 14th-century epidemic as a proper name\". So: \"Latin name atra mors\" - \"attached to\" - \"mid 14th-century epidemic\". Also \"In England, it was not until 1823 that the medieval epidemic was first called the Black Death.\" So: \"medieval epidemic\" - \"first called\" - \"Black Death\" with qualifier point in time 1823, location England.\n\nNeed subject_type and object_type. Use generic types: human, book, language name, disease, region, etc.\n\nWe also need qualifiers for claims: The claim is made by Gasquet, so we could have a triplet: \"Latin name atra mors\" - \"first appeared in modern times\" - \"1631\" with qualifier attribution: \"attribution\" object \"Gasquet\". But guidelines: \"Never turn a possible or attributed statement into an unconditional fact.\" So we must attach attribution qualifier to the claim. So the triplet representing the appearance should have qualifier attribution \"Gasquet\". Also maybe \"point in time\" qualifier 1631.\n\nSimilarly, the spread through Scandinavia and Germany is claimed by Gasquet? The text says \"The name spread through Scandinavia and then Germany, gradually becoming attached...\" This is part of the narrative, not necessarily claimed. Could be factual. We'll treat as factual.\n\nAlso \"the name spread through Scandinavia and then Germany\" - we can have two triplets.\n\nNow define relations: Use Wikidata-like: \"first mentioned in\" maybe \"first attested\" relation. Could use \"first attested\" or \"first appearance\". We'll use \"first attested\" as relation. For \"spread through\" maybe \"spread to\" or \"geographic distribution\". Use \"geographic distribution\" maybe \"spread to\". We'll use \"spread to\". For \"attached to\" maybe \"applies to\" or \"associated with\". Use \"associated with\". For \"first called\" maybe \"named after\" or \"named\". Use \"named\". But need to capture that the medieval epidemic was first called the Black Death in England in 1823. So relation \"named\" with object \"Black Death\". Qualifiers: point in time 1823, location England.\n\nNow define types: \"Latin name atra mors\" is a \"disease name\" or \"term\". Use \"term\". \"1631\" is date. \"book on Danish history\" is a \"book\". \"J.I. Pontanus\" is human. \"Scandinavia\" region, \"Germany\" country, \"mid 14th-century epidemic\" is \"epidemic\". \"medieval epidemic\" also \"epidemic\". \"Black Death\" is \"disease\". \"Gasquet (1908)\" is a human (maybe historian). Provide subject_type \"human\". For claim, subject is \"Latin name atra mors\". object is \"1631\". object_type \"date\". Relation \"first attested\". Qualifier attribution \"Gasquet\". Also qualifier \"point in time\"? Actually point in time is the object itself (date). Might not need qualifier. But we can include point in time qualifier for \"first attested\" maybe not needed. We'll keep date as object.\n\nBut guidelines: date can be object of standalone relation or qualifier. We'll treat as object.\n\nNow produce JSON.\n\nList triplets:\n\n1. Subject: \"Gasquet\", relation: \"stated that\", object: \"Latin name atra mors first attested in 1631 in a book on Danish history by J.I. Pontanus\". That's too complex. Better break.\n\nBetter to have triplet: \"Latin name atra mors\" - \"first attested\" - \"1631\". Qualifiers: attribution \"Gasquet\", \"point in time\" maybe not needed, \"published in\" maybe \"book on Danish history\". Could also have separate triplet: \"Latin name atra mors\" - \"first attested in work\" - \"book on Danish history\". Qualifier: author \"J.I. Pontanus\". Also \"book on Danish history\" - \"author\" - \"J.I. Pontanus\". Provide.\n\nLet's create:\n\nTriplet A:\nsubject: \"Latin name atra mors\"\nrelation: \"first attested\"\nobject: \"1631\"\nqualifiers: [{\"relation\":\"attribution\",\"object\":\"Gasquet\"}]\nsubject_type: \"term\"\nobject_type: \"date\"\n\nTriplet B:\nsubject: \"Latin name atra mors\"\nrelation: \"first attested in work\"\nobject: \"book on Danish history\"\nqualifiers: [{\"relation\":\"author\",\"object\":\"J.I. Pontanus\"},{\"relation\":\"attribution\",\"object\":\"Gasquet\"}]\nsubject_type: \"term\"\nobject_type: \"book\"\n\nTriplet C:\nsubject: \"book on Danish history\"\nrelation: \"author\"\nobject: \"J.I. Pontanus\"\nqualifiers: []\nsubject_type: \"book\"\nobject_type: \"human\"\n\nTriplet D:\nsubject: \"Latin name atra mors\"\nrelation: \"means\"\nobject: \"Black Death\"\nqualifiers: []\nsubject_type: \"term\"\nobject_type: \"disease\"\n\nTriplet E:\nsubject: \"Latin name atra mors\"\nrelation: \"spread to\"\nobject: \"Scandinavia\"\nqualifiers: []\nsubject_type: \"term\"\nobject_type: \"region\"\n\nTriplet F:\nsubject: \"Latin name atra mors\"\nrelation: \"spread to\"\nobject: \"Germany\"\nqualifiers: []\nsubject_type: \"term\"\nobject_type: \"country\"\n\nTriplet G:\nsubject: \"Latin name atra mors\"\nrelation: \"associated with\"\nobject: \"mid 14th-century epidemic\"\nqualifiers: []\nsubject_type: \"term\"\nobject_type: \"epidemic\"\n\nTriplet H:\nsubject: \"medieval epidemic\"\nrelation: \"named\"\nobject: \"Black Death\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1823\"},{\"relation\":\"location\",\"object\":\"England\"}]\nsubject_type: \"epidemic\"\nobject_type: \"disease\"\n\nAlso maybe \"mid 14th-century epidemic\" is same as \"medieval epidemic\". Could be separate but fine.\n\nNow ensure no extra text.\n\nReturn JSON with list.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1712,
+      "total_tokens": 3875,
+      "completion_tokens": 2163,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"first attested\",\n            \"object\": \"1631\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Gasquet\"\n                }\n            ],\n            \"subject_type\": \"term\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"first attested in work\",\n            \"object\": \"book on Danish history\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"author\",\n                    \"object\": \"J.I. Pontanus\"\n                },\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Gasquet\"\n                }\n            ],\n            \"subject_type\": \"term\",\n            \"object_type\": \"book\"\n        },\n        {\n            \"subject\": \"book on Danish history\",\n            \"relation\": \"author\",\n            \"object\": \"J.I. Pontanus\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"means\",\n            \"object\": \"Black Death\",\n            \"qualifiers\": [],\n            \"subject_type\": \"term\",\n            \"object_type\": \"disease\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"spread to\",\n            \"object\": \"Scandinavia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"term\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"spread to\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"term\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Latin name atra mors\",\n            \"relation\": \"associated with\",\n            \"object\": \"mid 14th-century epidemic\",\n            \"qualifiers\": [],\n            \"subject_type\": \"term\",\n            \"object_type\": \"epidemic\"\n        },\n        {\n            \"subject\": \"medieval epidemic\",\n            \"relation\": \"named\",\n            \"object\": \"Black Death\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1823\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"England\"\n                }\n            ],\n            \"subject_type\": \"epidemic\",\n            \"object_type\": \"disease\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Latin name atra mors",
+        "relation": "first attested",
+        "object": "1631",
+        "qualifiers": [
+          {
+            "relation": "attribution",
+            "object": "Gasquet"
+          }
+        ],
+        "subject_type": "term",
+        "object_type": "date"
+      },
+      {
+        "subject": "Latin name atra mors",
+        "relation": "first attested in work",
+        "object": "book on Danish history",
+        "qualifiers": [
+          {
+            "relation": "author",
+            "object": "J.I. Pontanus"
+          },
+          {
+            "relation": "attribution",
+            "object": "Gasquet"
+          }
+        ],
+        "subject_type": "term",
+        "object_type": "book"
+      },
+      {
+        "subject": "book on Danish history",
+        "relation": "author",
+        "object": "J.I. Pontanus",
+        "qualifiers": [],
+        "subject_type": "book",
+        "object_type": "human"
+      },
+      {
+        "subject": "Latin name atra mors",
+        "relation": "means",
+        "object": "Black Death",
+        "qualifiers": [],
+        "subject_type": "term",
+        "object_type": "disease"
+      },
+      {
+        "subject": "Latin name atra mors",
+        "relation": "spread to",
+        "object": "Scandinavia",
+        "qualifiers": [],
+        "subject_type": "term",
+        "object_type": "region"
+      },
+      {
+        "subject": "Latin name atra mors",
+        "relation": "spread to",
+        "object": "Germany",
+        "qualifiers": [],
+        "subject_type": "term",
+        "object_type": "country"
+      },
+      {
+        "subject": "Latin name atra mors",
+        "relation": "associated with",
+        "object": "mid 14th-century epidemic",
+        "qualifiers": [],
+        "subject_type": "term",
+        "object_type": "epidemic"
+      },
+      {
+        "subject": "medieval epidemic",
+        "relation": "named",
+        "object": "Black Death",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1823"
+          },
+          {
+            "relation": "location",
+            "object": "England"
+          }
+        ],
+        "subject_type": "epidemic",
+        "object_type": "disease"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1712,
+    "total_tokens": 3875,
+    "completion_tokens": 2163,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 758,
+    "output_tokens_est": 665
+  },
+  "attempts": 1,
+  "latency_s": 25.584733625997615,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:08:25.789315+00:00",
+  "cache_key": "35b4d30760752f89e09afebe3b47c871"
+}

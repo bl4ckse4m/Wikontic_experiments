@@ -1,0 +1,129 @@
+{
+  "task": {
+    "input_id": "8b5d63567ea51ba0",
+    "input_hash": "a7f4dc8a12c524f59c8f36be4176998b9652af89193f8d2f6d7402613f696177",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-33458faed378d00175236c69ffe1c5c4",
+    "object": "chat.completion",
+    "created": 1791504857,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Dewey Decimal class 920\",\n            \"relation\": \"class name\",\n            \"object\": \"Biography & genealogy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dewey decimal class\",\n            \"object_type\": \"topic\"\n        },\n        {\n            \"subject\": \"Dewey Decimal class 920\",\n            \"relation\": \"class name\",\n            \"object\": \"Biography, genealogy, insignia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dewey decimal class\",\n            \"object_type\": \"topic\"\n        },\n        {\n            \"subject\": \"Dewey Decimal class range 921-928\",\n            \"relation\": \"reserved for\",\n            \"object\": \"biographies\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location type\",\n                    \"object\": \"optional\"\n                }\n            ],\n            \"subject_type\": \"dewey decimal class range\",\n            \"object_type\": \"topic\"\n        },\n        {\n            \"subject\": \"biographies\",\n            \"relation\": \"shelving method\",\n            \"object\": \"alphabetically by subject's last name\",\n            \"qualifiers\": [],\n            \"subject_type\": \"topic\",\n            \"object_type\": \"method\"\n        },\n        {\n            \"subject\": \"Dewey Decimal class 929\",\n            \"relation\": \"class name\",\n            \"object\": \"Genealogy, names, insignia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dewey decimal class\",\n            \"object_type\": \"topic\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text. The text is about Dewey Decimal classes. It lists classes: \"920 Biography & genealogy 920 Biography, genealogy, insignia 921 - 928 This range is reserved as an optional location for biographies, which are shelved alphabetically by subject's last name. 929 Genealogy, names, insignia\"\n\nWe need to produce triplets representing facts.\n\nPossible entities: \"Dewey Decimal Classification\" maybe implied, but not explicitly mentioned. The text says \"List of Dewey Decimal classes\". So we can treat \"Dewey Decimal Classification\" as subject? The phrase \"List of Dewey Decimal classes\" is title. The facts: class 920 corresponds to \"Biography & genealogy\". Also \"920 Biography, genealogy, insignia\". So maybe two separate statements: (920, class name, \"Biography & genealogy\") and (920, class name, \"Biography, genealogy, insignia\") but they seem same. Could treat as (Dewey Decimal Classification, has class, 920) with qualifier \"class name\" etc. But we need to follow guidelines: subject must be named entity. Could use \"Dewey Decimal Classification\" as subject. Relation: \"class\" or \"has class\". Object: \"920\". Then qualifiers: maybe \"class name\" relation.\n\nBetter: create triplet: (Dewey Decimal Classification, class number, \"920\") with qualifier \"class name\" = \"Biography & genealogy\". But guidelines: qualifiers are relation-object pairs attached to a triplet. So we could have main relation \"class number\" and qualifier \"class name\". Or we could have separate triplet: (920, class name, \"Biography & genealogy\").\n\nProbably simpler: treat each class number as subject entity (e.g., \"Dewey Decimal class 920\") and relation \"subject of\" maybe not. But we can have subject \"Dewey Decimal class 920\". Relation \"topic\" or \"covers\" \"Biography & genealogy\". But need to use Wikidata-style relations. Could use \"class name\" as relation. Not sure.\n\nLet's think: In Wikidata, there is property \"Dewey Decimal Classification\" (P101). But here we are describing classes, not items. Could use relation \"class name\". We'll just use \"class name\". Subject type: \"classification\". Object type: \"concept\".\n\nAlso the range 921-928 is reserved as optional location for biographies. So we can have triplet: (921-928, reserved for, \"biographies\") with qualifier \"optional location\". Or (Dewey Decimal class range 921-928, reserved for, \"biographies\") with qualifier \"optional location\". Also note \"biographies are shelved alphabetically by subject's last name\". That's a fact about biographies: (biographies, shelving method, \"alphabetically by subject's last name\") maybe.\n\nAlso 929: \"Genealogy, names, insignia\". So similar.\n\nWe need to include subject_type and object_type. For class numbers, subject_type maybe \"dewey decimal class\". Object_type maybe \"topic\" or \"concept\". For range, subject_type \"dewey decimal class range\". For biographies, object_type \"subject type\"? Could be \"human activity\"? But we can use generic \"topic\". For shelving method, object_type \"method\". For \"subject's last name\", maybe \"attribute\".\n\nLet's produce triplets:\n\n1. Subject: \"Dewey Decimal class 920\", relation: \"class name\", object: \"Biography & genealogy\". qualifiers: none. subject_type: \"dewey decimal class\", object_type: \"topic\".\n\n2. Subject: \"Dewey Decimal class 920\", relation: \"class name\", object: \"Biography, genealogy, insignia\". But this duplicates. Might be okay to include both as separate statements.\n\n3. Subject: \"Dewey Decimal class range 921-928\", relation: \"reserved for\", object: \"biographies\". qualifiers: [{\"relation\":\"optional location\",\"object\":\"true\"}] maybe. But qualifier relation should be a property; we can use \"optional location\" as relation with object \"yes\". Or we could use \"location type\" = \"optional\". We'll use \"location type\" relation.\n\n4. Subject: \"biographies\", relation: \"shelving method\", object: \"alphabetically by subject's last name\". qualifiers: none.\n\n5. Subject: \"Dewey Decimal class 929\", relation: \"class name\", object: \"Genealogy, names, insignia\". qualifiers: none.\n\nWe also might include that the range 921-928 is \"optional location for biographies\". So maybe main relation \"location\" with qualifier \"optional\". But we can just include qualifier.\n\nNow ensure each triplet includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types: \"dewey decimal class\" for class numbers, \"dewey decimal class range\" for range, \"topic\" for object, \"method\" for shelving method, \"human activity\"? We'll use \"topic\". For \"biographies\", object_type \"topic\". For \"alphabetically by subject's last name\", object_type \"method\". For \"optional location\", object_type \"qualifier value\" maybe \"boolean\". We'll set object_type \"boolean\". For qualifier relation \"optional location\", object_type \"qualifier\". Might be okay.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1642,
+      "total_tokens": 3100,
+      "completion_tokens": 1458,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Dewey Decimal class 920\",\n            \"relation\": \"class name\",\n            \"object\": \"Biography & genealogy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dewey decimal class\",\n            \"object_type\": \"topic\"\n        },\n        {\n            \"subject\": \"Dewey Decimal class 920\",\n            \"relation\": \"class name\",\n            \"object\": \"Biography, genealogy, insignia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dewey decimal class\",\n            \"object_type\": \"topic\"\n        },\n        {\n            \"subject\": \"Dewey Decimal class range 921-928\",\n            \"relation\": \"reserved for\",\n            \"object\": \"biographies\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location type\",\n                    \"object\": \"optional\"\n                }\n            ],\n            \"subject_type\": \"dewey decimal class range\",\n            \"object_type\": \"topic\"\n        },\n        {\n            \"subject\": \"biographies\",\n            \"relation\": \"shelving method\",\n            \"object\": \"alphabetically by subject's last name\",\n            \"qualifiers\": [],\n            \"subject_type\": \"topic\",\n            \"object_type\": \"method\"\n        },\n        {\n            \"subject\": \"Dewey Decimal class 929\",\n            \"relation\": \"class name\",\n            \"object\": \"Genealogy, names, insignia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dewey decimal class\",\n            \"object_type\": \"topic\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Dewey Decimal class 920",
+        "relation": "class name",
+        "object": "Biography & genealogy",
+        "qualifiers": [],
+        "subject_type": "dewey decimal class",
+        "object_type": "topic"
+      },
+      {
+        "subject": "Dewey Decimal class 920",
+        "relation": "class name",
+        "object": "Biography, genealogy, insignia",
+        "qualifiers": [],
+        "subject_type": "dewey decimal class",
+        "object_type": "topic"
+      },
+      {
+        "subject": "Dewey Decimal class range 921-928",
+        "relation": "reserved for",
+        "object": "biographies",
+        "qualifiers": [
+          {
+            "relation": "location type",
+            "object": "optional"
+          }
+        ],
+        "subject_type": "dewey decimal class range",
+        "object_type": "topic"
+      },
+      {
+        "subject": "biographies",
+        "relation": "shelving method",
+        "object": "alphabetically by subject's last name",
+        "qualifiers": [],
+        "subject_type": "topic",
+        "object_type": "method"
+      },
+      {
+        "subject": "Dewey Decimal class 929",
+        "relation": "class name",
+        "object": "Genealogy, names, insignia",
+        "qualifiers": [],
+        "subject_type": "dewey decimal class",
+        "object_type": "topic"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1642,
+    "total_tokens": 3100,
+    "completion_tokens": 1458,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 478,
+    "output_tokens_est": 385
+  },
+  "attempts": 1,
+  "latency_s": 18.13591458999872,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:14:35.452121+00:00",
+  "cache_key": "cfe90a2886978131a58e978508639de8"
+}

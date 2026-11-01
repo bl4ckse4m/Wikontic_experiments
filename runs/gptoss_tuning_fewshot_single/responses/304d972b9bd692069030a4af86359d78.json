@@ -1,0 +1,142 @@
+{
+  "task": {
+    "input_id": "b1b3ff87bccd7ddd",
+    "input_hash": "1138fb164cc182b0e798a3f8f0298c345102cd24eadcc7166e95ee2ff69d62be",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-7109e08ec34710af3604d8cc531b2540",
+    "object": "chat.completion",
+    "created": 1791520642,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Opening (album)\",\n            \"relation\": \"album type\",\n            \"object\": \"live album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album type\"\n        },\n        {\n            \"subject\": \"The Opening (album)\",\n            \"relation\": \"artist\",\n            \"object\": \"Mal Waldron\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Mal Waldron\",\n            \"relation\": \"occupation\",\n            \"object\": \"jazz pianist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Mal Waldron\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"The Opening (album)\",\n            \"relation\": \"recorded in\",\n            \"object\": \"Paris\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1970\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"The Opening (album)\",\n            \"relation\": \"record label\",\n            \"object\": \"Futura\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country of origin\",\n                    \"object\": \"France\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"record label\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"The Opening (album)\n\nThe Opening is a live album by American jazz pianist Mal Waldron featuring a performance recorded in Paris in 1970 and released on the French Futura label.\"\n\nEntities: The Opening (album) - album title. Mal Waldron - human, occupation pianist, jazz pianist. Relation: album type live album. Relation: album by (artist) Mal Waldron. Also \"American\" indicates country of citizenship? Could be qualifier: country of citizenship = United States. But we need to be careful: \"American jazz pianist Mal Waldron\". So we can have a triplet: Mal Waldron occupation = pianist (or jazz pianist). Could also have nationality qualifier.\n\nBut we only extract facts explicitly stated. The sentence says: \"The Opening is a live album by American jazz pianist Mal Waldron\". So we can extract:\n\n- The Opening (album) relation: instance of (or type) \"live album\". Probably relation \"genre\" or \"type\". Use \"album type\" maybe. We'll use relation \"album type\" with object \"live album\". subject_type \"album\", object_type \"album type\".\n\n- The Opening (album) relation: \"artist\" or \"performer\" = Mal Waldron. Use relation \"artist\". object_type \"human\".\n\n- Mal Waldron relation: \"occupation\" = \"jazz pianist\". Could also separate \"pianist\". We'll use \"occupation\" object \"jazz pianist\". subject_type \"human\", object_type \"profession\".\n\n- Mal Waldron relation: \"country of citizenship\" = \"United States\". The text says \"American\". So we can add qualifier? Actually it's a direct attribute: \"American jazz pianist\". So we can treat as qualifier on occupation? But we can also have separate triplet: Mal Waldron \"country of citizenship\" \"United States\". That's explicit.\n\n- The Opening (album) relation: \"recorded in\" = Paris, with qualifier point in time 1970. So triplet: The Opening (album) \"recording location\" \"Paris\". qualifiers: point in time \"1970\". subject_type album, object_type location (city).\n\n- The Opening (album) relation: \"recorded\" maybe \"recording date\". But we have location and time.\n\n- The Opening (album) relation: \"released by\" = French Futura label. So object: Futura (label). qualifier: \"country of origin\" maybe \"France\". But text says \"French Futura label\". So we can have relation \"record label\" = \"Futura\". qualifier: \"country of origin\" = \"France\". Or we could have separate triplet: Futura label \"country of origin\" \"France\". But we need to capture that it's French. Could be qualifier on the \"record label\" relation: \"country of origin\" = \"France\". Use qualifier relation \"country of origin\". object \"France\". subject_type album, object_type \"record label\". Good.\n\n- Also \"Futura label\" is a label, type \"record label\". So we could add a triplet: Futura (record label) \"instance of\" \"record label\". But not necessary.\n\n- Also \"The Opening\" is an album, so we could have relation \"genre\" maybe \"jazz\". Not explicit.\n\n- Also \"live album\" indicates it's a live recording. Already captured.\n\n- Also \"performance recorded in Paris in 1970\". Could also have \"performance\" as event, but we can keep simple.\n\nNow format.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- \"The Opening\" (album) subject_type \"album\".\n- object \"live album\" type \"album type\".\n- object \"Mal Waldron\" type \"human\".\n- object \"jazz pianist\" type \"profession\".\n- object \"United States\" type \"country\".\n- object \"Paris\" type \"city\" or \"place\". Use \"city\".\n- object \"Futura\" type \"record label\".\n- object \"France\" type \"country\".\n\nNow qualifiers list.\n\nTriplet 1: subject \"The Opening (album)\", relation \"album type\", object \"live album\", qualifiers [].\n\nTriplet 2: subject \"The Opening (album)\", relation \"artist\", object \"Mal Waldron\", qualifiers [].\n\nTriplet 3: subject \"Mal Waldron\", relation \"occupation\", object \"jazz pianist\", qualifiers [].\n\nTriplet 4: subject \"Mal Waldron\", relation \"country of citizenship\", object \"United States\", qualifiers [].\n\nTriplet 5: subject \"The Opening (album)\", relation \"recording location\", object \"Paris\", qualifiers [{\"relation\":\"point in time\",\"object\":\"1970\"}].\n\nTriplet 6: subject \"The Opening (album)\", relation \"record label\", object \"Futura\", qualifiers [{\"relation\":\"country of origin\",\"object\":\"France\"}].\n\nPotentially also \"recorded\" relation? But we already have location with time.\n\nMake sure to include proper naming: \"recording location\" maybe \"recorded in\". Use \"recorded in\". object \"Paris\". qualifiers point in time 1970.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1629,
+      "total_tokens": 3069,
+      "completion_tokens": 1440,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Opening (album)\",\n            \"relation\": \"album type\",\n            \"object\": \"live album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album type\"\n        },\n        {\n            \"subject\": \"The Opening (album)\",\n            \"relation\": \"artist\",\n            \"object\": \"Mal Waldron\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Mal Waldron\",\n            \"relation\": \"occupation\",\n            \"object\": \"jazz pianist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Mal Waldron\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"The Opening (album)\",\n            \"relation\": \"recorded in\",\n            \"object\": \"Paris\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1970\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"The Opening (album)\",\n            \"relation\": \"record label\",\n            \"object\": \"Futura\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country of origin\",\n                    \"object\": \"France\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"record label\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "The Opening (album)",
+        "relation": "album type",
+        "object": "live album",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "album type"
+      },
+      {
+        "subject": "The Opening (album)",
+        "relation": "artist",
+        "object": "Mal Waldron",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "human"
+      },
+      {
+        "subject": "Mal Waldron",
+        "relation": "occupation",
+        "object": "jazz pianist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Mal Waldron",
+        "relation": "country of citizenship",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "The Opening (album)",
+        "relation": "recorded in",
+        "object": "Paris",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1970"
+          }
+        ],
+        "subject_type": "album",
+        "object_type": "city"
+      },
+      {
+        "subject": "The Opening (album)",
+        "relation": "record label",
+        "object": "Futura",
+        "qualifiers": [
+          {
+            "relation": "country of origin",
+            "object": "France"
+          }
+        ],
+        "subject_type": "album",
+        "object_type": "record label"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1629,
+    "total_tokens": 3069,
+    "completion_tokens": 1440,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 534,
+    "output_tokens_est": 442
+  },
+  "attempts": 1,
+  "latency_s": 17.809572430007393,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:37:41.050192+00:00",
+  "cache_key": "304d972b9bd692069030a4af86359d78"
+}

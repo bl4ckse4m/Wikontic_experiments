@@ -1,0 +1,179 @@
+{
+  "task": {
+    "input_id": "3ba9d587e5194f9b",
+    "input_hash": "ad1e12997226bfdc8ee8578c97cd257bdba449cbfa815a26f5b2f7984930394e",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793199563-NpGoRPXE8L9AwUjQz7Zn",
+    "object": "chat.completion",
+    "created": 1793199563,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DekaLLM",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Float Away Deconstructed\",\n            \"relation\": \"instance of\",\n            \"object\": \"album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Float Away Deconstructed\",\n            \"relation\": \"publication date\",\n            \"object\": \"2005\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Float Away Deconstructed\",\n            \"relation\": \"artist\",\n            \"object\": \"Marah\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"band\"\n        },\n        {\n            \"subject\": \"Float Away Deconstructed\",\n            \"relation\": \"contains\",\n            \"object\": \"demo\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"derived from\",\n                    \"object\": \"Float Away With the Friday Night Gods\",\n                    \"object_type\": \"album\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2002\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"demo\"\n        },\n        {\n            \"subject\": \"Float Away With the Friday Night Gods\",\n            \"relation\": \"instance of\",\n            \"object\": \"album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Float Away With the Friday Night Gods\",\n            \"relation\": \"publication date\",\n            \"object\": \"2002\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Float Away With the Friday Night Gods\",\n            \"relation\": \"artist\",\n            \"object\": \"Marah\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"band\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nEntities: \"Float Away Deconstructed\" (album), \"Marah\" (band), \"2005\" (year), \"Float Away With the Friday Night Gods\" (album), \"2002\" (year), \"demos\" (maybe track type). Also \"album\" type, \"band\" type, \"year\" type.\n\nFirst sentence: \"Float Away Deconstructed is an album released by the band Marah in 2005.\"\n\nTriplets:\n- subject: Float Away Deconstructed, relation: instance of? Actually we need type: album. Could be \"instance of\" relation: object \"album\". But typical Wikidata uses \"instance of\". We'll include.\n- subject: Float Away Deconstructed, relation: \"release date\" or \"publication date\" with object \"2005\". Use \"publication date\". object_type year.\n- subject: Float Away Deconstructed, relation: \"artist\" or \"performer\" or \"released by\". Use \"artist\" maybe. relation: \"artist\" object: Marah, object_type \"band\". Or \"released by\". We'll pick \"artist\". Also qualifier maybe \"point in time\"? Not needed.\n\nSecond sentence: \"It consists of demos from the band's 2002 release, \"Float Away With the Friday Night Gods\".\"\n\n\"It\" refers to Float Away Deconstructed. So relation: \"contains\" or \"has part\" with object \"demos\". But we need more specific: \"contains\" object \"demo\". Could be \"has part\" object \"demo\". Also we have relation: \"source of\" maybe. Actually \"consists of demos from the band's 2002 release\". So we can have triplet: Float Away Deconstructed – \"contains\" – \"demo\". object_type \"musical work\" maybe \"demo\". Also qualifier: \"source\" linking to the 2002 release. Or we can have separate triplet: Float Away Deconstructed – \"source of demos\" – Float Away With the Friday Night Gods, with qualifier \"point in time\" 2002. But better: Float Away Deconstructed – \"contains\" – \"demo\" with qualifier \"derived from\" – Float Away With the Friday Night Gods, and qualifier \"point in time\" – 2002.\n\nBut qualifiers must have relation and object, and object_type. So we can add two qualifiers.\n\nAlso need triplet for Float Away With the Friday Night Gods: it's an album released in 2002 by Marah. The text says \"the band's 2002 release\". So we can infer that it's an album released in 2002 by Marah. So we can add triplet: Float Away With the Friday Night Gods – instance of – album. Float Away With the Friday Night Gods – publication date – 2002. Float Away With the Friday Night Gods – artist – Marah.\n\nBut are we allowed to infer beyond explicit? The text says \"the band's 2002 release\". That implies it's an album (release). Could be a release (maybe album). We'll include.\n\nNow format JSON: top-level key \"triplets\": list.\n\nEach dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types: Float Away Deconstructed – album (object_type for instance of). So subject_type: album? Actually subject_type is class of subject. So for album subject_type \"album\". For relation \"instance of\", object_type \"album\"? Wait object is \"album\". So object_type \"album\". That seems redundant but okay.\n\nBetter: For \"instance of\" relation, object is \"album\". object_type \"album\". subject_type \"album\"? Actually subject is also album, but type is \"album\". That's okay.\n\nFor \"publication date\": object_type \"year\". subject_type \"album\".\n\nFor \"artist\": object_type \"band\". subject_type \"album\". Also need subject_type for band: \"band\". For \"contains\": object_type \"demo\". subject_type \"album\". Qualifier \"derived from\": object_type \"album\". Qualifier \"point in time\": object_type \"year\".\n\nNow produce JSON.\n\nCheck naming: Use short distinctive names: \"Float Away Deconstructed\", \"Marah\", \"Float Away With the Friday Night Gods\". Use \"demo\" as object.\n\nRelations: \"instance of\", \"publication date\", \"artist\", \"contains\", qualifiers: \"derived from\", \"point in time\".\n\nNow produce list.\n\nLet's craft.\n\nTriplet 1:\nsubject: Float Away Deconstructed\nrelation: instance of\nobject: album\nqualifiers: []\nsubject_type: album\nobject_type: album\n\nTriplet 2:\nsubject: Float Away Deconstructed\nrelation: publication date\nobject: 2005\nqualifiers: []\nsubject_type: album\nobject_type: year\n\nTriplet 3:\nsubject: Float Away Deconstructed\nrelation: artist\nobject: Marah\nqualifiers: []\nsubject_type: album\nobject_type: band\n\nTriplet 4:\nsubject: Float Away Deconstructed\nrelation: contains\nobject: demo\nqualifiers: [\n  {relation: \"derived from\", object: \"Float Away With the Friday Night Gods\", object_type: \"album\"},\n  {relation: \"point in time\", object: \"2002\", object_type: \"year\"}\n]\nsubject_type: album\nobject_type: musical work? Use \"demo\". object_type \"demo\". But we need a class; maybe \"musical work\". We'll set \"musical work\". Or \"demo\". Use \"demo\". Provide object_type \"demo\". Accept.\n\nTriplet 5:\nsubject: Float Away With the Friday Night Gods\nrelation: instance of\nobject: album\nqualifiers: []\nsubject_type: album\nobject_type: album\n\nTriplet 6:\nsubject: Float Away With the Friday Night Gods\nrelation: publication date\nobject: 2002\nqualifiers: []\nsubject_type: album\nobject_type: year\n\nTriplet 7:\nsubject: Float Away With the Friday Night Gods\nrelation: artist\nobject: Marah\nqualifiers: []\nsubject_type: album\nobject_type: band\n\nNow output JSON with key \"triplets\". Ensure proper quoting.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nEntities: \"Float Away Deconstructed\" (album), \"Marah\" (band), \"2005\" (year), \"Float Away With the Friday Night Gods\" (album), \"2002\" (year), \"demos\" (maybe track type). Also \"album\" type, \"band\" type, \"year\" type.\n\nFirst sentence: \"Float Away Deconstructed is an album released by the band Marah in 2005.\"\n\nTriplets:\n- subject: Float Away Deconstructed, relation: instance of? Actually we need type: album. Could be \"instance of\" relation: object \"album\". But typical Wikidata uses \"instance of\". We'll include.\n- subject: Float Away Deconstructed, relation: \"release date\" or \"publication date\" with object \"2005\". Use \"publication date\". object_type year.\n- subject: Float Away Deconstructed, relation: \"artist\" or \"performer\" or \"released by\". Use \"artist\" maybe. relation: \"artist\" object: Marah, object_type \"band\". Or \"released by\". We'll pick \"artist\". Also qualifier maybe \"point in time\"? Not needed.\n\nSecond sentence: \"It consists of demos from the band's 2002 release, \"Float Away With the Friday Night Gods\".\"\n\n\"It\" refers to Float Away Deconstructed. So relation: \"contains\" or \"has part\" with object \"demos\". But we need more specific: \"contains\" object \"demo\". Could be \"has part\" object \"demo\". Also we have relation: \"source of\" maybe. Actually \"consists of demos from the band's 2002 release\". So we can have triplet: Float Away Deconstructed – \"contains\" – \"demo\". object_type \"musical work\" maybe \"demo\". Also qualifier: \"source\" linking to the 2002 release. Or we can have separate triplet: Float Away Deconstructed – \"source of demos\" – Float Away With the Friday Night Gods, with qualifier \"point in time\" 2002. But better: Float Away Deconstructed – \"contains\" – \"demo\" with qualifier \"derived from\" – Float Away With the Friday Night Gods, and qualifier \"point in time\" – 2002.\n\nBut qualifiers must have relation and object, and object_type. So we can add two qualifiers.\n\nAlso need triplet for Float Away With the Friday Night Gods: it's an album released in 2002 by Marah. The text says \"the band's 2002 release\". So we can infer that it's an album released in 2002 by Marah. So we can add triplet: Float Away With the Friday Night Gods – instance of – album. Float Away With the Friday Night Gods – publication date – 2002. Float Away With the Friday Night Gods – artist – Marah.\n\nBut are we allowed to infer beyond explicit? The text says \"the band's 2002 release\". That implies it's an album (release). Could be a release (maybe album). We'll include.\n\nNow format JSON: top-level key \"triplets\": list.\n\nEach dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types: Float Away Deconstructed – album (object_type for instance of). So subject_type: album? Actually subject_type is class of subject. So for album subject_type \"album\". For relation \"instance of\", object_type \"album\"? Wait object is \"album\". So object_type \"album\". That seems redundant but okay.\n\nBetter: For \"instance of\" relation, object is \"album\". object_type \"album\". subject_type \"album\"? Actually subject is also album, but type is \"album\". That's okay.\n\nFor \"publication date\": object_type \"year\". subject_type \"album\".\n\nFor \"artist\": object_type \"band\". subject_type \"album\". Also need subject_type for band: \"band\". For \"contains\": object_type \"demo\". subject_type \"album\". Qualifier \"derived from\": object_type \"album\". Qualifier \"point in time\": object_type \"year\".\n\nNow produce JSON.\n\nCheck naming: Use short distinctive names: \"Float Away Deconstructed\", \"Marah\", \"Float Away With the Friday Night Gods\". Use \"demo\" as object.\n\nRelations: \"instance of\", \"publication date\", \"artist\", \"contains\", qualifiers: \"derived from\", \"point in time\".\n\nNow produce list.\n\nLet's craft.\n\nTriplet 1:\nsubject: Float Away Deconstructed\nrelation: instance of\nobject: album\nqualifiers: []\nsubject_type: album\nobject_type: album\n\nTriplet 2:\nsubject: Float Away Deconstructed\nrelation: publication date\nobject: 2005\nqualifiers: []\nsubject_type: album\nobject_type: year\n\nTriplet 3:\nsubject: Float Away Deconstructed\nrelation: artist\nobject: Marah\nqualifiers: []\nsubject_type: album\nobject_type: band\n\nTriplet 4:\nsubject: Float Away Deconstructed\nrelation: contains\nobject: demo\nqualifiers: [\n  {relation: \"derived from\", object: \"Float Away With the Friday Night Gods\", object_type: \"album\"},\n  {relation: \"point in time\", object: \"2002\", object_type: \"year\"}\n]\nsubject_type: album\nobject_type: musical work? Use \"demo\". object_type \"demo\". But we need a class; maybe \"musical work\". We'll set \"musical work\". Or \"demo\". Use \"demo\". Provide object_type \"demo\". Accept.\n\nTriplet 5:\nsubject: Float Away With the Friday Night Gods\nrelation: instance of\nobject: album\nqualifiers: []\nsubject_type: album\nobject_type: album\n\nTriplet 6:\nsubject: Float Away With the Friday Night Gods\nrelation: publication date\nobject: 2002\nqualifiers: []\nsubject_type: album\nobject_type: year\n\nTriplet 7:\nsubject: Float Away With the Friday Night Gods\nrelation: artist\nobject: Marah\nqualifiers: []\nsubject_type: album\nobject_type: band\n\nNow output JSON with key \"triplets\". Ensure proper quoting.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1398,
+      "completion_tokens": 1723,
+      "total_tokens": 3121,
+      "cost": 0.00035208,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00035208,
+        "upstream_inference_prompt_cost": 4.194e-05,
+        "upstream_inference_completions_cost": 0.00031014
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1281,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Float Away Deconstructed\",\n            \"relation\": \"instance of\",\n            \"object\": \"album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Float Away Deconstructed\",\n            \"relation\": \"publication date\",\n            \"object\": \"2005\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Float Away Deconstructed\",\n            \"relation\": \"artist\",\n            \"object\": \"Marah\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"band\"\n        },\n        {\n            \"subject\": \"Float Away Deconstructed\",\n            \"relation\": \"contains\",\n            \"object\": \"demo\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"derived from\",\n                    \"object\": \"Float Away With the Friday Night Gods\",\n                    \"object_type\": \"album\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2002\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"demo\"\n        },\n        {\n            \"subject\": \"Float Away With the Friday Night Gods\",\n            \"relation\": \"instance of\",\n            \"object\": \"album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Float Away With the Friday Night Gods\",\n            \"relation\": \"publication date\",\n            \"object\": \"2002\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Float Away With the Friday Night Gods\",\n            \"relation\": \"artist\",\n            \"object\": \"Marah\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"band\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Float Away Deconstructed",
+        "relation": "instance of",
+        "object": "album",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "album"
+      },
+      {
+        "subject": "Float Away Deconstructed",
+        "relation": "publication date",
+        "object": "2005",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "year"
+      },
+      {
+        "subject": "Float Away Deconstructed",
+        "relation": "artist",
+        "object": "Marah",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "band"
+      },
+      {
+        "subject": "Float Away Deconstructed",
+        "relation": "contains",
+        "object": "demo",
+        "qualifiers": [
+          {
+            "relation": "derived from",
+            "object": "Float Away With the Friday Night Gods"
+          },
+          {
+            "relation": "point in time",
+            "object": "2002"
+          }
+        ],
+        "subject_type": "album",
+        "object_type": "demo"
+      },
+      {
+        "subject": "Float Away With the Friday Night Gods",
+        "relation": "instance of",
+        "object": "album",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "album"
+      },
+      {
+        "subject": "Float Away With the Friday Night Gods",
+        "relation": "publication date",
+        "object": "2002",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "year"
+      },
+      {
+        "subject": "Float Away With the Friday Night Gods",
+        "relation": "artist",
+        "object": "Marah",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "band"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1398,
+    "completion_tokens": 1723,
+    "total_tokens": 3121,
+    "cost": 0.00035208,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00035208,
+      "upstream_inference_prompt_cost": 4.194e-05,
+      "upstream_inference_completions_cost": 0.00031014
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1281,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 662,
+    "output_tokens_est": 534
+  },
+  "attempts": 1,
+  "latency_s": 35.189683256001445,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T14:59:57.417828+00:00",
+  "cache_key": "aa740ee8f3a6f860538e0146123dc93d"
+}

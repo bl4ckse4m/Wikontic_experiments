@@ -1,0 +1,166 @@
+{
+  "task": {
+    "input_id": "caaff4e349ce8358",
+    "input_hash": "250068d595be67434277146773197e859cfb7b5642107f9c278627d9e98465b8",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c57825bd2a79b0c8c7e2cefc528d80dc",
+    "object": "chat.completion",
+    "created": 1791506815,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Sophie Ellis-Bextor\",\n            \"relation\": \"place of birth\",\n            \"object\": \"London\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Sophie Ellis-Bextor\",\n            \"relation\": \"mother\",\n            \"object\": \"Janet Ellis\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Sophie Ellis-Bextor\",\n            \"relation\": \"father\",\n            \"object\": \"Robin Bextor\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Janet Ellis\",\n            \"relation\": \"presenter of\",\n            \"object\": \"Blue Peter\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television program\"\n        },\n        {\n            \"subject\": \"Janet Ellis\",\n            \"relation\": \"presenter of\",\n            \"object\": \"Jigsaw\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television program\"\n        },\n        {\n            \"subject\": \"Robin Bextor\",\n            \"relation\": \"occupation\",\n            \"object\": \"film producer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Robin Bextor\",\n            \"relation\": \"occupation\",\n            \"object\": \"director\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Janet Ellis\",\n            \"relation\": \"marital separation\",\n            \"object\": \"Robin Bextor\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"Sophie Ellis-Bextor age four\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Sophie Ellis-Bextor\",\n            \"relation\": \"appeared on\",\n            \"object\": \"Blue Peter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"childhood\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television program\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Sophie Ellis-Bextor\n\nEllis-Bextor was born in London to Janet Ellis, who was later a presenter on BBC's children's television programmes \"Blue Peter\" and \"Jigsaw\", and Robin Bextor, a film producer and director: they separated when she was four. As a child, Ellis-Bextor occasionally appeared on \"Blue Peter\" alongside her mother, who presented the programme.\"\n\nWe need to parse.\n\nFirst, identify entities:\n\n- Sophie Ellis-Bextor (human)\n- London (city)\n- Janet Ellis (human)\n- Robin Bextor (human)\n- BBC's children's television programmes \"Blue Peter\" (TV program)\n- \"Jigsaw\" (TV program)\n- \"Blue Peter\" (TV program) again\n- mother (refers to Janet Ellis) but we can use Janet Ellis as mother.\n\nNow extract facts:\n\n1. Sophie Ellis-Bextor was born in London.\n=> (Sophie Ellis-Bextor, place of birth, London). subject_type human, object_type city/location.\n\n2. Sophie Ellis-Bextor was born to Janet Ellis (mother) and Robin Bextor (father). The phrase \"born in London to Janet Ellis ... and Robin Bextor\". So we can have parent relations.\n\n- (Sophie Ellis-Bextor, mother, Janet Ellis) or (parent, mother). Use relation \"mother\". object_type human.\n- (Sophie Ellis-Bextor, father, Robin Bextor) relation \"father\". object_type human.\n\n3. Janet Ellis was later a presenter on BBC's children's television programmes \"Blue Peter\" and \"Jigsaw\". So:\n\n- (Janet Ellis, occupation, presenter) maybe but we need specific relation: \"position held\" or \"occupation\". The text says \"presenter on ... programmes\". Could be (Janet Ellis, occupation, presenter). Also we can have (Janet Ellis, employer, BBC) but not explicit. Better: (Janet Ellis, position held, presenter) with qualifiers maybe \"on program\" but we can create separate relations: (Janet Ellis, presenter of, Blue Peter) and (Janet Ellis, presenter of, Jigsaw). Use relation \"presenter of\" (maybe \"presenter of\" is not standard but we can use \"presenter of\" as relation). object_type TV program.\n\nBut the text: \"presenter on BBC's children's television programmes \"Blue Peter\" and \"Jigsaw\".\" So we can capture two triplets:\n\n- (Janet Ellis, presenter of, Blue Peter)\n- (Janet Ellis, presenter of, Jigsaw)\n\nsubject_type human, object_type television program.\n\n4. Robin Bextor is a film producer and director. So:\n\n- (Robin Bextor, occupation, film producer)\n- (Robin Bextor, occupation, director)\n\nsubject_type human, object_type profession.\n\n5. \"they separated when she was four.\" \"they\" refers to Janet Ellis and Robin Bextor (the parents). So we have a separation event. Could be (Janet Ellis, spouse, Robin Bextor) but not given. We can capture (Janet Ellis, marital status, separated) with qualifier point in time? Actually \"when she was four\" refers to Sophie Ellis-Bextor age four. So we can have a qualifier \"point in time\" maybe not a date but age. Could be \"condition\" but we can capture as qualifier \"when\" with object \"Sophie Ellis-Bextor age four\". However guidelines: qualifiers can be date, place, etc. Age is not typical but we can still include qualifier \"when\" with object \"Sophie Ellis-Bextor age four\". But maybe better to create a triplet: (Janet Ellis, marital separation, Robin Bextor) with qualifier \"point in time\" = \"when Sophie Ellis-Bextor was four\". Represent as qualifier relation \"point in time\" object \"Sophie Ellis-Bextor age four\". Not ideal but okay.\n\nBut we need to be careful: The text says \"they separated when she was four.\" So we can create triplet: (Janet Ellis, spouse separation, Robin Bextor) with qualifier point in time. Use relation \"marital separation\". object_type human.\n\n6. As a child, Ellis-Bextor occasionally appeared on \"Blue Peter\" alongside her mother, who presented the programme.\n\nSo:\n\n- (Sophie Ellis-Bextor, appearance, Blue Peter) maybe relation \"appeared on\". object_type television program. Qualifier: \"occasionally\" maybe modality? \"occasionally\" is frequency, not required. Could add qualifier \"frequency\" but not defined. Could ignore.\n\n- Also \"appeared on Blue Peter alongside her mother\". Could capture (Sophie Ellis-Bextor, co-appeared with, Janet Ellis) on Blue Peter? Might be too complex. Keep simple: (Sophie Ellis-Bextor, appeared on, Blue Peter) with qualifier \"as a child\" maybe \"point in time\" not date. Could use qualifier \"point in time\" object \"childhood\". Use relation \"point in time\". object_type time period.\n\n- Also mother presented the programme: (Janet Ellis, presenter of, Blue Peter) already captured earlier. So okay.\n\nNow we need to assign subject_type and object_type.\n\nDefine types:\n\n- human\n- city (or location)\n- television program (maybe \"television program\")\n- profession (for occupation)\n- maybe \"film producer\" is profession.\n\n- For \"marital separation\" object_type human.\n\n- For \"appearance\" object_type television program.\n\nNow qualifiers list.\n\nTriplet 1: (Sophie Ellis-Bextor, place of birth, London) qualifiers none.\n\nTriplet 2: (Sophie Ellis-Bextor, mother, Janet Ellis) qualifiers none.\n\nTriplet 3: (Sophie Ellis-Bextor, father, Robin Bextor) qualifiers none.\n\nTriplet 4: (Janet Ellis, presenter of, Blue Peter) qualifiers none.\n\nTriplet 5: (Janet Ellis, presenter of, Jigsaw) qualifiers none.\n\nTriplet 6: (Robin Bextor, occupation, film producer) qualifiers none.\n\nTriplet 7: (Robin Bextor, occupation, director) qualifiers none.\n\nTriplet 8: (Janet Ellis, marital separation, Robin Bextor) qualifiers: point in time \"when Sophie Ellis-Bextor was four\". Represent as qualifier relation \"point in time\", object \"Sophie Ellis-Bextor age four\". object_type maybe \"age\". Could set object_type \"age\". Or \"time period\". We'll set object_type \"age\".\n\nTriplet 9: (Sophie Ellis-Bextor, appeared on, Blue Peter) qualifiers: maybe \"point in time\" \"childhood\". Use qualifier relation \"point in time\", object \"childhood\". object_type \"life stage\". Also maybe \"frequency\" but not needed.\n\nNow ensure we capture \"Ellis-Bextor was born in London to Janet Ellis, ... and Robin Bextor\". Already captured.\n\nNow produce JSON.\n\nCheck for any other facts: \"Janet Ellis, who was later a presenter on BBC's children's television programmes \"Blue Peter\" and \"Jigsaw\".\" The phrase \"later\" indicates time, but we can ignore.\n\nNow produce final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1668,
+      "total_tokens": 3758,
+      "completion_tokens": 2090,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Sophie Ellis-Bextor\",\n            \"relation\": \"place of birth\",\n            \"object\": \"London\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Sophie Ellis-Bextor\",\n            \"relation\": \"mother\",\n            \"object\": \"Janet Ellis\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Sophie Ellis-Bextor\",\n            \"relation\": \"father\",\n            \"object\": \"Robin Bextor\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Janet Ellis\",\n            \"relation\": \"presenter of\",\n            \"object\": \"Blue Peter\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television program\"\n        },\n        {\n            \"subject\": \"Janet Ellis\",\n            \"relation\": \"presenter of\",\n            \"object\": \"Jigsaw\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television program\"\n        },\n        {\n            \"subject\": \"Robin Bextor\",\n            \"relation\": \"occupation\",\n            \"object\": \"film producer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Robin Bextor\",\n            \"relation\": \"occupation\",\n            \"object\": \"director\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Janet Ellis\",\n            \"relation\": \"marital separation\",\n            \"object\": \"Robin Bextor\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"Sophie Ellis-Bextor age four\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Sophie Ellis-Bextor\",\n            \"relation\": \"appeared on\",\n            \"object\": \"Blue Peter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"childhood\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television program\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Sophie Ellis-Bextor",
+        "relation": "place of birth",
+        "object": "London",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Sophie Ellis-Bextor",
+        "relation": "mother",
+        "object": "Janet Ellis",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Sophie Ellis-Bextor",
+        "relation": "father",
+        "object": "Robin Bextor",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Janet Ellis",
+        "relation": "presenter of",
+        "object": "Blue Peter",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "television program"
+      },
+      {
+        "subject": "Janet Ellis",
+        "relation": "presenter of",
+        "object": "Jigsaw",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "television program"
+      },
+      {
+        "subject": "Robin Bextor",
+        "relation": "occupation",
+        "object": "film producer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Robin Bextor",
+        "relation": "occupation",
+        "object": "director",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Janet Ellis",
+        "relation": "marital separation",
+        "object": "Robin Bextor",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "Sophie Ellis-Bextor age four"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Sophie Ellis-Bextor",
+        "relation": "appeared on",
+        "object": "Blue Peter",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "childhood"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "television program"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1668,
+    "total_tokens": 3758,
+    "completion_tokens": 2090,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 724,
+    "output_tokens_est": 632
+  },
+  "attempts": 1,
+  "latency_s": 22.43420485000388,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:47:17.771338+00:00",
+  "cache_key": "4084857fe016f40374d116b1fab2db05"
+}

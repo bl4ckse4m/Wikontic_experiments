@@ -1,0 +1,140 @@
+{
+  "task": {
+    "input_id": "210b243b589bc390",
+    "input_hash": "5bfead89c5d223f5e9b64d00910c9b82f63a48a009417bf73aa53f94d5729fb7",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-555a12dabe90d8225e34d04f7aed3c18",
+    "object": "chat.completion",
+    "created": 1791549288,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Australia\",\n            \"relation\": \"country code\",\n            \"object\": \"61\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country code\"\n        },\n        {\n            \"subject\": \"International Access Code\",\n            \"relation\": \"represented by\",\n            \"object\": \"+\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telecommunication concept\",\n            \"object_type\": \"symbol\"\n        },\n        {\n            \"subject\": \"National Significant Number (Australia)\",\n            \"relation\": \"digit length\",\n            \"object\": \"9\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number component\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Victoria\",\n            \"relation\": \"telephone area code\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative region\",\n            \"object_type\": \"area code\"\n        },\n        {\n            \"subject\": \"Tasmania\",\n            \"relation\": \"telephone area code\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative region\",\n            \"object_type\": \"area code\"\n        },\n        {\n            \"subject\": \"Australian mobile telephone number\",\n            \"relation\": \"starts with\",\n            \"object\": \"4\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"prefix\"\n        },\n        {\n            \"subject\": \"Australian telephone number starting with 1\",\n            \"relation\": \"replacement required\",\n            \"object\": \"none\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number\",\n            \"object_type\": \"string\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract factual relationships from this text. The text describes telephone numbers in Australia, dialing from outside Australia, International Access Code, Country Code 61, nine digit National Significant Number, usage of + symbol, examples: +61 3 xxxx xxxx for a number in Victoria / Tasmania, +61 4xx xxx xxx for a Mobile number. Also \"Some numbers beginning with a 1 may be dialled without any replacement, after dialling the required International Access Code and the Country Code for Australia (+61).\"\n\nWe need to produce triplets.\n\nIdentify entities: Australia (country), International Access Code (concept), Country Code for Australia (61), National 'Significant' Number (NSN) (nine digit). Possibly \"Victoria / Tasmania\" (states). \"Mobile number\". \"Phone number starting with 1\".\n\nRelations: \"has country code\" maybe relation \"country code\". \"dialing procedure\" maybe \"requires\". But need specific Wikidata-style predicates. Use \"country code\" for country. Use \"dialing requires\". However need to stick to factual statements.\n\nTriplet examples:\n\n- Australia, country code, 61.\n- International Access Code, used for dialing from outside, maybe relation \"used for\" but not clear.\n\n- When dialing from outside Australia, after dialing International Access Code, it is necessary to dial Country Code for Australia (61) followed by nine digit National Significant Number.\n\nThus we can have triplet: \"International dialing to Australia\", \"requires country code\", \"61\". But better: \"Australia\", \"country code\", \"61\". Subject_type: country, object_type: string/number.\n\nAlso: \"National Significant Number\", \"digit length\", \"nine\". Could be object_type: number.\n\n- The + symbol is used to represent International Access Code. So triplet: \"+\" symbol, \"represents\", \"International Access Code\". Subject_type: symbol, object_type: concept.\n\n- Example: \"+61 3 xxxx xxxx\" is a number in Victoria / Tasmania. So we could have triplet: \"Phone number format +61 3 xxxx xxxx\", \"used in\", \"Victoria\". But maybe better: \"Victoria\", \"telephone area code\", \"3\". Or \"Victoria/Tasmania\", \"area code\", \"3\". Not explicit but implied: \"for a number in Victoria / Tasmania\". So we can produce: \"Victoria\", \"telephone area code\", \"3\". Also \"Tasmania\", \"telephone area code\", \"3\". Subject_type: administrative region, object_type: number.\n\n- \"+61 4xx xxx xxx\" is a Mobile number. So \"Mobile telephone number\", \"prefix\", \"4\". Or \"Mobile telephone numbers in Australia\", \"start with\", \"4\". Could produce: \"Australian mobile phone number\", \"starts with\", \"4\". But we need named entity: \"Mobile number\". Maybe \"Mobile telephone number (Australia)\", \"national prefix\", \"4\". We'll create triplet: \"Australian mobile phone number\", \"national prefix\", \"4\". Subject_type: telephone number type, object_type: number.\n\n- Some numbers beginning with a 1 may be dialed without any replacement, after dialing the required International Access Code and the Country Code for Australia (+61). So \"Australian telephone numbers starting with 1\", \"dialing requirement\", \"no replacement needed\". Hard to encode.\n\nMaybe create triplet: \"Australian telephone numbers starting with 1\", \"dialing after international access code and country code\", \"no replacement\". Not ideal.\n\nBetter: \"Telephone numbers in Australia beginning with 1\", \"dialing requirement\", \"dial International Access Code and Country Code (+61) without replacement\". Could capture as qualifiers.\n\nSimplify: \"Australian telephone numbers beginning with 1\", \"dialing procedure\", \"dial International Access Code and Country Code (+61) without replacement\". Provide qualifiers: maybe \"condition\": \"beginning with 1\". Hmm.\n\nGiven constraints, we need to produce a list of triplets with qualifiers.\n\nLet's design:\n\n1. Subject: Australia, relation: country code, object: \"61\". qualifiers: [].\n\nsubject_type: country, object_type: string/number.\n\n2. Subject: International Access Code, relation: represented by, object: \"+\". qualifiers [].\n\nsubject_type: concept, object_type: symbol.\n\n3. Subject: National Significant Number (Australia), relation: digit length, object: \"9\". qualifiers [].\n\nsubject_type: telephone number component, object_type: integer.\n\n4. Subject: Victoria, relation: telephone area code, object: \"3\". qualifiers [].\n\nsubject_type: administrative region, object_type: number.\n\n5. Subject: Tasmania, relation: telephone area code, object: \"3\". qualifiers [].\n\n6. Subject: Australian mobile telephone number, relation: starts with, object: \"4\". qualifiers [].\n\nsubject_type: telephone number type, object_type: number.\n\n7. Subject: Australian telephone numbers beginning with 1, relation: dialing requirement, object: \"dial International Access Code and Country Code (+61) without replacement\". This is a bit long but okay. Could split: relation: required dialing sequence, object: \"International Access Code + Country Code (+61)\". qualifiers maybe condition: \"begins with 1\". So:\n\ntriplet: subject: \"Australian telephone number\", relation: \"required dialing sequence\", object: \"International Access Code and Country Code (+61)\". qualifiers: {\"relation\":\"condition\",\"object\":\"begins with 1\"}.\n\nsubject_type: telephone number, object_type: procedure.\n\nBut we need to be concise.\n\nLet's define:\n\n- Subject: \"Australian telephone number starting with 1\", relation: \"dialing after international access code and country code\", object: \"no replacement needed\". qualifiers: [].\n\nsubject_type: telephone number, object_type: string.\n\nBetter to reflect the text: \"may be dialed without any replacement\". So object: \"no replacement\". Use relation: \"requires replacement\" with object \"none\". But we can use \"replacement required\" relation with \"none\". Let's decide:\n\nTriplet: subject: \"Australian telephone number starting with 1\", relation: \"replacement required\", object: \"none\". qualifiers: [].\n\nsubject_type: telephone number, object_type: string.\n\nOk.\n\nAlso maybe include that the + symbol is used to represent International Access Code. Already captured.\n\nNow produce JSON.\n\nCheck that each triplet includes qualifiers list (could be empty). Provide subject_type and object_type.\n\nDefine object_type for \"61\": \"country code\". For \"9\": \"digit count\". For \"3\": \"area code\". For \"4\": \"prefix\". For \"none\": \"none\". For \"+\" symbol: \"symbol\". For \"International Access Code\": \"concept\". For \"Australia\": \"country\". For \"National Significant Number\": \"telephone number component\". For \"Australian mobile telephone number\": \"telephone number type\". For \"Australian telephone number starting with 1\": \"telephone number\". For \"no replacement needed\": maybe \"string\". We'll keep object_type generic.\n\nLet's craft JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1713,
+      "total_tokens": 3546,
+      "completion_tokens": 1833,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Australia\",\n            \"relation\": \"country code\",\n            \"object\": \"61\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country code\"\n        },\n        {\n            \"subject\": \"International Access Code\",\n            \"relation\": \"represented by\",\n            \"object\": \"+\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telecommunication concept\",\n            \"object_type\": \"symbol\"\n        },\n        {\n            \"subject\": \"National Significant Number (Australia)\",\n            \"relation\": \"digit length\",\n            \"object\": \"9\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number component\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Victoria\",\n            \"relation\": \"telephone area code\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative region\",\n            \"object_type\": \"area code\"\n        },\n        {\n            \"subject\": \"Tasmania\",\n            \"relation\": \"telephone area code\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative region\",\n            \"object_type\": \"area code\"\n        },\n        {\n            \"subject\": \"Australian mobile telephone number\",\n            \"relation\": \"starts with\",\n            \"object\": \"4\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"prefix\"\n        },\n        {\n            \"subject\": \"Australian telephone number starting with 1\",\n            \"relation\": \"replacement required\",\n            \"object\": \"none\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number\",\n            \"object_type\": \"string\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Australia",
+        "relation": "country code",
+        "object": "61",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "country code"
+      },
+      {
+        "subject": "International Access Code",
+        "relation": "represented by",
+        "object": "+",
+        "qualifiers": [],
+        "subject_type": "telecommunication concept",
+        "object_type": "symbol"
+      },
+      {
+        "subject": "National Significant Number (Australia)",
+        "relation": "digit length",
+        "object": "9",
+        "qualifiers": [],
+        "subject_type": "telephone number component",
+        "object_type": "integer"
+      },
+      {
+        "subject": "Victoria",
+        "relation": "telephone area code",
+        "object": "3",
+        "qualifiers": [],
+        "subject_type": "administrative region",
+        "object_type": "area code"
+      },
+      {
+        "subject": "Tasmania",
+        "relation": "telephone area code",
+        "object": "3",
+        "qualifiers": [],
+        "subject_type": "administrative region",
+        "object_type": "area code"
+      },
+      {
+        "subject": "Australian mobile telephone number",
+        "relation": "starts with",
+        "object": "4",
+        "qualifiers": [],
+        "subject_type": "telephone number type",
+        "object_type": "prefix"
+      },
+      {
+        "subject": "Australian telephone number starting with 1",
+        "relation": "replacement required",
+        "object": "none",
+        "qualifiers": [],
+        "subject_type": "telephone number",
+        "object_type": "string"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1713,
+    "total_tokens": 3546,
+    "completion_tokens": 1833,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 557,
+    "output_tokens_est": 465
+  },
+  "attempts": 1,
+  "latency_s": 22.741061028005788,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:35:11.965143+00:00",
+  "cache_key": "2d365a80e69ef4ad3eede07dffdad718"
+}

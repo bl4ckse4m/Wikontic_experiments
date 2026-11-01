@@ -1,0 +1,147 @@
+{
+  "task": {
+    "input_id": "a7b063b806ff6396",
+    "input_hash": "81796b42dd590796be1d5c92e98b1c176f236d716fa6a40d5a0e726ad84a6781",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-118dfd12d480b0824ebb66195191e9a1",
+    "object": "chat.completion",
+    "created": 1791512571,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Great Irish Famine\",\n            \"relation\": \"caused influx of\",\n            \"object\": \"Irish immigrants\",\n            \"qualifiers\": [],\n            \"subject_type\": \"historical event\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"Irish immigrants\",\n            \"relation\": \"population in\",\n            \"object\": \"New York City\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1860\"\n                },\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"200,000\"\n                }\n            ],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Irish immigrants\",\n            \"relation\": \"share of population\",\n            \"object\": \"quarter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1860\"\n                },\n                {\n                    \"relation\": \"percentage\",\n                    \"object\": \"25%\"\n                }\n            ],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"proportion\"\n        },\n        {\n            \"subject\": \"German provinces\",\n            \"relation\": \"source of immigration\",\n            \"object\": \"German immigrants\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"Germans\",\n            \"relation\": \"share of population\",\n            \"object\": \"25%\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1860\"\n                }\n            ],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"percentage\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nEntities: New York City, Great Irish Famine, Irish immigrants, 200,000 (maybe population count), New York (city), 1860 (date), quarter of the city's population (maybe proportion), German provinces, Germans, German immigration, etc.\n\nWe need subject_type and object_type.\n\nLet's identify factual statements:\n\n1. The Great Irish Famine brought a large influx of Irish immigrants. So relation: \"cause of immigration\" maybe \"influx caused by\". Could be: subject: Great Irish Famine, relation: \"caused influx of\", object: Irish immigrants. subject_type: event, object_type: group of people (ethnic group).\n\n2. Over 200,000 were living in New York by 1860. So subject: Irish immigrants, relation: \"population in\", object: New York City, qualifiers: point in time 1860, quantity 200,000. But we need object as location. Could also be subject: Irish immigrants, relation: \"number in location\", object: \"200,000\". But typical pattern: \"population\" as number. Let's create triplet: subject: Irish immigrants, relation: \"population in\", object: New York City, qualifiers: point in time 1860, quantity 200,000. object_type: city, subject_type: ethnic group.\n\n3. \"upwards of a quarter of the city's population.\" So relation: \"proportion of population\". Could be: subject: Irish immigrants, relation: \"share of population\", object: \"quarter\". qualifiers: point in time 1860, location New York City. Might be redundant.\n\n4. \"There was also extensive immigration from the German provinces, where revolutions had disrupted societies\". So subject: German provinces, relation: \"source of immigration\", object: Germans (or German immigrants). Could be: subject: German provinces, relation: \"origin of\", object: German immigrants. subject_type: region, object_type: ethnic group.\n\n5. \"Germans comprised another 25% of New York's population by 1860.\" So subject: Germans, relation: \"share of population\", object: \"25%\". qualifiers: point in time 1860, location New York City.\n\nWe need to include \"New York\" as city.\n\nLet's craft triplets:\n\nTriplet1:\nsubject: Great Irish Famine\nrelation: caused influx of\nobject: Irish immigrants\nqualifiers: none\nsubject_type: historical event\nobject_type: ethnic group\n\nTriplet2:\nsubject: Irish immigrants\nrelation: population in\nobject: New York City\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1860\"},{\"relation\":\"quantity\",\"object\":\"200,000\"}]\nsubject_type: ethnic group\nobject_type: city\n\nTriplet3:\nsubject: Irish immigrants\nrelation: share of population\nobject: \"quarter\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1860\"},{\"relation\":\"percentage\",\"object\":\"25%\"}] Actually quarter is 25%. Could use \"percentage\" qualifier. But object is \"quarter of the city's population\". Maybe object_type: proportion. We'll set object: \"quarter\". object_type: proportion.\n\nTriplet4:\nsubject: German provinces\nrelation: source of immigration\nobject: German immigrants\nqualifiers: []\nsubject_type: region\nobject_type: ethnic group\n\nTriplet5:\nsubject: Germans\nrelation: share of population\nobject: \"25%\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1860\"}]\nsubject_type: ethnic group\nobject_type: percentage\n\nWe also might include \"German immigrants\" as same as Germans.\n\nMake sure each triplet includes subject_type and object_type.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1008,
+      "total_tokens": 2176,
+      "completion_tokens": 1168,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Great Irish Famine\",\n            \"relation\": \"caused influx of\",\n            \"object\": \"Irish immigrants\",\n            \"qualifiers\": [],\n            \"subject_type\": \"historical event\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"Irish immigrants\",\n            \"relation\": \"population in\",\n            \"object\": \"New York City\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1860\"\n                },\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"200,000\"\n                }\n            ],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Irish immigrants\",\n            \"relation\": \"share of population\",\n            \"object\": \"quarter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1860\"\n                },\n                {\n                    \"relation\": \"percentage\",\n                    \"object\": \"25%\"\n                }\n            ],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"proportion\"\n        },\n        {\n            \"subject\": \"German provinces\",\n            \"relation\": \"source of immigration\",\n            \"object\": \"German immigrants\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"Germans\",\n            \"relation\": \"share of population\",\n            \"object\": \"25%\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1860\"\n                }\n            ],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"percentage\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Great Irish Famine",
+        "relation": "caused influx of",
+        "object": "Irish immigrants",
+        "qualifiers": [],
+        "subject_type": "historical event",
+        "object_type": "ethnic group"
+      },
+      {
+        "subject": "Irish immigrants",
+        "relation": "population in",
+        "object": "New York City",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1860"
+          },
+          {
+            "relation": "quantity",
+            "object": "200,000"
+          }
+        ],
+        "subject_type": "ethnic group",
+        "object_type": "city"
+      },
+      {
+        "subject": "Irish immigrants",
+        "relation": "share of population",
+        "object": "quarter",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1860"
+          },
+          {
+            "relation": "percentage",
+            "object": "25%"
+          }
+        ],
+        "subject_type": "ethnic group",
+        "object_type": "proportion"
+      },
+      {
+        "subject": "German provinces",
+        "relation": "source of immigration",
+        "object": "German immigrants",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "ethnic group"
+      },
+      {
+        "subject": "Germans",
+        "relation": "share of population",
+        "object": "25%",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1860"
+          }
+        ],
+        "subject_type": "ethnic group",
+        "object_type": "percentage"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1008,
+    "total_tokens": 2176,
+    "completion_tokens": 1168,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 589,
+    "output_tokens_est": 491
+  },
+  "attempts": 1,
+  "latency_s": 14.37891373000457,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:23:05.717908+00:00",
+  "cache_key": "88edf3cc288b3448b3407bde15c1101d"
+}

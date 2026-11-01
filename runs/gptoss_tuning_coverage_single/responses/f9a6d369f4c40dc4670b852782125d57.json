@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "8b1ee1e50733e1c9",
+    "input_hash": "240843b438aafd6022b81f5da48980f67999705aa8183d8061446498770ee1da",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-203b2a19aa86807c4f6b70da72453f52",
+    "object": "chat.completion",
+    "created": 1791504857,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"H&SJ\",\n            \"relation\": \"finished\",\n            \"object\": \"Hannibal Bridge\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"July 1869\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Kansas City\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"bridge\"\n        },\n        {\n            \"subject\": \"Hannibal Bridge\",\n            \"relation\": \"first bridge to cross\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Hannibal Bridge\",\n            \"relation\": \"connected to\",\n            \"object\": \"Kansas Pacific trains\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"train service\"\n        },\n        {\n            \"subject\": \"Kansas Pacific\",\n            \"relation\": \"built\",\n            \"object\": \"Denver Pacific Railway\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"railway\"\n        },\n        {\n            \"subject\": \"Denver Pacific Railway\",\n            \"relation\": \"connects to\",\n            \"object\": \"Union Pacific\",\n            \"qualifiers\": [],\n            \"subject_type\": \"railway\",\n            \"object_type\": \"railway\"\n        },\n        {\n            \"subject\": \"Kansas Pacific\",\n            \"relation\": \"completed\",\n            \"object\": \"Atlantic to Pacific United States railroad\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"August 1870\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Strasburg, Colorado\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"railroad\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text. Identify entities: First Transcontinental Railroad (maybe a concept), Civil War, Missouri (state), H&SJ (likely \"Kansas City, Cameron & something\"? Actually H&SJ maybe \"Kansas City, Hannibal & St. Joseph\"? Not sure, but treat as entity \"H&SJ\"), Hannibal Bridge, Kansas City, Missouri River, Kansas Pacific, Denver, Denver Pacific Railway, Union Pacific, Kansas Pacific (again), Strasburg, Colorado, Atlantic to Pacific United States railroad (maybe \"first true Atlantic to Pacific United States railroad\").\n\nWe need to capture facts:\n\n- Several years after the end of the Civil War -> time relation: \"end of the Civil War\" is event. Could have triplet: \"Civil War\", \"end date\", maybe not explicit. The phrase \"Several years after the end of the Civil War\" is a temporal phrase but not a concrete fact about a date. Might not need a triplet.\n\n- \"the competing railroads coming from Missouri finally realized their initial strategic advantage and a building boom ensued.\" Could have triplet: \"competing railroads coming from Missouri\", \"realized\", \"initial strategic advantage\". Hard to capture.\n\n- \"In July 1869, the H&SJ finished the Hannick Bridge in Kansas City which was the first bridge to cross the Missouri River.\" So triplet: H&SJ (subject) - \"finished\" - Hannibal Bridge (object). qualifiers: point in time July 1869, location Kansas City. Also \"first bridge to cross the Missouri River\" could be a property of Hannibal Bridge: \"first bridge to cross\" relation? Could be \"first bridge to cross\" as object? Might be \"bridge\" with property \"first to cross\" but we can create triplet: Hannibal Bridge - \"first bridge to cross\" - Missouri River. But relation maybe \"first bridge to cross\" not standard. Could use \"first to cross\" but we need a Wikidata style predicate. Could use \"first bridge over\" maybe. We'll use \"first bridge to cross\" as relation.\n\n- \"This in turn connected to Kansas Pacific trains going from Kansas City to Denver\" So triplet: Hannibal Bridge - \"connected to\" - Kansas Pacific trains (or Kansas Pacific). Or \"Kansas Pacific trains\" is subject? Actually \"connected to Kansas Pacific trains\". So we can have: Hannibal Bridge - \"connected to\" - Kansas Pacific trains. Qualifier: route Kansas City to Denver? Might be separate.\n\n- \"which in turn had built the Denver Pacific Railway connecting to the Union Pacific.\" So Kansas Pacific trains had built the Denver Pacific Railway? Actually \"which in turn had built the Denver Pacific Railway connecting to the Union Pacific.\" The antecedent \"which\" refers to Kansas Pacific trains? Or Kansas Pacific? Probably Kansas Pacific built Denver Pacific Railway. So triplet: Kansas Pacific - \"built\" - Denver Pacific Railway. Qualifier: connecting to Union Pacific (maybe relation \"connects to\").\n\n- \"In August 1870, the Kansas Pacific drove the last spike connecting to the Denver Pacific line at Strasburg, Colorado and the first true Atlantic to Pacific United States railroad was completed.\" So triplet: Kansas Pacific - \"drove the last spike\" - (event) maybe \"completion of first true Atlantic to Pacific United States railroad\". Could be: Kansas Pacific - \"completed\" - Atlantic to Pacific United States railroad. Qualifiers: point in time August 1870, location Strasburg, Colorado.\n\nAlso \"first true Atlantic to Pacific United States railroad\" is a concept.\n\nWe need subject_type and object_type. For entities: H&SJ (maybe organization, railroad company). Hannibal Bridge (bridge). Kansas City (city). Missouri River (river). Kansas Pacific (railroad company). Denver Pacific Railway (railroad). Union Pacific (railroad). Strasburg, Colorado (city). Atlantic to Pacific United States railroad (railroad). Civil War (war). etc.\n\nWe need to include qualifiers as list.\n\nLet's craft triplets:\n\n1. H&SJ - \"finished\" - Hannibal Bridge. qualifiers: point in time July 1869, location Kansas City. subject_type: organization (railroad company). object_type: bridge.\n\n2. Hannibal Bridge - \"first bridge to cross\" - Missouri River. qualifiers: none. subject_type: bridge. object_type: river.\n\n3. Hannibal Bridge - \"connected to\" - Kansas Pacific trains. qualifiers: none. subject_type: bridge. object_type: train service? maybe \"rail service\". We'll use \"train service\".\n\n4. Kansas Pacific - \"built\" - Denver Pacific Railway. qualifiers: none. subject_type: organization (railroad). object_type: railway.\n\n5. Denver Pacific Railway - \"connects to\" - Union Pacific. qualifiers: none. subject_type: railway. object_type: railway.\n\n6. Kansas Pacific - \"drove the last spike\" - (event) maybe \"completion of Atlantic to Pacific United States railroad\". But better: Kansas Pacific - \"completed\" - Atlantic to Pacific United States railroad. qualifiers: point in time August 1870, location Strasburg, Colorado.\n\n7. Atlantic to Pacific United States railroad - \"first true\" - (maybe attribute). Could be \"first true Atlantic to Pacific United States railroad\" is a description, not a relation.\n\nWe might also include: \"first true Atlantic to Pacific United States railroad\" - \"status\" - \"completed\". But we already captured.\n\nAlso maybe \"Kansas Pacific\" - \"connected to\" - Denver Pacific line at Strasburg, Colorado. But we have.\n\nLet's ensure qualifiers format: list of dicts with relation and object.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1716,
+      "total_tokens": 3321,
+      "completion_tokens": 1605,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"H&SJ\",\n            \"relation\": \"finished\",\n            \"object\": \"Hannibal Bridge\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"July 1869\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Kansas City\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"bridge\"\n        },\n        {\n            \"subject\": \"Hannibal Bridge\",\n            \"relation\": \"first bridge to cross\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Hannibal Bridge\",\n            \"relation\": \"connected to\",\n            \"object\": \"Kansas Pacific trains\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"train service\"\n        },\n        {\n            \"subject\": \"Kansas Pacific\",\n            \"relation\": \"built\",\n            \"object\": \"Denver Pacific Railway\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"railway\"\n        },\n        {\n            \"subject\": \"Denver Pacific Railway\",\n            \"relation\": \"connects to\",\n            \"object\": \"Union Pacific\",\n            \"qualifiers\": [],\n            \"subject_type\": \"railway\",\n            \"object_type\": \"railway\"\n        },\n        {\n            \"subject\": \"Kansas Pacific\",\n            \"relation\": \"completed\",\n            \"object\": \"Atlantic to Pacific United States railroad\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"August 1870\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Strasburg, Colorado\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"railroad\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "H&SJ",
+        "relation": "finished",
+        "object": "Hannibal Bridge",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "July 1869"
+          },
+          {
+            "relation": "location",
+            "object": "Kansas City"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "bridge"
+      },
+      {
+        "subject": "Hannibal Bridge",
+        "relation": "first bridge to cross",
+        "object": "Missouri River",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "river"
+      },
+      {
+        "subject": "Hannibal Bridge",
+        "relation": "connected to",
+        "object": "Kansas Pacific trains",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "train service"
+      },
+      {
+        "subject": "Kansas Pacific",
+        "relation": "built",
+        "object": "Denver Pacific Railway",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "railway"
+      },
+      {
+        "subject": "Denver Pacific Railway",
+        "relation": "connects to",
+        "object": "Union Pacific",
+        "qualifiers": [],
+        "subject_type": "railway",
+        "object_type": "railway"
+      },
+      {
+        "subject": "Kansas Pacific",
+        "relation": "completed",
+        "object": "Atlantic to Pacific United States railroad",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "August 1870"
+          },
+          {
+            "relation": "location",
+            "object": "Strasburg, Colorado"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "railroad"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1716,
+    "total_tokens": 3321,
+    "completion_tokens": 1605,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 619,
+    "output_tokens_est": 527
+  },
+  "attempts": 1,
+  "latency_s": 19.544949078001082,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:14:36.860930+00:00",
+  "cache_key": "f9a6d369f4c40dc4670b852782125d57"
+}

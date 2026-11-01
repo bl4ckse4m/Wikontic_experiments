@@ -1,0 +1,160 @@
+{
+  "task": {
+    "input_id": "e0b6384b39c50246",
+    "input_hash": "68037ccc4d998d0c94eea9e26fd5c956c447527d67cddd1c07d414c9968a6e40",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-5db48297ab2ec379a7289c8fe5e2674c",
+    "object": "chat.completion",
+    "created": 1791513926,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"instance of\",\n            \"object\": \"museum\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"museum\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"located in\",\n            \"object\": \"Tralee\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Ireland\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"located in\",\n            \"object\": \"County Kerry\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Ireland\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"based in\",\n            \"object\": \"Ashe Memorial Hall\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"area\",\n                    \"object\": \"centre of Tralee\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"purpose\",\n            \"object\": \"collect, record, preserve and display material heritage of County Kerry\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"goal\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"designated repository for\",\n            \"object\": \"archaeological artefacts\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"legislation\",\n                    \"object\": \"National Monuments Act (1994)\"\n                },\n                {\n                    \"relation\": \"legislation\",\n                    \"object\": \"National Cultural Institutions Act (1997)\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"County Kerry\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"artefact\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text. Identify entities: Kerry County Museum (subject). Relations: instance of museum, location, based in, aim, designated repository, etc.\n\nWe also need subject_type and object_type.\n\nLet's parse sentences:\n\n\"Kerry County Museum is a museum located in Tralee, County Kerry in Ireland.\"\n\nTriplet: (Kerry County Museum, instance of, museum) maybe relation \"instance of\" or \"type\". Use \"type\" or \"instance of\". We'll use \"instance of\". object_type: \"museum\". subject_type: \"institution\" maybe \"museum\". We'll set subject_type \"museum\". object_type \"museum\"? Actually object is \"museum\" which is a class. So object_type \"institution\". But we can set object_type \"museum\". Let's follow example: they used occupation etc. For \"museum\" as type, object_type \"museum\". Subject_type \"museum\"? Could be \"institution\". Let's set subject_type \"museum\". object_type \"museum\". Might be okay.\n\nAlso location: (Kerry County Museum, location, Tralee) with qualifiers maybe \"country\" Ireland. Could have separate: location in city, location in country. We'll create two: location city and location country.\n\nTriplet: (Kerry County Museum, located in, Tralee) relation \"located in\". object_type \"city\". qualifiers maybe \"country\" Ireland. But qualifiers must be attached to triplet. So we can have qualifier relation \"country\" object \"Ireland\". So main triplet: subject Kerry County Museum, relation \"located in\", object \"Tralee\". qualifiers: [{\"relation\":\"country\",\"object\":\"Ireland\"}]. subject_type \"museum\". object_type \"city\".\n\nAlso \"County Kerry\" is a county in Ireland. Could also have location in county. Could add another: (Kerry County Museum, located in, County Kerry) with qualifier country Ireland. But maybe redundant.\n\nNext: \"The museum is based in the Ashe Memorial Hall in the centre of Tralee.\"\n\nTriplet: (Kerry County Museum, based in, Ashe Memorial Hall). object_type \"building\". qualifiers: maybe \"location\" \"centre of Tralee\". Could add qualifier relation \"located in\" object \"centre of Tralee\". But \"centre of Tralee\" is a location. We'll add qualifier \"part of\" \"Tralee\". Or \"area\" \"centre\". Let's do qualifier: {\"relation\":\"area\",\"object\":\"centre of Tralee\"}.\n\nSubject_type museum, object_type building.\n\nNext: \"The aim of the museum is to collect, record, preserve and display the material heritage of Co. Kerry.\"\n\nTriplet: (Kerry County Museum, aim, \"collect, record, preserve and display the material heritage of Co. Kerry\") maybe split into purpose. Could have relation \"purpose\" object \"collect, record, preserve and display material heritage of County Kerry\". object_type \"activity\". Or we could create separate: (Kerry County Museum, collects, material heritage of County Kerry). But the sentence says aim is to collect etc. We'll create a triplet: (Kerry County Museum, purpose, \"collect, record, preserve and display material heritage of County Kerry\") with object_type \"goal\". Might be okay.\n\nAlso \"material heritage of Co. Kerry\" is object. Could have relation \"material heritage of\" object \"County Kerry\". But we can keep as part of purpose.\n\nNext: \"Under the National Monuments Act (1994) and the National Cultural Institutions Act (1997), it is a designated repository for archaeological artefacts in Co. Kerry.\"\n\nTriplet: (Kerry County Museum, designated repository for, archaeological artefacts) with qualifiers: {\"relation\":\"legislation\",\"object\":\"National Monuments Act (1994)\"}, {\"relation\":\"legislation\",\"object\":\"National Cultural Institutions Act (1997)\"}, {\"relation\":\"location\",\"object\":\"County Kerry\"}.\n\nSubject_type museum, object_type \"archaeological artefacts\" (type: artefact). Good.\n\nAlso could have relation \"legal basis\" etc.\n\nNow compile list.\n\nMake sure each dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nLet's craft JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1027,
+      "total_tokens": 2364,
+      "completion_tokens": 1337,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"instance of\",\n            \"object\": \"museum\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"museum\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"located in\",\n            \"object\": \"Tralee\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Ireland\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"located in\",\n            \"object\": \"County Kerry\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Ireland\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"based in\",\n            \"object\": \"Ashe Memorial Hall\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"area\",\n                    \"object\": \"centre of Tralee\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"purpose\",\n            \"object\": \"collect, record, preserve and display material heritage of County Kerry\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"goal\"\n        },\n        {\n            \"subject\": \"Kerry County Museum\",\n            \"relation\": \"designated repository for\",\n            \"object\": \"archaeological artefacts\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"legislation\",\n                    \"object\": \"National Monuments Act (1994)\"\n                },\n                {\n                    \"relation\": \"legislation\",\n                    \"object\": \"National Cultural Institutions Act (1997)\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"County Kerry\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"artefact\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Kerry County Museum",
+        "relation": "instance of",
+        "object": "museum",
+        "qualifiers": [],
+        "subject_type": "museum",
+        "object_type": "museum"
+      },
+      {
+        "subject": "Kerry County Museum",
+        "relation": "located in",
+        "object": "Tralee",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "Ireland"
+          }
+        ],
+        "subject_type": "museum",
+        "object_type": "city"
+      },
+      {
+        "subject": "Kerry County Museum",
+        "relation": "located in",
+        "object": "County Kerry",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "Ireland"
+          }
+        ],
+        "subject_type": "museum",
+        "object_type": "county"
+      },
+      {
+        "subject": "Kerry County Museum",
+        "relation": "based in",
+        "object": "Ashe Memorial Hall",
+        "qualifiers": [
+          {
+            "relation": "area",
+            "object": "centre of Tralee"
+          }
+        ],
+        "subject_type": "museum",
+        "object_type": "building"
+      },
+      {
+        "subject": "Kerry County Museum",
+        "relation": "purpose",
+        "object": "collect, record, preserve and display material heritage of County Kerry",
+        "qualifiers": [],
+        "subject_type": "museum",
+        "object_type": "goal"
+      },
+      {
+        "subject": "Kerry County Museum",
+        "relation": "designated repository for",
+        "object": "archaeological artefacts",
+        "qualifiers": [
+          {
+            "relation": "legislation",
+            "object": "National Monuments Act (1994)"
+          },
+          {
+            "relation": "legislation",
+            "object": "National Cultural Institutions Act (1997)"
+          },
+          {
+            "relation": "location",
+            "object": "County Kerry"
+          }
+        ],
+        "subject_type": "museum",
+        "object_type": "artefact"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1027,
+    "total_tokens": 2364,
+    "completion_tokens": 1337,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 705,
+    "output_tokens_est": 607
+  },
+  "attempts": 1,
+  "latency_s": 15.895728357005282,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:45:42.659808+00:00",
+  "cache_key": "c4e3f7a10ab9dd44bc185039260011ad"
+}

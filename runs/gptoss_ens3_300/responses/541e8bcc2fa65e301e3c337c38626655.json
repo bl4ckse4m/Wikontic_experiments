@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "290613fcfd17cca8",
+    "input_hash": "e9e428d6bad5bd293a3e1db1bb57ea03c00c2b7c72fcd1e3c6c132244b4585e6",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-432df226724a5e94c6dfaec0c4ea1ce0",
+    "object": "chat.completion",
+    "created": 1791549932,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1927\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"date of death\",\n            \"object\": \"2009\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"occupation\",\n            \"object\": \"writer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"occupation\",\n            \"object\": \"screenwriter\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"France\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Paris\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"mother's nationality\",\n            \"object\": \"French\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"nationality\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"father's nationality\",\n            \"object\": \"Italian\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"nationality\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Remo Forlani\\n\\nRemo Forlani (1927–2009) was a French writer and screenwriter born in Paris to a French mother and an Italian immigrant father.\"\n\nEntities: Remo Forlani (human). Facts:\n\n- date of birth: 1927? Actually range: (1927–2009) gives birth year 1927, death year 2009. So date of birth 1927 (could be year). Use \"1927\". Date of death 2009.\n\n- nationality? \"was a French writer and screenwriter\". So occupation: writer, screenwriter. Also \"French\" as nationality or \"country of citizenship\". Could extract relation \"country of citizenship\" = France (or \"France\"). Or \"nationality\" = French.\n\n- place of birth: born in Paris. So relation \"place of birth\" = Paris.\n\n- mother nationality: French mother. Might create relation \"mother\" = (unspecified name) but we have mother is French. Probably \"mother's nationality\" not typical. Might capture \"parent\" relation but we don't have name. Could create \"mother's nationality\" but not standard. Usually we could have \"mother\" entity unknown. The text: \"to a French mother and an Italian immigrant father.\" Could produce two relations: \"mother's nationality\" or \"father's nationality\". But they ask for subject, relation, object that are named entities or concepts. \"French mother\" is not a named entity, but concept \"French mother\"? Could treat as \"mother\" (human) with qualifier \"nationality\" French. But we lack name. Might skip.\n\nBetter to include: \"father's nationality\" = Italian. But father is immigrant, maybe \"father\" relation with qualifier \"occupation\"? Not.\n\nProbably only extract clear facts: date of birth, date of death, occupation writer, occupation screenwriter, country of citizenship French, place of birth Paris.\n\nAlso \"Italian immigrant father\": could add relation \"father's nationality\" = Italian (object type \"nationality\").\n\nBut maybe they expect \"father\" relation with object \"Italian immigrant\". Could be \"father\" = \"Italian immigrant\". Let's produce.\n\nSimilarly \"mother\" = \"French\". We'll include.\n\nWe need subject_type \"human\", object_type appropriate: date, profession, country, city, etc.\n\nLet's craft triplets:\n\n1. subject Remo Forlani, relation \"date of birth\", object \"1927\", qualifiers [], subject_type human, object_type date.\n\n2. subject Remo Forlani, relation \"date of death\", object \"2009\", qualifiers [], object_type date.\n\n3. subject Remo Forlani, relation \"occupation\", object \"writer\", qualifiers [], object_type profession.\n\n4. subject Remo Forlani, relation \"occupation\", object \"screenwriter\", qualifiers [], object_type profession.\n\n5. subject Remo Forlani, relation \"country of citizenship\", object \"France\", qualifiers [], object_type country.\n\n6. subject Remo Forlani, relation \"place of birth\", object \"Paris\", qualifiers [], object_type city.\n\n7. subject Remo Forlani, relation \"mother\", object \"French mother\". But object_type maybe \"human\". But we don't have name. Could set object \"French mother\". But better to have \"mother\" relation with qualifier \"nationality\" French. However qualifiers must be attached to triplet. So we could have: subject Remo Forlani, relation \"mother\", object \"unknown\". Not good.\n\nMaybe they want \"mother's nationality\" relation.\n\nLet's do: subject Remo Forlani, relation \"mother's nationality\", object \"French\". object_type nationality.\n\nSimilarly \"father's nationality\" = Italian.\n\nBut is there a standard relation? Not sure. Could use \"father's nationality\". Accept.\n\nAdd qualifiers none.\n\nThus:\n\n7. subject Remo Forlani, relation \"mother's nationality\", object \"French\", object_type nationality.\n\n8. subject Remo Forlani, relation \"father's nationality\", object \"Italian\", object_type nationality.\n\nAlso father is immigrant, could add qualifier \"immigrant\" = true? Could use qualifier polarity? Not needed.\n\nWe'll produce these.\n\nCheck qualifiers format: list of dicts.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1623,
+      "total_tokens": 2953,
+      "completion_tokens": 1330,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1927\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"date of death\",\n            \"object\": \"2009\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"occupation\",\n            \"object\": \"writer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"occupation\",\n            \"object\": \"screenwriter\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"France\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Paris\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"mother's nationality\",\n            \"object\": \"French\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"nationality\"\n        },\n        {\n            \"subject\": \"Remo Forlani\",\n            \"relation\": \"father's nationality\",\n            \"object\": \"Italian\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"nationality\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Remo Forlani",
+        "relation": "date of birth",
+        "object": "1927",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Remo Forlani",
+        "relation": "date of death",
+        "object": "2009",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Remo Forlani",
+        "relation": "occupation",
+        "object": "writer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Remo Forlani",
+        "relation": "occupation",
+        "object": "screenwriter",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Remo Forlani",
+        "relation": "country of citizenship",
+        "object": "France",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Remo Forlani",
+        "relation": "place of birth",
+        "object": "Paris",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Remo Forlani",
+        "relation": "mother's nationality",
+        "object": "French",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "nationality"
+      },
+      {
+        "subject": "Remo Forlani",
+        "relation": "father's nationality",
+        "object": "Italian",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "nationality"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1623,
+    "total_tokens": 2953,
+    "completion_tokens": 1330,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 579,
+    "output_tokens_est": 486
+  },
+  "attempts": 1,
+  "latency_s": 16.103120151004987,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:45:49.133660+00:00",
+  "cache_key": "541e8bcc2fa65e301e3c337c38626655"
+}

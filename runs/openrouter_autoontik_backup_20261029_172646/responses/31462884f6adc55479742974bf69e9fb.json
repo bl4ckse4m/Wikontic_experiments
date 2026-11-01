@@ -1,0 +1,168 @@
+{
+  "task": {
+    "input_id": "35eefbdd15997f34",
+    "input_hash": "36bc4d974cfe37ec7289fa3dceb61c6c90ae66fbec8d1459f052b58957fd1b72",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793199198-mc0OGxisJUM60jMf5pN0",
+    "object": "chat.completion",
+    "created": 1793199198,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Near AI",
+    "system_fingerprint": "vllm-0.31.0-a60a7883",
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"date of birth\",\n            \"object\": \"January 18, 1958\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"date of death\",\n            \"object\": \"May 24, 1998\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"first woman to\",\n            \"object\": \"reach summit of Mount Everest without bottled oxygen\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"May 22, 1998\",\n                    \"object_type\": \"date\"\n                },\n                {\n                    \"relation\": \"country of citizenship\",\n                    \"object\": \"United States\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"achievement\"\n        },\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"died during\",\n            \"object\": \"descent of Mount Everest\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"May 24, 1998\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nEntities: Francys Arsentiev (human). Date of birth: January 18, 1958. Date of death: May 24, 1998. She became the first woman from the United States to reach the summit of Mount Everest without the aid of bottled oxygen, on May 22, 1998.\n\nSo relations: \"first woman from United States to reach summit of Mount Everest without bottled oxygen\". We need break into multiple facts.\n\nSubject: Francys Arsentiev. Relation: \"country of citizenship\" maybe? Not needed. But we need \"first woman from United States to reach summit of Mount Everest\". Could be expressed as:\n\n- \"first woman\" is a qualifier? Could be \"first\" as qualifier on \"reach summit\". But we can capture as \"first to\" relation? In Wikidata there is \"first person to\" property. Use relation \"first to\" maybe.\n\nBetter: Triplet: (Francys Arsentiev, \"first person to\", \"reach summit of Mount Everest without bottled oxygen\") with qualifier \"gender\" female? But we need \"first woman from United States\". Could break into:\n\n- (Francys Arsentiev, \"first woman to\", \"reach summit of Mount Everest without bottled oxygen\") with qualifier \"country of citizenship\" United States.\n\nBut we need separate entity for \"Mount Everest\". Also \"summit of Mount Everest\" is location.\n\nWe also have date of achievement: May 22, 1998.\n\nSo we can have:\n\nTriplet 1: subject Francys Arsentiev, relation \"date of birth\", object \"January 18, 1958\", types human/date.\n\nTriplet 2: subject Francys Arsentiev, relation \"date of death\", object \"May 24, 1998\".\n\nTriplet 3: subject Francys Arsentiev, relation \"first woman to\", object \"reach summit of Mount Everest without bottled oxygen\", qualifiers: point in time May 22 1998, country United States.\n\nBut object type: maybe \"mountaineering achievement\" or \"event\". Use \"mountaineering achievement\". We'll set object_type \"achievement\".\n\nTriplet 4: subject Francys Arsentiev, relation \"cause of death\", object \"fall during descent of Mount Everest\"? The text says \"died during the descent.\" Could capture as \"died during descent of Mount Everest\". So relation \"death place\" maybe? Actually \"died during the descent\" not location. Could use \"death circumstance\". Use relation \"died during\". object \"descent of Mount Everest\". Qualifier maybe \"date\" May 24 1998.\n\nSimplify: (Francys Arsentiev, \"died during\", \"descent of Mount Everest\") with qualifier point in time May 24 1998.\n\nAlso need \"summit of Mount Everest\" as object maybe separate: (Mount Everest, \"has summit\", \"summit\") but not needed.\n\nWe also need \"first woman from United States\". Could add separate triplet: (Francys Arsentiev, \"country of citizenship\", \"United States\") with subject_type human, object_type country.\n\nAlso (Francys Arsentiev, \"gender\", \"female\") maybe not required.\n\nBut we should include.\n\nThus final JSON list.\n\nMake sure each dict includes \"qualifiers\": list possibly empty. Provide \"subject_type\" and \"object_type\". For date objects type \"date\". For country type \"country\". For achievement type \"achievement\". For death circumstance maybe \"event\". Use \"event\". For \"descent of Mount Everest\" maybe \"event\". Use object_type \"event\". For \"reach summit of Mount Everest without bottled oxygen\" maybe \"achievement\". Good.\n\nNow produce JSON with key \"triplets\": list.\n\nLet's craft.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nEntities: Francys Arsentiev (human). Date of birth: January 18, 1958. Date of death: May 24, 1998. She became the first woman from the United States to reach the summit of Mount Everest without the aid of bottled oxygen, on May 22, 1998.\n\nSo relations: \"first woman from United States to reach summit of Mount Everest without bottled oxygen\". We need break into multiple facts.\n\nSubject: Francys Arsentiev. Relation: \"country of citizenship\" maybe? Not needed. But we need \"first woman from United States to reach summit of Mount Everest\". Could be expressed as:\n\n- \"first woman\" is a qualifier? Could be \"first\" as qualifier on \"reach summit\". But we can capture as \"first to\" relation? In Wikidata there is \"first person to\" property. Use relation \"first to\" maybe.\n\nBetter: Triplet: (Francys Arsentiev, \"first person to\", \"reach summit of Mount Everest without bottled oxygen\") with qualifier \"gender\" female? But we need \"first woman from United States\". Could break into:\n\n- (Francys Arsentiev, \"first woman to\", \"reach summit of Mount Everest without bottled oxygen\") with qualifier \"country of citizenship\" United States.\n\nBut we need separate entity for \"Mount Everest\". Also \"summit of Mount Everest\" is location.\n\nWe also have date of achievement: May 22, 1998.\n\nSo we can have:\n\nTriplet 1: subject Francys Arsentiev, relation \"date of birth\", object \"January 18, 1958\", types human/date.\n\nTriplet 2: subject Francys Arsentiev, relation \"date of death\", object \"May 24, 1998\".\n\nTriplet 3: subject Francys Arsentiev, relation \"first woman to\", object \"reach summit of Mount Everest without bottled oxygen\", qualifiers: point in time May 22 1998, country United States.\n\nBut object type: maybe \"mountaineering achievement\" or \"event\". Use \"mountaineering achievement\". We'll set object_type \"achievement\".\n\nTriplet 4: subject Francys Arsentiev, relation \"cause of death\", object \"fall during descent of Mount Everest\"? The text says \"died during the descent.\" Could capture as \"died during descent of Mount Everest\". So relation \"death place\" maybe? Actually \"died during the descent\" not location. Could use \"death circumstance\". Use relation \"died during\". object \"descent of Mount Everest\". Qualifier maybe \"date\" May 24 1998.\n\nSimplify: (Francys Arsentiev, \"died during\", \"descent of Mount Everest\") with qualifier point in time May 24 1998.\n\nAlso need \"summit of Mount Everest\" as object maybe separate: (Mount Everest, \"has summit\", \"summit\") but not needed.\n\nWe also need \"first woman from United States\". Could add separate triplet: (Francys Arsentiev, \"country of citizenship\", \"United States\") with subject_type human, object_type country.\n\nAlso (Francys Arsentiev, \"gender\", \"female\") maybe not required.\n\nBut we should include.\n\nThus final JSON list.\n\nMake sure each dict includes \"qualifiers\": list possibly empty. Provide \"subject_type\" and \"object_type\". For date objects type \"date\". For country type \"country\". For achievement type \"achievement\". For death circumstance maybe \"event\". Use \"event\". For \"descent of Mount Everest\" maybe \"event\". Use object_type \"event\". For \"reach summit of Mount Everest without bottled oxygen\" maybe \"achievement\". Good.\n\nNow produce JSON with key \"triplets\": list.\n\nLet's craft.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1419,
+      "completion_tokens": 1195,
+      "total_tokens": 2614,
+      "cost": 0.0002211,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 48,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0002211,
+        "upstream_inference_prompt_cost": 4.185e-05,
+        "upstream_inference_completions_cost": 0.00017925
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 785,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"date of birth\",\n            \"object\": \"January 18, 1958\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"date of death\",\n            \"object\": \"May 24, 1998\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"first woman to\",\n            \"object\": \"reach summit of Mount Everest without bottled oxygen\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"May 22, 1998\",\n                    \"object_type\": \"date\"\n                },\n                {\n                    \"relation\": \"country of citizenship\",\n                    \"object\": \"United States\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"achievement\"\n        },\n        {\n            \"subject\": \"Francys Arsentiev\",\n            \"relation\": \"died during\",\n            \"object\": \"descent of Mount Everest\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"May 24, 1998\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Francys Arsentiev",
+        "relation": "date of birth",
+        "object": "January 18, 1958",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Francys Arsentiev",
+        "relation": "date of death",
+        "object": "May 24, 1998",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Francys Arsentiev",
+        "relation": "country of citizenship",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Francys Arsentiev",
+        "relation": "first woman to",
+        "object": "reach summit of Mount Everest without bottled oxygen",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "May 22, 1998"
+          },
+          {
+            "relation": "country of citizenship",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "achievement"
+      },
+      {
+        "subject": "Francys Arsentiev",
+        "relation": "died during",
+        "object": "descent of Mount Everest",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "May 24, 1998"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "event"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1419,
+    "completion_tokens": 1195,
+    "total_tokens": 2614,
+    "cost": 0.0002211,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 48,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0002211,
+      "upstream_inference_prompt_cost": 4.185e-05,
+      "upstream_inference_completions_cost": 0.00017925
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 785,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 598,
+    "output_tokens_est": 471
+  },
+  "attempts": 1,
+  "latency_s": 27.161589290000848,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T14:53:44.894962+00:00",
+  "cache_key": "31462884f6adc55479742974bf69e9fb"
+}

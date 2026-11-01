@@ -1,0 +1,156 @@
+{
+  "task": {
+    "input_id": "dc262cb4bf0baf9f",
+    "input_hash": "36a940c34928d67706d401f8e7c16ed4ffa100bd6185d62ff8fe46b2b850de0f",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793212799-DSdNpbtrQVL0CKEYLhSq",
+    "object": "chat.completion",
+    "created": 1793212799,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Venice",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Imperial administration of the Caucasus\",\n            \"relation\": \"reorganized\",\n            \"object\": \"1846\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative body\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Georgia-Imeretia Governorate\",\n            \"relation\": \"dissolved\",\n            \"object\": \"1846\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Georgia-Imeretia Governorate\",\n            \"relation\": \"successor\",\n            \"object\": \"Tiflis Governorate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1846\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Georgia-Imeretia Governorate\",\n            \"relation\": \"successor\",\n            \"object\": \"Kutais Governorate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1846\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Georgia-Imeretia Governorate\n\nIn 1846 the Imperial administration of the Caucasus was reorganized and the Georgia-Imeretia Governorate was abolished, with its territory forming the new governorates of Tiflis and Kutais.\"\n\nWe have entities: Georgia-Imeretia Governorate (a governorate), Imperial administration of the Caucasus (maybe an administrative body), Tiflis (city/governorate), Kutais (city/governorate). Also date 1846.\n\nFacts:\n\n1. In 1846, the Imperial administration of the Caucasus was reorganized.\n=> subject: Imperial administration of the Caucasus, relation: \"reorganization\", maybe \"reorganized\". object: (some event) but we can treat as relation \"reorganized\" with qualifier point in time 1846. But object? Could be \"Imperial administration of the Caucasus\" reorganized (no object). Might need to express as \"reorganized\" with object \"Imperial administration of the Caucasus\"? Not typical. Better: \"Imperial administration of the Caucasus\" \"reorganized\" (object maybe \"administration\" itself). Could use relation \"reorganization date\". But guidelines: relation connects subject and object. So we could have subject: Imperial administration of the Caucasus, relation: \"reorganization date\", object: \"1846\". That seems okay: object is a date.\n\n2. The Georgia-Imeretia Governorate was abolished.\n=> subject: Georgia-Imeretia Governorate, relation: \"dissolved\", object: maybe \"abolishment\". Could use relation \"dissolved\" with object \"Georgia-Imeretia Governorate\"? No, subject is the governorate, object could be \"abolition\". But we can use relation \"abolished\" with object \"Georgia-Imeretia Governorate\"? That would invert. Better: subject: Georgia-Imeretia Governorate, relation: \"status\", object: \"abolished\". But maybe use \"dissolved\" relation with object \"Georgia-Imeretia Governorate\"? Actually typical Wikidata: \"dissolved, abolished\" is a property linking entity to date. So we can have relation \"dissolved\" with object \"1846\". But we also have that its territory formed new governorates.\n\nThus we can have:\n\n- Georgia-Imeretia Governorate dissolved (abolished) in 1846.\n\n- Its territory formed the new governorates of Tiflis and Kutais.\n\nThus we need two separate triplets for Tiflis and Kutais.\n\nTriplet: Georgia-Imeretia Governorate, relation: \"successor\", object: Tiflis Governorate? The text says \"new governorates of Tiflis and Kutais\". So we can treat objects as \"Tiflis Governorate\" and \"Kutais Governorate\". Use relation \"successor\" or \"split into\". Use \"successor\" maybe.\n\nAlso qualifiers: point in time 1846 for dissolution and for formation.\n\nLet's define entity names:\n\n- Georgia-Imeretia Governorate (type: administrative division)\n- Imperial administration of the Caucasus (type: administrative body)\n- Tiflis Governorate (type: administrative division)\n- Kutais Governorate (type: administrative division)\n\nNow produce triplets:\n\n1. Subject: Imperial administration of the Caucasus, relation: \"reorganized\", object: \"Imperial administration of the Caucasus\"? Not good. Better: relation \"reorganization date\", object \"1846\". So object_type date.\n\n2. Subject: Georgia-Imeretia Governorate, relation: \"dissolved\", object: \"1846\". object_type date.\n\nBut also we might want to capture that it was abolished (status). Use relation \"status\" with object \"abolished\". But we can combine with date qualifier.\n\nSimplify: Use relation \"dissolved\" with object \"1846\". That's fine.\n\n3. Subject: Georgia-Imeretia Governorate, relation: \"successor\", object: \"Tiflis Governorate\". qualifiers: point in time 1846.\n\n4. Subject: Georgia-Imeretia Governorate, relation: \"successor\", object: \"Kutais Governorate\". qualifiers: point in time 1846.\n\nAlso maybe we need a relation \"territory transferred to\". But \"successor\" works.\n\nNow produce JSON list.\n\nNeed each dict includes qualifiers list (maybe empty). For those with qualifiers, include qualifier dict with relation \"point in time\", object \"1846\", object_type \"year\". For date we can use \"year\". For dissolved we could also include qualifier.\n\nBut we already used object as date, not qualifier. Could also have object as \"abolished\" and qualifier date. But we need object_type. \"abolished\" is a status, maybe \"event\". But better to use \"dissolved\" relation with object \"1846\". That is okay.\n\nBut guidelines: object should be a named entity or concept, not a date? Actually date is allowed as object_type \"date\". So fine.\n\nThus:\n\nTriplet 1: Imperial administration of the Caucasus, relation \"reorganized\", object \"1846\". qualifiers empty.\n\nTriplet 2: Georgia-Imeretia Governorate, relation \"dissolved\", object \"1846\". qualifiers empty.\n\nTriplet 3: Georgia-Imeretia Governorate, relation \"successor\", object \"Tiflis Governorate\", qualifiers point in time 1846.\n\nTriplet 4: Georgia-Imeretia Governorate, relation \"successor\", object \"Kutais Governorate\", qualifiers point in time 1846.\n\nNow assign subject_type and object_type:\n\n- Imperial administration of the Caucasus: type \"administrative body\" or \"government\". Use \"administrative body\".\n\n- object \"1846\": type \"year\".\n\n- Georgia-Imeretia Governorate: type \"administrative division\".\n\n- object \"1846\": type \"year\".\n\n- Tiflis Governorate: type \"administrative division\".\n\n- Kutais Governorate: type \"administrative division\".\n\nNow produce JSON with key \"triplets\". Ensure proper formatting.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text.\n\nText: \"Georgia-Imeretia Governorate\n\nIn 1846 the Imperial administration of the Caucasus was reorganized and the Georgia-Imeretia Governorate was abolished, with its territory forming the new governorates of Tiflis and Kutais.\"\n\nWe have entities: Georgia-Imeretia Governorate (a governorate), Imperial administration of the Caucasus (maybe an administrative body), Tiflis (city/governorate), Kutais (city/governorate). Also date 1846.\n\nFacts:\n\n1. In 1846, the Imperial administration of the Caucasus was reorganized.\n=> subject: Imperial administration of the Caucasus, relation: \"reorganization\", maybe \"reorganized\". object: (some event) but we can treat as relation \"reorganized\" with qualifier point in time 1846. But object? Could be \"Imperial administration of the Caucasus\" reorganized (no object). Might need to express as \"reorganized\" with object \"Imperial administration of the Caucasus\"? Not typical. Better: \"Imperial administration of the Caucasus\" \"reorganized\" (object maybe \"administration\" itself). Could use relation \"reorganization date\". But guidelines: relation connects subject and object. So we could have subject: Imperial administration of the Caucasus, relation: \"reorganization date\", object: \"1846\". That seems okay: object is a date.\n\n2. The Georgia-Imeretia Governorate was abolished.\n=> subject: Georgia-Imeretia Governorate, relation: \"dissolved\", object: maybe \"abolishment\". Could use relation \"dissolved\" with object \"Georgia-Imeretia Governorate\"? No, subject is the governorate, object could be \"abolition\". But we can use relation \"abolished\" with object \"Georgia-Imeretia Governorate\"? That would invert. Better: subject: Georgia-Imeretia Governorate, relation: \"status\", object: \"abolished\". But maybe use \"dissolved\" relation with object \"Georgia-Imeretia Governorate\"? Actually typical Wikidata: \"dissolved, abolished\" is a property linking entity to date. So we can have relation \"dissolved\" with object \"1846\". But we also have that its territory formed new governorates.\n\nThus we can have:\n\n- Georgia-Imeretia Governorate dissolved (abolished) in 1846.\n\n- Its territory formed the new governorates of Tiflis and Kutais.\n\nThus we need two separate triplets for Tiflis and Kutais.\n\nTriplet: Georgia-Imeretia Governorate, relation: \"successor\", object: Tiflis Governorate? The text says \"new governorates of Tiflis and Kutais\". So we can treat objects as \"Tiflis Governorate\" and \"Kutais Governorate\". Use relation \"successor\" or \"split into\". Use \"successor\" maybe.\n\nAlso qualifiers: point in time 1846 for dissolution and for formation.\n\nLet's define entity names:\n\n- Georgia-Imeretia Governorate (type: administrative division)\n- Imperial administration of the Caucasus (type: administrative body)\n- Tiflis Governorate (type: administrative division)\n- Kutais Governorate (type: administrative division)\n\nNow produce triplets:\n\n1. Subject: Imperial administration of the Caucasus, relation: \"reorganized\", object: \"Imperial administration of the Caucasus\"? Not good. Better: relation \"reorganization date\", object \"1846\". So object_type date.\n\n2. Subject: Georgia-Imeretia Governorate, relation: \"dissolved\", object: \"1846\". object_type date.\n\nBut also we might want to capture that it was abolished (status). Use relation \"status\" with object \"abolished\". But we can combine with date qualifier.\n\nSimplify: Use relation \"dissolved\" with object \"1846\". That's fine.\n\n3. Subject: Georgia-Imeretia Governorate, relation: \"successor\", object: \"Tiflis Governorate\". qualifiers: point in time 1846.\n\n4. Subject: Georgia-Imeretia Governorate, relation: \"successor\", object: \"Kutais Governorate\". qualifiers: point in time 1846.\n\nAlso maybe we need a relation \"territory transferred to\". But \"successor\" works.\n\nNow produce JSON list.\n\nNeed each dict includes qualifiers list (maybe empty). For those with qualifiers, include qualifier dict with relation \"point in time\", object \"1846\", object_type \"year\". For date we can use \"year\". For dissolved we could also include qualifier.\n\nBut we already used object as date, not qualifier. Could also have object as \"abolished\" and qualifier date. But we need object_type. \"abolished\" is a status, maybe \"event\". But better to use \"dissolved\" relation with object \"1846\". That is okay.\n\nBut guidelines: object should be a named entity or concept, not a date? Actually date is allowed as object_type \"date\". So fine.\n\nThus:\n\nTriplet 1: Imperial administration of the Caucasus, relation \"reorganized\", object \"1846\". qualifiers empty.\n\nTriplet 2: Georgia-Imeretia Governorate, relation \"dissolved\", object \"1846\". qualifiers empty.\n\nTriplet 3: Georgia-Imeretia Governorate, relation \"successor\", object \"Tiflis Governorate\", qualifiers point in time 1846.\n\nTriplet 4: Georgia-Imeretia Governorate, relation \"successor\", object \"Kutais Governorate\", qualifiers point in time 1846.\n\nNow assign subject_type and object_type:\n\n- Imperial administration of the Caucasus: type \"administrative body\" or \"government\". Use \"administrative body\".\n\n- object \"1846\": type \"year\".\n\n- Georgia-Imeretia Governorate: type \"administrative division\".\n\n- object \"1846\": type \"year\".\n\n- Tiflis Governorate: type \"administrative division\".\n\n- Kutais Governorate: type \"administrative division\".\n\nNow produce JSON with key \"triplets\". Ensure proper formatting.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1403,
+      "completion_tokens": 1608,
+      "total_tokens": 3011,
+      "cost": 0.00028329,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1024,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00028329,
+        "upstream_inference_prompt_cost": 4.209e-05,
+        "upstream_inference_completions_cost": 0.0002412
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1288,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Imperial administration of the Caucasus\",\n            \"relation\": \"reorganized\",\n            \"object\": \"1846\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative body\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Georgia-Imeretia Governorate\",\n            \"relation\": \"dissolved\",\n            \"object\": \"1846\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Georgia-Imeretia Governorate\",\n            \"relation\": \"successor\",\n            \"object\": \"Tiflis Governorate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1846\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Georgia-Imeretia Governorate\",\n            \"relation\": \"successor\",\n            \"object\": \"Kutais Governorate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1846\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Imperial administration of the Caucasus",
+        "relation": "reorganized",
+        "object": "1846",
+        "qualifiers": [],
+        "subject_type": "administrative body",
+        "object_type": "year"
+      },
+      {
+        "subject": "Georgia-Imeretia Governorate",
+        "relation": "dissolved",
+        "object": "1846",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "year"
+      },
+      {
+        "subject": "Georgia-Imeretia Governorate",
+        "relation": "successor",
+        "object": "Tiflis Governorate",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1846"
+          }
+        ],
+        "subject_type": "administrative division",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Georgia-Imeretia Governorate",
+        "relation": "successor",
+        "object": "Kutais Governorate",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1846"
+          }
+        ],
+        "subject_type": "administrative division",
+        "object_type": "administrative division"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1403,
+    "completion_tokens": 1608,
+    "total_tokens": 3011,
+    "cost": 0.00028329,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00028329,
+      "upstream_inference_prompt_cost": 4.209e-05,
+      "upstream_inference_completions_cost": 0.0002412
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1288,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 503,
+    "output_tokens_est": 376
+  },
+  "attempts": 1,
+  "latency_s": 40.954696592998516,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:40:39.917593+00:00",
+  "cache_key": "7ef556a61045d370f6c7ae66e680e051"
+}

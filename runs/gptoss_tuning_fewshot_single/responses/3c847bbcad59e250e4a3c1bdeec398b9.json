@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "37bfca9bb37b3136",
+    "input_hash": "83e46df97e034bfb5578e69588551c0cd69de11c0cbea7685ae6a6320b7d6b5d",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-e5fdf958c608cf657fc4948967906f26",
+    "object": "chat.completion",
+    "created": 1791516561,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"tourist industry\",\n            \"relation\": \"basis\",\n            \"object\": \"promotion of Napoleon's imprisonment\",\n            \"qualifiers\": [],\n            \"subject_type\": \"industry\",\n            \"object_type\": \"activity\"\n        },\n        {\n            \"subject\": \"golf course\",\n            \"relation\": \"located in\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"sportfishing tourism\",\n            \"relation\": \"possibility\",\n            \"object\": \"great\",\n            \"qualifiers\": [],\n            \"subject_type\": \"tourism activity\",\n            \"object_type\": \"assessment\"\n        },\n        {\n            \"subject\": \"hotel\",\n            \"relation\": \"operates in\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"3\"\n                }\n            ],\n            \"subject_type\": \"hotel\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"arrival of tourists\",\n            \"relation\": \"directly linked to\",\n            \"object\": \"arrival and departure schedule of RMS St Helena\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"schedule\"\n        },\n        {\n            \"subject\": \"short-term visitors\",\n            \"relation\": \"arrived in\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"3,200\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2013\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"some\"\n                }\n            ],\n            \"subject_type\": \"visitor\",\n            \"object_type\": \"island\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Saint Helena\n\nThe tourist industry is heavily based on the promotion of Napoleon's imprisonment. A golf course also exists and the possibility for sportfishing tourism is great. Three hotels operate on the island but the arrival of tourists is directly linked to the arrival and departure schedule of the RMS St Helena. Some 3,200 short-term visitors arrived on the island in 2013.\"\n\nWe need to parse sentences.\n\nFirst sentence: \"The tourist industry is heavily based on the promotion of Napoleon's imprisonment.\"\n\nSubject: tourist industry (of Saint Helena? but we treat as entity \"tourist industry\").\n\nRelation: \"based on\" maybe \"basis\" or \"depends on\". Use relation \"basis\" maybe \"basis\" not standard. Could use \"based on\" as relation \"basis\". We'll use \"basis\" or \"depends on\". Let's choose \"basis\". Object: \"promotion of Napoleon's imprisonment\". That object is a \"activity\" maybe \"promotion of Napoleon's imprisonment\". Could break: \"promotion\" is object, with qualifier \"of Napoleon's imprisonment\". But we can treat object as \"promotion of Napoleon's imprisonment\". Relation: \"basis\". We'll include qualifier \"polarity\"? Not needed. Also \"heavily\" is intensity but not needed.\n\nSecond sentence: \"A golf course also exists\". Subject: \"golf course\". Relation: \"existence\". Could use \"exists\". Object maybe \"Saint Helena\". But sentence says a golf course also exists (on the island). So we can have triplet: subject \"golf course\" relation \"located in\" object \"Saint Helena\". Or \"exists\" with no object. Better to capture location. Use relation \"location\". So: subject \"golf course\" relation \"location\" object \"Saint Helena\". Qualifiers none.\n\nThird: \"the possibility for sportfishing tourism is great.\" Subject: \"possibility for sportfishing tourism\". Relation: \"quality\" maybe \"assessment\" \"great\". Could treat as \"possibility\" entity with qualifier \"polarity\"? Not. Could have triplet: subject \"sportfishing tourism\" relation \"possibility\" object \"great\". But maybe better: subject \"sportfishing tourism\" relation \"possibility\" object \"great\". We'll need object_type maybe \"assessment\". We'll include qualifier \"degree\" maybe not. Use relation \"possibility\" with object \"great\". Might be okay.\n\nFourth: \"Three hotels operate on the island but the arrival of tourists is directly linked to the arrival and departure schedule of the RMS St Helena.\"\n\nWe have two facts:\n\n- \"Three hotels operate on the island\". Subject: \"hotel\". But there are three hotels. Could create triplet: subject \"hotel\" relation \"count\" object \"3\". Or \"hotel\" relation \"operates in\" object \"Saint Helena\" with qualifier \"quantity\" 3. Let's produce: subject \"hotel\" relation \"operates in\" object \"Saint Helena\" qualifiers: {\"relation\":\"quantity\",\"object\":\"3\"} and maybe \"qualifier\": \"type\": \"count\". We'll use \"quantity\". Also subject_type \"building\" maybe \"hotel\". object_type \"island\". Also we could have separate entity \"Three hotels\". But we follow explicit.\n\n- \"the arrival of tourists is directly linked to the arrival and departure schedule of the RMS St Helena.\" So subject: \"arrival of tourists\". Relation: \"linked to\" object: \"arrival and departure schedule of the RMS St Helena\". Could break: object \"schedule of RMS St Helena\". We'll use relation \"directly linked to\". object \"arrival and departure schedule of RMS St Helena\". Also we could have qualifier \"mode\" but not needed.\n\nFifth: \"Some 3,200 short-term visitors arrived on the island in 2013.\"\n\nSubject: \"short-term visitors\". Relation: \"arrived\" object \"Saint Helena\". Qualifiers: quantity 3,200, point in time 2013, maybe \"duration\" short-term? That's part of subject. Also \"some\" indicates approximation. Use qualifier \"approximation\" \"some\". Also \"quantity\" \"3,200\". Also \"point in time\" \"2013\". Also maybe \"type\" \"short-term\". Could add qualifier \"duration\" \"short-term\". We'll include.\n\nNow need subject_type and object_type.\n\nDefine entities:\n\n- tourist industry: type \"industry\".\n- promotion of Napoleon's imprisonment: type \"activity\" maybe \"promotion\".\n- Napoleon: human.\n- imprisonment: event.\nBut we treat object as \"promotion of Napoleon's imprisonment\". type \"activity\".\n\n- golf course: type \"facility\" or \"golf course\". Use \"facility\".\n- Saint Helena: type \"island\".\n\n- sportfishing tourism: type \"tourism activity\".\n- possibility: maybe \"assessment\". We'll set object \"great\" type \"assessment\".\n\n- hotel: type \"building\" or \"hotel\".\n- Saint Helena: island.\n\n- arrival of tourists: type \"event\".\n- arrival and departure schedule of RMS St Helena: type \"schedule\".\n- RMS St Helena: type \"ship\".\n\n- short-term visitors: type \"person\" maybe \"visitor\". We'll use \"visitor\".\n- Saint Helena: island.\n\nNow qualifiers list format: list of dicts.\n\nLet's craft triplets.\n\nTriplet 1:\nsubject: \"tourist industry\"\nrelation: \"basis\"\nobject: \"promotion of Napoleon's imprisonment\"\nqualifiers: [] (maybe we could add \"intensity\" but not required)\nsubject_type: \"industry\"\nobject_type: \"activity\"\n\nTriplet 2:\nsubject: \"golf course\"\nrelation: \"located in\"\nobject: \"Saint Helena\"\nqualifiers: []\nsubject_type: \"facility\"\nobject_type: \"island\"\n\nTriplet 3:\nsubject: \"sportfishing tourism\"\nrelation: \"possibility\"\nobject: \"great\"\nqualifiers: []\nsubject_type: \"tourism activity\"\nobject_type: \"assessment\"\n\nTriplet 4:\nsubject: \"hotel\"\nrelation: \"operates in\"\nobject: \"Saint Helena\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"3\"}]\nsubject_type: \"hotel\"\nobject_type: \"island\"\n\nTriplet 5:\nsubject: \"arrival of tourists\"\nrelation: \"directly linked to\"\nobject: \"arrival and departure schedule of RMS St Helena\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"schedule\"\n\nTriplet 6:\nsubject: \"short-term visitors\"\nrelation: \"arrived in\"\nobject: \"Saint Helena\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"3,200\"},{\"relation\":\"point in time\",\"object\":\"2013\"},{\"relation\":\"approximation\",\"object\":\"some\"}]\nsubject_type: \"visitor\"\nobject_type: \"island\"\n\nCheck if any other facts: \"RMS St Helena\" is a ship. Could add relation \"type\" but not needed.\n\nAlso \"arrival and departure schedule of the RMS St Helena\" includes RMS St Helena. Could have separate triplet: \"RMS St Helena\" relation \"type\" object \"ship\". Not explicit but \"RMS\" indicates ship. Might be okay but not required.\n\nAlso \"Napoleon's imprisonment\" could be separate but not needed.\n\nMake sure qualifiers attached correctly.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1667,
+      "total_tokens": 3593,
+      "completion_tokens": 1926,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"tourist industry\",\n            \"relation\": \"basis\",\n            \"object\": \"promotion of Napoleon's imprisonment\",\n            \"qualifiers\": [],\n            \"subject_type\": \"industry\",\n            \"object_type\": \"activity\"\n        },\n        {\n            \"subject\": \"golf course\",\n            \"relation\": \"located in\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"sportfishing tourism\",\n            \"relation\": \"possibility\",\n            \"object\": \"great\",\n            \"qualifiers\": [],\n            \"subject_type\": \"tourism activity\",\n            \"object_type\": \"assessment\"\n        },\n        {\n            \"subject\": \"hotel\",\n            \"relation\": \"operates in\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"3\"\n                }\n            ],\n            \"subject_type\": \"hotel\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"arrival of tourists\",\n            \"relation\": \"directly linked to\",\n            \"object\": \"arrival and departure schedule of RMS St Helena\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"schedule\"\n        },\n        {\n            \"subject\": \"short-term visitors\",\n            \"relation\": \"arrived in\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"3,200\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2013\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"some\"\n                }\n            ],\n            \"subject_type\": \"visitor\",\n            \"object_type\": \"island\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "tourist industry",
+        "relation": "basis",
+        "object": "promotion of Napoleon's imprisonment",
+        "qualifiers": [],
+        "subject_type": "industry",
+        "object_type": "activity"
+      },
+      {
+        "subject": "golf course",
+        "relation": "located in",
+        "object": "Saint Helena",
+        "qualifiers": [],
+        "subject_type": "facility",
+        "object_type": "island"
+      },
+      {
+        "subject": "sportfishing tourism",
+        "relation": "possibility",
+        "object": "great",
+        "qualifiers": [],
+        "subject_type": "tourism activity",
+        "object_type": "assessment"
+      },
+      {
+        "subject": "hotel",
+        "relation": "operates in",
+        "object": "Saint Helena",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "3"
+          }
+        ],
+        "subject_type": "hotel",
+        "object_type": "island"
+      },
+      {
+        "subject": "arrival of tourists",
+        "relation": "directly linked to",
+        "object": "arrival and departure schedule of RMS St Helena",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "schedule"
+      },
+      {
+        "subject": "short-term visitors",
+        "relation": "arrived in",
+        "object": "Saint Helena",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "3,200"
+          },
+          {
+            "relation": "point in time",
+            "object": "2013"
+          },
+          {
+            "relation": "approximation",
+            "object": "some"
+          }
+        ],
+        "subject_type": "visitor",
+        "object_type": "island"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1667,
+    "total_tokens": 3593,
+    "completion_tokens": 1926,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 608,
+    "output_tokens_est": 516
+  },
+  "attempts": 1,
+  "latency_s": 21.744823080996866,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:29:43.943495+00:00",
+  "cache_key": "3c847bbcad59e250e4a3c1bdeec398b9"
+}

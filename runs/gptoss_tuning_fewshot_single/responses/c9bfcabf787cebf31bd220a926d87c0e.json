@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "15f89ee731bc29bc",
+    "input_hash": "9284427739d2a1e19063ad5889eeb48033d12df83143ceefa85b6e841c300b07",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-2f7944b0b3c44b54e855f99909ebce1d",
+    "object": "chat.completion",
+    "created": 1791515397,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"instance of\",\n            \"object\": \"village\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"instance of\",\n            \"object\": \"civil parish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"located in\",\n            \"object\": \"East Hertfordshire district\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"administrative district\"\n        },\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"distance from\",\n            \"object\": \"Buntingford\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"1.5\"},\n                {\"relation\": \"unit\", \"object\": \"mile\"},\n                {\"relation\": \"direction\", \"object\": \"north-east\"},\n                {\"relation\": \"approximation\", \"object\": \"around\"}\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"located north of\",\n            \"object\": \"Greenwich\",\n            \"qualifiers\": [\n                {\"relation\": \"direction\", \"object\": \"due north\"},\n                {\"relation\": \"place\", \"object\": \"Prime Meridian\"}\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Wyddial\n\nWyddial is a village and civil parish in the East Hertfordshire district of Hertfordshire, England. It is located around a mile and a half north-east of Buntingford (OS grid reference ), and lies due north of Greenwich on the Prime Meridian.\"\n\nEntities: Wyddial (subject). Relations:\n\n- \"is a village\" => relation \"instance of\" maybe? But example uses \"occupation\" etc. For places, maybe \"instance of\" with object \"village\". Use relation \"instance of\". object_type \"settlement\" maybe. We'll use \"village\". Also \"civil parish\". Could be two separate statements: instance of village, instance of civil parish. Or relation \"administrative unit type\". We'll produce two.\n\n- \"in the East Hertfordshire district of Hertfordshire, England.\" So Wyddial located in East Hertfordshire district. Relation \"located in administrative territorial entity\" maybe \"located in\". object: \"East Hertfordshire district\". Also could add qualifiers: \"point in time\"? Not given. So just location.\n\n- Also \"East Hertfordshire district\" is in \"Hertfordshire, England\". But that's not about Wyddial directly; we could have \"located in\" East Hertfordshire district, and maybe also \"located in\" Hertfordshire, England (since district is part). But only explicit: \"in the East Hertfordshire district of Hertfordshire, England.\" Could interpret as nested: district of Hertfordshire, England. Could produce two relations: Wyddial located in East Hertfordshire district; East Hertfordshire district located in Hertfordshire; Hertfordshire located in England. But only explicit about Wyddial: \"in the East Hertfordshire district of Hertfordshire, England.\" That phrase indicates district is within Hertfordshire, England, but not a separate clause about Wyddial. Might be okay to only have Wyddial located in East Hertfordshire district. Optionally also add \"located in\" Hertfordshire, England as a broader location, but that is not directly stated; it's implied by \"district of Hertfordshire, England\". Might be considered explicit: \"East Hertfordshire district of Hertfordshire, England\" means the district is part of Hertfordshire, which is part of England. But we could keep simple.\n\n- \"It is located around a mile and a half north-east of Buntingford (OS grid reference ),\" So relation \"distance from\" maybe \"located at distance\". Use relation \"distance from\" with object \"Buntingford\". Qualifiers: \"quantity\" 1.5, \"unit\" \"mile\", \"direction\" \"north-east\". Also maybe \"approximation\"? \"around\" indicates approximation. So qualifiers: {\"relation\":\"quantity\",\"object\":\"1.5\"}; {\"relation\":\"unit\",\"object\":\"mile\"}; {\"relation\":\"direction\",\"object\":\"north-east\"}; {\"relation\":\"approximation\",\"object\":\"around\"}.\n\n- Also \"and lies due north of Greenwich on the Prime Meridian.\" So relation \"direction from\" maybe \"lies north of\". Use relation \"located north of\". Object \"Greenwich\". Qualifier \"direction\" \"due north\". Also \"on the Prime Meridian\" indicates location of Greenwich? Actually \"lies due north of Greenwich on the Prime Meridian.\" Means Wyddial lies due north of Greenwich, and this line is on the Prime Meridian. Could add qualifier \"place\" \"Prime Meridian\". Or \"on the Prime Meridian\" as qualifier \"place\". Use qualifier relation \"place\" object \"Prime Meridian\". Also direction qualifier \"direction\" \"due north\". Could also include \"approximation\"? Not.\n\nNow need subject_type and object_type.\n\n- Wyddial: settlement (village). Use \"settlement\".\n- village: \"settlement type\"? object_type \"settlement\". Could be \"village\" as type. We'll set object_type \"settlement\".\n- civil parish: object_type \"administrative division\".\n- East Hertfordshire district: object_type \"administrative district\".\n- Buntingford: object_type \"settlement\".\n- Greenwich: object_type \"settlement\".\n- Prime Meridian: object_type \"geographic line\".\n\nNow produce JSON list.\n\nTriplet 1: subject \"Wyddial\", relation \"instance of\", object \"village\", qualifiers [], subject_type \"settlement\", object_type \"settlement\".\n\nTriplet 2: subject \"Wyddial\", relation \"instance of\", object \"civil parish\", qualifiers [], subject_type \"settlement\", object_type \"administrative division\".\n\nTriplet 3: subject \"Wyddial\", relation \"located in\", object \"East Hertfordshire district\", qualifiers [], subject_type \"settlement\", object_type \"administrative district\".\n\nTriplet 4: subject \"Wyddial\", relation \"distance from\", object \"Buntingford\", qualifiers list as above, subject_type \"settlement\", object_type \"settlement\".\n\nTriplet 5: subject \"Wyddial\", relation \"located north of\", object \"Greenwich\", qualifiers [{\"relation\":\"direction\",\"object\":\"due north\"},{\"relation\":\"place\",\"object\":\"Prime Meridian\"}], subject_type \"settlement\", object_type \"settlement\".\n\nCheck qualifiers: For distance, we need direction and quantity etc. Use separate qualifiers.\n\nQualifiers for triplet 4:\n- {\"relation\":\"quantity\",\"object\":\"1.5\"}\n- {\"relation\":\"unit\",\"object\":\"mile\"}\n- {\"relation\":\"direction\",\"object\":\"north-east\"}\n- {\"relation\":\"approximation\",\"object\":\"around\"}\n\nNow ensure JSON formatting.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1647,
+      "total_tokens": 3161,
+      "completion_tokens": 1514,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"instance of\",\n            \"object\": \"village\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"instance of\",\n            \"object\": \"civil parish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"located in\",\n            \"object\": \"East Hertfordshire district\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"administrative district\"\n        },\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"distance from\",\n            \"object\": \"Buntingford\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"1.5\"},\n                {\"relation\": \"unit\", \"object\": \"mile\"},\n                {\"relation\": \"direction\", \"object\": \"north-east\"},\n                {\"relation\": \"approximation\", \"object\": \"around\"}\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"Wyddial\",\n            \"relation\": \"located north of\",\n            \"object\": \"Greenwich\",\n            \"qualifiers\": [\n                {\"relation\": \"direction\", \"object\": \"due north\"},\n                {\"relation\": \"place\", \"object\": \"Prime Meridian\"}\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Wyddial",
+        "relation": "instance of",
+        "object": "village",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "settlement"
+      },
+      {
+        "subject": "Wyddial",
+        "relation": "instance of",
+        "object": "civil parish",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Wyddial",
+        "relation": "located in",
+        "object": "East Hertfordshire district",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "administrative district"
+      },
+      {
+        "subject": "Wyddial",
+        "relation": "distance from",
+        "object": "Buntingford",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "1.5"
+          },
+          {
+            "relation": "unit",
+            "object": "mile"
+          },
+          {
+            "relation": "direction",
+            "object": "north-east"
+          },
+          {
+            "relation": "approximation",
+            "object": "around"
+          }
+        ],
+        "subject_type": "settlement",
+        "object_type": "settlement"
+      },
+      {
+        "subject": "Wyddial",
+        "relation": "located north of",
+        "object": "Greenwich",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "due north"
+          },
+          {
+            "relation": "place",
+            "object": "Prime Meridian"
+          }
+        ],
+        "subject_type": "settlement",
+        "object_type": "settlement"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1647,
+    "total_tokens": 3161,
+    "completion_tokens": 1514,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 514,
+    "output_tokens_est": 422
+  },
+  "attempts": 1,
+  "latency_s": 18.63956425199285,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:10:16.608300+00:00",
+  "cache_key": "c9bfcabf787cebf31bd220a926d87c0e"
+}

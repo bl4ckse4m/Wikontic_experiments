@@ -1,0 +1,158 @@
+{
+  "task": {
+    "input_id": "c0d0db8c42ad05d8",
+    "input_hash": "52c8f26ea340090b47a3c313063cb0ffb89c8a633cc16ce232a19b1731982076",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-94ae95dc083f8e12f8ef1b81b6a0a60d",
+    "object": "chat.completion",
+    "created": 1791521090,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"date of birth\",\n            \"object\": \"8 July 1947\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Haiger\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Hessen\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"occupation\",\n            \"object\": \"pole vaulter\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"represented\",\n            \"object\": \"West Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"member of\",\n            \"object\": \"Union Sportclub Mainz\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports club\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"personal best\",\n            \"object\": \"5.23\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"metres\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"15 February 1969\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Barcelona\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText:\n\n\"Heinfried Engel\n\nHeinfried Engel (born 8 July 1947 in Haiger, Hessen) is a retired pole vaulter from Germany, who represented West Germany during his career. A member of the Union Sportclub Mainz he set his personal best (5.23 metres) on 15 February 1969 at a meet in Barcelona.\"\n\nWe need to parse.\n\nEntities: Heinfried Engel (human). Birth date: 8 July 1947. Birth place: Haiger, Hessen (city? region). He is a retired pole vaulter. So occupation: pole vaulter (sport). Also \"retired\" indicates status; maybe relation \"occupation\" with qualifier \"point in time\"? Not needed. Could add \"occupation\" = pole vaulter. Also \"country of citizenship\" = Germany. Also \"represented\" West Germany (entity). So relation: \"represented\" (or \"represented country\")? Use \"represented\" relation.\n\nMember of Union Sportclub Mainz (organization). So relation: \"member of\" (or \"member of organization\").\n\nSet personal best: personal best value 5.23 metres, date 15 February 1969, place Barcelona (city). So relation: \"personal best\" maybe \"record\" but we can use \"personal best\" relation with object \"5.23 metres\". Qualifiers: point in time 15 February 1969, place Barcelona.\n\nAlso \"meet\" is event; but we can just attach place qualifier.\n\nAlso \"retired\" maybe \"status\" but not needed.\n\nNow need subject_type and object_type.\n\nHeinfried Engel: human.\n\nDate: date.\n\nPlace: Haiger, Hessen (city). object_type \"city\" or \"place\". Use \"city\". For \"Germany\": country.\n\nWest Germany: country (historical). Use \"country\".\n\nUnion Sportclub Mainz: organization (sports club). object_type \"sports club\" maybe \"organization\".\n\nPersonal best value: \"5.23 metres\" is a quantity with unit metres. object_type \"quantity\". Could treat as \"measurement\". Use \"quantity\". Provide qualifier unit? Actually unit is part of object; but we can also add qualifier \"unit\" \"metres\". However rule: numbers with units should have qualifier \"unit\". The object could be \"5.23\" and qualifier unit \"metres\". But example earlier used object \"5.2%\" and qualifier \"quantity\". They used qualifier \"quantity\". In that example they used relation \"found\" object \"unemployment had fallen\" and qualifier \"quantity\" \"5.2%\". So they treat quantity as qualifier. For personal best, we could have object \"personal best\" and qualifier \"quantity\" \"5.23 metres\". But relation \"personal best\" maybe not standard. Could use relation \"personal best\" with object \"5.23 metres\". Then qualifier \"unit\" \"metres\". But they said qualifier \"unit\" for units. Let's follow: object \"5.23\" and qualifier unit \"metres\". But also need qualifier \"approximation\"? Not approximate.\n\nThus triplet: subject Heinfried Engel, relation \"personal best\", object \"5.23\", qualifiers: point in time 15 February 1969, place Barcelona, unit metres.\n\nBut maybe better: relation \"personal best\" object \"pole vault\". But we have measurement.\n\nWe'll produce:\n\nTriplet1: birth date.\n\nTriplet2: birth place.\n\nTriplet3: country of citizenship (Germany).\n\nTriplet4: occupation pole vaulter.\n\nTriplet5: represented West Germany.\n\nTriplet6: member of Union Sportclub Mainz.\n\nTriplet7: personal best (value) with qualifiers.\n\nNow need subject_type and object_type.\n\n- birth date: object_type \"date\".\n- birth place: object_type \"city\".\n- country of citizenship: object_type \"country\".\n- occupation: object_type \"profession\" or \"sport\". Use \"sport\".\n- represented: object_type \"country\".\n- member of: object_type \"sports club\" (organization).\n- personal best: object_type \"quantity\" (or \"measurement\").\n\nNow qualifiers list for each.\n\nTriplet1: qualifiers none.\n\nTriplet2: qualifiers none.\n\nTriplet3: none.\n\nTriplet4: none.\n\nTriplet5: none.\n\nTriplet6: none.\n\nTriplet7: qualifiers: point in time 15 February 1969, place Barcelona, unit metres.\n\nMake sure qualifiers are list of dicts with relation and object strings.\n\nNow produce JSON.\n\nCheck pronoun resolution: \"A member of the Union Sportclub Mainz he set his personal best...\" The subject is Heinfried Engel.\n\nNow final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1663,
+      "total_tokens": 3104,
+      "completion_tokens": 1441,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"date of birth\",\n            \"object\": \"8 July 1947\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Haiger\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Hessen\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"occupation\",\n            \"object\": \"pole vaulter\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"represented\",\n            \"object\": \"West Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"member of\",\n            \"object\": \"Union Sportclub Mainz\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports club\"\n        },\n        {\n            \"subject\": \"Heinfried Engel\",\n            \"relation\": \"personal best\",\n            \"object\": \"5.23\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"metres\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"15 February 1969\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Barcelona\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Heinfried Engel",
+        "relation": "date of birth",
+        "object": "8 July 1947",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Heinfried Engel",
+        "relation": "place of birth",
+        "object": "Haiger",
+        "qualifiers": [
+          {
+            "relation": "state",
+            "object": "Hessen"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Heinfried Engel",
+        "relation": "country of citizenship",
+        "object": "Germany",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Heinfried Engel",
+        "relation": "occupation",
+        "object": "pole vaulter",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "sport"
+      },
+      {
+        "subject": "Heinfried Engel",
+        "relation": "represented",
+        "object": "West Germany",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Heinfried Engel",
+        "relation": "member of",
+        "object": "Union Sportclub Mainz",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "sports club"
+      },
+      {
+        "subject": "Heinfried Engel",
+        "relation": "personal best",
+        "object": "5.23",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "metres"
+          },
+          {
+            "relation": "point in time",
+            "object": "15 February 1969"
+          },
+          {
+            "relation": "place",
+            "object": "Barcelona"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1663,
+    "total_tokens": 3104,
+    "completion_tokens": 1441,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 654,
+    "output_tokens_est": 561
+  },
+  "attempts": 1,
+  "latency_s": 17.742407468991587,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:45:08.952169+00:00",
+  "cache_key": "1d026de00cb5fc0d81ec8820e49bef95"
+}

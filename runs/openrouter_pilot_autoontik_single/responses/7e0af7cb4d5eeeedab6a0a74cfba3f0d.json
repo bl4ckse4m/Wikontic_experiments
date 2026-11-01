@@ -1,0 +1,167 @@
+{
+  "task": {
+    "input_id": "fa7ceb3b8b35203b",
+    "input_hash": "0df78c243ca5b6e8f892c3affbb252282ce68e7f98477dd204e647b6e7245f85",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793215111-IwAcYB68iDZdWeGTufjr",
+    "object": "chat.completion",
+    "created": 1793215111,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DekaLLM",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Harrisville\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"unincorporated community\"\n        },\n        {\n            \"subject\": \"Harrisville\",\n            \"relation\": \"located in\",\n            \"object\": \"Cecil County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Cecil County\",\n            \"relation\": \"located in\",\n            \"object\": \"Maryland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Maryland\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Nathan and Susannah Harris House\",\n            \"relation\": \"instance of\",\n            \"object\": \"building\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Nathan and Susannah Harris House\",\n            \"relation\": \"listed on\",\n            \"object\": \"National Register of Historic Places\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1984\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"heritage register\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nText mentions:\n\n- Harrisville, Maryland (place). Harrisville is an unincorporated community in Cecil County, Maryland, United States.\n\nSo triplet: Harrisville (subject) type: unincorporated community (maybe \"unincorporated community\" is a type). Relation: \"located in\" or \"situated in\" Cecil County. Also \"located in\" Maryland, United States. Could have hierarchical location: Harrisville is in Cecil County; Cecil County is in Maryland; Maryland is in United States. But we only have info that Harrisville is in Cecil County, Maryland, United States. Could produce two relations: \"located in administrative territorial entity\" maybe \"located in\". We'll produce separate triplets for each location level? The sentence says \"in Cecil County, Maryland, United States\". That's a chain: Harrisville is in Cecil County; Cecil County is in Maryland; Maryland is in United States. But we only have explicit that Harrisville is in Cecil County, Maryland, United States. Could capture as location: \"Cecil County, Maryland, United States\" as a single object? Better to break down.\n\nWe also have \"The Nathan and Susannah Harris House was listed on the National Register of Historic Places in 1984.\"\n\nSo triplet: Nathan and Susannah Harris House (subject) type: house (maybe \"building\" or \"historic house\"). Relation: \"heritage register listing\" or \"listed on\". Object: \"National Register of Historic Places\". Qualifier: point in time 1984 (year). Also maybe location: it's presumably in Harrisville, Maryland? Not stated but likely. Not include.\n\nAlso need subject_type and object_type.\n\nDefine entity types:\n\n- Harrisville: \"unincorporated community\" (type: human settlement? maybe \"unincorporated community\" as subclass of \"human settlement\". We'll set object_type for location: \"county\" for Cecil County, \"state\" for Maryland, \"country\" for United States.\n\n- Cecil County: type \"county\".\n\n- Maryland: type \"state\".\n\n- United States: type \"country\".\n\n- Nathan and Susannah Harris House: type \"building\" or \"historic house\". We'll use \"building\".\n\n- National Register of Historic Places: type \"heritage register\" or \"list\". Use \"heritage register\".\n\n- 1984: type \"year\".\n\nNow produce JSON list.\n\nTriplets:\n\n1. Harrisville - \"instance of\" - \"unincorporated community\". Could include relation \"instance of\". But example used occupation etc. Not required but we can include. The instruction: extract meaningful triplets that represent factual relationships. \"Harrisville is an unincorporated community\" is a classification. So relation \"instance of\". object_type \"unincorporated community\". subject_type \"human settlement\"? Actually subject_type is \"human settlement\". We'll set subject_type \"human settlement\". object_type \"unincorporated community\". Might be okay.\n\n2. Harrisville - \"located in\" - Cecil County. qualifiers none. subject_type \"human settlement\". object_type \"county\".\n\n3. Cecil County - \"located in\" - Maryland. subject_type \"county\". object_type \"state\".\n\n4. Maryland - \"located in\" - United States. subject_type \"state\". object_type \"country\".\n\n5. Nathan and Susannah Harris House - \"instance of\" - \"building\". subject_type \"building\"? Actually subject_type \"building\". object_type \"building\"? Wait instance of relation: subject_type maybe \"building\". object_type \"building type\"? Could set subject_type \"building\". object_type \"building\". Might be redundant. Could skip instance of and just use \"listed on\". But include.\n\n6. Nathan and Susannah Harris House - \"listed on\" - National Register of Historic Places. qualifiers: point in time 1984. subject_type \"building\". object_type \"heritage register\". qualifier object_type \"year\".\n\nPotential also \"located in\" - Harrisville? Not in text. Not include.\n\nNow format JSON: top-level key \"triplets\": list.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list, \"subject_type\", \"object_type\". For qualifiers, each dict includes \"relation\", \"object\", \"object_type\". Provide \"point in time\" qualifier.\n\nLet's craft.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nText mentions:\n\n- Harrisville, Maryland (place). Harrisville is an unincorporated community in Cecil County, Maryland, United States.\n\nSo triplet: Harrisville (subject) type: unincorporated community (maybe \"unincorporated community\" is a type). Relation: \"located in\" or \"situated in\" Cecil County. Also \"located in\" Maryland, United States. Could have hierarchical location: Harrisville is in Cecil County; Cecil County is in Maryland; Maryland is in United States. But we only have info that Harrisville is in Cecil County, Maryland, United States. Could produce two relations: \"located in administrative territorial entity\" maybe \"located in\". We'll produce separate triplets for each location level? The sentence says \"in Cecil County, Maryland, United States\". That's a chain: Harrisville is in Cecil County; Cecil County is in Maryland; Maryland is in United States. But we only have explicit that Harrisville is in Cecil County, Maryland, United States. Could capture as location: \"Cecil County, Maryland, United States\" as a single object? Better to break down.\n\nWe also have \"The Nathan and Susannah Harris House was listed on the National Register of Historic Places in 1984.\"\n\nSo triplet: Nathan and Susannah Harris House (subject) type: house (maybe \"building\" or \"historic house\"). Relation: \"heritage register listing\" or \"listed on\". Object: \"National Register of Historic Places\". Qualifier: point in time 1984 (year). Also maybe location: it's presumably in Harrisville, Maryland? Not stated but likely. Not include.\n\nAlso need subject_type and object_type.\n\nDefine entity types:\n\n- Harrisville: \"unincorporated community\" (type: human settlement? maybe \"unincorporated community\" as subclass of \"human settlement\". We'll set object_type for location: \"county\" for Cecil County, \"state\" for Maryland, \"country\" for United States.\n\n- Cecil County: type \"county\".\n\n- Maryland: type \"state\".\n\n- United States: type \"country\".\n\n- Nathan and Susannah Harris House: type \"building\" or \"historic house\". We'll use \"building\".\n\n- National Register of Historic Places: type \"heritage register\" or \"list\". Use \"heritage register\".\n\n- 1984: type \"year\".\n\nNow produce JSON list.\n\nTriplets:\n\n1. Harrisville - \"instance of\" - \"unincorporated community\". Could include relation \"instance of\". But example used occupation etc. Not required but we can include. The instruction: extract meaningful triplets that represent factual relationships. \"Harrisville is an unincorporated community\" is a classification. So relation \"instance of\". object_type \"unincorporated community\". subject_type \"human settlement\"? Actually subject_type is \"human settlement\". We'll set subject_type \"human settlement\". object_type \"unincorporated community\". Might be okay.\n\n2. Harrisville - \"located in\" - Cecil County. qualifiers none. subject_type \"human settlement\". object_type \"county\".\n\n3. Cecil County - \"located in\" - Maryland. subject_type \"county\". object_type \"state\".\n\n4. Maryland - \"located in\" - United States. subject_type \"state\". object_type \"country\".\n\n5. Nathan and Susannah Harris House - \"instance of\" - \"building\". subject_type \"building\"? Actually subject_type \"building\". object_type \"building\"? Wait instance of relation: subject_type maybe \"building\". object_type \"building type\"? Could set subject_type \"building\". object_type \"building\". Might be redundant. Could skip instance of and just use \"listed on\". But include.\n\n6. Nathan and Susannah Harris House - \"listed on\" - National Register of Historic Places. qualifiers: point in time 1984. subject_type \"building\". object_type \"heritage register\". qualifier object_type \"year\".\n\nPotential also \"located in\" - Harrisville? Not in text. Not include.\n\nNow format JSON: top-level key \"triplets\": list.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list, \"subject_type\", \"object_type\". For qualifiers, each dict includes \"relation\", \"object\", \"object_type\". Provide \"point in time\" qualifier.\n\nLet's craft.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1399,
+      "completion_tokens": 1271,
+      "total_tokens": 2670,
+      "cost": 0.00027075,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00027075,
+        "upstream_inference_prompt_cost": 4.197e-05,
+        "upstream_inference_completions_cost": 0.00022878
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 901,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Harrisville\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"unincorporated community\"\n        },\n        {\n            \"subject\": \"Harrisville\",\n            \"relation\": \"located in\",\n            \"object\": \"Cecil County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Cecil County\",\n            \"relation\": \"located in\",\n            \"object\": \"Maryland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Maryland\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Nathan and Susannah Harris House\",\n            \"relation\": \"instance of\",\n            \"object\": \"building\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Nathan and Susannah Harris House\",\n            \"relation\": \"listed on\",\n            \"object\": \"National Register of Historic Places\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1984\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"heritage register\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Harrisville",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "unincorporated community"
+      },
+      {
+        "subject": "Harrisville",
+        "relation": "located in",
+        "object": "Cecil County",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Cecil County",
+        "relation": "located in",
+        "object": "Maryland",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "state"
+      },
+      {
+        "subject": "Maryland",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "Nathan and Susannah Harris House",
+        "relation": "instance of",
+        "object": "building",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "building"
+      },
+      {
+        "subject": "Nathan and Susannah Harris House",
+        "relation": "listed on",
+        "object": "National Register of Historic Places",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1984"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "heritage register"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1399,
+    "completion_tokens": 1271,
+    "total_tokens": 2670,
+    "cost": 0.00027075,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00027075,
+      "upstream_inference_prompt_cost": 4.197e-05,
+      "upstream_inference_completions_cost": 0.00022878
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 901,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 567,
+    "output_tokens_est": 440
+  },
+  "attempts": 1,
+  "latency_s": 19.640142698001,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T19:18:50.598526+00:00",
+  "cache_key": "7e0af7cb4d5eeeedab6a0a74cfba3f0d"
+}

@@ -1,0 +1,207 @@
+{
+  "task": {
+    "input_id": "6685fffc14d807df",
+    "input_hash": "6b32ab0193b4851ac7227cf3d4284b928bf19b3ecdd1ba5f30b4e9829267b84e",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793203234-tvTcJeTRSMjCFOUCB7MV",
+    "object": "chat.completion",
+    "created": 1793203234,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DeepInfra",
+    "system_fingerprint": null,
+    "service_tier": "default",
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1971\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place of birth\",\n                    \"object\": \"Viersen\",\n                    \"object_type\": \"city\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"occupation\",\n            \"object\": \"author\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"author of\",\n            \"object\": \"study of Cosima Wagner\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"book\"\n        },\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"author of\",\n            \"object\": \"biography of Alma Mahler\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"book\"\n        },\n        {\n            \"subject\": \"Cosima Wagner\",\n            \"relation\": \"parent\",\n            \"object\": \"Franz Liszt\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Franz Liszt\",\n            \"relation\": \"occupation\",\n            \"object\": \"composer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Alma Mahler\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Vienna\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Alma Mahler\",\n            \"relation\": \"occupation\",\n            \"object\": \"socialite\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"study of Cosima Wagner\",\n            \"relation\": \"translated into\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"language\"\n        },\n        {\n            \"subject\": \"biography of Alma Mahler\",\n            \"relation\": \"translated into\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"language\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Oliver Hilmes (born 1971 in Viersen, Germany) is a German author who has written several historical biographies. His study of Cosima Wagner, the daughter of the 19th century composer Franz Liszt and his biography of Alma Mahler a Viennese-born socialite, have been translated into English.\"\n\nWe need to parse facts:\n\n- Oliver Hilmes date of birth: 1971 (year). Also place of birth: Viersen, Germany (city, country). So two qualifiers? Usually date of birth relation with qualifier location? Could have separate triplet for place of birth.\n\n- Oliver Hilmes nationality: German (or country of citizenship). Could be \"country of citizenship\" or \"nationality\". Use \"country of citizenship\" maybe.\n\n- Oliver Hilmes occupation: author (profession). Also maybe \"occupation\" = author.\n\n- Oliver Hilmes has written several historical biographies. That's a generic statement. Could be \"author of\" relation with objects: \"historical biography\". But we need specific works: his study of Cosima Wagner, and his biography of Alma Mahler. So we have two works.\n\n- Work: study of Cosima Wagner. Title unknown, but we can treat as \"study of Cosima Wagner\". Could be a \"book\" or \"work\". We'll treat object as \"study of Cosima Wagner\". Relation: \"author\". Or \"written work\". Use \"author\" relation? In example they used \"award received\". For works, maybe \"author of\". We'll use \"author of\". Object type: \"book\" or \"written work\". We'll say \"book\".\n\n- The study of Cosima Wagner: Cosima Wagner is the daughter of 19th century composer Franz Liszt. So we have relation: \"child of\" or \"daughter of\". Cosima Wagner is a person. So triplet: Cosima Wagner \"parent\" \"Franz Liszt\". Or \"child of\". Use \"parent\". Let's use \"parent\". Subject: Cosima Wagner, relation: \"parent\", object: Franz Liszt. object_type: \"human\". Also qualifier: \"occupation\" of Franz Liszt? Not needed.\n\n- Also \"Franz Liszt\" is a 19th century composer. Could have \"occupation\" composer, \"time period\" 19th century. But maybe not needed.\n\n- Also \"Alma Mahler\" is a Viennese-born socialite. So we have triplet: Alma Mahler \"place of birth\" \"Vienna\". Also \"occupation\" \"socialite\". Also \"nationality\"? Not needed.\n\n- The biography of Alma Mahler: another work by Oliver Hilmes. So \"author of\" \"biography of Alma Mahler\". Object type: book.\n\n- Both works have been translated into English. So we have triplet: \"study of Cosima Wagner\" \"language of work\" \"English\"? Or \"has translation language\" \"English\". Use relation \"language of work\" maybe \"language\". Or \"has been translated into\" relation. Use \"translated into\". Subject: study of Cosima Wagner, relation: \"translated into\", object: English (language). Similarly for biography of Alma Mahler.\n\n- Also \"Oliver Hilmes\" born in Viersen, Germany. So place of birth: Viersen. Could also include country: Germany. Use \"place of birth\" Viersen. Also \"country of birth\" Germany? We'll just do place of birth.\n\n- Also \"Oliver Hilmes\" is German author. So nationality: Germany.\n\n- Also \"Oliver Hilmes\" is a \"author\". Occupation.\n\n- Also \"Oliver Hilmes\" wrote \"historical biographies\". Could be generic, but we have specific works.\n\n- Also \"Oliver Hilmes\" is a \"German author\". So maybe \"occupation\" author, \"country of citizenship\" Germany.\n\n- Also \"Oliver Hilmes\" birth year 1971. So date of birth.\n\nNow we need to include qualifiers where appropriate: For date of birth, we can add qualifier \"place of birth\" Viersen, Germany. But qualifiers must be attached to a triplet. Could attach to date of birth triplet: qualifier relation \"place of birth\", object \"Viersen, Germany\". But object_type: location. However guidelines: qualifiers attached to triplet, not separate. So we can have date of birth triplet with qualifier place of birth.\n\nLet's produce:\n\nTriplet1: subject Oliver Hilmes, relation date of birth, object \"1971\", qualifiers: place of birth Viersen, Germany. object_type year? Actually date of birth object type \"year\". qualifier object_type \"city\" or \"location\". We'll set object_type \"year\". qualifier object_type \"city\". But we need object_type for qualifier: \"city\". Could also include country. We'll just include city.\n\nTriplet2: Oliver Hilmes, relation country of citizenship, object Germany, qualifiers none.\n\nTriplet3: Oliver Hilmes, relation occupation, object author, object_type profession.\n\nTriplet4: Oliver Hilmes, relation author of, object \"study of Cosima Wagner\", object_type book.\n\nTriplet5: Oliver Hilmes, relation author of, object \"biography of Alma Mahler\", object_type book.\n\nTriplet6: Cosima Wagner, relation parent, object Franz Liszt, object_type human.\n\nTriplet7: Cosima Wagner, relation occupation, object \"daughter\", maybe not needed. Actually \"daughter of\" is captured by parent relation.\n\nTriplet8: Franz Liszt, relation occupation, object composer, object_type profession.\n\nTriplet9: Alma Mahler, relation place of birth, object Vienna, object_type city.\n\nTriplet10: Alma Mahler, relation occupation, object socialite, object_type profession.\n\nTriplet11: \"study of Cosima Wagner\", relation translated into, object English, object_type language.\n\nTriplet12: \"biography of Alma Mahler\", relation translated into, object English, object_type language.\n\nPotentially also \"study of Cosima Wagner\" is about Cosima Wagner. Could add \"subject\" relation. But not required.\n\nNow format JSON.\n\nNeed \"triplets\": [ { ... } ].\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": [], \"subject_type\", \"object_type\". For qualifiers include \"relation\", \"object\", \"object_type\". For date of birth qualifier place of birth.\n\nDefine types:\n\n- Oliver Hilmes: human.\n\n- Germany: country.\n\n- author: profession.\n\n- study of Cosima Wagner: book (or written work). Use \"book\".\n\n- biography of Alma Mahler: book.\n\n- Cosima Wagner: human.\n\n- Franz Liszt: human.\n\n- composer: profession.\n\n- Vienna: city.\n\n- socialite: profession? Could be \"socialite\" as occupation.\n\n- English: language.\n\n- place of birth qualifier object_type: city.\n\n- date of birth object_type: year.\n\n- translated into relation: maybe \"language of work\". Use \"language\". object_type language.\n\nNow produce JSON.\n\nCheck qualifiers: For date of birth triplet, qualifiers list with one dict: relation \"place of birth\", object \"Viersen\", object_type \"city\". Could also include country, but fine.\n\nMake sure each dict includes subject_type and object_type.\n\nLet's craft.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nText: \"Oliver Hilmes (born 1971 in Viersen, Germany) is a German author who has written several historical biographies. His study of Cosima Wagner, the daughter of the 19th century composer Franz Liszt and his biography of Alma Mahler a Viennese-born socialite, have been translated into English.\"\n\nWe need to parse facts:\n\n- Oliver Hilmes date of birth: 1971 (year). Also place of birth: Viersen, Germany (city, country). So two qualifiers? Usually date of birth relation with qualifier location? Could have separate triplet for place of birth.\n\n- Oliver Hilmes nationality: German (or country of citizenship). Could be \"country of citizenship\" or \"nationality\". Use \"country of citizenship\" maybe.\n\n- Oliver Hilmes occupation: author (profession). Also maybe \"occupation\" = author.\n\n- Oliver Hilmes has written several historical biographies. That's a generic statement. Could be \"author of\" relation with objects: \"historical biography\". But we need specific works: his study of Cosima Wagner, and his biography of Alma Mahler. So we have two works.\n\n- Work: study of Cosima Wagner. Title unknown, but we can treat as \"study of Cosima Wagner\". Could be a \"book\" or \"work\". We'll treat object as \"study of Cosima Wagner\". Relation: \"author\". Or \"written work\". Use \"author\" relation? In example they used \"award received\". For works, maybe \"author of\". We'll use \"author of\". Object type: \"book\" or \"written work\". We'll say \"book\".\n\n- The study of Cosima Wagner: Cosima Wagner is the daughter of 19th century composer Franz Liszt. So we have relation: \"child of\" or \"daughter of\". Cosima Wagner is a person. So triplet: Cosima Wagner \"parent\" \"Franz Liszt\". Or \"child of\". Use \"parent\". Let's use \"parent\". Subject: Cosima Wagner, relation: \"parent\", object: Franz Liszt. object_type: \"human\". Also qualifier: \"occupation\" of Franz Liszt? Not needed.\n\n- Also \"Franz Liszt\" is a 19th century composer. Could have \"occupation\" composer, \"time period\" 19th century. But maybe not needed.\n\n- Also \"Alma Mahler\" is a Viennese-born socialite. So we have triplet: Alma Mahler \"place of birth\" \"Vienna\". Also \"occupation\" \"socialite\". Also \"nationality\"? Not needed.\n\n- The biography of Alma Mahler: another work by Oliver Hilmes. So \"author of\" \"biography of Alma Mahler\". Object type: book.\n\n- Both works have been translated into English. So we have triplet: \"study of Cosima Wagner\" \"language of work\" \"English\"? Or \"has translation language\" \"English\". Use relation \"language of work\" maybe \"language\". Or \"has been translated into\" relation. Use \"translated into\". Subject: study of Cosima Wagner, relation: \"translated into\", object: English (language). Similarly for biography of Alma Mahler.\n\n- Also \"Oliver Hilmes\" born in Viersen, Germany. So place of birth: Viersen. Could also include country: Germany. Use \"place of birth\" Viersen. Also \"country of birth\" Germany? We'll just do place of birth.\n\n- Also \"Oliver Hilmes\" is German author. So nationality: Germany.\n\n- Also \"Oliver Hilmes\" is a \"author\". Occupation.\n\n- Also \"Oliver Hilmes\" wrote \"historical biographies\". Could be generic, but we have specific works.\n\n- Also \"Oliver Hilmes\" is a \"German author\". So maybe \"occupation\" author, \"country of citizenship\" Germany.\n\n- Also \"Oliver Hilmes\" birth year 1971. So date of birth.\n\nNow we need to include qualifiers where appropriate: For date of birth, we can add qualifier \"place of birth\" Viersen, Germany. But qualifiers must be attached to a triplet. Could attach to date of birth triplet: qualifier relation \"place of birth\", object \"Viersen, Germany\". But object_type: location. However guidelines: qualifiers attached to triplet, not separate. So we can have date of birth triplet with qualifier place of birth.\n\nLet's produce:\n\nTriplet1: subject Oliver Hilmes, relation date of birth, object \"1971\", qualifiers: place of birth Viersen, Germany. object_type year? Actually date of birth object type \"year\". qualifier object_type \"city\" or \"location\". We'll set object_type \"year\". qualifier object_type \"city\". But we need object_type for qualifier: \"city\". Could also include country. We'll just include city.\n\nTriplet2: Oliver Hilmes, relation country of citizenship, object Germany, qualifiers none.\n\nTriplet3: Oliver Hilmes, relation occupation, object author, object_type profession.\n\nTriplet4: Oliver Hilmes, relation author of, object \"study of Cosima Wagner\", object_type book.\n\nTriplet5: Oliver Hilmes, relation author of, object \"biography of Alma Mahler\", object_type book.\n\nTriplet6: Cosima Wagner, relation parent, object Franz Liszt, object_type human.\n\nTriplet7: Cosima Wagner, relation occupation, object \"daughter\", maybe not needed. Actually \"daughter of\" is captured by parent relation.\n\nTriplet8: Franz Liszt, relation occupation, object composer, object_type profession.\n\nTriplet9: Alma Mahler, relation place of birth, object Vienna, object_type city.\n\nTriplet10: Alma Mahler, relation occupation, object socialite, object_type profession.\n\nTriplet11: \"study of Cosima Wagner\", relation translated into, object English, object_type language.\n\nTriplet12: \"biography of Alma Mahler\", relation translated into, object English, object_type language.\n\nPotentially also \"study of Cosima Wagner\" is about Cosima Wagner. Could add \"subject\" relation. But not required.\n\nNow format JSON.\n\nNeed \"triplets\": [ { ... } ].\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": [], \"subject_type\", \"object_type\". For qualifiers include \"relation\", \"object\", \"object_type\". For date of birth qualifier place of birth.\n\nDefine types:\n\n- Oliver Hilmes: human.\n\n- Germany: country.\n\n- author: profession.\n\n- study of Cosima Wagner: book (or written work). Use \"book\".\n\n- biography of Alma Mahler: book.\n\n- Cosima Wagner: human.\n\n- Franz Liszt: human.\n\n- composer: profession.\n\n- Vienna: city.\n\n- socialite: profession? Could be \"socialite\" as occupation.\n\n- English: language.\n\n- place of birth qualifier object_type: city.\n\n- date of birth object_type: year.\n\n- translated into relation: maybe \"language of work\". Use \"language\". object_type language.\n\nNow produce JSON.\n\nCheck qualifiers: For date of birth triplet, qualifiers list with one dict: relation \"place of birth\", object \"Viersen\", object_type \"city\". Could also include country, but fine.\n\nMake sure each dict includes subject_type and object_type.\n\nLet's craft.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1409,
+      "completion_tokens": 2138,
+      "total_tokens": 3547,
+      "cost": 0.000415593,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000415593,
+        "upstream_inference_prompt_cost": 5.2133e-05,
+        "upstream_inference_completions_cost": 0.00036346
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1627,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1971\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place of birth\",\n                    \"object\": \"Viersen\",\n                    \"object_type\": \"city\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"occupation\",\n            \"object\": \"author\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"author of\",\n            \"object\": \"study of Cosima Wagner\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"book\"\n        },\n        {\n            \"subject\": \"Oliver Hilmes\",\n            \"relation\": \"author of\",\n            \"object\": \"biography of Alma Mahler\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"book\"\n        },\n        {\n            \"subject\": \"Cosima Wagner\",\n            \"relation\": \"parent\",\n            \"object\": \"Franz Liszt\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Franz Liszt\",\n            \"relation\": \"occupation\",\n            \"object\": \"composer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Alma Mahler\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Vienna\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Alma Mahler\",\n            \"relation\": \"occupation\",\n            \"object\": \"socialite\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"study of Cosima Wagner\",\n            \"relation\": \"translated into\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"language\"\n        },\n        {\n            \"subject\": \"biography of Alma Mahler\",\n            \"relation\": \"translated into\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"language\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Oliver Hilmes",
+        "relation": "date of birth",
+        "object": "1971",
+        "qualifiers": [
+          {
+            "relation": "place of birth",
+            "object": "Viersen"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "year"
+      },
+      {
+        "subject": "Oliver Hilmes",
+        "relation": "country of citizenship",
+        "object": "Germany",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Oliver Hilmes",
+        "relation": "occupation",
+        "object": "author",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Oliver Hilmes",
+        "relation": "author of",
+        "object": "study of Cosima Wagner",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "book"
+      },
+      {
+        "subject": "Oliver Hilmes",
+        "relation": "author of",
+        "object": "biography of Alma Mahler",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "book"
+      },
+      {
+        "subject": "Cosima Wagner",
+        "relation": "parent",
+        "object": "Franz Liszt",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Franz Liszt",
+        "relation": "occupation",
+        "object": "composer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Alma Mahler",
+        "relation": "place of birth",
+        "object": "Vienna",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Alma Mahler",
+        "relation": "occupation",
+        "object": "socialite",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "study of Cosima Wagner",
+        "relation": "translated into",
+        "object": "English",
+        "qualifiers": [],
+        "subject_type": "book",
+        "object_type": "language"
+      },
+      {
+        "subject": "biography of Alma Mahler",
+        "relation": "translated into",
+        "object": "English",
+        "qualifiers": [],
+        "subject_type": "book",
+        "object_type": "language"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1409,
+    "completion_tokens": 2138,
+    "total_tokens": 3547,
+    "cost": 0.000415593,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000415593,
+      "upstream_inference_prompt_cost": 5.2133e-05,
+      "upstream_inference_completions_cost": 0.00036346
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1627,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 844,
+    "output_tokens_est": 717
+  },
+  "attempts": 1,
+  "latency_s": 72.30495049199817,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T16:01:46.683195+00:00",
+  "cache_key": "13fe47f6d3b60088feb89de92923f9e7"
+}

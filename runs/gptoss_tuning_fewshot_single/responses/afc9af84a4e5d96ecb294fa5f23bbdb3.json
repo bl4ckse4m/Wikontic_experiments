@@ -1,0 +1,191 @@
+{
+  "task": {
+    "input_id": "62fe22bb8fa8d52b",
+    "input_hash": "536a4b89f1dcad60eb8fbff23462901cf1a275a0db15de09307e30459e56cc47",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-b8c650510410572cf6f033ca4ccd2578",
+    "object": "chat.completion",
+    "created": 1791518008,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"accompanied\",\n            \"object\": \"husband\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1997\"},\n                {\"relation\": \"place\", \"object\": \"Sweden\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"accompanied\",\n            \"object\": \"husband\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1997\"},\n                {\"relation\": \"place\", \"object\": \"Finland\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"accompanied\",\n            \"object\": \"husband\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1999\"},\n                {\"relation\": \"place\", \"object\": \"China\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"interfered in\",\n            \"object\": \"husband's political work\",\n            \"qualifiers\": [\n                {\"relation\": \"polarity\", \"object\": \"negative\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"activity\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"met with\",\n            \"object\": \"voters\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1996 election campaign\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"gave interviews to\",\n            \"object\": \"media\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1996 election campaign\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"participated in\",\n            \"object\": \"state funeral of husband\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"April 2007\"},\n                {\"relation\": \"place\", \"object\": \"Moscow\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nEntities: Naina Yeltsina (human). Husband: presumably Boris Yeltsin (though not named, but \"her husband\" refers to Yeltsin). The text says \"her husband\" but not name; we may need to keep as \"her husband\" or \"husband of Naina Yeltsina\". Probably we should create entity \"husband of Naina Yeltsina\". But we can also treat as \"her husband\" as object. However need subject_type human, object_type human.\n\nFacts:\n\n1. Naina Yeltsina was rarely seen in public. Relation: \"public appearance frequency\"? Not standard. Could use \"visibility\" but maybe \"rarely seen in public\" is a statement. Could encode as statement with polarity? Could be \"public appearance\" with qualifier \"frequency\" etc. Might be better to treat as statement: subject Naina Yeltsina, relation \"visibility\", object \"rarely seen in public\". But we need standard relations. In examples they used \"found\" etc. Might use \"statement\" relation \"statement\". But guidelines: use specific Wikidata-style relations. There is relation \"public appearance\" maybe \"participated in\" etc. Could skip this ambiguous.\n\nBetter to capture concrete events:\n\n- She accompanied her husband on some of his foreign visits, including 1997 visits to Sweden, Finland, and a 1999 visit to China.\n\nThus we have events: \"accompanied\" relation.\n\nTriplet: subject Naina Yeltsina, relation \"accompanied\", object \"husband\". Qualifiers: point in time \"1997\", place \"Sweden\". Also separate for Finland same year. Also separate for China 1999.\n\nBut \"accompanied\" is a relation; object is husband (human). Qualifiers: point in time, place.\n\nWe need separate triplets for each location.\n\nThus:\n\nTriplet1: Naina Yeltsina - accompanied - husband of Naina Yeltsina (or \"her husband\"). Use object \"husband\". object_type \"human\". Qualifiers: point in time \"1997\", place \"Sweden\".\n\nTriplet2: same with place \"Finland\".\n\nTriplet3: point in time \"1999\", place \"China\".\n\nNext: \"As a rule, Naina Yeltsina never interfered in her husband's political work.\"\n\nRelation: \"interfered in\". Object: \"husband's political work\". Polarity negative. So qualifier polarity negative.\n\nTriplet: Naina Yeltsina - interfered in - political work of husband. Qualifiers: polarity negative.\n\nWe need object_type maybe \"activity\" or \"political work\". Use \"political work\". object_type \"activity\".\n\nNext: \"in the 1996 election campaign, she met with voters and gave interviews to the media.\"\n\nTwo actions: met with voters; gave interviews to media.\n\nTriplet: Naina Yeltsina - met with - voters. Qualifier point in time \"1996 election campaign\". Possibly also \"event\" type.\n\nTriplet: Naina Yeltsina - gave interviews to - media. Qualifier point in time \"1996 election campaign\".\n\nObject types: voters (group of people), media (organisation?).\n\nNext: \"A major public appearance was the state funeral of her late husband in Moscow in April 2007.\"\n\nFact: state funeral of her late husband occurred in Moscow April 2007. Naina Yeltsina had a public appearance at that funeral.\n\nWe can create triplet: Naina Yeltsina - participated in - state funeral of husband. Qualifiers: point in time \"April 2007\", place \"Moscow\". Also maybe \"public appearance\" but not needed.\n\nObject type: \"state funeral\" (event). Could be \"funeral\". Use \"state funeral of husband\". object_type \"event\".\n\nAlso note \"her late husband\" indicates husband is deceased. Could add statement: husband of Naina Yeltsina - date of death? Not given.\n\nAlso \"her husband\" is late, but not needed.\n\nAlso \"Naina Yeltsina was rarely seen in public.\" Could encode as statement with qualifier \"polarity\"? Not needed.\n\nMaybe we can include a statement: Naina Yeltsina - visibility - \"rarely seen in public\". But not standard.\n\nProbably skip ambiguous.\n\nNow need subject_type and object_type for each.\n\nDefine:\n\n- subject_type for Naina Yeltsina: \"human\".\n- object \"husband\": \"human\".\n- object \"political work\": \"activity\".\n- object \"voters\": \"group of people\".\n- object \"media\": \"organisation\".\n- object \"state funeral of husband\": \"event\".\n\nNow qualifiers list.\n\nMake JSON.\n\nCheck each triplet.\n\nTriplet1: {\"subject\":\"Naina Yeltsina\",\"relation\":\"accompanied\",\"object\":\"husband\",\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"1997\"},{\"relation\":\"place\",\"object\":\"Sweden\"}],\"subject_type\":\"human\",\"object_type\":\"human\"}\n\nTriplet2 similar with Finland.\n\nTriplet3 with 1999 China.\n\nTriplet4: interfered in, object \"husband's political work\". qualifiers: polarity negative.\n\nTriplet5: met with, object \"voters\". qualifiers: point in time \"1996 election campaign\".\n\nTriplet6: gave interviews to, object \"media\". qualifiers: point in time \"1996 election campaign\".\n\nTriplet7: participated in, object \"state funeral of husband\". qualifiers: point in time \"April 2007\", place \"Moscow\".\n\nPotential also \"state funeral of her late husband\" includes \"late\". Could add qualifier \"polarity\"? Not needed.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1697,
+      "total_tokens": 3467,
+      "completion_tokens": 1770,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"accompanied\",\n            \"object\": \"husband\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1997\"},\n                {\"relation\": \"place\", \"object\": \"Sweden\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"accompanied\",\n            \"object\": \"husband\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1997\"},\n                {\"relation\": \"place\", \"object\": \"Finland\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"accompanied\",\n            \"object\": \"husband\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1999\"},\n                {\"relation\": \"place\", \"object\": \"China\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"interfered in\",\n            \"object\": \"husband's political work\",\n            \"qualifiers\": [\n                {\"relation\": \"polarity\", \"object\": \"negative\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"activity\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"met with\",\n            \"object\": \"voters\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1996 election campaign\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"gave interviews to\",\n            \"object\": \"media\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1996 election campaign\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Naina Yeltsina\",\n            \"relation\": \"participated in\",\n            \"object\": \"state funeral of husband\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"April 2007\"},\n                {\"relation\": \"place\", \"object\": \"Moscow\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Naina Yeltsina",
+        "relation": "accompanied",
+        "object": "husband",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1997"
+          },
+          {
+            "relation": "place",
+            "object": "Sweden"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Naina Yeltsina",
+        "relation": "accompanied",
+        "object": "husband",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1997"
+          },
+          {
+            "relation": "place",
+            "object": "Finland"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Naina Yeltsina",
+        "relation": "accompanied",
+        "object": "husband",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1999"
+          },
+          {
+            "relation": "place",
+            "object": "China"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Naina Yeltsina",
+        "relation": "interfered in",
+        "object": "husband's political work",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "activity"
+      },
+      {
+        "subject": "Naina Yeltsina",
+        "relation": "met with",
+        "object": "voters",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1996 election campaign"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "group of people"
+      },
+      {
+        "subject": "Naina Yeltsina",
+        "relation": "gave interviews to",
+        "object": "media",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1996 election campaign"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "Naina Yeltsina",
+        "relation": "participated in",
+        "object": "state funeral of husband",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "April 2007"
+          },
+          {
+            "relation": "place",
+            "object": "Moscow"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "event"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1697,
+    "total_tokens": 3467,
+    "completion_tokens": 1770,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 731,
+    "output_tokens_est": 638
+  },
+  "attempts": 1,
+  "latency_s": 21.751140121996286,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:53:50.785133+00:00",
+  "cache_key": "afc9af84a4e5d96ecb294fa5f23bbdb3"
+}

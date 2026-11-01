@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "014df71316ba9b66",
+    "input_hash": "694caf0a977b580527dd5ce8efcd74bca896fc543af2a6877241588fba3d3db9",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-35bb99a11ce0d550ea0c298813a47126",
+    "object": "chat.completion",
+    "created": 1791542635,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"date of birth\",\n            \"object\": \"13 March 1760\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"date of death\",\n            \"object\": \"2 March 1801\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"occupation\",\n            \"object\": \"writer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"France\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"claimed to be descendant of\",\n            \"object\": \"La Fontaine\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                },\n                {\n                    \"relation\": \"parent\",\n                    \"object\": \"mother\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"claimed to be descendant of\",\n            \"object\": \"Racine\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                },\n                {\n                    \"relation\": \"parent\",\n                    \"object\": \"father\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Charles-Albert Demoustier\n\nCharles-Albert Demoustier (13 March 1760 – 2 March 1801) was a French writer. He falsely claimed to be a descendant of La Fontaine by his mother and Racine by his father.\"\n\nWe have facts:\n\n- Charles-Albert Demoustier date of birth: 13 March 1760\n- date of death: 2 March 1801\n- occupation: writer (French writer -> occupation writer, nationality French)\n- nationality: French (maybe relation \"country of citizenship\" or \"nationality\". Use \"country of citizenship\" or \"nationality\". We'll choose \"country of citizenship\" maybe.\n- He falsely claimed to be a descendant of La Fontaine by his mother and Racine by his father.\n\nWe need to represent claim with qualifiers: relation \"claim\" maybe \"claimed\". In Wikidata there is property \"claimed\" but more typical is \"statement\". Could use \"claimed to be\". The relation could be \"claimed relationship\". But we need to follow style: We can use relation \"claim\" or \"statement\". Let's think: The fact is that \"He falsely claimed to be a descendant of La Fontaine by his mother\". So subject: Charles-Albert Demoustier, relation: \"claimed to be descendant of\", object: \"La Fontaine\". Qualifiers: \"polarity\": negative? Actually the claim is false, so the claim statement is false. The text says \"He falsely claimed\". So we need to encode the claim with a qualifier \"polarity negative\" indicating the claim is false. Also we need qualifiers for \"by his mother\". That indicates the descent line: mother side. Could be qualifier \"maternal line\" but maybe \"by mother\" as qualifier \"parental line\" but we need a relation. Could use \"qualifier relation\": \"by mother\". Not standard but we can create relation \"by mother\". The instruction says qualifiers should have relation and object like triplets. So we can include qualifier {\"relation\": \"by\", \"object\": \"mother\"}? But better \"parental line\": \"mother\". Not sure. We'll include qualifier with relation \"parent\" and object \"mother\". Could be \"by mother\". We'll use relation \"by mother\". Similarly for Racine by his father: claim as descendant of Racine, qualifier \"by father\". Also need polarity negative for both claims.\n\nWe also need to capture that the claim is false (polarity negative). Also claim is false, so maybe also \"modality\": \"false\"? But spec says use polarity for negated claims. So we add qualifier polarity negative.\n\nThus we have two claim triplets:\n\n1. (Charles-Albert Demoustier, claimed to be descendant of, La Fontaine) with qualifiers: polarity negative, by mother.\n\n2. (Charles-Albert Demoustier, claimed to be descendant of, Racine) with qualifiers: polarity negative, by father.\n\nNow we need subject_type and object_type.\n\n- Subject: human.\n- object: La Fontaine (human) and Racine (human). Relation: \"claimed to be descendant of\" maybe object_type \"human\". Use \"human\" for both.\n\nAlso need occupation: writer (profession). So triplet: (Charles-Albert Demoustier, occupation, writer). subject_type human, object_type profession.\n\nNationality: French. Could be relation \"country of citizenship\" or \"nationality\". Use \"country of citizenship\". object_type \"country\". So (Charles-Albert Demoustier, country of citizenship, France). subject_type human, object_type country.\n\nDates: date of birth, date of death.\n\nNow produce JSON.\n\nCheck qualifiers format: list of dict with relation and object.\n\nFor claim qualifiers: include \"polarity\": \"negative\". Also \"by mother\" maybe \"by mother\". We'll set relation \"by mother\" (object maybe \"mother\"? Actually we could set relation \"parental line\" and object \"mother\". Use relation \"parental line\". But spec says qualifier relation connects an object and the triplet qualifier belongs to. So qualifier is like \"by mother\" but better to be \"by mother\". We'll set relation \"by mother\", object \"mother\". For father similarly.\n\nThus qualifiers list: [{\"relation\":\"polarity\",\"object\":\"negative\"},{\"relation\":\"by mother\",\"object\":\"mother\"}]. But \"by mother\" maybe redundant. Could just \"relation\":\"parent\",\"object\":\"mother\". We'll do that.\n\nAlso we need qualifier for father: \"parent\":\"father\".\n\nNow produce JSON.\n\nCheck order: Provide list.\n\nLet's craft final answer."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1637,
+      "total_tokens": 3021,
+      "completion_tokens": 1384,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"date of birth\",\n            \"object\": \"13 March 1760\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"date of death\",\n            \"object\": \"2 March 1801\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"occupation\",\n            \"object\": \"writer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"France\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"claimed to be descendant of\",\n            \"object\": \"La Fontaine\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                },\n                {\n                    \"relation\": \"parent\",\n                    \"object\": \"mother\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Charles-Albert Demoustier\",\n            \"relation\": \"claimed to be descendant of\",\n            \"object\": \"Racine\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                },\n                {\n                    \"relation\": \"parent\",\n                    \"object\": \"father\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Charles-Albert Demoustier",
+        "relation": "date of birth",
+        "object": "13 March 1760",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Charles-Albert Demoustier",
+        "relation": "date of death",
+        "object": "2 March 1801",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Charles-Albert Demoustier",
+        "relation": "occupation",
+        "object": "writer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Charles-Albert Demoustier",
+        "relation": "country of citizenship",
+        "object": "France",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Charles-Albert Demoustier",
+        "relation": "claimed to be descendant of",
+        "object": "La Fontaine",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          },
+          {
+            "relation": "parent",
+            "object": "mother"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Charles-Albert Demoustier",
+        "relation": "claimed to be descendant of",
+        "object": "Racine",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          },
+          {
+            "relation": "parent",
+            "object": "father"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1637,
+    "total_tokens": 3021,
+    "completion_tokens": 1384,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 611,
+    "output_tokens_est": 518
+  },
+  "attempts": 1,
+  "latency_s": 17.552184434010996,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T10:44:12.779971+00:00",
+  "cache_key": "c9776ea7b3f60ceeb5a3d3fca43d66ba"
+}

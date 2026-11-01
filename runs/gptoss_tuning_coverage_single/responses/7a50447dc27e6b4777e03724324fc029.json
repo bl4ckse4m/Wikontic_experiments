@@ -1,0 +1,165 @@
+{
+  "task": {
+    "input_id": "bf86cac530bcd14b",
+    "input_hash": "93895152b0060c613b9d98d6c13d082dfabf11e9a41d3145e30d8d32dacf0ebc",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-21f0f1fda175995e38959089438e9619",
+    "object": "chat.completion",
+    "created": 1791506450,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"date of birth\",\n            \"object\": \"30 April 1981\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"nationality\",\n            \"object\": \"Norway\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"occupation\",\n            \"object\": \"cross-country skier\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"career status\",\n            \"object\": \"retired\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"string\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"active years\",\n            \"object\": \"2002–2015\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"time period\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"number of individual World Cup victories\",\n            \"object\": \"6\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"number of individual medals at FIS Nordic World Ski Championships and Winter Olympic Games\",\n            \"object\": \"5\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"number of gold medals with Norway relay team\",\n            \"object\": \"4\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"nickname\",\n            \"object\": \"the eternal fourth\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Norwegian media\"\n                },\n                {\n                    \"relation\": \"reason\",\n                    \"object\": \"many finishes in fourth place\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"string\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nFirst identify entities: Kristin Størmer Steira (human). Norwegian (nationality). cross-country skier (occupation/sport). retired (status). Born 30 April 1981 (date of birth). Competed from 2002 to 2015 (activity period). Won six individual World Cup victories (award/achievement). Won five individual medals at the FIS Nordic World Ski Championships and Winter Olympic Games (need to split: maybe two separate facts: medals at Championships, medals at Olympic Games). Also won four gold medals with the Norway relay team (team achievement). Also dubbed \"the eternal fourth\" in Norwegian media (nickname). Also \"the eternal fourth\" due to many finishes in fourth place (reason). Could capture nickname relation.\n\nWe need to produce triplets with subject, relation, object, qualifiers, subject_type, object_type.\n\nDefine relations: date of birth, occupation, sport, nationality, retirement status? Could use \"retired\" as \"career status\". Might use \"career end\" but we have competition period.\n\nLet's list:\n\n1. (Kristin Størmer Steira, date of birth, 30 April 1981) qualifiers none. subject_type human, object_type date.\n\n2. (Kristin Størmer Steira, nationality, Norway) maybe object_type country.\n\n3. (Kristin Størmer Steira, occupation, cross-country skier) object_type sport or profession. Could also have relation \"sport\" but occupation is fine.\n\n4. (Kristin Størmer Steira, career status, retired) object_type string? maybe \"retired\" as status. Use relation \"retired\" maybe \"career end\". We'll use \"retired\" as relation? Better: relation \"retired\" with object \"true\". But spec expects object entity. Could use \"retired\" as object_type \"boolean\". But maybe use relation \"career status\" object \"retired\". We'll do relation \"career status\", object \"retired\". subject_type human, object_type string.\n\n5. (Kristin Størmer Steira, competition period, ???) Actually we can represent as two qualifiers on a \"participated in\" relation? Simpler: relation \"active years\" object \"2002–2015\". Use object_type \"time period\". No qualifiers.\n\n6. (Kristin Størmer Steira, award received, World Cup victory) but need six individual victories. Could represent as (Kristin..., number of individual World Cup victories, 6). Use relation \"number of individual World Cup victories\". object_type quantity. Or \"award received\" with qualifier count. But spec: numbers, quantities, measurements. So we can have a triplet: (Kristin..., number of individual World Cup victories, 6). subject_type human, object_type quantity.\n\n7. (Kristin..., number of individual medals at FIS Nordic World Ski Championships, 5). Also separate for Winter Olympic Games? The text says \"five individual medals at the FIS Nordic World Ski Championships and Winter Olympic Games.\" Could be total five across both events. Might treat as combined. We'll create two separate: one for Championships, one for Olympic Games, but ambiguous. Safer: one triplet: (Kristin..., number of individual medals at FIS Nordic World Ski Championships, 5) and (Kristin..., number of individual medals at Winter Olympic Games, 5). But that duplicates count. The text says \"five individual medals at the FIS Nordic World Ski Championships and Winter Olympic Games.\" Could be total five across both. We'll capture as combined: relation \"number of individual medals at major championships\", object \"5\". But need object_type quantity.\n\nMaybe create two: \"FIS Nordic World Ski Championships\" and \"Winter Olympic Games\". Use qualifier \"point in time\"? Not needed.\n\nWe'll create two separate triplets each with count 5? Might be inaccurate. Better to reflect text: \"five individual medals at the FIS Nordic World Ski Championships and Winter Olympic Games.\" So relation \"number of individual medals at FIS Nordic World Ski Championships and Winter Olympic Games\", object \"5\". Use object_type quantity.\n\n8. (Kristin..., number of gold medals with Norway relay team, 4). relation \"number of gold medals with Norway relay team\". object_type quantity.\n\n9. (Kristin..., nickname, \"the eternal fourth\") relation \"nickname\". object_type string. Qualifier maybe \"attribution\" with object \"Norwegian media\". So add qualifier: {\"relation\":\"attribution\",\"object\":\"Norwegian media\"}.\n\n10. (Kristin..., reason for nickname, \"many finishes in fourth place\") relation \"reason for nickname\". object_type string. Could also attach as qualifier to nickname: maybe qualifier \"reason\" but spec only allows qualifiers with relation and object. So we can add qualifier to nickname: {\"relation\":\"reason\",\"object\":\"many finishes in fourth place\"}.\n\nThus nickname triplet has two qualifiers: attribution and reason.\n\nCheck other relations: \"team\" Norway relay team. Could also have (Norway relay team, member, Kristin Størmer Steira) but not needed.\n\nNow produce JSON.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- human\n- date\n- country\n- sport (or profession)\n- string (for retired status, nickname, reason)\n- time period\n- quantity (maybe \"quantity\")\n- maybe \"team\" for Norway relay team? but object is number, so quantity.\n\nLet's assign.\n\nTriplet list.\n\nMake sure qualifiers list is list of dicts.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1686,
+      "total_tokens": 3424,
+      "completion_tokens": 1738,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"date of birth\",\n            \"object\": \"30 April 1981\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"nationality\",\n            \"object\": \"Norway\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"occupation\",\n            \"object\": \"cross-country skier\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"career status\",\n            \"object\": \"retired\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"string\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"active years\",\n            \"object\": \"2002–2015\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"time period\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"number of individual World Cup victories\",\n            \"object\": \"6\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"number of individual medals at FIS Nordic World Ski Championships and Winter Olympic Games\",\n            \"object\": \"5\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"number of gold medals with Norway relay team\",\n            \"object\": \"4\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Kristin Størmer Steira\",\n            \"relation\": \"nickname\",\n            \"object\": \"the eternal fourth\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Norwegian media\"\n                },\n                {\n                    \"relation\": \"reason\",\n                    \"object\": \"many finishes in fourth place\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"string\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Kristin Størmer Steira",
+        "relation": "date of birth",
+        "object": "30 April 1981",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Kristin Størmer Steira",
+        "relation": "nationality",
+        "object": "Norway",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Kristin Størmer Steira",
+        "relation": "occupation",
+        "object": "cross-country skier",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "sport"
+      },
+      {
+        "subject": "Kristin Størmer Steira",
+        "relation": "career status",
+        "object": "retired",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "string"
+      },
+      {
+        "subject": "Kristin Størmer Steira",
+        "relation": "active years",
+        "object": "2002–2015",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "time period"
+      },
+      {
+        "subject": "Kristin Størmer Steira",
+        "relation": "number of individual World Cup victories",
+        "object": "6",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Kristin Størmer Steira",
+        "relation": "number of individual medals at FIS Nordic World Ski Championships and Winter Olympic Games",
+        "object": "5",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Kristin Størmer Steira",
+        "relation": "number of gold medals with Norway relay team",
+        "object": "4",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Kristin Størmer Steira",
+        "relation": "nickname",
+        "object": "the eternal fourth",
+        "qualifiers": [
+          {
+            "relation": "attribution",
+            "object": "Norwegian media"
+          },
+          {
+            "relation": "reason",
+            "object": "many finishes in fourth place"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "string"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1686,
+    "total_tokens": 3424,
+    "completion_tokens": 1738,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 762,
+    "output_tokens_est": 669
+  },
+  "attempts": 1,
+  "latency_s": 19.961216052004602,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:41:10.289697+00:00",
+  "cache_key": "7a50447dc27e6b4777e03724324fc029"
+}

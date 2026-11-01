@@ -1,0 +1,154 @@
+{
+  "task": {
+    "input_id": "be9d1afa9b2ae00a",
+    "input_hash": "ca195924165cdba0ea436116615d0a2d1fe0cdbd724630cb421812a42ec72fc5",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793210534-leaIDz7LELZXE9c7Byhe",
+    "object": "chat.completion",
+    "created": 1793210534,
+    "model": "openai/gpt-oss-120b",
+    "provider": "CoreWeave",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"FC Khujand\",\n            \"relation\": \"instance of\",\n            \"object\": \"football club\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports organization\",\n            \"object_type\": \"sports organization\"\n        },\n        {\n            \"subject\": \"FC Khujand\",\n            \"relation\": \"based in\",\n            \"object\": \"Khujand\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"FC Khujand\",\n            \"relation\": \"participates in\",\n            \"object\": \"Tajik League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports organization\",\n            \"object_type\": \"sports league\"\n        },\n        {\n            \"subject\": \"Tajik League\",\n            \"relation\": \"top division in\",\n            \"object\": \"Tajikistan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports league\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FK Khujand\",\n            \"relation\": \"also known as\",\n            \"object\": \"FC Khujand\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports organization\",\n            \"object_type\": \"sports organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"FK Khujand\\n\\nFC Khujand () is a Tajik football club based in Khujand, currently playing in the Tajik League, the top division in the country.\"\n\nWe have entities: FK Khujand, FC Khujand (likely same club). The text says FC Khujand is a Tajik football club based in Khujand, currently playing in the Tajik League, the top division in the country.\n\nWe need to produce triplets:\n\n- subject: FC Khujand (or FK Khujand?). Probably both refer to same club; we can have two separate subjects? The text mentions both names. Could treat them as separate entities but they refer to same club. Might create two entities: \"FK Khujand\" and \"FC Khujand\". But they are synonyms. Could create a \"also known as\" relation. However not required. We can extract facts for FC Khujand.\n\nTriplets:\n\n1. FC Khujand - instance of - football club (type: football club). relation maybe \"instance of\" or \"type\". Use \"instance of\" as relation? In example they used \"occupation\" etc. For organization, maybe \"instance of\" or \"subclass of\". Use \"instance of\". object_type: \"football club\". subject_type: \"football club\"? Actually subject_type is class of subject: \"football club\". object_type is class of object: maybe \"sport\". But they want object_type as class of object. For \"instance of\", object is class. So object_type = \"sport organization\" maybe. But we can set object_type \"football club\". But that duplicates. Let's follow pattern: In example, for occupation they used object_type \"profession\". For award they used object_type \"award\". So for \"instance of\", object_type could be \"football club\". Subject_type \"football club\"? That seems odd. Maybe relation \"sport\" not needed. Let's use relation \"sport\"?? Actually we need to capture that it's a football club based in Khujan. So we can have:\n\n- subject: FC Khujand\n- relation: \"based in\"\n- object: Khujand\n- qualifiers: none\n- subject_type: \"football club\"\n- object_type: \"city\"\n\nAlso:\n\n- subject: FC Khujand\n- relation: \"league\"\n- object: Tajik League\n- qualifiers: maybe \"point in time\" \"currently\". But \"currently playing in the Tajik League\". Could add qualifier \"status\" \"current\". But we can just have relation \"participates in league\". Use \"league\". object_type: \"sports league\".\n\nAlso:\n\n- subject: Tajik League\n- relation: \"tier\"\n- object: \"top division\"\n- qualifiers: maybe \"in country\" \"Tajikistan\". But we can just have relation \"level\" \"top division\". object_type: \"division\".\n\nBut we need to capture that Tajik League is the top division in the country. So:\n\n- subject: Tajik League\n- relation: \"ranking\"\n- object: \"top division\"\n- qualifiers: [{\"relation\":\"in country\",\"object\":\"Tajikistan\",\"object_type\":\"country\"}]\n\nBut maybe simpler: \"top division in the country\" qualifies Tajik League. So we can have qualifier \"top division\" as object_type \"division\". But they want qualifiers attached to a triplet. So we could have a triplet: FC Khujand - \"league\" - Tajik League, qualifiers: [{\"relation\":\"status\",\"object\":\"current\",\"object_type\":\"string\"}] but not needed.\n\nAlso we have \"FK Khujand\" appears as heading. Could add \"also known as\" relation: FK Khujand - \"also known as\" - FC Khujand. subject_type: \"football club\". object_type: \"football club\". But not required.\n\nLet's produce a set of triplets:\n\n1. FC Khujand - instance of - football club\n2. FC Khujand - based in - Khujand\n3. FC Khujand - participates in - Tajik League\n4. Tajik League - top division in - Tajikistan (or \"top division in country\")\n5. FK Khujand - also known as - FC Khujand\n\nDefine types:\n\n- football club: \"sports organization\"\n- city: \"city\"\n- league: \"sports league\"\n- country: \"country\"\n- division: \"division\"\n\nFor \"top division in\" relation, object is \"Tajikistan\". So object_type \"country\". Relation \"top division in\". Could be \"top division in\". Use \"top division in\". object_type \"country\". Subject_type \"sports league\".\n\nNow format JSON as per spec: top-level key \"triplets\": list of dicts.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": [], \"subject_type\", \"object_type\". For qualifiers list, include dicts with \"relation\",\"object\",\"object_type\". Provide qualifiers where needed.\n\nAdd qualifiers for \"currently playing\" maybe not needed.\n\nLet's produce final JSON.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"FK Khujand\\n\\nFC Khujand () is a Tajik football club based in Khujand, currently playing in the Tajik League, the top division in the country.\"\n\nWe have entities: FK Khujand, FC Khujand (likely same club). The text says FC Khujand is a Tajik football club based in Khujand, currently playing in the Tajik League, the top division in the country.\n\nWe need to produce triplets:\n\n- subject: FC Khujand (or FK Khujand?). Probably both refer to same club; we can have two separate subjects? The text mentions both names. Could treat them as separate entities but they refer to same club. Might create two entities: \"FK Khujand\" and \"FC Khujand\". But they are synonyms. Could create a \"also known as\" relation. However not required. We can extract facts for FC Khujand.\n\nTriplets:\n\n1. FC Khujand - instance of - football club (type: football club). relation maybe \"instance of\" or \"type\". Use \"instance of\" as relation? In example they used \"occupation\" etc. For organization, maybe \"instance of\" or \"subclass of\". Use \"instance of\". object_type: \"football club\". subject_type: \"football club\"? Actually subject_type is class of subject: \"football club\". object_type is class of object: maybe \"sport\". But they want object_type as class of object. For \"instance of\", object is class. So object_type = \"sport organization\" maybe. But we can set object_type \"football club\". But that duplicates. Let's follow pattern: In example, for occupation they used object_type \"profession\". For award they used object_type \"award\". So for \"instance of\", object_type could be \"football club\". Subject_type \"football club\"? That seems odd. Maybe relation \"sport\" not needed. Let's use relation \"sport\"?? Actually we need to capture that it's a football club based in Khujan. So we can have:\n\n- subject: FC Khujand\n- relation: \"based in\"\n- object: Khujand\n- qualifiers: none\n- subject_type: \"football club\"\n- object_type: \"city\"\n\nAlso:\n\n- subject: FC Khujand\n- relation: \"league\"\n- object: Tajik League\n- qualifiers: maybe \"point in time\" \"currently\". But \"currently playing in the Tajik League\". Could add qualifier \"status\" \"current\". But we can just have relation \"participates in league\". Use \"league\". object_type: \"sports league\".\n\nAlso:\n\n- subject: Tajik League\n- relation: \"tier\"\n- object: \"top division\"\n- qualifiers: maybe \"in country\" \"Tajikistan\". But we can just have relation \"level\" \"top division\". object_type: \"division\".\n\nBut we need to capture that Tajik League is the top division in the country. So:\n\n- subject: Tajik League\n- relation: \"ranking\"\n- object: \"top division\"\n- qualifiers: [{\"relation\":\"in country\",\"object\":\"Tajikistan\",\"object_type\":\"country\"}]\n\nBut maybe simpler: \"top division in the country\" qualifies Tajik League. So we can have qualifier \"top division\" as object_type \"division\". But they want qualifiers attached to a triplet. So we could have a triplet: FC Khujand - \"league\" - Tajik League, qualifiers: [{\"relation\":\"status\",\"object\":\"current\",\"object_type\":\"string\"}] but not needed.\n\nAlso we have \"FK Khujand\" appears as heading. Could add \"also known as\" relation: FK Khujand - \"also known as\" - FC Khujand. subject_type: \"football club\". object_type: \"football club\". But not required.\n\nLet's produce a set of triplets:\n\n1. FC Khujand - instance of - football club\n2. FC Khujand - based in - Khujand\n3. FC Khujand - participates in - Tajik League\n4. Tajik League - top division in - Tajikistan (or \"top division in country\")\n5. FK Khujand - also known as - FC Khujand\n\nDefine types:\n\n- football club: \"sports organization\"\n- city: \"city\"\n- league: \"sports league\"\n- country: \"country\"\n- division: \"division\"\n\nFor \"top division in\" relation, object is \"Tajikistan\". So object_type \"country\". Relation \"top division in\". Could be \"top division in\". Use \"top division in\". object_type \"country\". Subject_type \"sports league\".\n\nNow format JSON as per spec: top-level key \"triplets\": list of dicts.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": [], \"subject_type\", \"object_type\". For qualifiers list, include dicts with \"relation\",\"object\",\"object_type\". Provide qualifiers where needed.\n\nAdd qualifiers for \"currently playing\" maybe not needed.\n\nLet's produce final JSON.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1390,
+      "completion_tokens": 1364,
+      "total_tokens": 2754,
+      "cost": 0.00027358,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00027358,
+        "upstream_inference_prompt_cost": 4.17e-05,
+        "upstream_inference_completions_cost": 0.00023188
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1072,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"FC Khujand\",\n            \"relation\": \"instance of\",\n            \"object\": \"football club\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports organization\",\n            \"object_type\": \"sports organization\"\n        },\n        {\n            \"subject\": \"FC Khujand\",\n            \"relation\": \"based in\",\n            \"object\": \"Khujand\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"FC Khujand\",\n            \"relation\": \"participates in\",\n            \"object\": \"Tajik League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports organization\",\n            \"object_type\": \"sports league\"\n        },\n        {\n            \"subject\": \"Tajik League\",\n            \"relation\": \"top division in\",\n            \"object\": \"Tajikistan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports league\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FK Khujand\",\n            \"relation\": \"also known as\",\n            \"object\": \"FC Khujand\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports organization\",\n            \"object_type\": \"sports organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "FC Khujand",
+        "relation": "instance of",
+        "object": "football club",
+        "qualifiers": [],
+        "subject_type": "sports organization",
+        "object_type": "sports organization"
+      },
+      {
+        "subject": "FC Khujand",
+        "relation": "based in",
+        "object": "Khujand",
+        "qualifiers": [],
+        "subject_type": "sports organization",
+        "object_type": "city"
+      },
+      {
+        "subject": "FC Khujand",
+        "relation": "participates in",
+        "object": "Tajik League",
+        "qualifiers": [],
+        "subject_type": "sports organization",
+        "object_type": "sports league"
+      },
+      {
+        "subject": "Tajik League",
+        "relation": "top division in",
+        "object": "Tajikistan",
+        "qualifiers": [],
+        "subject_type": "sports league",
+        "object_type": "country"
+      },
+      {
+        "subject": "FK Khujand",
+        "relation": "also known as",
+        "object": "FC Khujand",
+        "qualifiers": [],
+        "subject_type": "sports organization",
+        "object_type": "sports organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1390,
+    "completion_tokens": 1364,
+    "total_tokens": 2754,
+    "cost": 0.00027358,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00027358,
+      "upstream_inference_prompt_cost": 4.17e-05,
+      "upstream_inference_completions_cost": 0.00023188
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1072,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 455,
+    "output_tokens_est": 328
+  },
+  "attempts": 1,
+  "latency_s": 34.358484439995664,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:02:48.906263+00:00",
+  "cache_key": "fe3b6c6da33bf49178b19113d2461614"
+}

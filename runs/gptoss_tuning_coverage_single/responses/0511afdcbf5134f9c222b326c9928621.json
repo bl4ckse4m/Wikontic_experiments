@@ -1,0 +1,186 @@
+{
+  "task": {
+    "input_id": "64a230ac35e15f21",
+    "input_hash": "8858f180e3a7e93a474a872010842ab536862592490e8347600bab09a7dea5a7",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-3eeb0af7caa1bfa4b35d24a98a1ffeba",
+    "object": "chat.completion",
+    "created": 1791503658,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"position held\",\n            \"object\": \"President of the United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political position\"\n        },\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"said\",\n            \"object\": \"recognition of Jerusalem as Israel's capital\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"6 December 2017\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"said\",\n            \"object\": \"intention to move the embassy from Tel Aviv to Jerusalem\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"6 December 2017\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"recognises\",\n            \"object\": \"Jerusalem\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"as capital of\",\n                    \"object\": \"Israel\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"initiates\",\n            \"object\": \"embassy relocation\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"origin\",\n                    \"object\": \"Tel Aviv\"\n                },\n                {\n                    \"relation\": \"destination\",\n                    \"object\": \"Jerusalem\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"6 December 2017\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"state\",\n            \"relation\": \"recognises\",\n            \"object\": \"Jerusalem as national capital\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"sovereign state\",\n            \"object_type\": \"political concept\"\n        },\n        {\n            \"subject\": \"state\",\n            \"relation\": \"has embassy in\",\n            \"object\": \"Jerusalem\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"sovereign state\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"United Nations General Assembly resolution ES-10/L.22\",\n            \"relation\": \"instance of\",\n            \"object\": \"resolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"legal document\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"United Nations General Assembly resolution ES-10/L.22\n\nOn 6 December 2017, US President Donald Trump said that he would recognise Jerusalem as Israel's capital and begin the process of moving the embassy from Tel Aviv to Jerusalem. This was a departure from previous Security Council resolutions and prevailing international norms (where no state either recognises Jerusalem as a national capital nor has an embassy there).\"\n\nWe need to capture facts:\n\n- There is a UN General Assembly resolution ES-10/L.22 (maybe just an entity). Could be a resolution entity. But no explicit relation given. Might be just mention; maybe we can create a triplet: \"United Nations General Assembly resolution ES-10/L.22\" is a \"resolution\" type. But we need a relation; maybe \"instance of\" relation? Not in text. The text just mentions it as title. Might not need to extract unless there is a relation.\n\n- On 6 December 2017, US President Donald Trump said that he would recognise Jerusalem as Israel's capital and begin the process of moving the embassy from Tel Aviv to Jerusalem.\n\nSo we have statements:\n\n1. Donald Trump said (speech) that he would recognise Jerusalem as Israel's capital. So we can have a triplet: Donald Trump, statement, \"recognise Jerusalem as Israel's capital\". But we need relation types. Could be \"said\" relation with object being a statement. But typical Wikidata property: \"statement\" not typical. Could use \"said\" as relation. But we need object entity; maybe \"recognition of Jerusalem as Israel's capital\". Could treat as \"recognition\" relation: (Donald Trump, recognises, Jerusalem as Israel's capital). But the object should be an entity, not phrase. Could be \"Jerusalem\". And relation \"capital of\" with object \"Israel\". But the claim is that he would recognise Jerusalem as Israel's capital. So we could have triplet: Donald Trump, recognises, Jerusalem as capital of Israel. Might need to split: (Donald Trump, recognises, Jerusalem) with qualifier \"as capital of\", but not typical.\n\nBetter: Use relation \"recognises\" with object \"Jerusalem as Israel's capital\". Might be okay.\n\nAlso \"begin the process of moving the embassy from Tel Aviv to Jerusalem.\" So triplet: Donald Trump, intends to move embassy, from Tel Aviv to Jerusalem. Could be relation \"intended action\" but maybe \"plan\" relation. Could use \"plan to move embassy\". Might be \"embassy relocation\" event.\n\nWe can also capture event: \"moving the embassy from Tel Aviv to Jerusalem\". So subject: \"embassy relocation\" (or \"moving the embassy\") with qualifiers: \"origin\" Tel Aviv, \"destination\" Jerusalem, \"initiated by\" Donald Trump, \"point in time\" 6 December 2017 (or after). But we need to extract explicit facts.\n\nAlso note: \"This was a departure from previous Security Council resolutions and prevailing international norms (where no state either recognises Jerusalem as a national capital nor has an embassy there).\" So we have a claim that previous Security Council resolutions and norms did NOT recognise Jerusalem as a national capital nor have an embassy there. So we can capture negative statements:\n\n- No state recognises Jerusalem as a national capital. That's a negative universal claim. Could be captured as: \"state\", \"recognises\", \"Jerusalem as national capital\" with qualifier polarity negative. But subject ambiguous (any state). Might be too generic; maybe we skip.\n\n- No state has an embassy there (Jerusalem). So similar.\n\nBut we need to extract explicit facts: \"previous Security Council resolutions\" (plural) are referenced, but not specific.\n\nProbably we should extract:\n\nTriplet 1: Donald Trump, position held, US President (subject_type human, object_type political position). But not explicit? It says \"US President Donald Trump\". That's a title. Could extract occupation/position.\n\nTriplet: Donald Trump, occupation, US President (or \"President of the United States\"). Use object_type \"political position\".\n\nTriplet 2: Donald Trump, said, (that he would recognise Jerusalem as Israel's capital). Use relation \"said\". Object maybe \"recognition of Jerusalem as Israel's capital\". Could treat as a statement entity.\n\nBut we need object_type maybe \"statement\". Could be okay.\n\nAdd qualifier: point in time 6 December 2017.\n\nTriplet 3: Donald Trump, said, (that he would begin process of moving embassy from Tel Aviv to Jerusalem). relation \"said\". qualifier point in time.\n\nTriplet 4: Donald Trump, intends to recognise, Jerusalem as Israel's capital. relation \"recognises\". object \"Jerusalem\". qualifier \"as capital of\", object \"Israel\". But we need to encode qualifiers as separate qualifiers: maybe qualifier relation \"as capital of\", object \"Israel\". Also qualifier \"polarity\" positive.\n\nTriplet 5: Donald Trump, intends to move embassy, (embassy). Might be \"embassy relocation\". Could be: Donald Trump, initiates, embassy relocation. Qualifiers: origin Tel Aviv, destination Jerusalem, point in time after 6 December 2017.\n\nTriplet 6: Security Council resolutions, (previous) ... but not explicit.\n\nTriplet 7: No state recognises Jerusalem as national capital (negative). Could be: \"state\", \"recognises\", \"Jerusalem as national capital\", qualifier polarity negative, qualifier \"condition\" maybe \"no state\". But ambiguous.\n\nProbably better to include negative claim: \"no state recognises Jerusalem as a national capital\". Represent as subject \"state\", relation \"recognises\", object \"Jerusalem as national capital\", qualifier polarity negative. subject_type \"group of people\" maybe \"state\". object_type \"political entity\".\n\nSimilarly: \"no state has an embassy there\" (Jerusalem). So subject \"state\", relation \"has embassy in\", object \"Jerusalem\", qualifier polarity negative.\n\nBut the text says \"where no state either recognises Jerusalem as a national capital nor has an embassy there\". So both negative.\n\nWe also have \"United Nations General Assembly resolution ES-10/L.22\". Could be a separate entity but no relation.\n\nMaybe we create a triplet: \"United Nations General Assembly resolution ES-10/L.22\", \"instance of\", \"resolution\". subject_type \"document\", object_type \"legal document\". But not explicit in text; it's just a title. Might be okay.\n\nBut the instruction: extract meaningful triplets that represent factual relationships. Title is a fact that such a resolution exists. Could be considered.\n\nLet's craft final list:\n\n1. Donald Trump - position held - President of the United States (or US President). qualifiers none.\n\n2. Donald Trump - said - recognition of Jerusalem as Israel's capital. qualifiers: point in time 6 December 2017.\n\n3. Donald Trump - said - intention to move embassy from Tel Aviv to Jerusalem. qualifiers: point in time 6 December 2017.\n\n4. Donald Trump - recognises - Jerusalem. qualifiers: as capital of Israel.\n\n5. Donald Trump - initiates - embassy relocation. qualifiers: origin Tel Aviv, destination Jerusalem, point in time 6 December 2017 (or after).\n\n6. State - recognises - Jerusalem as national capital. qualifiers: polarity negative.\n\n7. State - has embassy in - Jerusalem. qualifiers: polarity negative.\n\n8. United Nations General Assembly resolution ES-10/L.22 - instance of - resolution.\n\nPotentially also: \"previous Security Council resolutions\" - type \"resolution\". But not needed.\n\nNow need to assign subject_type and object_type.\n\nDefine types:\n\n- Donald Trump: human\n- President of the United States: political position\n- recognition of Jerusalem as Israel's capital: maybe \"statement\" or \"policy\". Could use \"policy\". But we can set object_type \"statement\".\n- Jerusalem: city (geographic location)\n- Israel: country (so object_type \"country\")\n- embassy relocation: event (or \"process\")\n- Tel Aviv: city\n- Jerusalem (again) location\n- State: political entity (maybe \"sovereign state\")\n- \"Jerusalem as national capital\": maybe \"political concept\". Use object_type \"political concept\".\n- \"embassy\": building? but object is \"Jerusalem\". So object_type \"city\".\n- \"resolution\": document type.\n\nQualifiers need relation names: \"point in time\", \"as capital of\", \"origin\", \"destination\", \"polarity\". Use as given.\n\nNow produce JSON.\n\nCheck qualifiers format: list of dicts with relation and object.\n\nFor triplet 4: qualifiers [{\"relation\":\"as capital of\",\"object\":\"Israel\"}]\n\nTriplet 5: qualifiers [{\"relation\":\"origin\",\"object\":\"Tel Aviv\"},{\"relation\":\"destination\",\"object\":\"Jerusalem\"},{\"relation\":\"point in time\",\"object\":\"6 December 2017\"}]\n\nTriplet 2 and 3: qualifiers point in time.\n\nTriplet 6 and 7: qualifier polarity negative.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1665,
+      "total_tokens": 4170,
+      "completion_tokens": 2505,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"position held\",\n            \"object\": \"President of the United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political position\"\n        },\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"said\",\n            \"object\": \"recognition of Jerusalem as Israel's capital\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"6 December 2017\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"said\",\n            \"object\": \"intention to move the embassy from Tel Aviv to Jerusalem\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"6 December 2017\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"recognises\",\n            \"object\": \"Jerusalem\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"as capital of\",\n                    \"object\": \"Israel\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Donald Trump\",\n            \"relation\": \"initiates\",\n            \"object\": \"embassy relocation\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"origin\",\n                    \"object\": \"Tel Aviv\"\n                },\n                {\n                    \"relation\": \"destination\",\n                    \"object\": \"Jerusalem\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"6 December 2017\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"state\",\n            \"relation\": \"recognises\",\n            \"object\": \"Jerusalem as national capital\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"sovereign state\",\n            \"object_type\": \"political concept\"\n        },\n        {\n            \"subject\": \"state\",\n            \"relation\": \"has embassy in\",\n            \"object\": \"Jerusalem\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"sovereign state\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"United Nations General Assembly resolution ES-10/L.22\",\n            \"relation\": \"instance of\",\n            \"object\": \"resolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"legal document\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Donald Trump",
+        "relation": "position held",
+        "object": "President of the United States",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "political position"
+      },
+      {
+        "subject": "Donald Trump",
+        "relation": "said",
+        "object": "recognition of Jerusalem as Israel's capital",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "6 December 2017"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "statement"
+      },
+      {
+        "subject": "Donald Trump",
+        "relation": "said",
+        "object": "intention to move the embassy from Tel Aviv to Jerusalem",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "6 December 2017"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "statement"
+      },
+      {
+        "subject": "Donald Trump",
+        "relation": "recognises",
+        "object": "Jerusalem",
+        "qualifiers": [
+          {
+            "relation": "as capital of",
+            "object": "Israel"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Donald Trump",
+        "relation": "initiates",
+        "object": "embassy relocation",
+        "qualifiers": [
+          {
+            "relation": "origin",
+            "object": "Tel Aviv"
+          },
+          {
+            "relation": "destination",
+            "object": "Jerusalem"
+          },
+          {
+            "relation": "point in time",
+            "object": "6 December 2017"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "state",
+        "relation": "recognises",
+        "object": "Jerusalem as national capital",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "sovereign state",
+        "object_type": "political concept"
+      },
+      {
+        "subject": "state",
+        "relation": "has embassy in",
+        "object": "Jerusalem",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "sovereign state",
+        "object_type": "city"
+      },
+      {
+        "subject": "United Nations General Assembly resolution ES-10/L.22",
+        "relation": "instance of",
+        "object": "resolution",
+        "qualifiers": [],
+        "subject_type": "document",
+        "object_type": "legal document"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1665,
+    "total_tokens": 4170,
+    "completion_tokens": 2505,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 895,
+    "output_tokens_est": 803
+  },
+  "attempts": 1,
+  "latency_s": 29.930421897995984,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:54:48.675888+00:00",
+  "cache_key": "0511afdcbf5134f9c222b326c9928621"
+}

@@ -1,0 +1,162 @@
+{
+  "task": {
+    "input_id": "bf2aa666c8b22d2f",
+    "input_hash": "aeedf782fb2c0ddd6e110a33b589b885f9ec200365013025c6029bbb8eba037e",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793210680-D4EVEEVwnfj4DNvEbC03",
+    "object": "chat.completion",
+    "created": 1793210680,
+    "model": "openai/gpt-oss-120b",
+    "provider": "CoreWeave",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Herbarium and Botanical Garden complex\",\n            \"relation\": \"part of\",\n            \"object\": \"Shah Abdul Latif University\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"university\"\n        },\n        {\n            \"subject\": \"Herbarium and Botanical Garden complex\",\n            \"relation\": \"located in\",\n            \"object\": \"Khairpur\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Khairpur\",\n            \"relation\": \"located in\",\n            \"object\": \"Sindh\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Sindh\",\n            \"relation\": \"located in\",\n            \"object\": \"Pakistan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"province\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Herbarium and Botanical Garden complex\",\n            \"relation\": \"completion date\",\n            \"object\": \"2008\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Herbarium and Botanical Garden complex\",\n            \"relation\": \"first planned botanical garden in country\",\n            \"object\": \"Pakistan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Herbarium and Botanical Garden, Shah Abdul Latif University\n\nThe Herbarium and Botanical Garden complex of Shah Abdul Latif University is located in Khairpur, Sindh, Pakistan. Completed in 2008, it is the first-ever planned botanical garden of the country. The complex comprises the following:\"\n\nWe need to identify entities: Herbarium and Botanical Garden complex (maybe \"Herbarium and Botanical Garden complex of Shah Abdul Latif University\"), Shah Abdul Latif University, Khairpur, Sindh, Pakistan, year 2008, \"first-ever planned botanical garden of the country\" (maybe relation \"first planned botanical garden in Pakistan\").\n\nTriplets:\n\n1. Subject: Herbarium and Botanical Garden complex (of Shah Abdul Latif University) - maybe entity \"Herbarium and Botanical Garden complex (Shah Abdul Latif University)\". Relation: location, object: Khairpur. qualifiers: maybe \"province\" Sindh, \"country\" Pakistan. But we can have separate location relations: located in city, located in province, located in country. Use separate triplets.\n\n2. Subject: Herbarium and Botanical Garden complex, relation: part of (or affiliated with) Shah Abdul Latis University? Actually \"complex of Shah Abdul Latif University\". So relation: \"part of\" or \"affiliated with\". Use \"part of\" maybe.\n\n3. Subject: Herbarium and Botanical Garden complex, relation: \"inception year\" or \"completion date\" 2008. Use \"completion date\" with qualifier point in time? Actually \"Completed in 2008\". So relation: \"completion date\" object: 2008 (year). Could also be \"point in time\" qualifier but we can directly set object_type year.\n\n4. Subject: Herbarium and Botanical Garden complex, relation: \"first planned botanical garden in country\". Might be expressed as \"first planned botanical garden of Pakistan\". So relation: \"first of type\" maybe \"first planned botanical garden in country\". Could use relation \"first planned botanical garden in country\". But better: relation \"first planned botanical garden\" with qualifier \"country\" Pakistan. However guidelines: relation should be short predicate. Could use \"first planned botanical garden in\" as relation? Might be okay. Or use \"first of type\" with qualifier \"type\" botanical garden, \"country\" Pakistan. Simpler: relation \"first planned botanical garden in country\". We'll treat as relation \"first planned botanical garden in country\". Object: Pakistan. Or object: \"Pakistan\". But that seems redundant. Maybe we can have relation \"first planned botanical garden\" object \"Pakistan\". That works.\n\n5. Subject: Herbarium and Botanical Garden complex, relation: \"located in\", object: Khairpur. object_type: city.\n\n6. Subject: Khairpur, relation: \"located in province\", object: Sindh. object_type: province.\n\n7. Subject: Sindh, relation: \"located in country\", object: Pakistan. object_type: country.\n\nBut maybe we don't need location hierarchy; but we can include.\n\nAlso \"Herbarium and Botanical Garden, Shah Abdul Latif University\" maybe the name of the entity. So subject_type: \"botanical garden\" or \"herbarium\". Could be \"botanical garden\". We'll set subject_type: \"botanical garden\".\n\nShah Abdul Latif University: subject_type: \"university\".\n\nNow produce JSON list.\n\nNeed qualifiers list for each triplet (maybe empty). For completion date, we could have qualifier \"point in time\". But guidelines: they used qualifier for award date. For completion date we can directly set object_type year. So no qualifiers.\n\nFor first planned botanical garden, maybe qualifier \"country\". But we already set object as Pakistan, so no qualifier.\n\nLet's craft.\n\nTriplets:\n\n1. subject: \"Herbarium and Botanical Garden complex (Shah Abdul Latif University)\" maybe just \"Herbarium and Botanical Garden complex\". We'll include \"Shah Abdul Latif University\" as part of name? Use \"Herbarium and Botanical Garden complex\". subject_type: \"botanical garden\".\n\nrelation: \"part of\", object: \"Shah Abdul Latif University\", object_type: \"university\".\n\n2. subject: \"Herbarium and Botanical Garden complex\", relation: \"located in\", object: \"Khairpur\", object_type: \"city\".\n\n3. subject: \"Khairpur\", relation: \"located in\", object: \"Sindh\", object_type: \"province\".\n\n4. subject: \"Sindh\", relation: \"located in\", object: \"Pakistan\", object_type: \"country\".\n\n5. subject: \"Herbarium and Botanical Garden complex\", relation: \"completion date\", object: \"2008\", object_type: \"year\".\n\n6. subject: \"Herbarium and Botanical Garden complex\", relation: \"first planned botanical garden in country\", object: \"Pakistan\", object_type: \"country\". qualifiers empty.\n\nCheck if any other facts: \"The complex comprises the following:\" but no list given, so ignore.\n\nNow format JSON:\n\n{\n \"triplets\": [\n   {...},\n   ...\n ]\n}\n\nEach dict includes qualifiers list (empty). Provide subject_type and object_type.\n\nLet's assign types:\n\n- Herbarium and Botanical Garden complex: \"botanical garden\" (or \"herbarium and botanical garden complex\"). Use \"botanical garden\".\n\n- Shah Abdul Latif University: \"university\".\n\n- Khairpur: \"city\".\n\n- Sindh: \"province\".\n\n- Pakistan: \"country\".\n\n- 2008: \"year\".\n\nNow produce JSON.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"Herbarium and Botanical Garden, Shah Abdul Latif University\n\nThe Herbarium and Botanical Garden complex of Shah Abdul Latif University is located in Khairpur, Sindh, Pakistan. Completed in 2008, it is the first-ever planned botanical garden of the country. The complex comprises the following:\"\n\nWe need to identify entities: Herbarium and Botanical Garden complex (maybe \"Herbarium and Botanical Garden complex of Shah Abdul Latif University\"), Shah Abdul Latif University, Khairpur, Sindh, Pakistan, year 2008, \"first-ever planned botanical garden of the country\" (maybe relation \"first planned botanical garden in Pakistan\").\n\nTriplets:\n\n1. Subject: Herbarium and Botanical Garden complex (of Shah Abdul Latif University) - maybe entity \"Herbarium and Botanical Garden complex (Shah Abdul Latif University)\". Relation: location, object: Khairpur. qualifiers: maybe \"province\" Sindh, \"country\" Pakistan. But we can have separate location relations: located in city, located in province, located in country. Use separate triplets.\n\n2. Subject: Herbarium and Botanical Garden complex, relation: part of (or affiliated with) Shah Abdul Latis University? Actually \"complex of Shah Abdul Latif University\". So relation: \"part of\" or \"affiliated with\". Use \"part of\" maybe.\n\n3. Subject: Herbarium and Botanical Garden complex, relation: \"inception year\" or \"completion date\" 2008. Use \"completion date\" with qualifier point in time? Actually \"Completed in 2008\". So relation: \"completion date\" object: 2008 (year). Could also be \"point in time\" qualifier but we can directly set object_type year.\n\n4. Subject: Herbarium and Botanical Garden complex, relation: \"first planned botanical garden in country\". Might be expressed as \"first planned botanical garden of Pakistan\". So relation: \"first of type\" maybe \"first planned botanical garden in country\". Could use relation \"first planned botanical garden in country\". But better: relation \"first planned botanical garden\" with qualifier \"country\" Pakistan. However guidelines: relation should be short predicate. Could use \"first planned botanical garden in\" as relation? Might be okay. Or use \"first of type\" with qualifier \"type\" botanical garden, \"country\" Pakistan. Simpler: relation \"first planned botanical garden in country\". We'll treat as relation \"first planned botanical garden in country\". Object: Pakistan. Or object: \"Pakistan\". But that seems redundant. Maybe we can have relation \"first planned botanical garden\" object \"Pakistan\". That works.\n\n5. Subject: Herbarium and Botanical Garden complex, relation: \"located in\", object: Khairpur. object_type: city.\n\n6. Subject: Khairpur, relation: \"located in province\", object: Sindh. object_type: province.\n\n7. Subject: Sindh, relation: \"located in country\", object: Pakistan. object_type: country.\n\nBut maybe we don't need location hierarchy; but we can include.\n\nAlso \"Herbarium and Botanical Garden, Shah Abdul Latif University\" maybe the name of the entity. So subject_type: \"botanical garden\" or \"herbarium\". Could be \"botanical garden\". We'll set subject_type: \"botanical garden\".\n\nShah Abdul Latif University: subject_type: \"university\".\n\nNow produce JSON list.\n\nNeed qualifiers list for each triplet (maybe empty). For completion date, we could have qualifier \"point in time\". But guidelines: they used qualifier for award date. For completion date we can directly set object_type year. So no qualifiers.\n\nFor first planned botanical garden, maybe qualifier \"country\". But we already set object as Pakistan, so no qualifier.\n\nLet's craft.\n\nTriplets:\n\n1. subject: \"Herbarium and Botanical Garden complex (Shah Abdul Latif University)\" maybe just \"Herbarium and Botanical Garden complex\". We'll include \"Shah Abdul Latif University\" as part of name? Use \"Herbarium and Botanical Garden complex\". subject_type: \"botanical garden\".\n\nrelation: \"part of\", object: \"Shah Abdul Latif University\", object_type: \"university\".\n\n2. subject: \"Herbarium and Botanical Garden complex\", relation: \"located in\", object: \"Khairpur\", object_type: \"city\".\n\n3. subject: \"Khairpur\", relation: \"located in\", object: \"Sindh\", object_type: \"province\".\n\n4. subject: \"Sindh\", relation: \"located in\", object: \"Pakistan\", object_type: \"country\".\n\n5. subject: \"Herbarium and Botanical Garden complex\", relation: \"completion date\", object: \"2008\", object_type: \"year\".\n\n6. subject: \"Herbarium and Botanical Garden complex\", relation: \"first planned botanical garden in country\", object: \"Pakistan\", object_type: \"country\". qualifiers empty.\n\nCheck if any other facts: \"The complex comprises the following:\" but no list given, so ignore.\n\nNow format JSON:\n\n{\n \"triplets\": [\n   {...},\n   ...\n ]\n}\n\nEach dict includes qualifiers list (empty). Provide subject_type and object_type.\n\nLet's assign types:\n\n- Herbarium and Botanical Garden complex: \"botanical garden\" (or \"herbarium and botanical garden complex\"). Use \"botanical garden\".\n\n- Shah Abdul Latif University: \"university\".\n\n- Khairpur: \"city\".\n\n- Sindh: \"province\".\n\n- Pakistan: \"country\".\n\n- 2008: \"year\".\n\nNow produce JSON.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1415,
+      "completion_tokens": 1519,
+      "total_tokens": 2934,
+      "cost": 0.00030068,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00030068,
+        "upstream_inference_prompt_cost": 4.245e-05,
+        "upstream_inference_completions_cost": 0.00025823
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1168,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Herbarium and Botanical Garden complex\",\n            \"relation\": \"part of\",\n            \"object\": \"Shah Abdul Latif University\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"university\"\n        },\n        {\n            \"subject\": \"Herbarium and Botanical Garden complex\",\n            \"relation\": \"located in\",\n            \"object\": \"Khairpur\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Khairpur\",\n            \"relation\": \"located in\",\n            \"object\": \"Sindh\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Sindh\",\n            \"relation\": \"located in\",\n            \"object\": \"Pakistan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"province\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Herbarium and Botanical Garden complex\",\n            \"relation\": \"completion date\",\n            \"object\": \"2008\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Herbarium and Botanical Garden complex\",\n            \"relation\": \"first planned botanical garden in country\",\n            \"object\": \"Pakistan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Herbarium and Botanical Garden complex",
+        "relation": "part of",
+        "object": "Shah Abdul Latif University",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "university"
+      },
+      {
+        "subject": "Herbarium and Botanical Garden complex",
+        "relation": "located in",
+        "object": "Khairpur",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "city"
+      },
+      {
+        "subject": "Khairpur",
+        "relation": "located in",
+        "object": "Sindh",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "province"
+      },
+      {
+        "subject": "Sindh",
+        "relation": "located in",
+        "object": "Pakistan",
+        "qualifiers": [],
+        "subject_type": "province",
+        "object_type": "country"
+      },
+      {
+        "subject": "Herbarium and Botanical Garden complex",
+        "relation": "completion date",
+        "object": "2008",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "year"
+      },
+      {
+        "subject": "Herbarium and Botanical Garden complex",
+        "relation": "first planned botanical garden in country",
+        "object": "Pakistan",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1415,
+    "completion_tokens": 1519,
+    "total_tokens": 2934,
+    "cost": 0.00030068,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00030068,
+      "upstream_inference_prompt_cost": 4.245e-05,
+      "upstream_inference_completions_cost": 0.00025823
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1168,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 533,
+    "output_tokens_est": 406
+  },
+  "attempts": 1,
+  "latency_s": 28.532389373001934,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:05:08.822688+00:00",
+  "cache_key": "4364a6053930a6490f8a94c5cd494f21"
+}

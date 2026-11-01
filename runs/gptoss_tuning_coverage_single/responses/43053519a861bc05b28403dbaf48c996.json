@@ -1,0 +1,166 @@
+{
+  "task": {
+    "input_id": "6f453ac9884c5268",
+    "input_hash": "6f1ac7453370f08ed0f450237c750326f9368355426e45b69760a3091b4234aa",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a76273ead067c0e3ce9b93add62253aa",
+    "object": "chat.completion",
+    "created": 1791503945,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"country of origin\",\n            \"object\": \"Hong Kong\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"genre\",\n            \"object\": \"action\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"genre\",\n            \"object\": \"comedy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"date of release\",\n            \"object\": \"1982\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"director\",\n            \"object\": \"Eric Tsang\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"starring\",\n            \"object\": \"Samuel Hui\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"starring\",\n            \"object\": \"Karl Maka\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"alternative title\",\n            \"object\": \"Diamondfinger\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"alternative title\",\n            \"object\": \"Mad Mission\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"title\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Aces Go Places\n\nAces Go Places, (), also known in the United States as Diamondfinger or Mad Mission, is a 1982 Hong Kong action comedy film directed by Eric Tsang, and starring Samuel Hui and Karl Maka.\"\n\nWe need to parse facts:\n\n- Title: Aces Go Places (film)\n- Also known as Diamondfinger (in United States)\n- Also known as Mad Mission (in United States) – two alternative titles.\n- It is a 1982 Hong Kong action comedy film.\n- Directed by Eric Tsang.\n- Starring Samuel Hui.\n- Starring Karl Maka.\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine subject: \"Aces Go Places\" (film). object types: \"film\", \"alternative title\", \"country\", \"genre\", \"year\", \"director\", \"actor\".\n\nRelations: \"instance of\" maybe? Not required but we can include \"genre\", \"country of origin\", \"publication date\" (or \"date of release\") etc. Use Wikidata style: \"original language of work\"? Not needed.\n\nWe need to capture:\n\n1. (Aces Go Places, instance of, film) maybe but not explicit. The text says \"is a 1982 Hong Kong action comedy film\". So we can extract:\n\n- (Aces Go Places, country of origin, Hong Kong) – relation \"country of origin\".\n- (Aces Go Places, genre, action comedy) – maybe split into two: action, comedy. Could be \"genre\" with \"action comedy\". We'll do separate: (Aces Go Places, genre, action) and (Aces Go Places, genre, comedy). But \"action comedy\" is a combined genre. Might be okay to have \"action comedy\". Let's split for clarity.\n\n- (Aces Go Places, publication date, 1982) or \"date of release\". Use \"publication date\" maybe. We'll use \"date of release\".\n\n- (Aces Go Places, director, Eric Tsang).\n\n- (Aces Go Places, starring, Samuel Hui). \"starring\" relation.\n\n- (Aces Go Places, starring, Karl Maka).\n\n- (Aces Go Places, alternative title, Diamondfinger) with qualifier location United States? The phrase \"also known in the United States as Diamondfinger\". So we can have qualifier: {\"relation\":\"applies to region\",\"object\":\"United States\"} maybe. Use \"region\" qualifier. We'll attach qualifier \"region\" (or \"location\") to alternative title. Use \"region\" as relation.\n\n- Similarly for Mad Mission.\n\nWe also need subject_type: \"film\". object_type: for each.\n\nDefine types:\n\n- film: \"film\".\n- country: \"country\".\n- genre: \"genre\".\n- date: \"date\".\n- person: \"human\".\n- alternative title: maybe \"title\".\n\nNow qualifiers list.\n\nFor alternative title triplet: qualifiers: [{\"relation\":\"region\",\"object\":\"United States\"}].\n\nNow produce JSON.\n\nCheck for any other facts: The parentheses \"()\" maybe empty, ignore.\n\nNow produce final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1633,
+      "total_tokens": 2810,
+      "completion_tokens": 1177,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"country of origin\",\n            \"object\": \"Hong Kong\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"genre\",\n            \"object\": \"action\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"genre\",\n            \"object\": \"comedy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"date of release\",\n            \"object\": \"1982\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"director\",\n            \"object\": \"Eric Tsang\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"starring\",\n            \"object\": \"Samuel Hui\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"starring\",\n            \"object\": \"Karl Maka\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"alternative title\",\n            \"object\": \"Diamondfinger\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Aces Go Places\",\n            \"relation\": \"alternative title\",\n            \"object\": \"Mad Mission\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"title\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Aces Go Places",
+        "relation": "country of origin",
+        "object": "Hong Kong",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "country"
+      },
+      {
+        "subject": "Aces Go Places",
+        "relation": "genre",
+        "object": "action",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "genre"
+      },
+      {
+        "subject": "Aces Go Places",
+        "relation": "genre",
+        "object": "comedy",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "genre"
+      },
+      {
+        "subject": "Aces Go Places",
+        "relation": "date of release",
+        "object": "1982",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "date"
+      },
+      {
+        "subject": "Aces Go Places",
+        "relation": "director",
+        "object": "Eric Tsang",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "human"
+      },
+      {
+        "subject": "Aces Go Places",
+        "relation": "starring",
+        "object": "Samuel Hui",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "human"
+      },
+      {
+        "subject": "Aces Go Places",
+        "relation": "starring",
+        "object": "Karl Maka",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "human"
+      },
+      {
+        "subject": "Aces Go Places",
+        "relation": "alternative title",
+        "object": "Diamondfinger",
+        "qualifiers": [
+          {
+            "relation": "region",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "title"
+      },
+      {
+        "subject": "Aces Go Places",
+        "relation": "alternative title",
+        "object": "Mad Mission",
+        "qualifiers": [
+          {
+            "relation": "region",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "title"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1633,
+    "total_tokens": 2810,
+    "completion_tokens": 1177,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 700,
+    "output_tokens_est": 608
+  },
+  "attempts": 1,
+  "latency_s": 14.520656674001657,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:59:19.964567+00:00",
+  "cache_key": "43053519a861bc05b28403dbaf48c996"
+}

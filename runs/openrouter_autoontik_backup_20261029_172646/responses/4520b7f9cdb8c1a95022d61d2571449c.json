@@ -1,0 +1,176 @@
+{
+  "task": {
+    "input_id": "a533c696e0f3caba",
+    "input_hash": "7c8d110c7fa30cd800b11c820200e70826f3d7da765fe7d736361420ca466397",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793208650-XUWhLS6Tukk4t5sRup5j",
+    "object": "chat.completion",
+    "created": 1793208650,
+    "model": "openai/gpt-oss-120b",
+    "provider": "BaseTen",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"climate type\",\n            \"object\": \"continental climate\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"climate type\"\n        },\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"climate type\",\n            \"object\": \"oceanic climate\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"climate type\"\n        },\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"climate type\",\n            \"object\": \"humid continental climate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"classification system\",\n                    \"object\": \"Köppen climate classification scheme\",\n                    \"object_type\": \"classification system\"\n                },\n                {\n                    \"relation\": \"characteristic\",\n                    \"object\": \"warm summer\",\n                    \"object_type\": \"climate characteristic\"\n                },\n                {\n                    \"relation\": \"characteristic\",\n                    \"object\": \"cold dry winter\",\n                    \"object_type\": \"climate characteristic\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"climate type\"\n        },\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"has season\",\n            \"object\": \"short rainy season\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"name\",\n                    \"object\": \"changma\",\n                    \"object_type\": \"season name\"\n                },\n                {\n                    \"relation\": \"occurs in\",\n                    \"object\": \"summer\",\n                    \"object_type\": \"season\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"season\"\n        },\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"has season\",\n            \"object\": \"four distinct seasons\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"season\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": " need to extract triplets from the given text. The text is about geography of North Korea, climate. Entities: North Korea, continental climate, oceanic climate, four distinct seasons, humid continental climate, Köppen climate classification scheme, warm summers, cold dry winters, summer, short rainy season, changma.\n\nWe need to produce JSON with \"triplets\": [ ... ].\n\nWe need subject_type and object_type. Types: North Korea is a country. Climate types: continental climate (climate type), oceanic climate (climate type), humid continental climate (climate type), Köppen climate classification scheme (classification system), warm summers (season characteristic? maybe \"climate characteristic\" or \"weather condition\"), cold dry winters (climate characteristic), short rainy season (season), changma (season name). Also \"four distinct seasons\" is a phrase; could be object_type \"season\" or \"climate feature\". We'll need to decide.\n\nRelations: \"has climate type\", \"has climate type\", \"has climate classification\", \"has characteristic\", \"has season\", etc.\n\nLet's parse sentences:\n\n1. \"North Korea has a combination of a continental climate and an oceanic climate, with four distinct seasons.\"\n\nSo we can extract:\n- subject: North Korea, relation: \"climate type\", object: \"continental climate\"\n- subject: North Korea, relation: \"climate type\", object: \"oceanic climate\"\n- subject: North Korea, relation: \"season count\", object: \"four distinct seasons\"? Might be better: relation \"has season\" object \"four distinct seasons\"? But \"four distinct seasons\" is a description, not a specific season. Could be \"has number of seasons\" with qualifier \"count\" 4. But we need object entity. Could treat \"four distinct seasons\" as a phrase entity of type \"season\". Might be okay.\n\nBut maybe better to capture \"has season\" object \"season\" with qualifier \"count\" 4 and \"distinctness\" true. However qualifiers must be attached to a triplet. Could have triplet: subject North Korea, relation \"has season\", object \"season\", qualifiers: count 4, distinct true. But \"season\" is generic. Might be okay.\n\nSimplify: create triplet: North Korea - \"has season count\" - \"four\". But object_type \"number\". However relation \"season count\" is okay.\n\nBut guidelines: relation short, reusable. \"season count\" maybe okay.\n\nLet's produce:\n\nTriplet1: subject \"North Korea\", relation \"climate type\", object \"continental climate\", qualifiers none.\n\nTriplet2: subject \"North Korea\", relation \"climate type\", object \"oceanic climate\".\n\nTriplet3: subject \"North Korea\", relation \"season count\", object \"4\", qualifiers maybe \"qualifier\": {\"relation\":\"season distinctness\",\"object\":\"distinct\",\"object_type\":\"qualifier\"} but maybe too complex. Could just have object \"four distinct seasons\" as phrase. Provide object_type \"season\". Let's do object \"four distinct seasons\", object_type \"season\". Relation \"has season\". That may be okay.\n\nSecond sentence: \"Most of North Korea is classified as being of a humid humid continental climate within the Köppen climate classification scheme, with warm summers and cold, dry winters.\"\n\nExtract:\n- subject \"North Korea\", relation \"climate classification\", object \"humid continental climate\", qualifiers: maybe \"classification system\" \"Köppen climate classification scheme\". Actually the phrase says \"within the Köppen climate classification scheme\". So we can have a qualifier linking to classification system. So main triplet: North Korea - \"climate type\" - \"humid continental climate\". Qualifier: relation \"classification system\", object \"Köppen climate classification scheme\", object_type \"classification system\". Also qualifiers for characteristics: warm summers, cold dry winters. Could be separate triplets: North Korea - \"climate characteristic\" - \"warm summer\". But \"warm summers\" is plural. We'll treat as object \"warm summer\". object_type \"climate characteristic\". Similarly \"cold dry winter\". object_type \"climate characteristic\". Could also attach as qualifiers to the climate type triplet, but guidelines: qualifiers provide context to triplet, could be used. Could attach both as qualifiers to the humid continental climate triplet. Let's do that: qualifiers list includes two entries.\n\nThird sentence: \"In summer, there is a short rainy season called changma.\"\n\nExtract:\n- subject \"North Korea\", relation \"has season\", object \"short rainy season\", qualifiers: relation \"name\", object \"changma\", object_type \"season name\". Also maybe \"season\" object \"summer\"? Actually \"In summer\" indicates time. Could have qualifier \"point in time\" \"summer\". But we can also have separate triplet: \"changma\" - \"type of season\" - \"short rainy season\". But guidelines: subject must be entity. Could do: \"short rainy season\" - \"named\" - \"changma\". But we need subject entity \"short rainy season\". Might be okay.\n\nSimplify: Triplet: North Korea - \"has season\" - \"short rainy season\", qualifiers: {\"relation\":\"name\",\"object\":\"changma\",\"object_type\":\"season name\"}, {\"relation\":\"occurs in\",\"object\":\"summer\",\"object_type\":\"season\"}.\n\nAlso we could have separate triplet: \"changma\" - \"instance of\" - \"short rainy season\". But maybe redundant.\n\nLet's compile list.\n\nDefine types:\n- North Korea: country\n- continental climate: climate type\n- oceanic climate: climate type\n- humid continental climate: climate type\n- Köppen climate classification scheme: classification system\n- warm summer: climate characteristic (or \"season characteristic\")\n- cold dry winter: climate characteristic\n- short rainy season: season\n- changma: season name (or \"season\")\n- summer: season\n- four distinct seasons: season (maybe \"season set\").\n\nWe'll need object_type for each.\n\nNow produce JSON.\n\nStructure:\n\n{\n \"triplets\": [\n   { \"subject\":\"North Korea\", \"relation\":\"climate type\", \"object\":\"continental climate\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"climate type\"},\n   { \"subject\":\"North Korea\", \"relation\":\"climate type\", \"object\":\"oceanic climate\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"climate type\"},\n   { \"subject\":\"North Korea\", \"relation\":\"climate type\", \"object\":\"humid continental climate\", \"qualifiers\":[ {\"relation\":\"classification system\",\"object\":\"Köppen climate classification scheme\",\"object_type\":\"classification system\"} ], \"subject_type\":\"country\", \"object_type\":\"climate type\"},\n   { \"subject\":\"North Korea\", \"relation\":\"climate characteristic\", \"object\":\"warm summer\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"climate characteristic\"},\n   { \"subject\":\"North Korea\", \"relation\":\"climate characteristic\", \"object\":\"cold dry winter\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"climate characteristic\"},\n   { \"subject\":\"North Korea\", \"relation\":\"has season\", \"object\":\"short rainy season\", \"qualifiers\":[ {\"relation\":\"name\",\"object\":\"changma\",\"object_type\":\"season name\"}, {\"relation\":\"occurs in\",\"object\":\"summer\",\"object_type\":\"season\"} ], \"subject_type\":\"country\", \"object_type\":\"season\"},\n   { \"subject\":\"North Korea\", \"relation\":\"has season\", \"object\":\"four distinct seasons\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"season\"}\n ]\n}\n\nCheck if any missing qualifiers: For humid continental climate, also warm summers and cold dry winters are qualifiers. Could attach them as qualifiers to that triplet instead of separate triplets. Let's do that: combine.\n\nSo modify: humid continental climate triplet qualifiers include warm summer and cold dry winter.\n\nThus we remove separate climate characteristic triplets.\n\nQualifiers list: each qualifier must have relation, object, object_type.\n\nWe can have qualifier relation \"characteristic\" object \"warm summer\". object_type \"climate characteristic\". Another qualifier \"characteristic\" object \"cold dry winter\". object_type \"climate characteristic\".\n\nThus we have:\n\nTriplet for humid continental climate with qualifiers: classification system, characteristic warm summer, characteristic cold dry winter.\n\nThus we drop separate climate characteristic triplets.\n\nNow final list:\n\n1 continental climate\n2 oceanic climate\n3 humid continental climate with qualifiers\n4 short rainy season with qualifiers\n5 four distinct seasons (maybe just season count). Could also have qualifier \"count\" 4. But we can keep as object \"four distinct seasons\". object_type \"season\". That's okay.\n\nNow produce JSON.\n\nCheck formatting: top-level key \"triplets\". Provide list.\n\nMake sure each dict includes \"qualifiers\": [] if none.\n\nNow output.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": " need to extract triplets from the given text. The text is about geography of North Korea, climate. Entities: North Korea, continental climate, oceanic climate, four distinct seasons, humid continental climate, Köppen climate classification scheme, warm summers, cold dry winters, summer, short rainy season, changma.\n\nWe need to produce JSON with \"triplets\": [ ... ].\n\nWe need subject_type and object_type. Types: North Korea is a country. Climate types: continental climate (climate type), oceanic climate (climate type), humid continental climate (climate type), Köppen climate classification scheme (classification system), warm summers (season characteristic? maybe \"climate characteristic\" or \"weather condition\"), cold dry winters (climate characteristic), short rainy season (season), changma (season name). Also \"four distinct seasons\" is a phrase; could be object_type \"season\" or \"climate feature\". We'll need to decide.\n\nRelations: \"has climate type\", \"has climate type\", \"has climate classification\", \"has characteristic\", \"has season\", etc.\n\nLet's parse sentences:\n\n1. \"North Korea has a combination of a continental climate and an oceanic climate, with four distinct seasons.\"\n\nSo we can extract:\n- subject: North Korea, relation: \"climate type\", object: \"continental climate\"\n- subject: North Korea, relation: \"climate type\", object: \"oceanic climate\"\n- subject: North Korea, relation: \"season count\", object: \"four distinct seasons\"? Might be better: relation \"has season\" object \"four distinct seasons\"? But \"four distinct seasons\" is a description, not a specific season. Could be \"has number of seasons\" with qualifier \"count\" 4. But we need object entity. Could treat \"four distinct seasons\" as a phrase entity of type \"season\". Might be okay.\n\nBut maybe better to capture \"has season\" object \"season\" with qualifier \"count\" 4 and \"distinctness\" true. However qualifiers must be attached to a triplet. Could have triplet: subject North Korea, relation \"has season\", object \"season\", qualifiers: count 4, distinct true. But \"season\" is generic. Might be okay.\n\nSimplify: create triplet: North Korea - \"has season count\" - \"four\". But object_type \"number\". However relation \"season count\" is okay.\n\nBut guidelines: relation short, reusable. \"season count\" maybe okay.\n\nLet's produce:\n\nTriplet1: subject \"North Korea\", relation \"climate type\", object \"continental climate\", qualifiers none.\n\nTriplet2: subject \"North Korea\", relation \"climate type\", object \"oceanic climate\".\n\nTriplet3: subject \"North Korea\", relation \"season count\", object \"4\", qualifiers maybe \"qualifier\": {\"relation\":\"season distinctness\",\"object\":\"distinct\",\"object_type\":\"qualifier\"} but maybe too complex. Could just have object \"four distinct seasons\" as phrase. Provide object_type \"season\". Let's do object \"four distinct seasons\", object_type \"season\". Relation \"has season\". That may be okay.\n\nSecond sentence: \"Most of North Korea is classified as being of a humid humid continental climate within the Köppen climate classification scheme, with warm summers and cold, dry winters.\"\n\nExtract:\n- subject \"North Korea\", relation \"climate classification\", object \"humid continental climate\", qualifiers: maybe \"classification system\" \"Köppen climate classification scheme\". Actually the phrase says \"within the Köppen climate classification scheme\". So we can have a qualifier linking to classification system. So main triplet: North Korea - \"climate type\" - \"humid continental climate\". Qualifier: relation \"classification system\", object \"Köppen climate classification scheme\", object_type \"classification system\". Also qualifiers for characteristics: warm summers, cold dry winters. Could be separate triplets: North Korea - \"climate characteristic\" - \"warm summer\". But \"warm summers\" is plural. We'll treat as object \"warm summer\". object_type \"climate characteristic\". Similarly \"cold dry winter\". object_type \"climate characteristic\". Could also attach as qualifiers to the climate type triplet, but guidelines: qualifiers provide context to triplet, could be used. Could attach both as qualifiers to the humid continental climate triplet. Let's do that: qualifiers list includes two entries.\n\nThird sentence: \"In summer, there is a short rainy season called changma.\"\n\nExtract:\n- subject \"North Korea\", relation \"has season\", object \"short rainy season\", qualifiers: relation \"name\", object \"changma\", object_type \"season name\". Also maybe \"season\" object \"summer\"? Actually \"In summer\" indicates time. Could have qualifier \"point in time\" \"summer\". But we can also have separate triplet: \"changma\" - \"type of season\" - \"short rainy season\". But guidelines: subject must be entity. Could do: \"short rainy season\" - \"named\" - \"changma\". But we need subject entity \"short rainy season\". Might be okay.\n\nSimplify: Triplet: North Korea - \"has season\" - \"short rainy season\", qualifiers: {\"relation\":\"name\",\"object\":\"changma\",\"object_type\":\"season name\"}, {\"relation\":\"occurs in\",\"object\":\"summer\",\"object_type\":\"season\"}.\n\nAlso we could have separate triplet: \"changma\" - \"instance of\" - \"short rainy season\". But maybe redundant.\n\nLet's compile list.\n\nDefine types:\n- North Korea: country\n- continental climate: climate type\n- oceanic climate: climate type\n- humid continental climate: climate type\n- Köppen climate classification scheme: classification system\n- warm summer: climate characteristic (or \"season characteristic\")\n- cold dry winter: climate characteristic\n- short rainy season: season\n- changma: season name (or \"season\")\n- summer: season\n- four distinct seasons: season (maybe \"season set\").\n\nWe'll need object_type for each.\n\nNow produce JSON.\n\nStructure:\n\n{\n \"triplets\": [\n   { \"subject\":\"North Korea\", \"relation\":\"climate type\", \"object\":\"continental climate\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"climate type\"},\n   { \"subject\":\"North Korea\", \"relation\":\"climate type\", \"object\":\"oceanic climate\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"climate type\"},\n   { \"subject\":\"North Korea\", \"relation\":\"climate type\", \"object\":\"humid continental climate\", \"qualifiers\":[ {\"relation\":\"classification system\",\"object\":\"Köppen climate classification scheme\",\"object_type\":\"classification system\"} ], \"subject_type\":\"country\", \"object_type\":\"climate type\"},\n   { \"subject\":\"North Korea\", \"relation\":\"climate characteristic\", \"object\":\"warm summer\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"climate characteristic\"},\n   { \"subject\":\"North Korea\", \"relation\":\"climate characteristic\", \"object\":\"cold dry winter\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"climate characteristic\"},\n   { \"subject\":\"North Korea\", \"relation\":\"has season\", \"object\":\"short rainy season\", \"qualifiers\":[ {\"relation\":\"name\",\"object\":\"changma\",\"object_type\":\"season name\"}, {\"relation\":\"occurs in\",\"object\":\"summer\",\"object_type\":\"season\"} ], \"subject_type\":\"country\", \"object_type\":\"season\"},\n   { \"subject\":\"North Korea\", \"relation\":\"has season\", \"object\":\"four distinct seasons\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"season\"}\n ]\n}\n\nCheck if any missing qualifiers: For humid continental climate, also warm summers and cold dry winters are qualifiers. Could attach them as qualifiers to that triplet instead of separate triplets. Let's do that: combine.\n\nSo modify: humid continental climate triplet qualifiers include warm summer and cold dry winter.\n\nThus we remove separate climate characteristic triplets.\n\nQualifiers list: each qualifier must have relation, object, object_type.\n\nWe can have qualifier relation \"characteristic\" object \"warm summer\". object_type \"climate characteristic\". Another qualifier \"characteristic\" object \"cold dry winter\". object_type \"climate characteristic\".\n\nThus we have:\n\nTriplet for humid continental climate with qualifiers: classification system, characteristic warm summer, characteristic cold dry winter.\n\nThus we drop separate climate characteristic triplets.\n\nNow final list:\n\n1 continental climate\n2 oceanic climate\n3 humid continental climate with qualifiers\n4 short rainy season with qualifiers\n5 four distinct seasons (maybe just season count). Could also have qualifier \"count\" 4. But we can keep as object \"four distinct seasons\". object_type \"season\". That's okay.\n\nNow produce JSON.\n\nCheck formatting: top-level key \"triplets\". Provide list.\n\nMake sure each dict includes \"qualifiers\": [] if none.\n\nNow output.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1426,
+      "completion_tokens": 2266,
+      "total_tokens": 3692,
+      "cost": 0.0012756,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1344,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0012756,
+        "upstream_inference_prompt_cost": 0.0001426,
+        "upstream_inference_completions_cost": 0.001133
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"climate type\",\n            \"object\": \"continental climate\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"climate type\"\n        },\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"climate type\",\n            \"object\": \"oceanic climate\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"climate type\"\n        },\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"climate type\",\n            \"object\": \"humid continental climate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"classification system\",\n                    \"object\": \"Köppen climate classification scheme\",\n                    \"object_type\": \"classification system\"\n                },\n                {\n                    \"relation\": \"characteristic\",\n                    \"object\": \"warm summer\",\n                    \"object_type\": \"climate characteristic\"\n                },\n                {\n                    \"relation\": \"characteristic\",\n                    \"object\": \"cold dry winter\",\n                    \"object_type\": \"climate characteristic\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"climate type\"\n        },\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"has season\",\n            \"object\": \"short rainy season\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"name\",\n                    \"object\": \"changma\",\n                    \"object_type\": \"season name\"\n                },\n                {\n                    \"relation\": \"occurs in\",\n                    \"object\": \"summer\",\n                    \"object_type\": \"season\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"season\"\n        },\n        {\n            \"subject\": \"North Korea\",\n            \"relation\": \"has season\",\n            \"object\": \"four distinct seasons\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"season\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "North Korea",
+        "relation": "climate type",
+        "object": "continental climate",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "climate type"
+      },
+      {
+        "subject": "North Korea",
+        "relation": "climate type",
+        "object": "oceanic climate",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "climate type"
+      },
+      {
+        "subject": "North Korea",
+        "relation": "climate type",
+        "object": "humid continental climate",
+        "qualifiers": [
+          {
+            "relation": "classification system",
+            "object": "Köppen climate classification scheme"
+          },
+          {
+            "relation": "characteristic",
+            "object": "warm summer"
+          },
+          {
+            "relation": "characteristic",
+            "object": "cold dry winter"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "climate type"
+      },
+      {
+        "subject": "North Korea",
+        "relation": "has season",
+        "object": "short rainy season",
+        "qualifiers": [
+          {
+            "relation": "name",
+            "object": "changma"
+          },
+          {
+            "relation": "occurs in",
+            "object": "summer"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "season"
+      },
+      {
+        "subject": "North Korea",
+        "relation": "has season",
+        "object": "four distinct seasons",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "season"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1426,
+    "completion_tokens": 2266,
+    "total_tokens": 3692,
+    "cost": 0.0012756,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1344,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0012756,
+      "upstream_inference_prompt_cost": 0.0001426,
+      "upstream_inference_completions_cost": 0.001133
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 691,
+    "output_tokens_est": 564
+  },
+  "attempts": 1,
+  "latency_s": 16.331183685004362,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T17:31:06.617931+00:00",
+  "cache_key": "4520b7f9cdb8c1a95022d61d2571449c"
+}

@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "44ba409c8f2cee2b",
+    "input_hash": "633865eeedaa91053605fcbcac74b37f90014de86eadbf6d1ad50f38a10dd079",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c8b1e712b64a0213c01feea08f04bae3",
+    "object": "chat.completion",
+    "created": 1791517000,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"date of birth\",\n            \"object\": \"9 April 1974\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Rio de Janeiro\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Brazil\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"occupation\",\n            \"object\": \"footballer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"played for\",\n            \"object\": \"Canadian clubs\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"played in league\",\n            \"object\": \"Canadian Soccer League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports league\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"played for\",\n            \"object\": \"Toronto Lynx\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"Toronto Lynx\",\n            \"relation\": \"member of league\",\n            \"object\": \"USL A-League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"sports league\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Francisco Dos Santos\n\nFrancisco Dos Santos (born 9 April 1974 in Rio de Janeiro) is a Brazilian former footballer who played the majority of career with Canadian clubs in the Canadian Soccer League, and the Toronto Lynx of the USL A-League.\"\n\nWe have subject: Francisco Dos Santos.\n\nFacts:\n\n- date of birth: 9 April 1974 (qualifier maybe place of birth)\n- place of birth: Rio de Janeiro\n- nationality: Brazilian (maybe \"country of citizenship\")\n- occupation: footballer (former) -> occupation: footballer, with qualifier maybe \"status\": former? Could use qualifier \"point in time\"? Not needed. Could add qualifier \"qualifier\": {\"relation\":\"status\",\"object\":\"former\"} but not defined. Probably just occupation \"footballer\". Could also add \"occupation\" with qualifier \"qualifier\": {\"relation\":\"career stage\",\"object\":\"former\"} but not in spec. We'll just note occupation.\n\n- \"former footballer\" indicates past occupation; but we can still record occupation.\n\n- \"played the majority of career with Canadian clubs in the Canadian Soccer League, and the Toronto Lynx of the USL A-League.\"\n\nWe need to capture that he played for Canadian clubs in the Canadian Soccer League (maybe generic). Could create triplet: subject Francisco Dos Santos, relation \"member of sports team\", object \"Canadian Soccer League clubs\". But better: relation \"played for\", object \"Canadian clubs\". Could also separate: \"played for\" \"Toronto Lynx\". Also \"Toronto Lynx\" is a club in USL A-League.\n\nThus we can have two triplets:\n\n1) Francisco Dos Santos – played for – Canadian clubs (maybe generic). But we need object entity. Could be \"Canadian Soccer League\". Actually phrase: \"played the majority of career with Canadian clubs in the Canadian Soccer League\". So clubs are members of that league. Could treat object as \"Canadian Soccer League\". Relation \"participated in league\" maybe. But we need to capture that he played for clubs in that league. Could produce two triplets: \"played in league\" relation.\n\nSimplify: create triplet: subject \"Francisco Dos Santos\", relation \"league participated in\", object \"Canadian Soccer League\", qualifier maybe \"role\": \"player\". But spec not defined.\n\nBetter: \"played for\" \"Toronto Lynx\". And \"played in league\" \"Canadian Soccer League\". Also \"played in league\" \"USL A-League\". But the text says Toronto Lynx of the USL A-League, so he played for Toronto Lynx which is in USL A-League.\n\nThus we can have:\n\n- Francisco Dos Santos – played for – Toronto Lynx (qualifier maybe \"league\": USL A-League). Could add qualifier \"league\" but not defined. Could add qualifier \"point in time\"? Not given.\n\n- Francisco Dos Santos – played in league – Canadian Soccer League (qualifier maybe \"majority of career\").\n\nWe also need subject_type and object_type.\n\nDefine types:\n\n- Francisco Dos Santos: human\n- date: date\n- Rio de Janeiro: city (place)\n- Brazil: country (maybe \"Brazilian\" indicates nationality). Use object_type \"country\".\n- footballer: profession\n- Toronto Lynx: sports team (football club)\n- Canadian Soccer League: sports league\n- USL A-League: sports league\n\nNow qualifiers: For date of birth, also place of birth as qualifier? Actually separate triplet for place of birth.\n\nTriplet: subject Francisco Dos Santos, relation \"date of birth\", object \"9 April 1974\", qualifiers [].\n\nTriplet: subject Francisco Dos Santos, relation \"place of birth\", object \"Rio de Janeiro\", qualifiers [].\n\nTriplet: subject Francisco Dos Santos, relation \"country of citizenship\", object \"Brazil\", qualifiers [].\n\nTriplet: subject Francisco Dos Santos, relation \"occupation\", object \"footballer\", qualifiers [].\n\nTriplet: subject Francisco Dos Santos, relation \"played for\", object \"Toronto Lynx\", qualifiers [].\n\nTriplet: subject \"Toronto Lynx\", relation \"member of league\", object \"USL A-League\", qualifiers [].\n\nTriplet: subject Francisco Dos Santos, relation \"played in league\", object \"Canadian Soccer League\", qualifiers [].\n\nBut \"played the majority of career with Canadian clubs in the Canadian Soccer League\" maybe we need to capture \"played for Canadian clubs\". Could also add \"played for\" \"Canadian clubs\". But \"Canadian clubs\" is generic. Might be okay to have \"played for\" \"Canadian clubs\". Object_type \"sports team\". We'll include.\n\nThus add triplet: subject Francisco Dos Santos, relation \"played for\", object \"Canadian clubs\", qualifiers [].\n\nBut \"Canadian clubs\" ambiguous; but it's explicit phrase.\n\nNow produce JSON.\n\nCheck qualifiers: none needed.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1647,
+      "total_tokens": 3110,
+      "completion_tokens": 1463,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"date of birth\",\n            \"object\": \"9 April 1974\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Rio de Janeiro\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Brazil\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"occupation\",\n            \"object\": \"footballer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"played for\",\n            \"object\": \"Canadian clubs\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"played in league\",\n            \"object\": \"Canadian Soccer League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports league\"\n        },\n        {\n            \"subject\": \"Francisco Dos Santos\",\n            \"relation\": \"played for\",\n            \"object\": \"Toronto Lynx\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"Toronto Lynx\",\n            \"relation\": \"member of league\",\n            \"object\": \"USL A-League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"sports league\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Francisco Dos Santos",
+        "relation": "date of birth",
+        "object": "9 April 1974",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Francisco Dos Santos",
+        "relation": "place of birth",
+        "object": "Rio de Janeiro",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Francisco Dos Santos",
+        "relation": "country of citizenship",
+        "object": "Brazil",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Francisco Dos Santos",
+        "relation": "occupation",
+        "object": "footballer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Francisco Dos Santos",
+        "relation": "played for",
+        "object": "Canadian clubs",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "sports team"
+      },
+      {
+        "subject": "Francisco Dos Santos",
+        "relation": "played in league",
+        "object": "Canadian Soccer League",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "sports league"
+      },
+      {
+        "subject": "Francisco Dos Santos",
+        "relation": "played for",
+        "object": "Toronto Lynx",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "sports team"
+      },
+      {
+        "subject": "Toronto Lynx",
+        "relation": "member of league",
+        "object": "USL A-League",
+        "qualifiers": [],
+        "subject_type": "sports team",
+        "object_type": "sports league"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1647,
+    "total_tokens": 3110,
+    "completion_tokens": 1463,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 607,
+    "output_tokens_est": 515
+  },
+  "attempts": 1,
+  "latency_s": 17.59246042900486,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:36:58.273690+00:00",
+  "cache_key": "ca064492fb378ac41bacddf828d18144"
+}

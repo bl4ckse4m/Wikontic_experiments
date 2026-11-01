@@ -1,0 +1,156 @@
+{
+  "task": {
+    "input_id": "09e98fb3a0b96584",
+    "input_hash": "4392858b17ee29280bef4cfc930484bbd8ce5f0a85db36cfc6461ba6da507adb",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-27c9efe52b1c83c61e5979c2bae3af0e",
+    "object": "chat.completion",
+    "created": 1791500914,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Chopin's music\",\n            \"relation\": \"used in\",\n            \"object\": \"Chopiniana\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1909\"\n                }\n            ],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"ballet\"\n        },\n        {\n            \"subject\": \"Chopiniana\",\n            \"relation\": \"choreographer\",\n            \"object\": \"Michel Fokine\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1909\"\n                }\n            ],\n            \"subject_type\": \"ballet\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Chopiniana\",\n            \"relation\": \"orchestrated by\",\n            \"object\": \"Alexander Glazunov\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1909\"\n                }\n            ],\n            \"subject_type\": \"ballet\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Sergei Diaghilev\",\n            \"relation\": \"commissioned\",\n            \"object\": \"additional orchestrations\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"creator\",\n                    \"object\": \"Igor Stravinsky\"\n                },\n                {\n                    \"relation\": \"creator\",\n                    \"object\": \"Anatoly Lyadov\"\n                },\n                {\n                    \"relation\": \"creator\",\n                    \"object\": \"Sergei Taneyev\"\n                },\n                {\n                    \"relation\": \"creator\",\n                    \"object\": \"Nikolai Tcherepnin\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"musical work\"\n        },\n        {\n            \"subject\": \"later productions\",\n            \"relation\": \"title\",\n            \"object\": \"Les Sylphides\",\n            \"qualifiers\": [],\n            \"subject_type\": \"production\",\n            \"object_type\": \"ballet\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Frédéric Chopin\n\nChopin's music was used in the 1909 ballet Chopiniana, choreographed by Michel Fokine and orchestrated by Alexander Glazunov. Sergei Diaghilev commissioned additional orchestrations—from Stravinsky, Anatoly Lyadov, Sergei Taneyev and Nikolai Tcherepnin—for later productions, which used the title Les Sylphides.\"\n\nWe need to parse facts.\n\nFirst sentence: \"Frédéric Chopin\" is just a heading, maybe we can infer subject entity but no explicit fact. Might not need a triplet.\n\nSecond sentence: \"Chopin's music was used in the 1909 ballet Chopiniana, choreographed by Michel Fokine and orchestrated by Alexander Glazunov.\"\n\nFacts:\n\n- Chopin's music was used in the ballet Chopiniana. So relation: \"used in\" maybe \"used in\" is not a standard Wikidata predicate. Could be \"used in\" -> \"instance of\"? Actually we need a relation connecting subject (music of Chopin) to object (ballet Chopiniana). Could be \"used in\" or \"appears in\". In Wikidata, there is property \"used in\" (P2285) maybe? Actually \"used in\" is a property for \"used in\" (P2285) used for \"used in\" (e.g., a material used in a product). For music, maybe \"used in\" works. We'll use \"used in\". Subject: \"Chopin's music\". Object: \"Chopiniana (ballet)\". Provide qualifiers: point in time 1909.\n\nAlso \"choreographed by Michel Fokine\". This is about the ballet Chopiniana. So relation: \"choreographer\" maybe \"choreographed by\". Subject: \"Chopiniana\". Object: \"Michel Fokine\". Qualifier: maybe \"point in time\" 1909? The choreographer likely for that ballet (1909). Could add qualifier point in time 1909.\n\nAlso \"orchestrated by Alexander Glazunov\". So relation: \"orchestrated by\". Subject: \"Chopiniana\". Object: \"Alexander Glazunov\". Qualifier: point in time 1909.\n\nThird sentence: \"Sergei Diaghilev commissioned additional orchestrations—from Stravinsky, Anatoly Lyadov, Sergei Taneyev and Nikolai Tcherepnin—for later productions, which used the title Les Sylphides.\"\n\nFacts:\n\n- Sergei Diaghilev commissioned additional orchestrations from Stravinsky, Anatoly Lyadov, Sergei Taneyev and Nikolai Tcherepnin. So relation: \"commissioned\" maybe \"commissioned work\". Subject: \"Sergei Diaghilev\". Object: \"additional orchestrations\". But we need to capture that the orchestrations were by those composers. Could split: \"Sergei Diaghilev commissioned orchestration by Igor Stravinsky\". But the phrase \"additional orchestrations—from Stravinsky, Anatoly Lyadov, Sergei Taneyev and Nikolai Tcherepnin\". So each composer created orchestrations commissioned by Diaghilev. So we can have multiple triplets: (Sergei Diaghilev, commissioned, orchestration) with qualifier \"creator\" maybe? But we need to keep simple: (Sergei Diaghilev, commissioned, Stravinsky) but that is not accurate. Better: (Sergei Diaghilev, commissioned, orchestration) with qualifier \"creator\" = Stravinsky etc. However guidelines: each triplet should have subject, relation, object. Qualifiers can add extra info.\n\nWe could produce separate triplets for each composer: (Sergei Diaghilev, commissioned, orchestration) with qualifier \"creator\" = \"Igor Stravinsky\". But object \"orchestration\" is generic. Might be okay.\n\nAlternatively, relation \"commissioned work\" with object \"orchestration by Igor Stravinsky\". But object should be a named entity. Could be \"orchestration (by Igor Stravinsky)\". Might be too complex.\n\nMaybe we treat each composer as object: (Sergei Diaghilev, commissioned, Igor Stravinsky). But that loses that it's orchestrations. However the text says \"commissioned additional orchestrations—from Stravinsky, ...\". So the commission is of orchestrations, not of the composers themselves. But we can still capture: (Sergei Diaghilev, commissioned, Igor Stravinsky) with qualifier \"work type\" = \"orchestration\". But guidelines not specify such qualifier.\n\nSimplify: produce triplet: (Sergei Diaghilev, commissioned, additional orchestrations) with qualifiers \"creator\" each composer. Could have multiple qualifiers? Qualifiers list can have multiple entries. So we can have qualifiers: {\"relation\":\"creator\",\"object\":\"Igor Stravinsky\"}, etc. That seems okay.\n\nAlso \"for later productions\". Could be qualifier \"purpose\" = \"later productions\". Not required.\n\nThen \"which used the title Les Sylphides.\" The \"which\" refers to later productions (or the productions). So productions used the title Les Sylphides. So relation: \"title\" maybe \"has title\". Subject: \"later productions\". Object: \"Les Sylphides\". But \"later productions\" is not a named entity. Could be \"productions (later)\". Might be ambiguous. Could treat as \"productions\" generic. Might skip.\n\nAlternatively, we could capture that the ballet (or the productions) used the title Les Sylphides. So (Chopiniana, title used, Les Sylphides) but not accurate; the later productions used that title, not necessarily the original ballet. Could be \"Les Sylphides\" is a later version of the ballet. So we could have (Les Sylphides, instance of, ballet) but not in text.\n\nProbably we can capture: (later productions, title, Les Sylphides). But \"later productions\" not a proper entity. Might be okay to include as object_type \"event\" or \"production\". We'll include.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- \"Chopin's music\": type \"musical work\" or \"music\". We'll use \"musical work\".\n- \"Chopiniana\": type \"ballet\".\n- \"Michel Fokine\": type \"human\".\n- \"Alexander Glazunov\": type \"human\".\n- \"Sergei Diaghilev\": type \"human\".\n- \"additional orchestrations\": type \"musical work\" maybe \"orchestration\".\n- \"Igor Stravinsky\": type \"human\".\n- \"Anatoly Lyadov\": human.\n- \"Sergei Taneyev\": human.\n- \"Nikolai Tcherepnin\": human.\n- \"later productions\": type \"event\" or \"production\". We'll use \"production\".\n- \"Les Sylphides\": type \"ballet\" (but not explicitly said; it's a title). We'll set \"ballet\".\n\nNow qualifiers:\n\n- For music used in ballet: qualifier point in time 1909.\n- For choreographed by: also point in time 1909.\n- For orchestrated by: point in time 1909.\n- For commissioned orchestrations: maybe point in time not given; could be after 1909? Not specified. No qualifier.\n\n- For later productions title: maybe no date.\n\nNow produce JSON.\n\nTriplet list:\n\n1. subject \"Chopin's music\", relation \"used in\", object \"Chopiniana\", qualifiers [{\"relation\":\"point in time\",\"object\":\"1909\"}], subject_type \"musical work\", object_type \"ballet\".\n\n2. subject \"Chopiniana\", relation \"choreographer\", object \"Michel Fokine\", qualifiers [{\"relation\":\"point in time\",\"object\":\"1909\"}], subject_type \"ballet\", object_type \"human\".\n\nBut relation name maybe \"choreographed by\". We'll use \"choreographer\". Or \"choreographed by\". Use \"choreographer\". Actually property \"choreographer\" (P864) expects human. So relation \"choreographer\". Good.\n\n3. subject \"Chopiniana\", relation \"orchestrated by\", object \"Alexander Glazunov\", qualifiers [{\"relation\":\"point in time\",\"object\":\"1909\"}], subject_type \"ballet\", object_type \"human\".\n\n4. subject \"Sergei Diaghilev\", relation \"commissioned\", object \"additional orchestrations\", qualifiers [{\"relation\":\"creator\",\"object\":\"Igor Stravinsky\"},{\"relation\":\"creator\",\"object\":\"Anatoly Lyadov\"},{\"relation\":\"creator\",\"object\":\"Sergei Taneyev\"},{\"relation\":\"creator\",\"object\":\"Nikolai Tcherepnin\"}], subject_type \"human\", object_type \"musical work\".\n\n5. subject \"later productions\", relation \"title\", object \"Les Sylphides\", qualifiers [], subject_type \"production\", object_type \"ballet\".\n\nPotentially also a triplet linking \"Les Sylphides\" to \"ballet\" as instance of, but not explicit.\n\nMake sure JSON format correct.\n\nCheck pronoun resolution: \"which used the title Les Sylphides.\" \"which\" refers to \"later productions\". Good.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1671,
+      "total_tokens": 4103,
+      "completion_tokens": 2432,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Chopin's music\",\n            \"relation\": \"used in\",\n            \"object\": \"Chopiniana\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1909\"\n                }\n            ],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"ballet\"\n        },\n        {\n            \"subject\": \"Chopiniana\",\n            \"relation\": \"choreographer\",\n            \"object\": \"Michel Fokine\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1909\"\n                }\n            ],\n            \"subject_type\": \"ballet\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Chopiniana\",\n            \"relation\": \"orchestrated by\",\n            \"object\": \"Alexander Glazunov\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1909\"\n                }\n            ],\n            \"subject_type\": \"ballet\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Sergei Diaghilev\",\n            \"relation\": \"commissioned\",\n            \"object\": \"additional orchestrations\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"creator\",\n                    \"object\": \"Igor Stravinsky\"\n                },\n                {\n                    \"relation\": \"creator\",\n                    \"object\": \"Anatoly Lyadov\"\n                },\n                {\n                    \"relation\": \"creator\",\n                    \"object\": \"Sergei Taneyev\"\n                },\n                {\n                    \"relation\": \"creator\",\n                    \"object\": \"Nikolai Tcherepnin\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"musical work\"\n        },\n        {\n            \"subject\": \"later productions\",\n            \"relation\": \"title\",\n            \"object\": \"Les Sylphides\",\n            \"qualifiers\": [],\n            \"subject_type\": \"production\",\n            \"object_type\": \"ballet\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Chopin's music",
+        "relation": "used in",
+        "object": "Chopiniana",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1909"
+          }
+        ],
+        "subject_type": "musical work",
+        "object_type": "ballet"
+      },
+      {
+        "subject": "Chopiniana",
+        "relation": "choreographer",
+        "object": "Michel Fokine",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1909"
+          }
+        ],
+        "subject_type": "ballet",
+        "object_type": "human"
+      },
+      {
+        "subject": "Chopiniana",
+        "relation": "orchestrated by",
+        "object": "Alexander Glazunov",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1909"
+          }
+        ],
+        "subject_type": "ballet",
+        "object_type": "human"
+      },
+      {
+        "subject": "Sergei Diaghilev",
+        "relation": "commissioned",
+        "object": "additional orchestrations",
+        "qualifiers": [
+          {
+            "relation": "creator",
+            "object": "Igor Stravinsky"
+          },
+          {
+            "relation": "creator",
+            "object": "Anatoly Lyadov"
+          },
+          {
+            "relation": "creator",
+            "object": "Sergei Taneyev"
+          },
+          {
+            "relation": "creator",
+            "object": "Nikolai Tcherepnin"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "musical work"
+      },
+      {
+        "subject": "later productions",
+        "relation": "title",
+        "object": "Les Sylphides",
+        "qualifiers": [],
+        "subject_type": "production",
+        "object_type": "ballet"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1671,
+    "total_tokens": 4103,
+    "completion_tokens": 2432,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 641,
+    "output_tokens_est": 549
+  },
+  "attempts": 1,
+  "latency_s": 27.004872219004028,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:09:01.722439+00:00",
+  "cache_key": "9cb37921e2ba18f7b3378de08c6d4f8e"
+}

@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "1f33ea2e7b1c118b",
+    "input_hash": "957e9b4a363e51fb5fb05edfd9075364b82028dd03ffd5960f4b1a3fa5c3cde2",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-ebae8e47221619a3d37ea5b5dab9d45e",
+    "object": "chat.completion",
+    "created": 1791549025,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"date of birth\",\n            \"object\": \"9 December 1973\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Sandy Bay\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"occupation\",\n            \"object\": \"long-distance runner\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Saint Vincent and the Grenadines\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"represented country\",\n            \"object\": \"Saint Vincent and the Grenadines\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"sport\",\n                    \"object\": \"marathon\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1996\"\n                },\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"2\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nThe text: \"Pamenos Ballantyne\\n\\nPamenos Ballantyne (born 9 December 1973 in Sandy Bay) is a long-distance runner from Saint Vincent and the Grenadines. He represented his country in the marathon at two consecutive Summer Olympics starting in 1996.\"\n\nWe have facts:\n\n- Pamenos Ballantyne, date of birth = 9 December 1973.\n- Pamenos Ballantyne, place of birth = Sandy Bay. (The text says \"born ... in Sandy Bay\". So that's a location of birth. Use relation \"place of birth\".\n- Pamenos Ballantyne, occupation = long-distance runner (or \"sport\" maybe). Use relation \"occupation\" or \"sport\". In example they used \"occupation\". Use \"occupation\" with object \"long-distance runner\".\n- Pamenos Ballantyne, country of citizenship? Not explicitly. \"from Saint Vincent and the Grenadines\" indicates nationality. So relation \"country of citizenship\" or \"country of origin\". Use \"country of citizenship\" maybe. Let's use \"country of citizenship\".\n- He represented his country in the marathon at two consecutive Summer Olympics starting in 1996.\n\nWe need to capture event: \"represented his country in the marathon at two consecutive Summer Olympics starting in 1996.\" So subject: Pamenos Ballantyne. Relation: \"participated in\". Object: \"marathon\". Qualifiers: \"point in time\": 1996 (starting), maybe \"point in time\": \"1996 Summer Olympics\" and \"point in time\": \"2000 Summer Olympics\"? It says two consecutive Summer Olympics starting in 1996, so 1996 and 2000. But not explicitly mention 2000, but \"two consecutive Summer Olympics starting in 1996\". So we can capture qualifier \"number of events\": 2? But we need to abide by explicit facts. It says \"two consecutive Summer Olympics starting in 1996\". So we can have qualifier \"point in time\" = \"1996\" and qualifier \"count\" = \"2\". Or maybe better to create separate triplets: participated in \"1996 Summer Olympics\" and \"2000 Summer Olympics\". But the text only explicitly mentions starting year, not the second year. However \"two consecutive Summer Olympics starting in 1996\" implies 1996 and 2000 (since Summer Olympics every 4 years). That is inferred, not explicit. Avoid inference. So maybe only one triplet: (Pamenos Ballantyne, participated in, marathon) with qualifiers: \"event type\": \"Summer Olympics\", \"point in time\": \"1996\", \"count\": \"2\". But \"event type\" maybe not needed. Use qualifier \"point in time\" and \"quantity\" maybe. The instruction: qualifiers can be date, place, other attributes. So we can add qualifier \"point in time\": \"1996\". Also qualifier \"quantity\": \"2\" with relation maybe \"count\"? Not defined. Could use \"number of occurrences\". But not required.\n\nAlso \"represented his country\" indicates relation \"represented\". So relation \"represented\" with object \"Saint Vincent and the Grenadines\". Could be separate: (Pamenos Ballantyne, represented country, Saint Vincent and the Grenadines) with qualifier \"sport\": marathon, \"point in time\": 1996, \"count\": 2. Or we could have two triplets: (Pamenos Ballantyne, represented country, Saint Vincent and the Grenadines) with qualifiers, plus (Pamenos Ballantyne, sport, marathon) maybe.\n\nThe example used \"award received\". For sports, they might use \"sport\" relation. But \"represented his country in the marathon\" is about participation. Let's produce two separate triplets:\n\n1. (Pamenos Ballantyne, occupation, long-distance runner)\n2. (Pamenos Ballantyne, country of citizenship, Saint Vincent and the Grenadines) or \"country of origin\". Use \"country of citizenship\".\n3. (Pamenos Ballantyne, date of birth, 9 December 1973)\n4. (Pamenos Ballantyne, place of birth, Sandy Bay)\n5. (Pamenos Ballantyne, represented country, Saint Vincent and the Grenadines) with qualifiers: \"sport\": marathon, \"point in time\": 1996, \"quantity\": \"2\". Use qualifier relation \"sport\" maybe. Use \"sport\" qualifier. Also \"number of events\": \"2\". Use qualifier relation \"quantity\". Not sure exact naming. Use \"quantity\" as qualifier relation.\n\nNeed subject_type and object_type.\n\n- Pamenos Ballantyne: human.\n- date of birth object: date.\n- place of birth object: location (maybe \"settlement\" but use \"location\").\n- occupation object: profession.\n- country of citizenship object: country.\n- represented country object: country.\n- marathon is a sport event, object_type maybe \"sport\" or \"event\". Use \"sport\".\n- qualifiers: sport (marathon) object_type \"sport\".\n- point in time qualifier object_type \"date\" or \"year\". Use \"date\".\n- quantity qualifier object_type \"quantity\" (maybe \"number\").\n\nNow produce JSON.\n\nCheck format: each triplet dict includes \"qualifiers\": list of dicts with \"relation\" and \"object\". No need to include qualifier types.\n\nLet's craft.\n\nTriplet list order not important.\n\nWill include qualifiers for representation triplet.\n\nAlso maybe include a \"participated in\" relation: (Pamenos Ballantyne, participated in, marathon) with qualifiers: \"point in time\": 1996, \"event\": \"Summer Olympics\", \"quantity\": 2. But to keep simple, use represented country.\n\nLet's produce.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1642,
+      "total_tokens": 3223,
+      "completion_tokens": 1581,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"date of birth\",\n            \"object\": \"9 December 1973\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Sandy Bay\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"occupation\",\n            \"object\": \"long-distance runner\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Saint Vincent and the Grenadines\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Pamenos Ballantyne\",\n            \"relation\": \"represented country\",\n            \"object\": \"Saint Vincent and the Grenadines\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"sport\",\n                    \"object\": \"marathon\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1996\"\n                },\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"2\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Pamenos Ballantyne",
+        "relation": "date of birth",
+        "object": "9 December 1973",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Pamenos Ballantyne",
+        "relation": "place of birth",
+        "object": "Sandy Bay",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "location"
+      },
+      {
+        "subject": "Pamenos Ballantyne",
+        "relation": "occupation",
+        "object": "long-distance runner",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Pamenos Ballantyne",
+        "relation": "country of citizenship",
+        "object": "Saint Vincent and the Grenadines",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Pamenos Ballantyne",
+        "relation": "represented country",
+        "object": "Saint Vincent and the Grenadines",
+        "qualifiers": [
+          {
+            "relation": "sport",
+            "object": "marathon"
+          },
+          {
+            "relation": "point in time",
+            "object": "1996"
+          },
+          {
+            "relation": "quantity",
+            "object": "2"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1642,
+    "total_tokens": 3223,
+    "completion_tokens": 1581,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 518,
+    "output_tokens_est": 425
+  },
+  "attempts": 1,
+  "latency_s": 18.897455578000518,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:30:44.182863+00:00",
+  "cache_key": "1a830c30df8d0408e2542e8ad93218ac"
+}

@@ -1,0 +1,191 @@
+{
+  "task": {
+    "input_id": "89914948c64de7a6",
+    "input_hash": "6d828c643b63bfa9be265115d08ea8139969ca491b6f850b19f7db6cdca94e9b",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793205695-0rD1qz7Kj26T8ysw0EcF",
+    "object": "chat.completion",
+    "created": 1793205695,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Bell family home\",\n            \"relation\": \"located in\",\n            \"object\": \"Cambridge, Massachusetts\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"1880\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Bell's father-in-law\",\n            \"relation\": \"bought\",\n            \"object\": \"house\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1880\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Washington, D.C.\",\n                    \"object_type\": \"city\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Bell's father-in-law\",\n            \"relation\": \"bought\",\n            \"object\": \"home\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1882\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Washington, D.C.\",\n                    \"object_type\": \"city\"\n                },\n                {\n                    \"relation\": \"beneficiary\",\n                    \"object\": \"Bell's family\",\n                    \"object_type\": \"family\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Bell's family\",\n            \"relation\": \"located in\",\n            \"object\": \"Washington, D.C.\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1882\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"family\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"involved in\",\n            \"object\": \"court case\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"subject matter\",\n                    \"object\": \"patent disputes\",\n                    \"object_type\": \"legal dispute\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legal case\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Alexander Graham Bell\n\nThe Bell family home was in Cambridge, Massachusetts, until 1880 when Bell's father-in-law bought a house in Washington, D.C., and later in 1882 bought a home in the same city for Bell's family, so that they could be with him while he attended to the numerous court cases involving patent disputes.\"\n\nWe need to parse facts.\n\nEntities: Alexander Graham Bell (human). Bell family (maybe family). Bell's father-in-law (person). The Bell family home (maybe residence). Cambridge, Massachusetts (city). Washington, D.C. (city). House (building). Home (building). 1880 (year). 1882 (year). Patent disputes (legal case). Court cases (legal case). Possibly \"numerous court cases involving patent disputes\" is a fact about Bell attending to them.\n\nWe need to produce triplets.\n\nFirst sentence: \"Alexander Graham Bell\" is just a heading, maybe no fact.\n\nSecond: \"The Bell family home was in Cambridge, Massachusetts, until 1880\". So we have subject: Bell family home (maybe \"Bell family home\") relation: location (or \"located in\") object: Cambridge, Massachusetts. Qualifier: end time 1880 (since \"until 1880\"). So we need a qualifier \"end time\" with object \"1880\" type year.\n\nSubject_type: \"residence\" or \"building\". Use \"building\". Object_type: \"city\". Provide qualifiers list.\n\nNext: \"when Bell's father-in-law bought a house in Washington, D.C.\" So subject: Bell's father-in-law (person) relation: \"bought\" object: house (building). Qualifier: location Washington, D.C. Also time: 1880 (since \"when ... bought ...\", same year). So we can have qualifiers: \"point in time\" 1880, \"location\" Washington, D.C.\n\nBut we also need to capture that the house is in Washington, D.C. Could also be separate triplet: house location Washington, D.C. But we can embed as qualifier.\n\nBetter to have separate: \"house\" relation \"located in\" Washington, D.C. with qualifier point in time 1880. However the text says \"bought a house in Washington, D.C.\" So the location is part of the purchase. We'll create triplet: Bell's father-in-law - \"bought\" - house. Qualifiers: point in time 1880, location Washington, D.C.\n\nSubject_type: human. Object_type: building.\n\nNext: \"and later in 1882 bought a home in the same city for Bell's family\". So same subject: Bell's father-in-law. Relation: bought. Object: home (building). Qualifiers: point in time 1882, location Washington, D.C. (same city). Also \"for Bell's family\" indicates beneficiary. Could add qualifier \"beneficiary\" object \"Bell's family\". object_type \"family\". We'll include.\n\nNext: \"so that they could be with him while he attended to the numerous court cases involving patent disputes.\"\n\nThis clause indicates purpose: The father-in-law bought home so that Bell's family could be with him while he attended to court cases. We can extract: Bell's father-in-law - \"purpose\" - \"provide residence for Bell's family\". But maybe we can capture: Bell's family - \"location\" - Washington, D.C. (they could be with him). Or \"Bell's family\" - \"resided in\" - Washington, D.C. with qualifier point in time 1882? Might be overlapping.\n\nAlso \"Bell\" attended to numerous court cases involving patent disputes. So subject: Alexander Graham Bell (human) relation: \"attended to\" (or \"involved in\") object: court cases (legal case). Qualifier: \"topic\" \"patent disputes\". Also maybe \"number\" \"numerous\". Could use qualifier \"subject matter\" \"patent disputes\". Also time not given.\n\nWe'll create triplet: Alexander Graham Bell - \"involved in\" - court cases. Qualifier: \"subject matter\" \"patent disputes\". object_type: \"legal case\". subject_type: human.\n\nAlso \"court cases\" could be plural; we treat as \"court case\". Good.\n\nAlso \"Bell's father-in-law\" - \"relationship\" - \"father-in-law of Alexander Graham Bell\". Could capture but not explicit. Might not be needed.\n\nAlso \"Bell family home\" earlier is \"Bell family home\". Could also have relation \"owned by\" Bell's family? Not in text.\n\nLet's list triplets:\n\n1. Subject: Bell family home; relation: located in; object: Cambridge, Massachusetts; qualifier: end time 1880.\n\n2. Subject: Bell's father-in-law; relation: bought; object: house; qualifiers: point in time 1880; location Washington, D.C.\n\n3. Subject: Bell's father-in-law; relation: bought; object: home; qualifiers: point in time 1882; location Washington, D.C.; beneficiary Bell's family.\n\n4. Subject: Bell's family; relation: located in; object: Washington, D.C.; qualifier: start time 1882? Could be \"since 1882\". Not explicit but implied. Might include start time 1882.\n\n5. Subject: Alexander Graham Bell; relation: involved in; object: court case; qualifiers: subject matter patent disputes.\n\nPotentially also \"court case\" plural but okay.\n\nNow need to assign types:\n\n- Bell family home: building (or residence). Use \"building\".\n- Cambridge, Massachusetts: city (or \"city\").\n- Bell's father-in-law: human.\n- house: building.\n- home: building.\n- Washington, D.C.: city.\n- Bell's family: family (or \"family\").\n- Alexander Graham Bell: human.\n- court case: legal case.\n- patent disputes: legal dispute (or \"legal dispute\").\n\nQualifiers object_type: for end time: year. point in time: year. location: city. beneficiary: family. subject matter: legal dispute? Use \"legal dispute\". start time: year.\n\nNow format JSON as per spec: top-level key \"triplets\": list of dicts.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list, \"subject_type\", \"object_type\".\n\nQualifiers each dict: \"relation\", \"object\", \"object_type\".\n\nLet's craft.\n\nTriplet 1:\n\n{\n \"subject\": \"Bell family home\",\n \"relation\": \"located in\",\n \"object\": \"Cambridge, Massachusetts\",\n \"qualifiers\": [\n   {\"relation\": \"end time\", \"object\": \"1880\", \"object_type\": \"year\"}\n ],\n \"subject_type\": \"building\",\n \"object_type\": \"city\"\n}\n\nTriplet 2:\n\n{\n \"subject\": \"Bell's father-in-law\",\n \"relation\": \"bought\",\n \"object\": \"house\",\n \"qualifiers\": [\n   {\"relation\": \"point in time\", \"object\": \"1880\", \"object_type\": \"year\"},\n   {\"relation\": \"location\", \"object\": \"Washington, D.C.\", \"object_type\": \"city\"}\n ],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 3:\n\n{\n \"subject\": \"Bell's father-in-law\",\n \"relation\": \"bought\",\n \"object\": \"home\",\n \"qualifiers\": [\n   {\"relation\": \"point in time\", \"object\": \"1882\", \"object_type\": \"year\"},\n   {\"relation\": \"location\", \"object\": \"Washington, D.C.\", \"object_type\": \"city\"},\n   {\"relation\": \"beneficiary\", \"object\": \"Bell's family\", \"object_type\": \"family\"}\n ],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 4:\n\n{\n \"subject\": \"Bell's family\",\n \"relation\": \"located in\",\n \"object\": \"Washington, D.C.\",\n \"qualifiers\": [\n   {\"relation\": \"start time\", \"object\": \"1882\", \"object_type\": \"year\"}\n ],\n \"subject_type\": \"family\",\n \"object_type\": \"city\"\n}\n\nTriplet 5:\n\n{\n \"subject\": \"Alexander Graham Bell\",\n \"relation\": \"involved in\",\n \"object\": \"court case\",\n \"qualifiers\": [\n   {\"relation\": \"subject matter\", \"object\": \"patent disputes\", \"object_type\": \"legal dispute\"}\n ],\n \"subject_type\": \"human\",\n \"object_type\": \"legal case\"\n}\n\nCheck if any other facts: \"The Bell family home was in Cambridge, Massachusetts, until 1880\". Could also have start time unknown; we ignore.\n\nAlso \"Bell's father-in-law bought a house in Washington, D.C.\" Could also have \"house\" located in Washington, D.C. but we already have location qualifier.\n\nPotentially \"Bell's father-in-law\" relation \"family relation\" to Alexander Graham Bell. Not required.\n\nNow produce JSON.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"Alexander Graham Bell\n\nThe Bell family home was in Cambridge, Massachusetts, until 1880 when Bell's father-in-law bought a house in Washington, D.C., and later in 1882 bought a home in the same city for Bell's family, so that they could be with him while he attended to the numerous court cases involving patent disputes.\"\n\nWe need to parse facts.\n\nEntities: Alexander Graham Bell (human). Bell family (maybe family). Bell's father-in-law (person). The Bell family home (maybe residence). Cambridge, Massachusetts (city). Washington, D.C. (city). House (building). Home (building). 1880 (year). 1882 (year). Patent disputes (legal case). Court cases (legal case). Possibly \"numerous court cases involving patent disputes\" is a fact about Bell attending to them.\n\nWe need to produce triplets.\n\nFirst sentence: \"Alexander Graham Bell\" is just a heading, maybe no fact.\n\nSecond: \"The Bell family home was in Cambridge, Massachusetts, until 1880\". So we have subject: Bell family home (maybe \"Bell family home\") relation: location (or \"located in\") object: Cambridge, Massachusetts. Qualifier: end time 1880 (since \"until 1880\"). So we need a qualifier \"end time\" with object \"1880\" type year.\n\nSubject_type: \"residence\" or \"building\". Use \"building\". Object_type: \"city\". Provide qualifiers list.\n\nNext: \"when Bell's father-in-law bought a house in Washington, D.C.\" So subject: Bell's father-in-law (person) relation: \"bought\" object: house (building). Qualifier: location Washington, D.C. Also time: 1880 (since \"when ... bought ...\", same year). So we can have qualifiers: \"point in time\" 1880, \"location\" Washington, D.C.\n\nBut we also need to capture that the house is in Washington, D.C. Could also be separate triplet: house location Washington, D.C. But we can embed as qualifier.\n\nBetter to have separate: \"house\" relation \"located in\" Washington, D.C. with qualifier point in time 1880. However the text says \"bought a house in Washington, D.C.\" So the location is part of the purchase. We'll create triplet: Bell's father-in-law - \"bought\" - house. Qualifiers: point in time 1880, location Washington, D.C.\n\nSubject_type: human. Object_type: building.\n\nNext: \"and later in 1882 bought a home in the same city for Bell's family\". So same subject: Bell's father-in-law. Relation: bought. Object: home (building). Qualifiers: point in time 1882, location Washington, D.C. (same city). Also \"for Bell's family\" indicates beneficiary. Could add qualifier \"beneficiary\" object \"Bell's family\". object_type \"family\". We'll include.\n\nNext: \"so that they could be with him while he attended to the numerous court cases involving patent disputes.\"\n\nThis clause indicates purpose: The father-in-law bought home so that Bell's family could be with him while he attended to court cases. We can extract: Bell's father-in-law - \"purpose\" - \"provide residence for Bell's family\". But maybe we can capture: Bell's family - \"location\" - Washington, D.C. (they could be with him). Or \"Bell's family\" - \"resided in\" - Washington, D.C. with qualifier point in time 1882? Might be overlapping.\n\nAlso \"Bell\" attended to numerous court cases involving patent disputes. So subject: Alexander Graham Bell (human) relation: \"attended to\" (or \"involved in\") object: court cases (legal case). Qualifier: \"topic\" \"patent disputes\". Also maybe \"number\" \"numerous\". Could use qualifier \"subject matter\" \"patent disputes\". Also time not given.\n\nWe'll create triplet: Alexander Graham Bell - \"involved in\" - court cases. Qualifier: \"subject matter\" \"patent disputes\". object_type: \"legal case\". subject_type: human.\n\nAlso \"court cases\" could be plural; we treat as \"court case\". Good.\n\nAlso \"Bell's father-in-law\" - \"relationship\" - \"father-in-law of Alexander Graham Bell\". Could capture but not explicit. Might not be needed.\n\nAlso \"Bell family home\" earlier is \"Bell family home\". Could also have relation \"owned by\" Bell's family? Not in text.\n\nLet's list triplets:\n\n1. Subject: Bell family home; relation: located in; object: Cambridge, Massachusetts; qualifier: end time 1880.\n\n2. Subject: Bell's father-in-law; relation: bought; object: house; qualifiers: point in time 1880; location Washington, D.C.\n\n3. Subject: Bell's father-in-law; relation: bought; object: home; qualifiers: point in time 1882; location Washington, D.C.; beneficiary Bell's family.\n\n4. Subject: Bell's family; relation: located in; object: Washington, D.C.; qualifier: start time 1882? Could be \"since 1882\". Not explicit but implied. Might include start time 1882.\n\n5. Subject: Alexander Graham Bell; relation: involved in; object: court case; qualifiers: subject matter patent disputes.\n\nPotentially also \"court case\" plural but okay.\n\nNow need to assign types:\n\n- Bell family home: building (or residence). Use \"building\".\n- Cambridge, Massachusetts: city (or \"city\").\n- Bell's father-in-law: human.\n- house: building.\n- home: building.\n- Washington, D.C.: city.\n- Bell's family: family (or \"family\").\n- Alexander Graham Bell: human.\n- court case: legal case.\n- patent disputes: legal dispute (or \"legal dispute\").\n\nQualifiers object_type: for end time: year. point in time: year. location: city. beneficiary: family. subject matter: legal dispute? Use \"legal dispute\". start time: year.\n\nNow format JSON as per spec: top-level key \"triplets\": list of dicts.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list, \"subject_type\", \"object_type\".\n\nQualifiers each dict: \"relation\", \"object\", \"object_type\".\n\nLet's craft.\n\nTriplet 1:\n\n{\n \"subject\": \"Bell family home\",\n \"relation\": \"located in\",\n \"object\": \"Cambridge, Massachusetts\",\n \"qualifiers\": [\n   {\"relation\": \"end time\", \"object\": \"1880\", \"object_type\": \"year\"}\n ],\n \"subject_type\": \"building\",\n \"object_type\": \"city\"\n}\n\nTriplet 2:\n\n{\n \"subject\": \"Bell's father-in-law\",\n \"relation\": \"bought\",\n \"object\": \"house\",\n \"qualifiers\": [\n   {\"relation\": \"point in time\", \"object\": \"1880\", \"object_type\": \"year\"},\n   {\"relation\": \"location\", \"object\": \"Washington, D.C.\", \"object_type\": \"city\"}\n ],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 3:\n\n{\n \"subject\": \"Bell's father-in-law\",\n \"relation\": \"bought\",\n \"object\": \"home\",\n \"qualifiers\": [\n   {\"relation\": \"point in time\", \"object\": \"1882\", \"object_type\": \"year\"},\n   {\"relation\": \"location\", \"object\": \"Washington, D.C.\", \"object_type\": \"city\"},\n   {\"relation\": \"beneficiary\", \"object\": \"Bell's family\", \"object_type\": \"family\"}\n ],\n \"subject_type\": \"human\",\n \"object_type\": \"building\"\n}\n\nTriplet 4:\n\n{\n \"subject\": \"Bell's family\",\n \"relation\": \"located in\",\n \"object\": \"Washington, D.C.\",\n \"qualifiers\": [\n   {\"relation\": \"start time\", \"object\": \"1882\", \"object_type\": \"year\"}\n ],\n \"subject_type\": \"family\",\n \"object_type\": \"city\"\n}\n\nTriplet 5:\n\n{\n \"subject\": \"Alexander Graham Bell\",\n \"relation\": \"involved in\",\n \"object\": \"court case\",\n \"qualifiers\": [\n   {\"relation\": \"subject matter\", \"object\": \"patent disputes\", \"object_type\": \"legal dispute\"}\n ],\n \"subject_type\": \"human\",\n \"object_type\": \"legal case\"\n}\n\nCheck if any other facts: \"The Bell family home was in Cambridge, Massachusetts, until 1880\". Could also have start time unknown; we ignore.\n\nAlso \"Bell's father-in-law bought a house in Washington, D.C.\" Could also have \"house\" located in Washington, D.C. but we already have location qualifier.\n\nPotentially \"Bell's father-in-law\" relation \"family relation\" to Alexander Graham Bell. Not required.\n\nNow produce JSON.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1423,
+      "completion_tokens": 2402,
+      "total_tokens": 3825,
+      "cost": 0.000491864,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000491864,
+        "upstream_inference_prompt_cost": 4.269e-05,
+        "upstream_inference_completions_cost": 0.000449174
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Bell family home\",\n            \"relation\": \"located in\",\n            \"object\": \"Cambridge, Massachusetts\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"1880\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Bell's father-in-law\",\n            \"relation\": \"bought\",\n            \"object\": \"house\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1880\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Washington, D.C.\",\n                    \"object_type\": \"city\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Bell's father-in-law\",\n            \"relation\": \"bought\",\n            \"object\": \"home\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1882\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Washington, D.C.\",\n                    \"object_type\": \"city\"\n                },\n                {\n                    \"relation\": \"beneficiary\",\n                    \"object\": \"Bell's family\",\n                    \"object_type\": \"family\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Bell's family\",\n            \"relation\": \"located in\",\n            \"object\": \"Washington, D.C.\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1882\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"family\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Alexander Graham Bell\",\n            \"relation\": \"involved in\",\n            \"object\": \"court case\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"subject matter\",\n                    \"object\": \"patent disputes\",\n                    \"object_type\": \"legal dispute\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legal case\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Bell family home",
+        "relation": "located in",
+        "object": "Cambridge, Massachusetts",
+        "qualifiers": [
+          {
+            "relation": "end time",
+            "object": "1880"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "city"
+      },
+      {
+        "subject": "Bell's father-in-law",
+        "relation": "bought",
+        "object": "house",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1880"
+          },
+          {
+            "relation": "location",
+            "object": "Washington, D.C."
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "building"
+      },
+      {
+        "subject": "Bell's father-in-law",
+        "relation": "bought",
+        "object": "home",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1882"
+          },
+          {
+            "relation": "location",
+            "object": "Washington, D.C."
+          },
+          {
+            "relation": "beneficiary",
+            "object": "Bell's family"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "building"
+      },
+      {
+        "subject": "Bell's family",
+        "relation": "located in",
+        "object": "Washington, D.C.",
+        "qualifiers": [
+          {
+            "relation": "start time",
+            "object": "1882"
+          }
+        ],
+        "subject_type": "family",
+        "object_type": "city"
+      },
+      {
+        "subject": "Alexander Graham Bell",
+        "relation": "involved in",
+        "object": "court case",
+        "qualifiers": [
+          {
+            "relation": "subject matter",
+            "object": "patent disputes"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "legal case"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1423,
+    "completion_tokens": 2402,
+    "total_tokens": 3825,
+    "cost": 0.000491864,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000491864,
+      "upstream_inference_prompt_cost": 4.269e-05,
+      "upstream_inference_completions_cost": 0.000449174
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 796,
+    "output_tokens_est": 668
+  },
+  "attempts": 1,
+  "latency_s": 61.589746830002696,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T16:42:36.307115+00:00",
+  "cache_key": "a27aba2159cd21b0e5b406d1ccd86968"
+}

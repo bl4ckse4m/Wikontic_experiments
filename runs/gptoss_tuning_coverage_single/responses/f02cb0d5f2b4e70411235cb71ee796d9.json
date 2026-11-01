@@ -1,0 +1,161 @@
+{
+  "task": {
+    "input_id": "91771b67098560d3",
+    "input_hash": "cebd46fa146ed3512076e810da40518b63271efe5892c1fe7aeceba63757cdf2",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-13259c5e9ef5f5d5b3f6ad19f2742bd9",
+    "object": "chat.completion",
+    "created": 1791505056,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"part of series\",\n            \"object\": \"House (TV series)\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"episode number\",\n            \"object\": \"7\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"season\",\n            \"object\": \"Season 6\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"season\"\n        },\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"overall episode number\",\n            \"object\": \"117\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"air date\",\n            \"object\": \"9 November 2009\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"House\",\n            \"relation\": \"attended conference\",\n            \"object\": \"medical conference\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Wilson\",\n            \"relation\": \"attended conference\",\n            \"object\": \"medical conference\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Cuddy\",\n            \"relation\": \"attended conference\",\n            \"object\": \"medical conference\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"House\",\n            \"relation\": \"discovers about\",\n            \"object\": \"Cuddy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"medical conference\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \n\"Known Unknowns\n\n\"Known Unknowns\" is the seventh episode of the sixth season of \"House\" and 117th overall. It aired on November 9, 2009. The team tries to diagnose a teenage girl while House is away at a medical conference with Wilson and Cuddy. At the conference House finds something out about Cuddy.\"\n\nWe need to capture facts:\n\n- \"Known Unknowns\" is the seventh episode of the sixth season of \"House\" and 117th overall.\nSo we have episode entity \"Known Unknowns\". Relations:\n   - \"episode of series\" maybe \"part of series\" or \"episode of\". Use \"episode of\" relation? In Wikidata, there is \"part of the series\" (P179) for episodes. We'll use relation \"part of series\". Object: \"House\". subject_type: \"television episode\". object_type: \"television series\".\n   - \"season number\": seventh episode of the sixth season. Actually \"seventh episode of the sixth season\". So we can have relation \"episode number\" = 7? Or \"episode number\" within season. Also \"season\" relation: \"season\" = \"Season 6\". Could create relation \"season\" with object \"Season 6 of House\". But we need simple. Let's create two triplets:\n   1) (Known Unknowns, episode number, 7) with qualifier maybe \"point in time\"? Not needed. object_type: \"integer\".\n   2) (Known Unknowns, part of season, \"Season 6 of House\") maybe \"season\" relation. We'll treat object as \"Season 6\". object_type \"season\".\n   Also \"overall episode number\" 117th overall. So relation \"overall episode number\" = 117.\n\n- It aired on November 9, 2009. So (Known Unknowns, air date, \"9 November 2009\") with object_type date.\n\n- The team tries to diagnose a teenage girl while House is away at a medical conference with Wilson and Cuddy.\nWe can extract:\n   - (House, participation in, \"medical conference\")? Actually House is away at a medical conference with Wilson and Cuddy. So we can have (House, attendee of, \"medical conference\") with qualifiers maybe \"with participants\" Wilson and Cuddy. But maybe separate triplets:\n   - (House, attended conference, \"medical conference\") subject_type human, object_type event.\n   - (Wilson, attended conference, \"medical conference\")\n   - (Cuddy, attended conference, \"medical conference\")\n   Also \"team tries to diagnose a teenage girl\". The team (the House team) tries to diagnose a teenage girl. Could have (team, activity, \"diagnose teenage girl\") but maybe not needed. The team is not named entity. Might skip.\n\n- At the conference House finds something out about Cuddy.\nSo (House, discovers about, Cuddy) with qualifier \"point in time\" = same conference? Could add qualifier \"event\" = \"medical conference\". But we can just have (House, finds something about, Cuddy) with qualifier \"point in time\" maybe \"during medical conference\". We'll add qualifier relation \"point in time\" object \"medical conference\". Or \"context\" maybe. Use \"point in time\" as per guidelines.\n\nNow need subject_type and object_type.\n\nDefine types:\n- \"Known Unknowns\": television episode.\n- \"House\": television series (or maybe character? Actually \"House\" is TV series, but also Dr. Gregory House is a character. Here context is series. Use series.\n- \"Season 6\": season (of TV series).\n- \"medical conference\": event.\n- \"Wilson\": human (character).\n- \"Cuddy\": human.\n- \"teenage girl\": human (maybe \"person\" but unspecified). Could be \"human\". But we may not need a triplet for that.\n\nNow produce JSON.\n\nList of triplets:\n\n1) Known Unknowns - part of series - House\n2) Known Unknowns - episode number - 7\n3) Known Unknowns - season - Season 6 (or \"Season 6 of House\")\n4) Known Unknowns - overall episode number - 117\n5) Known Unknowns - air date - 9 November 2009\n6) House - attended conference - medical conference\n7) Wilson - attended conference - medical conference\n8) Cuddy - attended conference - medical conference\n9) House - discovers about - Cuddy (qualifier point in time = medical conference)\n\nCheck qualifiers: For #9, add qualifier.\n\nNow need subject_type and object_type.\n\nDefine:\n- \"Known Unknowns\": \"television episode\"\n- \"House\": \"television series\"\n- \"episode number\": object_type \"integer\"\n- \"season\": object_type \"season\"\n- \"overall episode number\": integer\n- \"air date\": date\n- \"medical conference\": \"event\"\n- \"human\" for Wilson, Cuddy, House (character) but House as human? Actually House is a person (Dr. Gregory House). But earlier we used House as series. In this context \"House is away at a medical conference with Wilson and Cuddy.\" That refers to Dr. Gregory House, a human. So we need differentiate. The entity \"House\" ambiguous. Since earlier we used \"House\" as series for episode relation. But we can treat \"House (TV series)\" vs \"House (character)\". To avoid confusion, maybe use \"House (TV series)\" for series relation, and \"Gregory House\" for person. However text just says \"House\". In context of episode description, \"House\" likely refers to TV series, but later \"House is away at a medical conference\" refers to the character. Could treat as same entity but type ambiguous. Might set subject_type \"human\" for later triplets, and object_type \"television series\" for earlier. That's okay.\n\nThus for triplet 1: subject \"Known Unknowns\", object \"House (TV series)\". We'll name object \"House (TV series)\". For later triplets, subject \"House (character)\" maybe \"Gregory House\". But we can keep \"House\" and set subject_type \"human\". Accept.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1656,
+      "total_tokens": 3481,
+      "completion_tokens": 1825,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"part of series\",\n            \"object\": \"House (TV series)\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"episode number\",\n            \"object\": \"7\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"season\",\n            \"object\": \"Season 6\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"season\"\n        },\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"overall episode number\",\n            \"object\": \"117\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Known Unknowns\",\n            \"relation\": \"air date\",\n            \"object\": \"9 November 2009\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"House\",\n            \"relation\": \"attended conference\",\n            \"object\": \"medical conference\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Wilson\",\n            \"relation\": \"attended conference\",\n            \"object\": \"medical conference\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Cuddy\",\n            \"relation\": \"attended conference\",\n            \"object\": \"medical conference\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"House\",\n            \"relation\": \"discovers about\",\n            \"object\": \"Cuddy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"medical conference\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Known Unknowns",
+        "relation": "part of series",
+        "object": "House (TV series)",
+        "qualifiers": [],
+        "subject_type": "television episode",
+        "object_type": "television series"
+      },
+      {
+        "subject": "Known Unknowns",
+        "relation": "episode number",
+        "object": "7",
+        "qualifiers": [],
+        "subject_type": "television episode",
+        "object_type": "integer"
+      },
+      {
+        "subject": "Known Unknowns",
+        "relation": "season",
+        "object": "Season 6",
+        "qualifiers": [],
+        "subject_type": "television episode",
+        "object_type": "season"
+      },
+      {
+        "subject": "Known Unknowns",
+        "relation": "overall episode number",
+        "object": "117",
+        "qualifiers": [],
+        "subject_type": "television episode",
+        "object_type": "integer"
+      },
+      {
+        "subject": "Known Unknowns",
+        "relation": "air date",
+        "object": "9 November 2009",
+        "qualifiers": [],
+        "subject_type": "television episode",
+        "object_type": "date"
+      },
+      {
+        "subject": "House",
+        "relation": "attended conference",
+        "object": "medical conference",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "Wilson",
+        "relation": "attended conference",
+        "object": "medical conference",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "Cuddy",
+        "relation": "attended conference",
+        "object": "medical conference",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "House",
+        "relation": "discovers about",
+        "object": "Cuddy",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "medical conference"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1656,
+    "total_tokens": 3481,
+    "completion_tokens": 1825,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 698,
+    "output_tokens_est": 605
+  },
+  "attempts": 1,
+  "latency_s": 21.054523013997823,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:17:57.894697+00:00",
+  "cache_key": "f02cb0d5f2b4e70411235cb71ee796d9"
+}

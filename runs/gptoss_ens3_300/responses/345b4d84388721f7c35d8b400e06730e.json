@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "1894234b9b919eac",
+    "input_hash": "0bb23b7669cf75aff126954bb251f8d33a74f75dd4d932648cac2d78d3a008cd",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d9468b74ff78077356e9ba99ef071a4e",
+    "object": "chat.completion",
+    "created": 1791548440,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"iPhone (1st generation)\",\n            \"relation\": \"introduced by\",\n            \"object\": \"Steve Jobs\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"9 January 2007\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Moscone West, San Francisco, California\"\n                },\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"Macworld Conference & Expo keynote address\"\n                }\n            ],\n            \"subject_type\": \"product\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"iPhone (1st generation)\",\n            \"relation\": \"has part\",\n            \"object\": \"widescreen iPod with touch controls\",\n            \"qualifiers\": [],\n            \"subject_type\": \"product\",\n            \"object_type\": \"device\"\n        },\n        {\n            \"subject\": \"iPhone (1st generation)\",\n            \"relation\": \"has part\",\n            \"object\": \"revolutionary mobile phone\",\n            \"qualifiers\": [],\n            \"subject_type\": \"product\",\n            \"object_type\": \"device\"\n        },\n        {\n            \"subject\": \"iPhone (1st generation)\",\n            \"relation\": \"has part\",\n            \"object\": \"breakthrough Internet communicator\",\n            \"qualifiers\": [],\n            \"subject_type\": \"product\",\n            \"object_type\": \"device\"\n        },\n        {\n            \"subject\": \"Apple\",\n            \"relation\": \"plan to reinvent\",\n            \"object\": \"phone\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Steve Jobs\"\n                },\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"planned\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"9 January 2007\"\n                }\n            ],\n            \"subject_type\": \"company\",\n            \"object_type\": \"device\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from given text.\n\nIdentify entities: iPhone (1st generation) maybe \"iPhone\". Original iPhone. Steve Jobs. Date Jan 9 2007. Event: introduction of iPhone at keynote address at Macworld Conference & Expo held in Moscone West in San Francisco, California. So triplets:\n\n- iPhone (original) introduced by Steve Jobs.\n- introduction date: January 9 2007 (qualifier point in time).\n- introduction location: Moscone West, San Francisco, California (maybe \"Moscone West\" is venue). Could have qualifiers: location.\n\n- event: keynote address at Macworld Conference & Expo (event type). The address held in Moscone West in San Francisco, California. So perhaps triplet: \"Macworld Conference & Expo\" instance of conference. But not explicit.\n\n- Jobs said ... statements: we need to capture as statements with attribution qualifiers. The statements: \"This is a day, that I have been looking forward to for two and a half years\" (maybe a quote). \"today, Apple is going to reinvent the phone.\" So we could create triplet: Apple will reinvent the phone (future). But it's a statement made by Steve Jobs, so we need to attach attribution qualifier to triplet. However we should represent as claim with modality? It's a future statement: \"going to reinvent\". Could be modality \"planned\". So we can make triplet: Apple, relation \"intention\", object \"reinvent the phone\". But we need to use Wikidata style predicates. Not sure.\n\nBetter to capture: \"Apple\" (subject) \"plan to reinvent\" \"phone\". We can use relation \"intended result\" maybe not. Could use \"plan to\" but not defined. The spec says use specific Wikidata-style predicates, but not list provided. Use generic but not \"related_to\". Could use \"projected action\". Might be okay to use \"plan to\". However maybe we skip quotes as not explicit factual claim but statement. But the instruction says extract meaningful triplets that represent factual relationships, including statements with attribution qualifiers. So we include.\n\nTriplet 1:\nsubject: iPhone (1st generation) (or \"iPhone\")\nrelation: \"introduced by\"\nobject: Steve Jobs\nqualifiers: point in time: January 9 2007; location: Moscone West, San Francisco, California; event: \"Macworld Conference & Expo keynote address\". Might need separate qualifiers: \"event\" maybe \"point in time\" and \"location\". Provide qualifiers list.\n\nTriplet 2: Steve Jobs said that \"this is a day I have been looking forward to for two and a half years\". That's a statement about time? Could encode as \"subject\" Steve Jobs, relation \"statement\", object \"looking forward to day for two and a half years\". Might be too vague.\n\nMaybe better to capture: Steve Jobs expressed anticipation for the day for two and a half years. So triplet: Steve Jobs, relation \"duration of anticipation\", object \"2.5 years\". But not explicit.\n\nSimplify: Include two statements as separate triplets with attribution.\n\nTriplet: Apple, relation \"plan to reinvent\", object \"phone\". qualifiers: attribution: \"Steve Jobs\". modality: \"planned\". Also point in time maybe \"January 9 2007\" as when said.\n\nTriplet: Steve Jobs, relation \"expressed anticipation\", object \"day\". qualifiers: \"duration\", \"2.5 years\". Not clear.\n\nGiven complexity, maybe only extract clear factual relations: introduction, date, location, speaker, event, description of iPhone as combination of three devices. The description: iPhone is a combination of three devices: widescreen iPod with touch controls; revolutionary mobile phone; breakthrough Internet communicator. So we can create three \"instance of\" or \"has part\" relations.\n\nTriplet: iPhone, relation \"has part\", object \"widescreen iPod with touch controls\". object_type: device. qualifiers none.\n\nSimilarly for \"revolutionary mobile phone\" and \"breakthrough Internet communicator\".\n\nAlso maybe \"iPhone\" relation \"type\" \"smartphone\". Not explicit but we can treat as \"device\". But not in text.\n\nAlso \"Steve Jobs\" relation \"position\" \"CEO of Apple\"? Not in text.\n\nThus produce list.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- iPhone (1st generation): \"product\" or \"device\".\n- Steve Jobs: \"human\".\n- Macworld Conference & Expo: \"event\" or \"conference\".\n- Moscone West: \"venue\".\n- San Francisco: \"city\".\n- California: \"state\".\n- Apple: \"company\".\n- widescreen iPod with touch controls: \"device\".\n- revolutionary mobile phone: \"device\".\n- breakthrough Internet communicator: \"device\".\n\nNow format JSON.\n\nTriplets:\n\n1. subject: \"iPhone (1st generation)\" relation: \"introduced by\" object: \"Steve Jobs\". qualifiers: point in time Jan 9 2007; location \"Moscone West, San Francisco, California\"; event \"Macworld Conference & Expo keynote address\". Provide separate qualifiers entries.\n\n2. subject: \"iPhone (1st generation)\" relation: \"has part\" object: \"widescreen iPod with touch controls\". qualifiers: [].\n\n3. subject: \"iPhone (1st generation)\" relation: \"has part\" object: \"revolutionary mobile phone\". qualifiers: [].\n\n4. subject: \"iPhone (1st generation)\" relation: \"has part\" object: \"breakthrough Internet communicator\". qualifiers: [].\n\n5. subject: \"Apple\" relation: \"plan to reinvent\" object: \"phone\". qualifiers: attribution \"Steve Jobs\"; modality \"planned\"; point in time \"January 9 2007\". object_type \"device\"? phone is device.\n\n6. subject: \"Steve Jobs\" relation: \"expressed anticipation for\" object \"day\". qualifiers: duration \"2.5 years\"; point in time \"January 9 2007\". Not sure.\n\nMaybe skip ambiguous.\n\nI'll include only clear ones: intro, parts, statement about Apple.\n\nThus final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1711,
+      "total_tokens": 3421,
+      "completion_tokens": 1710,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"iPhone (1st generation)\",\n            \"relation\": \"introduced by\",\n            \"object\": \"Steve Jobs\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"9 January 2007\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Moscone West, San Francisco, California\"\n                },\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"Macworld Conference & Expo keynote address\"\n                }\n            ],\n            \"subject_type\": \"product\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"iPhone (1st generation)\",\n            \"relation\": \"has part\",\n            \"object\": \"widescreen iPod with touch controls\",\n            \"qualifiers\": [],\n            \"subject_type\": \"product\",\n            \"object_type\": \"device\"\n        },\n        {\n            \"subject\": \"iPhone (1st generation)\",\n            \"relation\": \"has part\",\n            \"object\": \"revolutionary mobile phone\",\n            \"qualifiers\": [],\n            \"subject_type\": \"product\",\n            \"object_type\": \"device\"\n        },\n        {\n            \"subject\": \"iPhone (1st generation)\",\n            \"relation\": \"has part\",\n            \"object\": \"breakthrough Internet communicator\",\n            \"qualifiers\": [],\n            \"subject_type\": \"product\",\n            \"object_type\": \"device\"\n        },\n        {\n            \"subject\": \"Apple\",\n            \"relation\": \"plan to reinvent\",\n            \"object\": \"phone\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Steve Jobs\"\n                },\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"planned\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"9 January 2007\"\n                }\n            ],\n            \"subject_type\": \"company\",\n            \"object_type\": \"device\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "iPhone (1st generation)",
+        "relation": "introduced by",
+        "object": "Steve Jobs",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "9 January 2007"
+          },
+          {
+            "relation": "location",
+            "object": "Moscone West, San Francisco, California"
+          },
+          {
+            "relation": "event",
+            "object": "Macworld Conference & Expo keynote address"
+          }
+        ],
+        "subject_type": "product",
+        "object_type": "human"
+      },
+      {
+        "subject": "iPhone (1st generation)",
+        "relation": "has part",
+        "object": "widescreen iPod with touch controls",
+        "qualifiers": [],
+        "subject_type": "product",
+        "object_type": "device"
+      },
+      {
+        "subject": "iPhone (1st generation)",
+        "relation": "has part",
+        "object": "revolutionary mobile phone",
+        "qualifiers": [],
+        "subject_type": "product",
+        "object_type": "device"
+      },
+      {
+        "subject": "iPhone (1st generation)",
+        "relation": "has part",
+        "object": "breakthrough Internet communicator",
+        "qualifiers": [],
+        "subject_type": "product",
+        "object_type": "device"
+      },
+      {
+        "subject": "Apple",
+        "relation": "plan to reinvent",
+        "object": "phone",
+        "qualifiers": [
+          {
+            "relation": "attribution",
+            "object": "Steve Jobs"
+          },
+          {
+            "relation": "modality",
+            "object": "planned"
+          },
+          {
+            "relation": "point in time",
+            "object": "9 January 2007"
+          }
+        ],
+        "subject_type": "company",
+        "object_type": "device"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1711,
+    "total_tokens": 3421,
+    "completion_tokens": 1710,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 633,
+    "output_tokens_est": 541
+  },
+  "attempts": 1,
+  "latency_s": 20.896519272995647,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:21:01.230340+00:00",
+  "cache_key": "345b4d84388721f7c35d8b400e06730e"
+}

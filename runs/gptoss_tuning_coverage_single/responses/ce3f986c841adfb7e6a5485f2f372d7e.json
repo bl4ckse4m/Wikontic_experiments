@@ -1,0 +1,144 @@
+{
+  "task": {
+    "input_id": "f267def8aa52c040",
+    "input_hash": "e7203f1cef5df549f4d9fdea3f9c7746884e54b14843959a717120db44f4e786",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c80e75f019c1a6d740be3580aeb9d406",
+    "object": "chat.completion",
+    "created": 1791508051,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Angel of the Morning\",\n            \"relation\": \"performer\",\n            \"object\": \"Chrissie Hynde\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                },\n                {\n                    \"relation\": \"album\",\n                    \"object\": \"Friends soundtrack album\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Angel of the Morning\",\n            \"relation\": \"performer\",\n            \"object\": \"The Pretenders\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                },\n                {\n                    \"relation\": \"album\",\n                    \"object\": \"Friends soundtrack album\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"band\"\n        },\n        {\n            \"subject\": \"Angel of the Morning\",\n            \"relation\": \"release format\",\n            \"object\": \"single\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"single\"\n        },\n        {\n            \"subject\": \"Angel of the Morning\",\n            \"relation\": \"chart position\",\n            \"object\": \"none\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"string\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Angel of the Morning\n\nIn 1995, Chrissie Hynde and The Pretenders sang their own version on the Friends soundtrack album. The song was released as a single, but it did not chart.\"\n\nWe have entities: Angel of the Morning (song). Chrissie Hynde (human). The Pretenders (band). Friends soundtrack album (album). 1995 (date). The song (Angel of the Morning) was released as a single (release type). It did not chart (negative claim about chart performance). Also they sang their own version on the Friends soundtrack album (so relation: performed version? maybe \"performer\" or \"artist\" relation). Could be \"performer\" relation: subject: Angel of the Morning (song) - relation: performer - object: Chrissie Hynde and The Pretenders (maybe two separate performers). Or we could have two triplets: (Chrissie Hynde, performer, Angel of the Morning) and (The Pretenders, performer, Angel of the Morning). The text says \"Chrissie Hynde and The Pretenders sang their own version on the Friends soundtrack album.\" So they performed a version of the song for that album. So we can capture: (Chrissie Hynde, performer, Angel of the Morning) with qualifier point in time 1995, maybe also qualifier \"album\" = Friends soundtrack album. Similarly for The Pretenders.\n\nAlso \"Angel of the Morning\" is a song, but not explicitly said \"song\". But context: \"The song was released as a single\". So we can infer that Angel of the Morning is a song. So we can have a type for subject: \"song\". object_type for performer: \"human\" or \"band\". For release: relation \"release type\" maybe \"single\". Could use relation \"format\" or \"release format\". In Wikidata, there is \"single\" as a type of release. Could use relation \"release format\". But we need a relation connecting song to single. Maybe \"released as\" relation. Use \"release format\". Let's choose \"release format\". object_type \"single\". Also qualifier point in time 1995.\n\nAlso \"did not chart\": negative claim about chart performance. Relation could be \"chart performance\". Object maybe \"charted\". But we need to represent negative claim. Could have relation \"chart position\" with object \"none\". But better: relation \"charted\" with object \"true/false\"? Not sure. Use relation \"chart performance\" with object \"did not chart\". But we need to preserve negation qualifier. According to guidelines, we can have a triplet like (Angel of the Morning, charted, true) with qualifier polarity negative. Or (Angel of the Morning, charted, \"chart\") with polarity negative. Simpler: (Angel of the Morning, charted, \"yes\") with polarity negative. But object_type maybe \"boolean\". Might be okay.\n\nLet's construct triplets:\n\n1. (Angel of the Morning, performer, Chrissie Hynde) qualifiers: point in time 1995, album Friends soundtrack album. subject_type song, object_type human.\n\n2. (Angel of the Morning, performer, The Pretenders) qualifiers same.\n\n3. (Angel of the Morning, release format, single) qualifiers point in time 1995. subject_type song, object_type single.\n\n4. (Angel of the Morning, charted, true) qualifiers: polarity negative. subject_type song, object_type boolean.\n\nAlso maybe (Angel of the Morning, part of, Friends soundtrack album) but that's more about inclusion. Could add relation \"included in album\". But not required.\n\nAlso we could have (Chrissie Hynde, member of, The Pretenders) but not stated. So skip.\n\nNow need to ensure relation names are Wikidata-style. Use \"performer\" (Wikidata P175). \"release format\" (P577? Actually P577 is publication date. Release format is P386? Not sure. But we can just use \"release format\". \"chart performance\" maybe \"chart position\". Use \"chart position\". For negative, we can have object \"none\". But we need qualifier polarity negative. So (Angel of the Morning, chart position, none) with polarity negative. object_type maybe \"string\". Let's do that.\n\nNow produce JSON.\n\nCheck qualifiers format: list of dicts with relation and object.\n\nFor qualifiers point in time: relation \"point in time\", object \"1995\". For album: relation \"album\", object \"Friends soundtrack album\". For polarity: relation \"polarity\", object \"negative\". For approximation none.\n\nNow produce final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1627,
+      "total_tokens": 2949,
+      "completion_tokens": 1322,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Angel of the Morning\",\n            \"relation\": \"performer\",\n            \"object\": \"Chrissie Hynde\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                },\n                {\n                    \"relation\": \"album\",\n                    \"object\": \"Friends soundtrack album\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Angel of the Morning\",\n            \"relation\": \"performer\",\n            \"object\": \"The Pretenders\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                },\n                {\n                    \"relation\": \"album\",\n                    \"object\": \"Friends soundtrack album\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"band\"\n        },\n        {\n            \"subject\": \"Angel of the Morning\",\n            \"relation\": \"release format\",\n            \"object\": \"single\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1995\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"single\"\n        },\n        {\n            \"subject\": \"Angel of the Morning\",\n            \"relation\": \"chart position\",\n            \"object\": \"none\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"string\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Angel of the Morning",
+        "relation": "performer",
+        "object": "Chrissie Hynde",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1995"
+          },
+          {
+            "relation": "album",
+            "object": "Friends soundtrack album"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Angel of the Morning",
+        "relation": "performer",
+        "object": "The Pretenders",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1995"
+          },
+          {
+            "relation": "album",
+            "object": "Friends soundtrack album"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "band"
+      },
+      {
+        "subject": "Angel of the Morning",
+        "relation": "release format",
+        "object": "single",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1995"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "single"
+      },
+      {
+        "subject": "Angel of the Morning",
+        "relation": "chart position",
+        "object": "none",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "string"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1627,
+    "total_tokens": 2949,
+    "completion_tokens": 1322,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 545,
+    "output_tokens_est": 453
+  },
+  "attempts": 1,
+  "latency_s": 16.420887704007328,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:07:48.392369+00:00",
+  "cache_key": "ce3f986c841adfb7e6a5485f2f372d7e"
+}

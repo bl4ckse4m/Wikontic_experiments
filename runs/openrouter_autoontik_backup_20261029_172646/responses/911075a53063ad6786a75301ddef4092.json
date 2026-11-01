@@ -1,0 +1,204 @@
+{
+  "task": {
+    "input_id": "378496e9295c4909",
+    "input_hash": "b0b07e4569ffc82aff206a48eb5143b1d75abe4b5fdf6cfbaa41761de95dfbe8",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793199387-ausQSZr3ivR6nOj4nUnL",
+    "object": "chat.completion",
+    "created": 1793199387,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Venice",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of school districts\",\n            \"object\": \"school district\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"14000\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"school district\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"annual education expenditure\",\n            \"object\": \"public primary and secondary education\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"amount\",\n                    \"object\": \"$500 billion\",\n                    \"object_type\": \"monetary amount\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"education\"\n        },\n        {\n            \"subject\": \"state\",\n            \"relation\": \"required school year length\",\n            \"object\": \"duration\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"180 days\",\n                    \"object_type\": \"duration\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of teachers\",\n            \"object\": \"teacher\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"3,823,142\",\n                    \"object_type\": \"quantity\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"teacher\",\n            \"relation\": \"taught\",\n            \"object\": \"student\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"55,203,000\",\n                    \"object_type\": \"quantity\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"student\",\n            \"relation\": \"attended\",\n            \"object\": \"school\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"132,656\",\n                    \"object_type\": \"quantity\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text about education in US. Identify entities: United States (country), school districts, public primary and secondary education, states, school districts within the state, 180 days a year (maybe \"school year length\"), 2010 (year), teachers, public, charter, private, Catholic elementary and secondary schools, students, schools.\n\nWe need to produce JSON with \"triplets\": [ ... ].\n\nWe must include subject_type and object_type.\n\nWe need to extract facts:\n\n1. There are more than 14,000 school districts in the United States.\n- subject: United States (country)\n- relation: number of school districts\n- object: 14,000 (quantity)\n- qualifier: \"point in time\"? Not given, it's a general statement maybe current. Could add qualifier \"quantity qualifier\" like \"more than\". But we can just treat as quantity with qualifier \"greater than\". However guidelines: qualifiers are relations like \"point in time\". Could add qualifier \"qualifier\": {\"relation\":\"greater than\",\"object\":\"14000\",\"object_type\":\"quantity\"}? Not typical. Might just set object as \"14,000 school districts\". But object should be entity, not statement. Could create object \"school district\" with qualifier \"quantity\". But we need object_type \"school district\". So maybe relation \"number of\" and object \"school district\". Then qualifier \"quantity\" with object \"14000\". But guidelines: qualifiers are attached to triplet, not separate. So we can have:\n\n{\n \"subject\":\"United States\",\n \"relation\":\"number of school districts\",\n \"object\":\"school district\",\n \"qualifiers\":[{\"relation\":\"quantity\",\"object\":\"14000\",\"object_type\":\"quantity\"}],\n \"subject_type\":\"country\",\n \"object_type\":\"school district\"\n}\n\nBut \"number of school districts\" is a relation; maybe better \"has number of\" but okay.\n\n2. More than $500 billion is spent each year on public primary and secondary education.\n- subject: United States? Actually \"more than $500 billion is spent each year on public primary and secondary education\" implies spending by US. Could set subject \"United States\" or \"public primary and secondary education\". Probably subject \"United States\" with relation \"annual education expenditure\". object \"public primary and secondary education\". qualifier \"amount\" \"$500 billion\" and \"point in time\" \"each year\". Could also have \"currency\" etc.\n\nLet's create:\n\nsubject: United States\nrelation: annual expenditure on education\nobject: public primary and secondary education\nqualifiers: amount $500 billion (object_type: monetary amount), point in time \"yearly\" maybe \"per year\". Use \"point in time\" with object \"year\" maybe not needed. We'll include amount qualifier.\n\n3. Most states require that their school districts within the state teach for 180 days a year.\n- subject: state (maybe \"state\" as class). But we need specific entity? \"Most states\" is a group. Could use \"state\" as subject_type. Relation: require school district teaching days. Might be better to have subject \"state\" (generic) with relation \"required school year length\". object \"180 days\". qualifier \"point in time\" maybe not needed.\n\nBut we need subject_type \"state\". object_type \"duration\". Provide qualifier \"per year\". We'll just set.\n\n4. In 2010, there were 3,823,142 teachers in public, charter, private, and Catholic elementary and secondary schools.\n- subject: United States (or maybe \"United States\" as location). Relation: number of teachers. object: teacher. qualifier: quantity 3,823,142, point in time 2010, object_type teacher.\n\n5. They taught a total of 55,203,000 students, who attended one of 132,656 schools.\n- subject: teachers (or \"teachers in 2010\") taught students. Relation: taught. object: student. qualifier: quantity 55,203,000 (maybe \"total number of students taught\"). Also \"students attended schools\". So separate triplet: subject: student, relation: attended, object: school, qualifier: quantity 132,656 (number of schools). Also point in time maybe 2010.\n\nBut \"they taught a total of 55,203,000 students\" - we can have relation \"number of students taught\" with object \"student\". qualifier quantity.\n\nAlso \"students attended one of 132,656 schools\" - relation \"attended school\". object \"school\". qualifier quantity 132,656.\n\nNow need to assign types: United States - country. school district - administrative division? Use \"school district\". teacher - human (occupation). public primary and secondary education - \"education\". amount - monetary amount. duration - time period. student - human. school - educational institution.\n\nNow produce JSON list.\n\nMake sure each dictionary includes \"qualifiers\": [] if none.\n\nLet's craft triplets:\n\n1. US - number of school districts - school district - qualifier quantity 14000 (greater than). Use object_type \"school district\". qualifier object_type \"quantity\".\n\n2. US - annual education expenditure - public primary and secondary education - qualifier amount \"$500 billion\" (object_type \"monetary amount\"), qualifier point in time \"yearly\" maybe \"per year\". We'll include amount only.\n\n3. State - required school year length - duration - qualifier quantity \"180 days\". object_type \"duration\". subject_type \"state\". relation maybe \"required school year length\". Use qualifier \"unit\" maybe not needed.\n\n4. United States - number of teachers - teacher - qualifier quantity 3823142, point in time 2010.\n\n5. Teacher - taught - student - qualifier quantity 55203000, point in time 2010.\n\n6. Student - attended - school - qualifier quantity 132656, point in time 2010.\n\nPotential also: \"public, charter, private, and Catholic elementary and secondary schools\" as type of school. Could have subject \"United States\" relation \"has school type\" object \"public school\", etc. But maybe not needed.\n\nNow produce JSON.\n\nCheck format: top-level key \"triplets\": [ ... ].\n\nEach entry includes subject, relation, object, qualifiers (list), subject_type, object_type.\n\nQualifiers entries: relation, object, object_type.\n\nLet's craft.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text about education in US. Identify entities: United States (country), school districts, public primary and secondary education, states, school districts within the state, 180 days a year (maybe \"school year length\"), 2010 (year), teachers, public, charter, private, Catholic elementary and secondary schools, students, schools.\n\nWe need to produce JSON with \"triplets\": [ ... ].\n\nWe must include subject_type and object_type.\n\nWe need to extract facts:\n\n1. There are more than 14,000 school districts in the United States.\n- subject: United States (country)\n- relation: number of school districts\n- object: 14,000 (quantity)\n- qualifier: \"point in time\"? Not given, it's a general statement maybe current. Could add qualifier \"quantity qualifier\" like \"more than\". But we can just treat as quantity with qualifier \"greater than\". However guidelines: qualifiers are relations like \"point in time\". Could add qualifier \"qualifier\": {\"relation\":\"greater than\",\"object\":\"14000\",\"object_type\":\"quantity\"}? Not typical. Might just set object as \"14,000 school districts\". But object should be entity, not statement. Could create object \"school district\" with qualifier \"quantity\". But we need object_type \"school district\". So maybe relation \"number of\" and object \"school district\". Then qualifier \"quantity\" with object \"14000\". But guidelines: qualifiers are attached to triplet, not separate. So we can have:\n\n{\n \"subject\":\"United States\",\n \"relation\":\"number of school districts\",\n \"object\":\"school district\",\n \"qualifiers\":[{\"relation\":\"quantity\",\"object\":\"14000\",\"object_type\":\"quantity\"}],\n \"subject_type\":\"country\",\n \"object_type\":\"school district\"\n}\n\nBut \"number of school districts\" is a relation; maybe better \"has number of\" but okay.\n\n2. More than $500 billion is spent each year on public primary and secondary education.\n- subject: United States? Actually \"more than $500 billion is spent each year on public primary and secondary education\" implies spending by US. Could set subject \"United States\" or \"public primary and secondary education\". Probably subject \"United States\" with relation \"annual education expenditure\". object \"public primary and secondary education\". qualifier \"amount\" \"$500 billion\" and \"point in time\" \"each year\". Could also have \"currency\" etc.\n\nLet's create:\n\nsubject: United States\nrelation: annual expenditure on education\nobject: public primary and secondary education\nqualifiers: amount $500 billion (object_type: monetary amount), point in time \"yearly\" maybe \"per year\". Use \"point in time\" with object \"year\" maybe not needed. We'll include amount qualifier.\n\n3. Most states require that their school districts within the state teach for 180 days a year.\n- subject: state (maybe \"state\" as class). But we need specific entity? \"Most states\" is a group. Could use \"state\" as subject_type. Relation: require school district teaching days. Might be better to have subject \"state\" (generic) with relation \"required school year length\". object \"180 days\". qualifier \"point in time\" maybe not needed.\n\nBut we need subject_type \"state\". object_type \"duration\". Provide qualifier \"per year\". We'll just set.\n\n4. In 2010, there were 3,823,142 teachers in public, charter, private, and Catholic elementary and secondary schools.\n- subject: United States (or maybe \"United States\" as location). Relation: number of teachers. object: teacher. qualifier: quantity 3,823,142, point in time 2010, object_type teacher.\n\n5. They taught a total of 55,203,000 students, who attended one of 132,656 schools.\n- subject: teachers (or \"teachers in 2010\") taught students. Relation: taught. object: student. qualifier: quantity 55,203,000 (maybe \"total number of students taught\"). Also \"students attended schools\". So separate triplet: subject: student, relation: attended, object: school, qualifier: quantity 132,656 (number of schools). Also point in time maybe 2010.\n\nBut \"they taught a total of 55,203,000 students\" - we can have relation \"number of students taught\" with object \"student\". qualifier quantity.\n\nAlso \"students attended one of 132,656 schools\" - relation \"attended school\". object \"school\". qualifier quantity 132,656.\n\nNow need to assign types: United States - country. school district - administrative division? Use \"school district\". teacher - human (occupation). public primary and secondary education - \"education\". amount - monetary amount. duration - time period. student - human. school - educational institution.\n\nNow produce JSON list.\n\nMake sure each dictionary includes \"qualifiers\": [] if none.\n\nLet's craft triplets:\n\n1. US - number of school districts - school district - qualifier quantity 14000 (greater than). Use object_type \"school district\". qualifier object_type \"quantity\".\n\n2. US - annual education expenditure - public primary and secondary education - qualifier amount \"$500 billion\" (object_type \"monetary amount\"), qualifier point in time \"yearly\" maybe \"per year\". We'll include amount only.\n\n3. State - required school year length - duration - qualifier quantity \"180 days\". object_type \"duration\". subject_type \"state\". relation maybe \"required school year length\". Use qualifier \"unit\" maybe not needed.\n\n4. United States - number of teachers - teacher - qualifier quantity 3823142, point in time 2010.\n\n5. Teacher - taught - student - qualifier quantity 55203000, point in time 2010.\n\n6. Student - attended - school - qualifier quantity 132656, point in time 2010.\n\nPotential also: \"public, charter, private, and Catholic elementary and secondary schools\" as type of school. Could have subject \"United States\" relation \"has school type\" object \"public school\", etc. But maybe not needed.\n\nNow produce JSON.\n\nCheck format: top-level key \"triplets\": [ ... ].\n\nEach entry includes subject, relation, object, qualifiers (list), subject_type, object_type.\n\nQualifiers entries: relation, object, object_type.\n\nLet's craft.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1459,
+      "completion_tokens": 1908,
+      "total_tokens": 3367,
+      "cost": 0.00032997,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1024,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00032997,
+        "upstream_inference_prompt_cost": 4.377e-05,
+        "upstream_inference_completions_cost": 0.0002862
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1310,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of school districts\",\n            \"object\": \"school district\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"14000\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"school district\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"annual education expenditure\",\n            \"object\": \"public primary and secondary education\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"amount\",\n                    \"object\": \"$500 billion\",\n                    \"object_type\": \"monetary amount\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"education\"\n        },\n        {\n            \"subject\": \"state\",\n            \"relation\": \"required school year length\",\n            \"object\": \"duration\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"180 days\",\n                    \"object_type\": \"duration\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of teachers\",\n            \"object\": \"teacher\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"3,823,142\",\n                    \"object_type\": \"quantity\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"teacher\",\n            \"relation\": \"taught\",\n            \"object\": \"student\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"55,203,000\",\n                    \"object_type\": \"quantity\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"student\",\n            \"relation\": \"attended\",\n            \"object\": \"school\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"132,656\",\n                    \"object_type\": \"quantity\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"educational institution\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "United States",
+        "relation": "number of school districts",
+        "object": "school district",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "14000"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "school district"
+      },
+      {
+        "subject": "United States",
+        "relation": "annual education expenditure",
+        "object": "public primary and secondary education",
+        "qualifiers": [
+          {
+            "relation": "amount",
+            "object": "$500 billion"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "education"
+      },
+      {
+        "subject": "state",
+        "relation": "required school year length",
+        "object": "duration",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "180 days"
+          }
+        ],
+        "subject_type": "state",
+        "object_type": "duration"
+      },
+      {
+        "subject": "United States",
+        "relation": "number of teachers",
+        "object": "teacher",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "3,823,142"
+          },
+          {
+            "relation": "point in time",
+            "object": "2010"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "human"
+      },
+      {
+        "subject": "teacher",
+        "relation": "taught",
+        "object": "student",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "55,203,000"
+          },
+          {
+            "relation": "point in time",
+            "object": "2010"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "student",
+        "relation": "attended",
+        "object": "school",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "132,656"
+          },
+          {
+            "relation": "point in time",
+            "object": "2010"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "educational institution"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1459,
+    "completion_tokens": 1908,
+    "total_tokens": 3367,
+    "cost": 0.00032997,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00032997,
+      "upstream_inference_prompt_cost": 4.377e-05,
+      "upstream_inference_completions_cost": 0.0002862
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1310,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 911,
+    "output_tokens_est": 783
+  },
+  "attempts": 1,
+  "latency_s": 59.547770047000085,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T14:57:26.410152+00:00",
+  "cache_key": "911075a53063ad6786a75301ddef4092"
+}

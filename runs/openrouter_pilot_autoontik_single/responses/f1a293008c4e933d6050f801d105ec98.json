@@ -1,0 +1,195 @@
+{
+  "task": {
+    "input_id": "210b243b589bc390",
+    "input_hash": "5bfead89c5d223f5e9b64d00910c9b82f63a48a009417bf73aa53f94d5729fb7",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793197081-EAfohE5WsvQVEE89z6aj",
+    "object": "chat.completion",
+    "created": 1793197081,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Australia\",\n            \"relation\": \"country code\",\n            \"object\": \"61\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"telephone country code\"\n        },\n        {\n            \"subject\": \"International Access Code\",\n            \"relation\": \"represented by\",\n            \"object\": \"+\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone code\",\n            \"object_type\": \"symbol\"\n        },\n        {\n            \"subject\": \"National Significant Number\",\n            \"relation\": \"digit count\",\n            \"object\": \"9\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"digits\",\n                    \"object_type\": \"unit\"\n                }\n            ],\n            \"subject_type\": \"telephone number component\",\n            \"object_type\": \"number\"\n        },\n        {\n            \"subject\": \"Mobile number\",\n            \"relation\": \"starts with\",\n            \"object\": \"4\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after country code\",\n                    \"object\": \"61\",\n                    \"object_type\": \"telephone country code\"\n                }\n            ],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"digit\"\n        },\n        {\n            \"subject\": \"Landline number in Victoria\",\n            \"relation\": \"starts with\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after country code\",\n                    \"object\": \"61\",\n                    \"object_type\": \"telephone country code\"\n                }\n            ],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"digit\"\n        },\n        {\n            \"subject\": \"Landline number in Tasmania\",\n            \"relation\": \"starts with\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after country code\",\n                    \"object\": \"61\",\n                    \"object_type\": \"telephone country code\"\n                }\n            ],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"digit\"\n        },\n        {\n            \"subject\": \"Numbers beginning with 1\",\n            \"relation\": \"dialing requirement\",\n            \"object\": \"no replacement needed\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after dialing\",\n                    \"object\": \"International Access Code and Country Code for Australia\",\n                    \"object_type\": \"procedure\"\n                }\n            ],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"instruction\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from this text about telephone numbers in Australia. Identify entities: Australia (country), International Access Code (concept), Country Code for Australia (code 61), National Significant Number (nine digit number), Mobile number, Victoria, Tasmania, numbers beginning with 1, etc.\n\nWe need to produce JSON with \"triplets\": [ ... ].\n\nWe need subject_type and object_type.\n\nDefine types: country, telephone number, telephone code, region, etc.\n\nLet's parse sentences:\n\n1. \"When dialling from outside Australia, after dialling the appropriate International Access Code it is necessary to dial the Country Code for Australia (61) followed by the nine digit ``National 'Significant' Number ''.\" So facts:\n\n- Subject: International Access Code (concept) used when dialing from outside Australia. Relation: \"used for dialing from\" maybe \"applicable for calls from\". But we need factual relationships.\n\nBetter: \"Country Code for Australia\" has value \"61\". So triplet: subject: Country Code for Australia, relation: \"code\", object: \"61\". object_type: \"telephone country code\" maybe \"number\". subject_type: \"telephone code\". Also \"Country Code for Australia\" is associated with \"Australia\". So: subject: Australia, relation: \"country code\", object: \"61\". That seems better.\n\n- Also \"National Significant Number\" is nine digit. So triplet: subject: National Significant Number, relation: \"length\", object: \"9 digits\". object_type: \"number of digits\". Or \"digit count\". Could also be \"digit count\". We'll use \"digit count\". subject_type: \"telephone number component\".\n\n- Also \"International Access Code\" is used when dialing from outside Australia. So maybe: subject: International Access Code, relation: \"required for dialing from\", object: \"outside Australia\". object_type: \"location\". But maybe not needed.\n\n- The example includes that the + symbol represents International Access Code. So: subject: \"+\" symbol, relation: \"represents\", object: \"International Access Code\". object_type: \"telephone code concept\". subject_type: \"symbol\".\n\n- Example: \"+ 61 3 xxxx xxxx for a number in Victoria / Tasmania\". So: subject: Victoria, relation: \"has area code\", object: \"3\". Similarly Tasmania. But not explicit.\n\n- Also \"+ 61 4xx xxx xxx for a Mobile number\". So: subject: Mobile number, relation: \"prefix\", object: \"4\". Or \"starts with\". Could be \"mobile number prefix\". We'll create: subject: Mobile number, relation: \"starts with\", object: \"4\". object_type: \"digit\". subject_type: \"telephone number type\".\n\n- \"Some numbers beginning with a 1 may be dialled without any replacement, after dialling the required International Access Code and the Country Code for Australia (+ 61).\" So: subject: Numbers beginning with 1, relation: \"dialing requirement\", object: \"no replacement needed\". Might be too vague.\n\nSimplify: Provide core facts:\n\n1. Australia - country code - 61.\n2. International Access Code - represented by \"+\" symbol.\n3. National Significant Number - length - 9 digits.\n4. Mobile telephone numbers in Australia - start with digit 4 after country code.\n5. Landline numbers in Victoria/Tasmania - start with digit 3 after country code.\n6. Numbers beginning with 1 can be dialed without replacement after dialing international access code and country code.\n\nDefine types:\n\n- Australia: country\n- Country code: telephone country code (object_type: \"telephone country code\")\n- International Access Code: telephone code concept (subject_type: \"telephone code\")\n- \"+\" symbol: symbol\n- National Significant Number: telephone number component\n- Mobile number: telephone number type\n- Victoria: region (state)\n- Tasmania: region (state)\n- Landline number: telephone number type (maybe \"landline number\")\n- Numbers beginning with 1: telephone number type (maybe \"special number\").\n\nWe'll produce triplets accordingly.\n\nNeed qualifiers list possibly for start time etc. Not needed.\n\nLet's craft JSON.\n\nStructure:\n\n{\n \"triplets\": [\n   { \"subject\":\"Australia\", \"relation\":\"country code\", \"object\":\"61\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"telephone country code\"},\n   { \"subject\":\"International Access Code\", \"relation\":\"represented by\", \"object\":\"+\", \"qualifiers\":[], \"subject_type\":\"telephone code\", \"object_type\":\"symbol\"},\n   { \"subject\":\"National Significant Number\", \"relation\":\"digit count\", \"object\":\"9\", \"qualifiers\":[{\"relation\":\"unit\",\"object\":\"digits\",\"object_type\":\"unit\"}], \"subject_type\":\"telephone number component\", \"object_type\":\"number\"},\n   { \"subject\":\"Mobile number\", \"relation\":\"starts with\", \"object\":\"4\", \"qualifiers\":[{\"relation\":\"after country code\",\"object\":\"61\",\"object_type\":\"telephone country code\"}], \"subject_type\":\"telephone number type\", \"object_type\":\"digit\"},\n   { \"subject\":\"Landline number in Victoria\", \"relation\":\"starts with\", \"object\":\"3\", \"qualifiers\":[{\"relation\":\"after country code\",\"object\":\"61\",\"object_type\":\"telephone country code\"}], \"subject_type\":\"telephone number type\", \"object_type\":\"digit\"},\n   { \"subject\":\"Landline number in Tasmania\", \"relation\":\"starts with\", \"object\":\"3\", \"qualifiers\":[{\"relation\":\"after country code\",\"object\":\"61\",\"object_type\":\"telephone country code\"}], \"subject_type\":\"telephone number type\", \"object_type\":\"digit\"},\n   { \"subject\":\"Numbers beginning with 1\", \"relation\":\"dialing requirement\", \"object\":\"no replacement needed\", \"qualifiers\":[{\"relation\":\"after dialing\",\"object\":\"International Access Code and Country Code for Australia\",\"object_type\":\"procedure\"}], \"subject_type\":\"telephone number type\", \"object_type\":\"instruction\"}\n ]\n}\n\nBut need to ensure object_type for \"no replacement needed\" maybe \"instruction\". Qualifier object_type \"procedure\". Might be okay.\n\nMake sure each dict includes qualifiers list (could be empty). Provide object_type for each.\n\nLet's produce final JSON.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from this text about telephone numbers in Australia. Identify entities: Australia (country), International Access Code (concept), Country Code for Australia (code 61), National Significant Number (nine digit number), Mobile number, Victoria, Tasmania, numbers beginning with 1, etc.\n\nWe need to produce JSON with \"triplets\": [ ... ].\n\nWe need subject_type and object_type.\n\nDefine types: country, telephone number, telephone code, region, etc.\n\nLet's parse sentences:\n\n1. \"When dialling from outside Australia, after dialling the appropriate International Access Code it is necessary to dial the Country Code for Australia (61) followed by the nine digit ``National 'Significant' Number ''.\" So facts:\n\n- Subject: International Access Code (concept) used when dialing from outside Australia. Relation: \"used for dialing from\" maybe \"applicable for calls from\". But we need factual relationships.\n\nBetter: \"Country Code for Australia\" has value \"61\". So triplet: subject: Country Code for Australia, relation: \"code\", object: \"61\". object_type: \"telephone country code\" maybe \"number\". subject_type: \"telephone code\". Also \"Country Code for Australia\" is associated with \"Australia\". So: subject: Australia, relation: \"country code\", object: \"61\". That seems better.\n\n- Also \"National Significant Number\" is nine digit. So triplet: subject: National Significant Number, relation: \"length\", object: \"9 digits\". object_type: \"number of digits\". Or \"digit count\". Could also be \"digit count\". We'll use \"digit count\". subject_type: \"telephone number component\".\n\n- Also \"International Access Code\" is used when dialing from outside Australia. So maybe: subject: International Access Code, relation: \"required for dialing from\", object: \"outside Australia\". object_type: \"location\". But maybe not needed.\n\n- The example includes that the + symbol represents International Access Code. So: subject: \"+\" symbol, relation: \"represents\", object: \"International Access Code\". object_type: \"telephone code concept\". subject_type: \"symbol\".\n\n- Example: \"+ 61 3 xxxx xxxx for a number in Victoria / Tasmania\". So: subject: Victoria, relation: \"has area code\", object: \"3\". Similarly Tasmania. But not explicit.\n\n- Also \"+ 61 4xx xxx xxx for a Mobile number\". So: subject: Mobile number, relation: \"prefix\", object: \"4\". Or \"starts with\". Could be \"mobile number prefix\". We'll create: subject: Mobile number, relation: \"starts with\", object: \"4\". object_type: \"digit\". subject_type: \"telephone number type\".\n\n- \"Some numbers beginning with a 1 may be dialled without any replacement, after dialling the required International Access Code and the Country Code for Australia (+ 61).\" So: subject: Numbers beginning with 1, relation: \"dialing requirement\", object: \"no replacement needed\". Might be too vague.\n\nSimplify: Provide core facts:\n\n1. Australia - country code - 61.\n2. International Access Code - represented by \"+\" symbol.\n3. National Significant Number - length - 9 digits.\n4. Mobile telephone numbers in Australia - start with digit 4 after country code.\n5. Landline numbers in Victoria/Tasmania - start with digit 3 after country code.\n6. Numbers beginning with 1 can be dialed without replacement after dialing international access code and country code.\n\nDefine types:\n\n- Australia: country\n- Country code: telephone country code (object_type: \"telephone country code\")\n- International Access Code: telephone code concept (subject_type: \"telephone code\")\n- \"+\" symbol: symbol\n- National Significant Number: telephone number component\n- Mobile number: telephone number type\n- Victoria: region (state)\n- Tasmania: region (state)\n- Landline number: telephone number type (maybe \"landline number\")\n- Numbers beginning with 1: telephone number type (maybe \"special number\").\n\nWe'll produce triplets accordingly.\n\nNeed qualifiers list possibly for start time etc. Not needed.\n\nLet's craft JSON.\n\nStructure:\n\n{\n \"triplets\": [\n   { \"subject\":\"Australia\", \"relation\":\"country code\", \"object\":\"61\", \"qualifiers\":[], \"subject_type\":\"country\", \"object_type\":\"telephone country code\"},\n   { \"subject\":\"International Access Code\", \"relation\":\"represented by\", \"object\":\"+\", \"qualifiers\":[], \"subject_type\":\"telephone code\", \"object_type\":\"symbol\"},\n   { \"subject\":\"National Significant Number\", \"relation\":\"digit count\", \"object\":\"9\", \"qualifiers\":[{\"relation\":\"unit\",\"object\":\"digits\",\"object_type\":\"unit\"}], \"subject_type\":\"telephone number component\", \"object_type\":\"number\"},\n   { \"subject\":\"Mobile number\", \"relation\":\"starts with\", \"object\":\"4\", \"qualifiers\":[{\"relation\":\"after country code\",\"object\":\"61\",\"object_type\":\"telephone country code\"}], \"subject_type\":\"telephone number type\", \"object_type\":\"digit\"},\n   { \"subject\":\"Landline number in Victoria\", \"relation\":\"starts with\", \"object\":\"3\", \"qualifiers\":[{\"relation\":\"after country code\",\"object\":\"61\",\"object_type\":\"telephone country code\"}], \"subject_type\":\"telephone number type\", \"object_type\":\"digit\"},\n   { \"subject\":\"Landline number in Tasmania\", \"relation\":\"starts with\", \"object\":\"3\", \"qualifiers\":[{\"relation\":\"after country code\",\"object\":\"61\",\"object_type\":\"telephone country code\"}], \"subject_type\":\"telephone number type\", \"object_type\":\"digit\"},\n   { \"subject\":\"Numbers beginning with 1\", \"relation\":\"dialing requirement\", \"object\":\"no replacement needed\", \"qualifiers\":[{\"relation\":\"after dialing\",\"object\":\"International Access Code and Country Code for Australia\",\"object_type\":\"procedure\"}], \"subject_type\":\"telephone number type\", \"object_type\":\"instruction\"}\n ]\n}\n\nBut need to ensure object_type for \"no replacement needed\" maybe \"instruction\". Qualifier object_type \"procedure\". Might be okay.\n\nMake sure each dict includes qualifiers list (could be empty). Provide object_type for each.\n\nLet's produce final JSON.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1481,
+      "completion_tokens": 1824,
+      "total_tokens": 3305,
+      "cost": 0.000385518,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1344,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000385518,
+        "upstream_inference_prompt_cost": 4.443e-05,
+        "upstream_inference_completions_cost": 0.000341088
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1472,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Australia\",\n            \"relation\": \"country code\",\n            \"object\": \"61\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"telephone country code\"\n        },\n        {\n            \"subject\": \"International Access Code\",\n            \"relation\": \"represented by\",\n            \"object\": \"+\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone code\",\n            \"object_type\": \"symbol\"\n        },\n        {\n            \"subject\": \"National Significant Number\",\n            \"relation\": \"digit count\",\n            \"object\": \"9\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"digits\",\n                    \"object_type\": \"unit\"\n                }\n            ],\n            \"subject_type\": \"telephone number component\",\n            \"object_type\": \"number\"\n        },\n        {\n            \"subject\": \"Mobile number\",\n            \"relation\": \"starts with\",\n            \"object\": \"4\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after country code\",\n                    \"object\": \"61\",\n                    \"object_type\": \"telephone country code\"\n                }\n            ],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"digit\"\n        },\n        {\n            \"subject\": \"Landline number in Victoria\",\n            \"relation\": \"starts with\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after country code\",\n                    \"object\": \"61\",\n                    \"object_type\": \"telephone country code\"\n                }\n            ],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"digit\"\n        },\n        {\n            \"subject\": \"Landline number in Tasmania\",\n            \"relation\": \"starts with\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after country code\",\n                    \"object\": \"61\",\n                    \"object_type\": \"telephone country code\"\n                }\n            ],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"digit\"\n        },\n        {\n            \"subject\": \"Numbers beginning with 1\",\n            \"relation\": \"dialing requirement\",\n            \"object\": \"no replacement needed\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after dialing\",\n                    \"object\": \"International Access Code and Country Code for Australia\",\n                    \"object_type\": \"procedure\"\n                }\n            ],\n            \"subject_type\": \"telephone number type\",\n            \"object_type\": \"instruction\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Australia",
+        "relation": "country code",
+        "object": "61",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "telephone country code"
+      },
+      {
+        "subject": "International Access Code",
+        "relation": "represented by",
+        "object": "+",
+        "qualifiers": [],
+        "subject_type": "telephone code",
+        "object_type": "symbol"
+      },
+      {
+        "subject": "National Significant Number",
+        "relation": "digit count",
+        "object": "9",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "digits"
+          }
+        ],
+        "subject_type": "telephone number component",
+        "object_type": "number"
+      },
+      {
+        "subject": "Mobile number",
+        "relation": "starts with",
+        "object": "4",
+        "qualifiers": [
+          {
+            "relation": "after country code",
+            "object": "61"
+          }
+        ],
+        "subject_type": "telephone number type",
+        "object_type": "digit"
+      },
+      {
+        "subject": "Landline number in Victoria",
+        "relation": "starts with",
+        "object": "3",
+        "qualifiers": [
+          {
+            "relation": "after country code",
+            "object": "61"
+          }
+        ],
+        "subject_type": "telephone number type",
+        "object_type": "digit"
+      },
+      {
+        "subject": "Landline number in Tasmania",
+        "relation": "starts with",
+        "object": "3",
+        "qualifiers": [
+          {
+            "relation": "after country code",
+            "object": "61"
+          }
+        ],
+        "subject_type": "telephone number type",
+        "object_type": "digit"
+      },
+      {
+        "subject": "Numbers beginning with 1",
+        "relation": "dialing requirement",
+        "object": "no replacement needed",
+        "qualifiers": [
+          {
+            "relation": "after dialing",
+            "object": "International Access Code and Country Code for Australia"
+          }
+        ],
+        "subject_type": "telephone number type",
+        "object_type": "instruction"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1481,
+    "completion_tokens": 1824,
+    "total_tokens": 3305,
+    "cost": 0.000385518,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1344,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000385518,
+      "upstream_inference_prompt_cost": 4.443e-05,
+      "upstream_inference_completions_cost": 0.000341088
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1472,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 839,
+    "output_tokens_est": 711
+  },
+  "attempts": 1,
+  "latency_s": 16.23604165999859,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T14:18:17.277106+00:00",
+  "cache_key": "f1a293008c4e933d6050f801d105ec98"
+}

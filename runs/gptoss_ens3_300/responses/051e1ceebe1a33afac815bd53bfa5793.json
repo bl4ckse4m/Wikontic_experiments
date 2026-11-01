@@ -1,0 +1,140 @@
+{
+  "task": {
+    "input_id": "210b243b589bc390",
+    "input_hash": "5bfead89c5d223f5e9b64d00910c9b82f63a48a009417bf73aa53f94d5729fb7",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a3a5ff5cf1ea6303c52b86dffc7bf890",
+    "object": "chat.completion",
+    "created": 1791549288,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Australia\",\n            \"relation\": \"country calling code\",\n            \"object\": \"61\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"telephone calling code\"\n        },\n        {\n            \"subject\": \"International Access Code\",\n            \"relation\": \"symbol\",\n            \"object\": \"+\",\n            \"qualifiers\": [],\n            \"subject_type\": \"concept\",\n            \"object_type\": \"symbol\"\n        },\n        {\n            \"subject\": \"dialing from outside Australia\",\n            \"relation\": \"requires\",\n            \"object\": \"dial International Access Code, then Country Code for Australia (61), then nine‑digit National Significant Number\",\n            \"qualifiers\": [],\n            \"subject_type\": \"procedure\",\n            \"object_type\": \"instruction\"\n        },\n        {\n            \"subject\": \"National Significant Number\",\n            \"relation\": \"length\",\n            \"object\": \"nine digits\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number component\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"telephone number format for Victoria / Tasmania\",\n            \"relation\": \"example\",\n            \"object\": \"+61 3 xxxx xxxx\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number format\",\n            \"object_type\": \"phone number example\"\n        },\n        {\n            \"subject\": \"telephone number format for Mobile\",\n            \"relation\": \"example\",\n            \"object\": \"+61 4xx xxx xxx\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number format\",\n            \"object_type\": \"phone number example\"\n        },\n        {\n            \"subject\": \"numbers beginning with 1\",\n            \"relation\": \"dialing rule\",\n            \"object\": \"dial after International Access Code and Country Code for Australia (+61) without replacement\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number\",\n            \"object_type\": \"dialing instruction\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from this text about telephone numbers in Australia. Identify factual statements.\n\nText:\n\n\"Telephone numbers in Australia\n\nWhen dialling from outside Australia, after dialling the appropriate International Access Code it is necessary to dial the Country Code for Australia (61) followed by the nine digit ``National 'Significant' Number ''. (The + symbol is used to represent International Access Code, e.g. + 61 3 xxxx xxxx for a number in Victoria / Tasmania or + 61 4xx xxx xxx for a`` Mobile'' number). Some numbers beginning with a 1 may be dialled without any replacement, after dialling the required International Access Code and the Country Code for Australia (+ 61). (see below)\"\n\nWe can extract facts:\n\n- Country Code for Australia is 61.\n- International Access Code is represented by + symbol.\n- When dialing from outside Australia, you need to dial International Access Code then Country Code then nine digit National Significant Number.\n- Example: +61 3 xxxx xxxx for a number in Victoria / Tasmania.\n- Example: +61 4xx xxx xxx for a Mobile number.\n- Some numbers beginning with a 1 may be dialled without any replacement, after dialing the required International Access Code and Country Code for Australia (+61). This suggests that numbers beginning with 1 can be dialed as is after the prefix? The fact: Some numbers beginning with 1 may be dialed without any replacement after dialing required International Access Code and Country Code for Australia (+61). So maybe: numbers beginning with 1 can be dialed directly after International Access Code and Country Code.\n\nWe need relations: \"country code\", \"international access code representation\", \"dialing procedure\", \"example number format\", \"mobile number format\", etc.\n\nSubject types: \"Australia\" is a country. \"Country Code for Australia\" is a code (numeric). Could treat as entity \"Australia\" and relation \"country calling code\" -> \"61\". The object type \"telephone calling code\". Use relation \"country calling code\". Provide qualifiers maybe \"for\" but not needed.\n\nSimilarly, \"International Access Code\" is a concept, represented by \"+\" symbol. Relation maybe \"symbol for\" or \"representation\". Could use \"symbol\" relation.\n\nTriplet: (\"International Access Code\", \"symbol\", \"+\").\n\nBut the text: \"The + symbol is used to represent International Access Code\". So subject International Access Code, relation \"symbol\", object \"+\".\n\nSubject_type: concept; object_type: symbol.\n\nTriplet: (\"Australia\", \"country calling code\", \"61\").\n\nSubject_type: country; object_type: telephone calling code.\n\nTriplet about dialing procedure: Could be expressed as (\"dialing from outside Australia\", \"requires\", \"dial International Access Code then Country Code for Australia then nine digit National Significant Number\"). Might be too complex. Simpler: (\"dialing from outside Australia\", \"requires\", \"dial Country Code for Australia (61) followed by nine digit National Significant Number\") but we need explicit subject entity. Could use \"dialing from outside Australia\" as event. relation \"requires\". object maybe \"dial Country Code for Australia\". Might be okay.\n\nBut maybe better to capture as two separate facts:\n\n- When dialing from outside Australia, it is necessary to dial Country Code for Australia (61) after International Access Code. So we can have triplet: (\"International Access Code\", \"precedes\", \"Country Code for Australia (61)\") but not standard.\n\nSimplify: only extract clear factual statements: country code, representation of plus, example formats.\n\nExamples: \"e.g. + 61 3 xxxx xxxx for a number in Victoria / Tasmania\". So we can have a triplet: (\"example number format Victoria/Tasmania\", \"value\", \"+61 3 xxxx xxxx\") maybe.\n\nBetter: Represent as (\"Victoria / Tasmania telephone number format\", \"example\", \"+61 3 xxxx xxxx\").\n\nSubject_type: \"region\". Object_type: \"phone number format\".\n\nSimilarly for mobile: (\"Mobile telephone number format in Australia\", \"example\", \"+61 4xx xxx xxx\").\n\nAlso: \"Some numbers beginning with a 1 may be dialed without any replacement, after dialing the required International Access Code and the Country Code for Australia (+61).\" So fact: numbers beginning with 1 can be dialed directly after International Access Code and Country Code. Could have triplet: (\"numbers beginning with 1\", \"dialing rule\", \"dial after International Access Code and Country Code for Australia (+61) without replacement\").\n\nMaybe we can create a triplet: (\"numbers beginning with 1\", \"dialing requirement\", \"International Access Code + Country Code for Australia (+61)\").\n\nSubject_type: \"telephone number\". Object_type: \"dialing requirement\".\n\nGiven constraints: we must include qualifiers when appropriate, e.g., point in time not relevant.\n\nLet's craft list of triplets:\n\n1. subject: \"Australia\", relation: \"country calling code\", object: \"61\". qualifiers: [].\n\nsubject_type: \"country\". object_type: \"telephone calling code\".\n\n2. subject: \"International Access Code\", relation: \"symbol\", object: \"+\".\n\nsubject_type: \"concept\". object_type: \"symbol\".\n\n3. subject: \"dialing from outside Australia\", relation: \"requires\", object: \"dial International Access Code, Country Code for Australia (61), and nine digit National Significant Number\". This is long but okay.\n\nsubject_type: \"procedure\". object_type: \"instruction\".\n\nqualifiers maybe none.\n\n4. subject: \"National Significant Number\", relation: \"length\", object: \"nine digits\". subject_type: \"telephone number component\". object_type: \"quantity\".\n\n5. subject: \"example telephone number format for Victoria / Tasmania\", relation: \"example\", object: \"+61 3 xxxx xxxx\". subject_type: \"telephone number format\". object_type: \"phone number example\".\n\n6. subject: \"example telephone number format for Mobile\", relation: \"example\", object: \"+61 4xx xxx xxx\". subject_type: \"telephone number format\". object_type: \"phone number example\".\n\n7. subject: \"numbers beginning with 1\", relation: \"dialing rule\", object: \"dial after International Access Code and Country Code for Australia (+61) without replacement\". subject_type: \"telephone number\". object_type: \"dialing instruction\".\n\nCheck qualifiers: none.\n\nMake sure each object is short but clear.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1713,
+      "total_tokens": 3462,
+      "completion_tokens": 1749,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Australia\",\n            \"relation\": \"country calling code\",\n            \"object\": \"61\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"telephone calling code\"\n        },\n        {\n            \"subject\": \"International Access Code\",\n            \"relation\": \"symbol\",\n            \"object\": \"+\",\n            \"qualifiers\": [],\n            \"subject_type\": \"concept\",\n            \"object_type\": \"symbol\"\n        },\n        {\n            \"subject\": \"dialing from outside Australia\",\n            \"relation\": \"requires\",\n            \"object\": \"dial International Access Code, then Country Code for Australia (61), then nine‑digit National Significant Number\",\n            \"qualifiers\": [],\n            \"subject_type\": \"procedure\",\n            \"object_type\": \"instruction\"\n        },\n        {\n            \"subject\": \"National Significant Number\",\n            \"relation\": \"length\",\n            \"object\": \"nine digits\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number component\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"telephone number format for Victoria / Tasmania\",\n            \"relation\": \"example\",\n            \"object\": \"+61 3 xxxx xxxx\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number format\",\n            \"object_type\": \"phone number example\"\n        },\n        {\n            \"subject\": \"telephone number format for Mobile\",\n            \"relation\": \"example\",\n            \"object\": \"+61 4xx xxx xxx\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number format\",\n            \"object_type\": \"phone number example\"\n        },\n        {\n            \"subject\": \"numbers beginning with 1\",\n            \"relation\": \"dialing rule\",\n            \"object\": \"dial after International Access Code and Country Code for Australia (+61) without replacement\",\n            \"qualifiers\": [],\n            \"subject_type\": \"telephone number\",\n            \"object_type\": \"dialing instruction\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Australia",
+        "relation": "country calling code",
+        "object": "61",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "telephone calling code"
+      },
+      {
+        "subject": "International Access Code",
+        "relation": "symbol",
+        "object": "+",
+        "qualifiers": [],
+        "subject_type": "concept",
+        "object_type": "symbol"
+      },
+      {
+        "subject": "dialing from outside Australia",
+        "relation": "requires",
+        "object": "dial International Access Code, then Country Code for Australia (61), then nine‑digit National Significant Number",
+        "qualifiers": [],
+        "subject_type": "procedure",
+        "object_type": "instruction"
+      },
+      {
+        "subject": "National Significant Number",
+        "relation": "length",
+        "object": "nine digits",
+        "qualifiers": [],
+        "subject_type": "telephone number component",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "telephone number format for Victoria / Tasmania",
+        "relation": "example",
+        "object": "+61 3 xxxx xxxx",
+        "qualifiers": [],
+        "subject_type": "telephone number format",
+        "object_type": "phone number example"
+      },
+      {
+        "subject": "telephone number format for Mobile",
+        "relation": "example",
+        "object": "+61 4xx xxx xxx",
+        "qualifiers": [],
+        "subject_type": "telephone number format",
+        "object_type": "phone number example"
+      },
+      {
+        "subject": "numbers beginning with 1",
+        "relation": "dialing rule",
+        "object": "dial after International Access Code and Country Code for Australia (+61) without replacement",
+        "qualifiers": [],
+        "subject_type": "telephone number",
+        "object_type": "dialing instruction"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1713,
+    "total_tokens": 3462,
+    "completion_tokens": 1749,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 620,
+    "output_tokens_est": 528
+  },
+  "attempts": 1,
+  "latency_s": 21.760886559000937,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:35:10.984757+00:00",
+  "cache_key": "051e1ceebe1a33afac815bd53bfa5793"
+}

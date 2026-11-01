@@ -1,0 +1,167 @@
+{
+  "task": {
+    "input_id": "c7ec275b78dad2f3",
+    "input_hash": "39522de4ac91b907da038d8f5d63c148557d6554c44b1036e8417f42ffdf49d1",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793211283-K0Sj57ktKBXvEAMh2gQz",
+    "object": "chat.completion",
+    "created": 1793211283,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Venice",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pidkamin\",\n            \"relation\": \"instance of\",\n            \"object\": \"urban-type settlement\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Pidkamin\",\n            \"relation\": \"located in\",\n            \"object\": \"Brody Raion\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"district\"\n        },\n        {\n            \"subject\": \"Brody Raion\",\n            \"relation\": \"located in\",\n            \"object\": \"Lviv oblast\",\n            \"qualifiers\": [],\n            \"subject_type\": \"district\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Lviv oblast\",\n            \"relation\": \"located in\",\n            \"object\": \"Ukraine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Pidkamin\",\n            \"relation\": \"located near\",\n            \"object\": \"administrative border\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border of\",\n                    \"object\": \"Lviv oblast\",\n                    \"object_type\": \"region\"\n                },\n                {\n                    \"relation\": \"border of\",\n                    \"object\": \"Rivne oblast\",\n                    \"object_type\": \"region\"\n                },\n                {\n                    \"relation\": \"border of\",\n                    \"object\": \"Ternopil oblast\",\n                    \"object_type\": \"region\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"geographic feature\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Pidkamin\\n\\nPidkamin (, ) is an urban-type settlement in Brody Raion (district), Lviv oblast in Ukraine. It is located near the administrative border of three oblasts, Lviv, Rivne, and Ternopil. Population:\"\n\nWe have entities: Pidkamin (the settlement), urban-type settlement (type), Brody Raion (district), Lviv oblast (region), Ukraine (country), administrative border, three oblasts: Lviv, Rivne, Ternopil.\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine types: Pidkamin is a human settlement (maybe \"settlement\" or \"urban-type settlement\"). We'll use \"urban-type settlement\" as object_type for relation \"instance of\"? Actually relation could be \"instance of\" linking Pidkamin to \"urban-type settlement\". Or \"type\" relation. In example they used occupation, field of work etc. For location they might use \"located in administrative territorial entity\". We'll use relation \"instance of\" for type.\n\nTriplet 1: subject \"Pidkamin\", relation \"instance of\", object \"urban-type settlement\". subject_type \"settlement\", object_type \"settlement type\"? Might be \"urban-type settlement\" is a type of settlement. We'll set object_type \"settlement type\". subject_type \"settlement\". Good.\n\nTriplet 2: subject \"Pidkamin\", relation \"located in\", object \"Brody Raion\". subject_type \"settlement\", object_type \"district\". Also qualifiers maybe \"administrative division\" but not needed.\n\nTriplet 3: subject \"Brody Raion\", relation \"part of\", object \"Lviv oblast\". subject_type \"district\", object_type \"region\" (oblast). Could also be \"located in\". We'll use \"located in\".\n\nTriplet 4: subject \"Lviv oblast\", relation \"located in\", object \"Ukraine\". subject_type \"region\", object_type \"country\".\n\nTriplet 5: subject \"Pidkamin\", relation \"located near\", object \"administrative border of three oblasts\". But better: \"Pidkamin\", relation \"located near\", object \"administrative border\". object_type \"geographic feature\". Qualifier: \"border of\", object \"Lviv oblast\", \"Rivne oblast\", \"Ternopil oblast\". However qualifiers must be attached to a triplet. Could have multiple qualifiers each with relation \"border of\". But qualifiers list expects each dict with relation, object, object_type. So we can have three qualifiers.\n\nTriplet 5: subject \"Pidkamin\", relation \"located near\", object \"administrative border\". subject_type \"settlement\", object_type \"geographic feature\". qualifiers: three entries each with relation \"border of\", object \"Lviv oblast\", object_type \"region\". Similarly for Rivne oblast and Ternopil oblast.\n\nPopulation: no data given, so no triplet.\n\nAlso maybe include \"Pidkamin\" has \"name in Ukrainian\" etc but not needed.\n\nNow format JSON as per spec: top-level key \"triplets\": list of dicts.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list, \"subject_type\", \"object_type\".\n\nMake sure object_type for \"urban-type settlement\" is \"settlement type\". For \"Brody Raion\" object_type \"district\". For \"Lviv oblast\" object_type \"region\". For \"Ukraine\" object_type \"country\". For \"administrative border\" object_type \"geographic feature\". For qualifiers objects: \"Lviv oblast\" etc same type \"region\". Provide relation \"border of\". Good.\n\nNow produce JSON.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"Pidkamin\\n\\nPidkamin (, ) is an urban-type settlement in Brody Raion (district), Lviv oblast in Ukraine. It is located near the administrative border of three oblasts, Lviv, Rivne, and Ternopil. Population:\"\n\nWe have entities: Pidkamin (the settlement), urban-type settlement (type), Brody Raion (district), Lviv oblast (region), Ukraine (country), administrative border, three oblasts: Lviv, Rivne, Ternopil.\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine types: Pidkamin is a human settlement (maybe \"settlement\" or \"urban-type settlement\"). We'll use \"urban-type settlement\" as object_type for relation \"instance of\"? Actually relation could be \"instance of\" linking Pidkamin to \"urban-type settlement\". Or \"type\" relation. In example they used occupation, field of work etc. For location they might use \"located in administrative territorial entity\". We'll use relation \"instance of\" for type.\n\nTriplet 1: subject \"Pidkamin\", relation \"instance of\", object \"urban-type settlement\". subject_type \"settlement\", object_type \"settlement type\"? Might be \"urban-type settlement\" is a type of settlement. We'll set object_type \"settlement type\". subject_type \"settlement\". Good.\n\nTriplet 2: subject \"Pidkamin\", relation \"located in\", object \"Brody Raion\". subject_type \"settlement\", object_type \"district\". Also qualifiers maybe \"administrative division\" but not needed.\n\nTriplet 3: subject \"Brody Raion\", relation \"part of\", object \"Lviv oblast\". subject_type \"district\", object_type \"region\" (oblast). Could also be \"located in\". We'll use \"located in\".\n\nTriplet 4: subject \"Lviv oblast\", relation \"located in\", object \"Ukraine\". subject_type \"region\", object_type \"country\".\n\nTriplet 5: subject \"Pidkamin\", relation \"located near\", object \"administrative border of three oblasts\". But better: \"Pidkamin\", relation \"located near\", object \"administrative border\". object_type \"geographic feature\". Qualifier: \"border of\", object \"Lviv oblast\", \"Rivne oblast\", \"Ternopil oblast\". However qualifiers must be attached to a triplet. Could have multiple qualifiers each with relation \"border of\". But qualifiers list expects each dict with relation, object, object_type. So we can have three qualifiers.\n\nTriplet 5: subject \"Pidkamin\", relation \"located near\", object \"administrative border\". subject_type \"settlement\", object_type \"geographic feature\". qualifiers: three entries each with relation \"border of\", object \"Lviv oblast\", object_type \"region\". Similarly for Rivne oblast and Ternopil oblast.\n\nPopulation: no data given, so no triplet.\n\nAlso maybe include \"Pidkamin\" has \"name in Ukrainian\" etc but not needed.\n\nNow format JSON as per spec: top-level key \"triplets\": list of dicts.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list, \"subject_type\", \"object_type\".\n\nMake sure object_type for \"urban-type settlement\" is \"settlement type\". For \"Brody Raion\" object_type \"district\". For \"Lviv oblast\" object_type \"region\". For \"Ukraine\" object_type \"country\". For \"administrative border\" object_type \"geographic feature\". For qualifiers objects: \"Lviv oblast\" etc same type \"region\". Provide relation \"border of\". Good.\n\nNow produce JSON.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1407,
+      "completion_tokens": 1152,
+      "total_tokens": 2559,
+      "cost": 0.00021501,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1024,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00021501,
+        "upstream_inference_prompt_cost": 4.221e-05,
+        "upstream_inference_completions_cost": 0.0001728
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 774,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pidkamin\",\n            \"relation\": \"instance of\",\n            \"object\": \"urban-type settlement\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Pidkamin\",\n            \"relation\": \"located in\",\n            \"object\": \"Brody Raion\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"district\"\n        },\n        {\n            \"subject\": \"Brody Raion\",\n            \"relation\": \"located in\",\n            \"object\": \"Lviv oblast\",\n            \"qualifiers\": [],\n            \"subject_type\": \"district\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Lviv oblast\",\n            \"relation\": \"located in\",\n            \"object\": \"Ukraine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Pidkamin\",\n            \"relation\": \"located near\",\n            \"object\": \"administrative border\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border of\",\n                    \"object\": \"Lviv oblast\",\n                    \"object_type\": \"region\"\n                },\n                {\n                    \"relation\": \"border of\",\n                    \"object\": \"Rivne oblast\",\n                    \"object_type\": \"region\"\n                },\n                {\n                    \"relation\": \"border of\",\n                    \"object\": \"Ternopil oblast\",\n                    \"object_type\": \"region\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"geographic feature\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Pidkamin",
+        "relation": "instance of",
+        "object": "urban-type settlement",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Pidkamin",
+        "relation": "located in",
+        "object": "Brody Raion",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "district"
+      },
+      {
+        "subject": "Brody Raion",
+        "relation": "located in",
+        "object": "Lviv oblast",
+        "qualifiers": [],
+        "subject_type": "district",
+        "object_type": "region"
+      },
+      {
+        "subject": "Lviv oblast",
+        "relation": "located in",
+        "object": "Ukraine",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "country"
+      },
+      {
+        "subject": "Pidkamin",
+        "relation": "located near",
+        "object": "administrative border",
+        "qualifiers": [
+          {
+            "relation": "border of",
+            "object": "Lviv oblast"
+          },
+          {
+            "relation": "border of",
+            "object": "Rivne oblast"
+          },
+          {
+            "relation": "border of",
+            "object": "Ternopil oblast"
+          }
+        ],
+        "subject_type": "settlement",
+        "object_type": "geographic feature"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1407,
+    "completion_tokens": 1152,
+    "total_tokens": 2559,
+    "cost": 0.00021501,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00021501,
+      "upstream_inference_prompt_cost": 4.221e-05,
+      "upstream_inference_completions_cost": 0.0001728
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 774,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 575,
+    "output_tokens_est": 448
+  },
+  "attempts": 1,
+  "latency_s": 25.31436138999561,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:15:08.770185+00:00",
+  "cache_key": "f4ba8936a1bbd31ef2db2b7df82c2bdb"
+}

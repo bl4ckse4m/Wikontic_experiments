@@ -1,0 +1,188 @@
+{
+  "task": {
+    "input_id": "bcbef551561d7582",
+    "input_hash": "fcac0f41477e44c48d29ac93591adcfaafaae4bfcbcf9d5e76d63ba2cdb76579",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-1e9039481c0785722052ab196f8c6bd4",
+    "object": "chat.completion",
+    "created": 1791506361,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"contains\",\n            \"object\": \"Los Angeles International Airport\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"airport\"\n        },\n        {\n            \"subject\": \"Los Angeles International Airport\",\n            \"relation\": \"ranking by passenger volume in United States\",\n            \"object\": \"2\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Los Angeles International Airport\",\n            \"relation\": \"ranking by international passenger volume in United States\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"contains\",\n            \"object\": \"San Diego International Airport\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"airport\"\n        },\n        {\n            \"subject\": \"San Diego International Airport\",\n            \"relation\": \"world's busiest single runway airport rank\",\n            \"object\": \"1\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"contains\",\n            \"object\": \"Van Nuys Airport\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"airport\"\n        },\n        {\n            \"subject\": \"Van Nuys Airport\",\n            \"relation\": \"world's busiest general aviation airport rank\",\n            \"object\": \"1\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Orange County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Bakersfield\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Ontario\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Burbank\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Long Beach\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has numerous smaller commercial and general aviation airports\",\n            \"object\": \"smaller commercial and general aviation airports\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"airport group\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text. The text describes Southern California and lists airports and their rankings.\n\nWe need to produce triplets with subject \"Southern California\". Relations like \"has airport\", \"airport ranking\", etc. Need to use Wikidata-style predicates. We must not invent generic \"related_to\". Use specific ones: \"has part\", \"located in\", \"airport rank by passenger volume\", etc. But we need to map to known relations. Since we don't have a list, we can use plausible ones: \"contains\", \"has airport\", \"airport rank by passenger volume\", \"airport rank by international passenger volume\", \"airport rank by single runway\", \"airport rank by general aviation\", etc.\n\nWe must also include qualifiers like point in time? Not given.\n\nLet's parse sentences:\n\n\"Southern California is home to Los Angeles International Airport, the second-busiest airport in the United States by passenger volume (see World's busiest airports by passenger traffic) and the third by international passenger volume (see Busiest airports in the United States by international passenger traffic); San Diego International Airport the busiest single runway airport in the world; Van Nuys Airport, the world's busiest general aviation airport; major commercial airports at Orange County, Bakersfield, Ontario, Burbank and Long Beach; and numerous smaller commercial and general aviation airports.\"\n\nSo we have:\n\n- Southern California contains Los Angeles International Airport (LAX). Relation: \"contains airport\" or \"has airport\". Use \"has airport\". Subject_type: region (maybe \"region\"). Object_type: \"airport\".\n\n- LAX is \"second-busiest airport in the United States by passenger volume\". That's a fact about LAX, not about Southern California. But we could include a triplet with subject LAX. However the instruction says extract meaningful triplets from text; they can involve any entities. So we should include LAX ranking.\n\nThus triplet: (Los Angeles International Airport, rank by passenger volume in United States, 2). Relation maybe \"ranking by passenger volume\". Object could be \"2\". But object_type maybe \"ordinal\". Could also be \"second-busiest airport\". Might be better: relation \"passenger volume rank in United States\", object \"2\". Provide qualifier \"point in time\"? Not given.\n\nAlso \"third by international passenger volume\". So another ranking.\n\n- San Diego International Airport is \"the busiest single runway airport in the world\". So triplet: (San Diego International Airport, rank by single runway passenger volume worldwide, 1) or relation \"world's busiest single runway airport\". Could use \"rank by single runway\" with object \"1\". Provide qualifier \"point in time\"? Not needed.\n\n- Van Nuys Airport is \"the world's busiest general aviation airport\". So similar.\n\n- \"major commercial airports at Orange County, Bakersfield, Ontario, Burbank and Long Beach\". This indicates that Southern California has major commercial airports located in those cities. So we could create triplets: (Southern California, has major commercial airport, Orange County Airport) etc. But the text says \"major commercial airports at Orange County, Bakersfield, Ontario, Burbank and Long Beach\". The airports are likely \"John Wayne Airport (Orange County)\", \"Bakersfield Airport (Meadows Field)\", \"Ontario International Airport\", \"Burbank Airport (Bob Hope)\", \"Long Beach Airport\". But the text doesn't give exact names, just locations. So we could treat object as \"Orange County (location of major commercial airport)\". Might be ambiguous. Safer to create triplet: (Southern California, has major commercial airport in, Orange County). Relation \"has major commercial airport in\". But maybe better: (Southern California, major commercial airport location, Orange County). Not sure.\n\n- \"numerous smaller commercial and general aviation airports\". Could be generic.\n\nWe need to ensure each triplet includes subject_type and object_type.\n\nDefine types: \"Southern California\" -> \"region\". \"Los Angeles International Airport\" -> \"airport\". \"United States\" -> \"country\". \"San Diego International Airport\" -> \"airport\". \"world\" -> \"planet\". \"Van Nuys Airport\" -> \"airport\". \"Orange County\" -> \"county\". \"Bakersfield\" -> \"city\". \"Ontario\" -> \"city\". \"Burbank\" -> \"city\". \"Long Beach\" -> \"city\". \"major commercial airport\" -> \"airport\". \"smaller commercial airport\" -> \"airport\". \"general aviation airport\" -> \"airport\".\n\nNow decide relations.\n\nPotential relations list (Wikidata style):\n\n- \"contains\" (P527) for part-whole: region contains airport.\n- \"rank\" (P1352) maybe \"ranking\". But we can use \"ranking\" generic? The instruction says not to use generic \"related_to\". But \"ranking\" is specific.\n\n- \"passenger volume rank\" maybe not standard but okay.\n\nWe'll produce:\n\nTriplet 1:\nsubject: \"Southern California\"\nrelation: \"contains\"\nobject: \"Los Angeles International Airport\"\nqualifiers: []\nsubject_type: \"region\"\nobject_type: \"airport\"\n\nTriplet 2:\nsubject: \"Los Angeles International Airport\"\nrelation: \"ranking by passenger volume in United States\"\nobject: \"2\"\nqualifiers: []\nsubject_type: \"airport\"\nobject_type: \"ordinal\"\n\nTriplet 3:\nsubject: \"Los Angeles International Airport\"\nrelation: \"ranking by international passenger volume in United States\"\nobject: \"3\"\nqualifiers: []\nsubject_type: \"airport\"\nobject_type: \"ordinal\"\n\nTriplet 4:\nsubject: \"Southern California\"\nrelation: \"contains\"\nobject: \"San Diego International Airport\"\nqualifiers: []\nsubject_type: \"region\"\nobject_type: \"airport\"\n\nTriplet 5:\nsubject: \"San Diego International Airport\"\nrelation: \"world's busiest single runway airport rank\"\nobject: \"1\"\nqualifiers: []\nsubject_type: \"airport\"\nobject_type: \"ordinal\"\n\nTriplet 6:\nsubject: \"Southern California\"\nrelation: \"contains\"\nobject: \"Van Nuys Airport\"\nqualifiers: []\nsubject_type: \"region\"\nobject_type: \"airport\"\n\nTriplet 7:\nsubject: \"Van Nuys Airport\"\nrelation: \"world's busiest general aviation airport rank\"\nobject: \"1\"\nqualifiers: []\nsubject_type: \"airport\"\nobject_type: \"ordinal\"\n\nTriplet 8-12 for each major commercial airport location:\n\nWe could create separate triplets: (Southern California, has major commercial airport in, Orange County). etc.\n\nRelation: \"has major commercial airport in\". object_type: \"county\" or \"city\". Use \"county\" for Orange County, \"city\" for others.\n\nTriplet 8:\nsubject: \"Southern California\"\nrelation: \"has major commercial airport in\"\nobject: \"Orange County\"\nqualifiers: []\nsubject_type: \"region\"\nobject_type: \"county\"\n\nTriplet 9:\nsubject: \"Southern California\"\nrelation: \"has major commercial airport in\"\nobject: \"Bakersfield\"\nqualifiers: []\nsubject_type: \"region\"\nobject_type: \"city\"\n\nTriplet 10:\nsubject: \"Southern California\"\nrelation: \"has major commercial airport in\"\nobject: \"Ontario\"\nqualifiers: []\nsubject_type: \"region\"\nobject_type: \"city\"\n\nTriplet 11:\nsubject: \"Southern California\"\nrelation: \"has major commercial airport in\"\nobject: \"Burbank\"\nqualifiers: []\nsubject_type: \"region\"\nobject_type: \"city\"\n\nTriplet 12:\nsubject: \"Southern California\"\nrelation: \"has major commercial airport in\"\nobject: \"Long Beach\"\nqualifiers: []\nsubject_type: \"region\"\nobject_type: \"city\"\n\nTriplet 13: \"Southern California\" \"has numerous smaller commercial and general aviation airports\". Could be generic: relation \"has smaller commercial airport\". object \"numerous smaller commercial and general aviation airports\". But object is a concept. Use object_type \"airport group\". Might be okay.\n\nTriplet 13:\nsubject: \"Southern California\"\nrelation: \"has numerous smaller commercial and general aviation airports\"\nobject: \"smaller commercial and general aviation airports\"\nqualifiers: []\nsubject_type: \"region\"\nobject_type: \"airport group\"\n\nBut maybe better to split: relation \"contains\" object \"smaller commercial airports\". But we need to keep phrase.\n\nWe'll include.\n\nNow ensure qualifiers list is empty for all.\n\nReturn JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1695,
+      "total_tokens": 4152,
+      "completion_tokens": 2457,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"contains\",\n            \"object\": \"Los Angeles International Airport\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"airport\"\n        },\n        {\n            \"subject\": \"Los Angeles International Airport\",\n            \"relation\": \"ranking by passenger volume in United States\",\n            \"object\": \"2\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Los Angeles International Airport\",\n            \"relation\": \"ranking by international passenger volume in United States\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"contains\",\n            \"object\": \"San Diego International Airport\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"airport\"\n        },\n        {\n            \"subject\": \"San Diego International Airport\",\n            \"relation\": \"world's busiest single runway airport rank\",\n            \"object\": \"1\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"contains\",\n            \"object\": \"Van Nuys Airport\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"airport\"\n        },\n        {\n            \"subject\": \"Van Nuys Airport\",\n            \"relation\": \"world's busiest general aviation airport rank\",\n            \"object\": \"1\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Orange County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Bakersfield\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Ontario\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Burbank\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has major commercial airport in\",\n            \"object\": \"Long Beach\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Southern California\",\n            \"relation\": \"has numerous smaller commercial and general aviation airports\",\n            \"object\": \"smaller commercial and general aviation airports\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"airport group\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Southern California",
+        "relation": "contains",
+        "object": "Los Angeles International Airport",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "airport"
+      },
+      {
+        "subject": "Los Angeles International Airport",
+        "relation": "ranking by passenger volume in United States",
+        "object": "2",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "ordinal"
+      },
+      {
+        "subject": "Los Angeles International Airport",
+        "relation": "ranking by international passenger volume in United States",
+        "object": "3",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "ordinal"
+      },
+      {
+        "subject": "Southern California",
+        "relation": "contains",
+        "object": "San Diego International Airport",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "airport"
+      },
+      {
+        "subject": "San Diego International Airport",
+        "relation": "world's busiest single runway airport rank",
+        "object": "1",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "ordinal"
+      },
+      {
+        "subject": "Southern California",
+        "relation": "contains",
+        "object": "Van Nuys Airport",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "airport"
+      },
+      {
+        "subject": "Van Nuys Airport",
+        "relation": "world's busiest general aviation airport rank",
+        "object": "1",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "ordinal"
+      },
+      {
+        "subject": "Southern California",
+        "relation": "has major commercial airport in",
+        "object": "Orange County",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "county"
+      },
+      {
+        "subject": "Southern California",
+        "relation": "has major commercial airport in",
+        "object": "Bakersfield",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "city"
+      },
+      {
+        "subject": "Southern California",
+        "relation": "has major commercial airport in",
+        "object": "Ontario",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "city"
+      },
+      {
+        "subject": "Southern California",
+        "relation": "has major commercial airport in",
+        "object": "Burbank",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "city"
+      },
+      {
+        "subject": "Southern California",
+        "relation": "has major commercial airport in",
+        "object": "Long Beach",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "city"
+      },
+      {
+        "subject": "Southern California",
+        "relation": "has numerous smaller commercial and general aviation airports",
+        "object": "smaller commercial and general aviation airports",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "airport group"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1695,
+    "total_tokens": 4152,
+    "completion_tokens": 2457,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 994,
+    "output_tokens_est": 901
+  },
+  "attempts": 1,
+  "latency_s": 28.126265994003916,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:39:49.453330+00:00",
+  "cache_key": "0b39de7608be2ac3063d27e9babf8468"
+}

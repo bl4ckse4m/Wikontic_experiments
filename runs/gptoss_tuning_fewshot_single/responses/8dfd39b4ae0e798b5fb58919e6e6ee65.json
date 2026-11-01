@@ -1,0 +1,132 @@
+{
+  "task": {
+    "input_id": "8fb04513fb465f2d",
+    "input_hash": "1808af36f4949fbf28776894cc836c9c5a735aaddddbc30d3c131b3f32d628dd",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-df66e744c90828053a5f4e77148f1453",
+    "object": "chat.completion",
+    "created": 1791519502,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"exclusive to\",\n            \"object\": \"Japan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"based on\",\n            \"object\": \"The Legend of Zelda: Twilight Princess\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"video game\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"author\",\n            \"object\": \"Akira Himekawa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"date of first release\",\n            \"object\": \"8 February 2016\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"publisher\",\n            \"object\": \"Shogakukan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"available via\",\n            \"object\": \"MangaOne mobile application\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"software\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"The Legend of Zelda: Twilight Princess\n\nA Japan-exclusive manga series based on Twilight Princess, penned and illustrated by Akira Himekawa, was first released on February 8, 2016. The series is available solely via publisher Shogakukan's MangaOne mobile application. While the manga adaptation began almost ten years after the initial release of the game on which it is based, it launched only a month before the release of the high-definition remake.\"\n\nWe need entities: \"The Legend of Zelda: Twilight Princess\" (the game). The manga series (maybe name same? Could be \"The Legend of Zelda: Twilight Princess (manga)\" but not given. We'll treat subject as \"Twilight Princess manga series\". Might just use \"Twilight Princess manga series\". Let's extract:\n\n1. Subject: \"Twilight Princess manga series\" (or \"The Legend of Zelda: Twilight Princess manga series\") relation: \"country of origin\" or \"region exclusivity\"? Text says \"Japan-exclusive manga series\". So relation: \"exclusivity\" maybe \"region of exclusivity\". Use \"region of exclusivity\" with object \"Japan\". Or \"exclusive to\". We'll pick relation \"exclusive to\" object \"Japan\". subject_type: \"manga series\". object_type: \"country\". qualifiers none.\n\n2. Relation: \"based on\" object: \"The Legend of Zelda: Twilight Princess\" (the game). subject_type: \"manga series\". object_type: \"video game\". qualifiers none.\n\n3. Relation: \"author\" or \"creator\" maybe \"penning and illustrating by Akira Himekawa\". So relation \"author\" object \"Akira Himekawa\". subject_type manga series, object_type human (or group? Akira Himekawa is a duo). We'll use \"human\". qualifiers none.\n\n4. Relation: \"date of first release\" object \"8 February 2016\". Use relation \"date of first release\". subject_type manga series, object_type date. qualifiers none.\n\n5. Relation: \"available via\" object \"MangaOne mobile application\". subject_type manga series, object_type software/application. Also qualifier \"publisher\" Shogakukan? Actually \"via publisher Shogakukan's MangaOne mobile application\". So we could have two facts: \"publisher\" relation \"Shogakukan\". And \"available via\" relation \"MangaOne mobile application\". Also \"publisher\" qualifier maybe \"publisher\". Let's create:\n\n- subject: \"Twilight Princess manga series\", relation: \"publisher\", object: \"Shogakukan\". qualifiers none.\n\n- subject: \"Twilight Princess manga series\", relation: \"available via\", object: \"MangaOne mobile application\". qualifiers none.\n\n6. Temporal statements: \"the manga adaptation began almost ten years after the initial release of the game on which it is based\". This is a statement about start of adaptation relative to game release. Could be captured as \"adaptation began\" event with qualifier \"point in time\" relative? Not explicit date. It says \"almost ten years after\". That's approximation. Could encode as relation \"adaptation began\" with qualifier \"approximate time offset\" but not defined. Probably we skip because not explicit date.\n\n7. \"it launched only a month before the release of the high-definition remake.\" This says manga launched (release) a month before HD remake release. We have manga release date Feb 8 2016. So we could create relation \"launch date\" already captured. Also relation \"launch relative to\" maybe \"point in time offset\". But not required. Might create a fact: \"high-definition remake\" (object) relation \"release date\" unknown. Not explicit.\n\nThus we have triplets:\n\n- exclusive to Japan\n- based on The Legend of Zelda: Twilight Princess\n- author Akira Himekawa\n- date of first release 8 February 2016\n- publisher Shogakukan\n- available via MangaOne mobile application\n\nNeed subject_type and object_type.\n\nDefine subject_type \"manga series\". object_type for Japan \"country\". For game \"video game\". For Akira Himekawa \"human\". For date \"date\". For Shogakukan \"organisation\". For MangaOne mobile application \"software\". Provide qualifiers empty.\n\nReturn JSON.\n\nCheck pronoun resolution: \"it launched only a month before the release of the high-definition remake.\" \"it\" refers to manga series. Already captured launch date. Could add relation \"launch relative to\" but not explicit date. We'll not add.\n\nThus final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1683,
+      "total_tokens": 2987,
+      "completion_tokens": 1304,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"exclusive to\",\n            \"object\": \"Japan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"based on\",\n            \"object\": \"The Legend of Zelda: Twilight Princess\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"video game\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"author\",\n            \"object\": \"Akira Himekawa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"date of first release\",\n            \"object\": \"8 February 2016\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"publisher\",\n            \"object\": \"Shogakukan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Twilight Princess manga series\",\n            \"relation\": \"available via\",\n            \"object\": \"MangaOne mobile application\",\n            \"qualifiers\": [],\n            \"subject_type\": \"manga series\",\n            \"object_type\": \"software\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Twilight Princess manga series",
+        "relation": "exclusive to",
+        "object": "Japan",
+        "qualifiers": [],
+        "subject_type": "manga series",
+        "object_type": "country"
+      },
+      {
+        "subject": "Twilight Princess manga series",
+        "relation": "based on",
+        "object": "The Legend of Zelda: Twilight Princess",
+        "qualifiers": [],
+        "subject_type": "manga series",
+        "object_type": "video game"
+      },
+      {
+        "subject": "Twilight Princess manga series",
+        "relation": "author",
+        "object": "Akira Himekawa",
+        "qualifiers": [],
+        "subject_type": "manga series",
+        "object_type": "human"
+      },
+      {
+        "subject": "Twilight Princess manga series",
+        "relation": "date of first release",
+        "object": "8 February 2016",
+        "qualifiers": [],
+        "subject_type": "manga series",
+        "object_type": "date"
+      },
+      {
+        "subject": "Twilight Princess manga series",
+        "relation": "publisher",
+        "object": "Shogakukan",
+        "qualifiers": [],
+        "subject_type": "manga series",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "Twilight Princess manga series",
+        "relation": "available via",
+        "object": "MangaOne mobile application",
+        "qualifiers": [],
+        "subject_type": "manga series",
+        "object_type": "software"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1683,
+    "total_tokens": 2987,
+    "completion_tokens": 1304,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 508,
+    "output_tokens_est": 416
+  },
+  "attempts": 1,
+  "latency_s": 16.067321741997148,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:18:38.523297+00:00",
+  "cache_key": "8dfd39b4ae0e798b5fb58919e6e6ee65"
+}

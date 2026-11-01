@@ -1,0 +1,155 @@
+{
+  "task": {
+    "input_id": "87602b9eb3c3b098",
+    "input_hash": "16cb3b67d85ab28960dbf562171d652f4b587f1c4cfcb46b47a308c102feed9a",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c5cd25a8b44e105d4ffc54fcbceca27f",
+    "object": "chat.completion",
+    "created": 1791519243,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"instance of\",\n            \"object\": \"wrinkle ridge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"geological formation\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"located on\",\n            \"object\": \"Moon\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"celestial body\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"located in\",\n            \"object\": \"Mare Serenitatis\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"lunar mare\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"near\",\n            \"object\": \"Mare Tranquilitatis\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"lunar mare\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"length\",\n            \"object\": \"44\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"km\"\n                }\n            ],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"named after\",\n            \"object\": \"William Nicol\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1976\"\n                }\n            ],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"William Nicol\",\n            \"relation\": \"occupation\",\n            \"object\": \"physicist\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country of citizenship\",\n                    \"object\": \"Scotland\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Dorsum Nicol\n\nDorsum Nicol is a wrinkle ridge on the Moon at in Mare Serenitatis near the border of Mare Tranquilitatis. It is 44 km long and was named after Scottish physicist William Nicol in 1976.\"\n\nWe have entity Dorsum Nicol (a geographical feature). Facts:\n\n- Dorsum Nicol is a wrinkle ridge. relation: \"instance of\" maybe \"type\". Use \"subclass of\"? In examples they used \"occupation\", \"field of work\". For geographic features, maybe relation \"type\" or \"instance of\". We'll use \"instance of\" with object \"wrinkle ridge\". subject_type: \"geological feature\". object_type: \"geological formation\". Could be \"wrinkle ridge\" as a type.\n\n- Dorsum Nicol is on the Moon. relation \"located on\" or \"place\". Use \"located on\". object \"Moon\". subject_type \"geological feature\". object_type \"celestial body\".\n\n- Dorsum Nicol is in Mare Serenitatis. relation \"located in\". object \"Mare Serenitatis\". subject_type \"geological feature\". object_type \"mare (lunar plain)\". Also \"near the border of Mare Tranquilitatis\". So relation \"near border of\" maybe \"near\". Use \"near\". object \"Mare Tranquilitatis\". qualifier maybe \"relation\": \"place\"? but we can just have separate triplet: Dorsum Nicol near Mare Tranquilitatis. Could also include qualifier \"relation\": \"border of\". But spec says qualifiers for context; \"near the border of Mare Tranquilitatis\" is location context. Could treat as relation \"near\". object \"Mare Tranquilitatis\". No qualifier needed.\n\n- Length: 44 km. relation \"length\". object \"44 km\". qualifiers: unit \"km\". But they treat unit as qualifier. In example they used quantity qualifier for percentage. Here we can have object \"44\" and qualifier unit \"km\". Or object \"44 km\" and no qualifier. The spec: \"numbers with units\" as separate qualifiers. So we can have relation \"length\" object \"44\". qualifiers: {\"relation\":\"unit\",\"object\":\"km\"}.\n\n- Named after William Nicol in 1976. So relation \"named after\". object \"William Nicol\". qualifiers: point in time \"1976\". Also need subject_type \"geological feature\", object_type \"human\". Also we have William Nicol is a Scottish physicist. That's extra fact: \"William Nicol\" occupation \"physicist\". Also nationality \"Scottish\". Could include but only if explicitly stated: \"Scottish physicist William Nicol\". So we can extract: William Nicol occupation physicist, qualifier country of citizenship \"Scotland\". Also \"physicist\" type profession. Also maybe \"William Nicol\" is a human.\n\n- Also Dorsum Nicol was named after William Nicol in 1976. So we have that.\n\n- Also Dorsum Nicol is a wrinkle ridge on the Moon at in Mare Serenitatis near the border of Mare Tranquilitatis. There's a stray \"at\". ignore.\n\nNow produce JSON.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- Dorsum Nicol: \"geological feature\" (or \"wrinkle ridge\" but that's object). Use \"geological feature\".\n- wrinkle ridge: \"geological formation\".\n- Moon: \"celestial body\".\n- Mare Serenitatis: \"lunar mare\".\n- Mare Tranquilitatis: \"lunar mare\".\n- William Nicol: \"human\".\n- physicist: \"profession\".\n- Scotland: \"country\".\n- length: object numeric \"44\". object_type \"quantity\". Or maybe \"number\". Use \"quantity\".\n\nNow qualifiers list.\n\nTriplet list:\n\n1. Dorsum Nicol - instance of - wrinkle ridge.\n2. Dorsum Nicol - located on - Moon.\n3. Dorsum Nicol - located in - Mare Serenitatis.\n4. Dorsum Nicol - near - Mare Tranquilitatis. (maybe qualifier \"relation\": \"border of\"? but we can just near.)\n5. Dorsum Nicol - length - 44. qualifiers unit km.\n6. Dorsum Nicol - named after - William Nicol. qualifiers point in time 1976.\n7. William Nicol - occupation - physicist. qualifier country of citizenship Scotland.\n8. William Nicol - country of citizenship - Scotland. (maybe separate). But we already have qualifier. Could include separate triplet for clarity. The spec: qualifiers attached to claim they modify. In occupation claim we attach qualifier country of citizenship. That's okay. Also we could have separate \"nationality\" relation. But not needed.\n\nMake sure each triplet includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nNow produce JSON.\n\nCheck formatting: list of dicts.\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1642,
+      "total_tokens": 3119,
+      "completion_tokens": 1477,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"instance of\",\n            \"object\": \"wrinkle ridge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"geological formation\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"located on\",\n            \"object\": \"Moon\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"celestial body\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"located in\",\n            \"object\": \"Mare Serenitatis\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"lunar mare\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"near\",\n            \"object\": \"Mare Tranquilitatis\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"lunar mare\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"length\",\n            \"object\": \"44\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"km\"\n                }\n            ],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Dorsum Nicol\",\n            \"relation\": \"named after\",\n            \"object\": \"William Nicol\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1976\"\n                }\n            ],\n            \"subject_type\": \"geological feature\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"William Nicol\",\n            \"relation\": \"occupation\",\n            \"object\": \"physicist\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country of citizenship\",\n                    \"object\": \"Scotland\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Dorsum Nicol",
+        "relation": "instance of",
+        "object": "wrinkle ridge",
+        "qualifiers": [],
+        "subject_type": "geological feature",
+        "object_type": "geological formation"
+      },
+      {
+        "subject": "Dorsum Nicol",
+        "relation": "located on",
+        "object": "Moon",
+        "qualifiers": [],
+        "subject_type": "geological feature",
+        "object_type": "celestial body"
+      },
+      {
+        "subject": "Dorsum Nicol",
+        "relation": "located in",
+        "object": "Mare Serenitatis",
+        "qualifiers": [],
+        "subject_type": "geological feature",
+        "object_type": "lunar mare"
+      },
+      {
+        "subject": "Dorsum Nicol",
+        "relation": "near",
+        "object": "Mare Tranquilitatis",
+        "qualifiers": [],
+        "subject_type": "geological feature",
+        "object_type": "lunar mare"
+      },
+      {
+        "subject": "Dorsum Nicol",
+        "relation": "length",
+        "object": "44",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "km"
+          }
+        ],
+        "subject_type": "geological feature",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Dorsum Nicol",
+        "relation": "named after",
+        "object": "William Nicol",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1976"
+          }
+        ],
+        "subject_type": "geological feature",
+        "object_type": "human"
+      },
+      {
+        "subject": "William Nicol",
+        "relation": "occupation",
+        "object": "physicist",
+        "qualifiers": [
+          {
+            "relation": "country of citizenship",
+            "object": "Scotland"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "profession"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1642,
+    "total_tokens": 3119,
+    "completion_tokens": 1477,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 643,
+    "output_tokens_est": 551
+  },
+  "attempts": 1,
+  "latency_s": 18.6125413000118,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:14:22.527506+00:00",
+  "cache_key": "7d5722375dc0097da6fbb5dc8cd6984f"
+}

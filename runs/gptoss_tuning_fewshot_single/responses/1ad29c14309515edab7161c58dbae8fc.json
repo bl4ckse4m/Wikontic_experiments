@@ -1,0 +1,171 @@
+{
+  "task": {
+    "input_id": "65c5425f39fb8d82",
+    "input_hash": "ad79fec6e5df6333ddd38d784cc2884b828381a001bce1bb4236c368c9d530d2",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-47017f680aeb34648b67e41efdf5eb16",
+    "object": "chat.completion",
+    "created": 1791518108,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Queen (band)\",\n            \"relation\": \"interviewed by\",\n            \"object\": \"Mojo magazine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"band\",\n            \"object_type\": \"magazine\"\n        },\n        {\n            \"subject\": \"Queen (band)\",\n            \"relation\": \"said\",\n            \"object\": \"the most amazing sight at Live Aid was to see the audience clapping to Radio Ga Ga\",\n            \"qualifiers\": [],\n            \"subject_type\": \"band\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"audience\",\n            \"relation\": \"clapped to\",\n            \"object\": \"Radio Ga Ga\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"Live Aid\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Brian May\",\n            \"relation\": \"stated\",\n            \"object\": \"I'd never seen anything like that in my life and it wasn't calculated either\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"Queen (band)\",\n            \"relation\": \"understood\",\n            \"object\": \"their audience\",\n            \"qualifiers\": [],\n            \"subject_type\": \"band\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"Queen (band)\",\n            \"relation\": \"performed for\",\n            \"object\": \"audience\",\n            \"qualifiers\": [],\n            \"subject_type\": \"band\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"Brian May\",\n            \"relation\": \"thought\",\n            \"object\": \"this is not a Queen audience\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"general audience\",\n            \"relation\": \"bought tickets\",\n            \"object\": \"tickets\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"before they even knew Queen was on the bill\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"ticket\"\n        },\n        {\n            \"subject\": \"Nobody\",\n            \"relation\": \"told\",\n            \"object\": \"audience\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"Live Aid\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"group of people\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts. Text about Queen (band) interview. Entities: Queen (band), Mojo magazine, Live Aid, audience, \"Radio Ga Ga\" (song), Brian May (person), maybe \"the audience\" etc.\n\nWe need to parse statements.\n\nSentence: \"When interviewed for Mojo magazine the band said the most amazing sight at Live Aid was to see the audience clapping to \"Radio Ga Ga\".\"\n\nFacts:\n- Queen (band) was interviewed for Mojo magazine. Relation: \"interviewed by\" maybe? Actually \"interviewed for Mojo magazine\" means the band gave interview to Mojo. So subject: Queen (band), relation: \"interviewed by\", object: Mojo magazine. Qualifier maybe \"point in time\"? Not given. So just that.\n\n- The band said the most amazing sight at Live Aid was to see the audience clapping to \"Radio Ga Ga\". So we can have a statement: Queen (band) \"said\" something. But we need to capture the content? Could be \"most amazing sight at Live Aid\" = \"audience clapping to Radio Ga Ga\". Might be captured as: \"most amazing sight at Live Aid\" (object) = \"audience clapping to Radio Ga Ga\". Relation maybe \"most amazing sight\". Not a standard relation. Could use \"statement\" relation. But we need explicit facts. Could produce: subject: Queen (band), relation: \"said\", object: \"the most amazing sight at Live Aid was to see the audience clapping to Radio Ga Ga\". That's a statement. Qualifiers maybe none.\n\nBut maybe better to break: \"audience clapping to Radio Ga Ga\" is a fact about Live Aid. So we could have: \"audience\" \"clapped to\" \"Radio Ga Ga\" with qualifier \"point in time\": Live Aid. But the text says \"to see the audience clapping to Radio Ga Ga\". So we can capture: \"audience\" \"clapped to\" \"Radio Ga Ga\" with qualifier \"event\": Live Aid. Use relation \"clapped to\". Not standard but okay.\n\nNext: \"Brian May stated: \"I'd never seen anything like that in my life and it wasn't calculated either.\" So fact: Brian May \"stated\" something. Could capture as statement. Or extract \"Brian May\" \"had never seen anything like that in his life\". That's a claim about his experience. Relation: \"never seen\". Might be tricky.\n\nSimplify: capture that Brian May \"stated\" a quote. So subject: Brian May, relation: \"stated\", object: \"I'd never seen anything like that in my life and it wasn't calculated either\". That's a statement.\n\nNext: \"We understood our audience and played ...\". This is part of quote, but we could extract \"Queen (band)\" \"understood\" \"their audience\". Relation: \"understood\". Subject: Queen (band) (or \"we\" refers to band). So we can have: subject: Queen (band), relation: \"understood\", object: \"their audience\". Qualifier maybe none.\n\nAlso \"played to them\". Could be \"performed for\" \"audience\". So subject: Queen (band), relation: \"performed for\", object: \"audience\". Might be okay.\n\nNext: \"but that was one of those weird accidents because of the (music) video.\" So maybe: \"weird accidents\" caused by music video. Not a clear fact.\n\nNext: \"I remember thinking 'oh great, they've picked it up' and then I thought 'this is not a Queen audience'.\" So Brian May thought that. Could capture: Brian May \"thought\" \"this is not a Queen audience\". That's a statement.\n\nNext: \"This is a general audience who've bought tickets before they even knew we were on the bill.\" So fact: \"general audience\" \"bought tickets\" before they knew Queen was on the bill. Could capture: \"general audience\" \"bought tickets\" with qualifier \"point in time\": before they knew Queen was on the bill. Might be too complex.\n\nSimplify: capture that there was a \"general audience\" that \"bought tickets\" before knowing Queen was on the bill. Subject: general audience, relation: \"bought tickets\", object: \"tickets\". Qualifier: \"condition\": \"before they even knew we were on the bill\". Use qualifier relation \"condition\". object_type ticket.\n\nNext: \"And they all did it. How did they know? Nobody told them to do it.\" So \"Nobody\" \"told\" \"audience\" to do it. So subject: Nobody, relation: \"told\", object: \"audience\", qualifier \"point in time\": Live Aid? Could add.\n\nWe need to assign entity types: Queen (band) type \"band\". Mojo magazine type \"magazine\". Live Aid type \"event\". Audience type \"group of people\". Radio Ga Ga type \"song\". Brian May type \"human\". General audience type \"group of people\". Tickets type \"ticket\". Nobody type \"group of people\"? Could be \"unknown\". Use \"group of people\". \"Nobody\" maybe \"group of people\". Or \"person\" unknown.\n\nNow produce JSON with list of triplets.\n\nLet's list:\n\n1. Queen (band) - interviewed by - Mojo magazine. qualifiers [].\n\n2. Queen (band) - said - \"the most amazing sight at Live Aid was to see the audience clapping to Radio Ga Ga\". qualifiers [].\n\n3. Audience - clapped to - Radio Ga Ga. qualifiers [{relation:\"event\", object:\"Live Aid\"}] but relation \"event\" not allowed; maybe use \"point in time\". Use point in time Live Aid.\n\n4. Brian May - stated - \"I'd never seen anything like that in my life and it wasn't calculated either\". qualifiers [].\n\n5. Queen (band) - understood - their audience. qualifiers [].\n\n6. Queen (band) - performed for - audience. qualifiers [].\n\n7. Brian May - thought - \"this is not a Queen audience\". qualifiers [].\n\n8. General audience - bought tickets - tickets. qualifiers [{relation:\"condition\", object:\"before they even knew Queen was on the bill\"}].\n\n9. Nobody - told - audience. qualifiers [{relation:\"point in time\", object:\"Live Aid\"}].\n\nPotentially also \"audience\" \"did it\" but vague.\n\nMake sure each triplet has subject_type and object_type.\n\nDefine types:\n\n- Queen (band): \"band\"\n- Mojo magazine: \"magazine\"\n- Audience: \"group of people\"\n- Radio Ga Ga: \"song\"\n- Live Aid: \"event\"\n- Brian May: \"human\"\n- General audience: \"group of people\"\n- Tickets: \"ticket\"\n- Nobody: \"group of people\"\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1729,
+      "total_tokens": 3731,
+      "completion_tokens": 2002,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Queen (band)\",\n            \"relation\": \"interviewed by\",\n            \"object\": \"Mojo magazine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"band\",\n            \"object_type\": \"magazine\"\n        },\n        {\n            \"subject\": \"Queen (band)\",\n            \"relation\": \"said\",\n            \"object\": \"the most amazing sight at Live Aid was to see the audience clapping to Radio Ga Ga\",\n            \"qualifiers\": [],\n            \"subject_type\": \"band\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"audience\",\n            \"relation\": \"clapped to\",\n            \"object\": \"Radio Ga Ga\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"Live Aid\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Brian May\",\n            \"relation\": \"stated\",\n            \"object\": \"I'd never seen anything like that in my life and it wasn't calculated either\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"Queen (band)\",\n            \"relation\": \"understood\",\n            \"object\": \"their audience\",\n            \"qualifiers\": [],\n            \"subject_type\": \"band\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"Queen (band)\",\n            \"relation\": \"performed for\",\n            \"object\": \"audience\",\n            \"qualifiers\": [],\n            \"subject_type\": \"band\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"Brian May\",\n            \"relation\": \"thought\",\n            \"object\": \"this is not a Queen audience\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"statement\"\n        },\n        {\n            \"subject\": \"general audience\",\n            \"relation\": \"bought tickets\",\n            \"object\": \"tickets\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"before they even knew Queen was on the bill\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"ticket\"\n        },\n        {\n            \"subject\": \"Nobody\",\n            \"relation\": \"told\",\n            \"object\": \"audience\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"Live Aid\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"group of people\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Queen (band)",
+        "relation": "interviewed by",
+        "object": "Mojo magazine",
+        "qualifiers": [],
+        "subject_type": "band",
+        "object_type": "magazine"
+      },
+      {
+        "subject": "Queen (band)",
+        "relation": "said",
+        "object": "the most amazing sight at Live Aid was to see the audience clapping to Radio Ga Ga",
+        "qualifiers": [],
+        "subject_type": "band",
+        "object_type": "statement"
+      },
+      {
+        "subject": "audience",
+        "relation": "clapped to",
+        "object": "Radio Ga Ga",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "Live Aid"
+          }
+        ],
+        "subject_type": "group of people",
+        "object_type": "song"
+      },
+      {
+        "subject": "Brian May",
+        "relation": "stated",
+        "object": "I'd never seen anything like that in my life and it wasn't calculated either",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "statement"
+      },
+      {
+        "subject": "Queen (band)",
+        "relation": "understood",
+        "object": "their audience",
+        "qualifiers": [],
+        "subject_type": "band",
+        "object_type": "group of people"
+      },
+      {
+        "subject": "Queen (band)",
+        "relation": "performed for",
+        "object": "audience",
+        "qualifiers": [],
+        "subject_type": "band",
+        "object_type": "group of people"
+      },
+      {
+        "subject": "Brian May",
+        "relation": "thought",
+        "object": "this is not a Queen audience",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "statement"
+      },
+      {
+        "subject": "general audience",
+        "relation": "bought tickets",
+        "object": "tickets",
+        "qualifiers": [
+          {
+            "relation": "condition",
+            "object": "before they even knew Queen was on the bill"
+          }
+        ],
+        "subject_type": "group of people",
+        "object_type": "ticket"
+      },
+      {
+        "subject": "Nobody",
+        "relation": "told",
+        "object": "audience",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "Live Aid"
+          }
+        ],
+        "subject_type": "group of people",
+        "object_type": "group of people"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1729,
+    "total_tokens": 3731,
+    "completion_tokens": 2002,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 793,
+    "output_tokens_est": 701
+  },
+  "attempts": 1,
+  "latency_s": 25.03891612899315,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:55:33.503009+00:00",
+  "cache_key": "1ad29c14309515edab7161c58dbae8fc"
+}

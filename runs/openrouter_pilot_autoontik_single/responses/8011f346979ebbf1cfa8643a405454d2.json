@@ -1,0 +1,180 @@
+{
+  "task": {
+    "input_id": "f362627a02300622",
+    "input_hash": "e3f0b6ca5b77f403e7e9b1e6a22ed56b12a64ea4dd761c037de4be5dd5d67262",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793214520-4nv3yIOHRnN22Ee1mwI5",
+    "object": "chat.completion",
+    "created": 1793214520,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Mancer 2",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"date of release\",\n            \"object\": \"1945\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"genre\",\n            \"object\": \"action\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"genre\",\n            \"object\": \"adventure\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"director\",\n            \"object\": \"Mutz Greenbaum\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"pseudonym\",\n                    \"object\": \"Max Greene\",\n                    \"object_type\": \"human\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"production company\",\n            \"object\": \"Welwyn Studios\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Great Britain\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"film studio\"\n        },\n        {\n            \"subject\": \"Mutz Greenbaum\",\n            \"relation\": \"pseudonym\",\n            \"object\": \"Max Greene\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Welwyn Studios\",\n            \"relation\": \"country\",\n            \"object\": \"Great Britain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film studio\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract entities and relations.\n\nText: Title \"The Man from Morocco\". It's a 1945 action adventure film directed by Mutz Greenbaum as Max Greene. The film was produced by Welwyn Studios in Great Britain.\n\nWe need triplets:\n\n- The Man from Morocco (film) instance type: film (maybe \"film\" or \"motion picture\").\n- relation: publication date? \"date of release\" or \"publication date\". Use \"publication date\" maybe \"date of release\". Use \"date of release\" with object \"1945\". object_type \"year\".\n- relation: genre? It says \"action adventure film\". Could split into two: genre \"action\" and genre \"adventure\". So two triplets: subject film, relation \"genre\", object \"action\". object_type \"genre\". same for adventure.\n- relation: director: Mutz Greenbaum as Max Greene. Means Mutz Greenbaum (person) also known as Max Greene (pseudonym). So we have director relation: subject film, relation \"director\", object \"Mutz Greenbaum\". object_type \"human\". Also qualifier maybe \"pseudonym\" linking Mutz Greenbaum to Max Greene? But qualifiers must attach to a triplet. Could add qualifier to director triplet: relation \"pseudonym\", object \"Max Greene\", object_type \"human\"? Actually Max Greene is a pseudonym (name) not a person. Could treat as \"alias\". But spec: qualifiers are relations connecting object and qualifier. The qualifier attaches to the main triplet. So we could have qualifier: relation \"alias\", object \"Max Greene\", object_type \"name\". But maybe better to have separate triplet: \"Mutz Greenbaum\" \"pseudonym\" \"Max Greene\". However that would be a separate fact, not a qualifier. The instruction: qualifiers must be attached to a triplet and never exist as standalone. But we can also have separate triplet for pseudonym. It's a fact about Mutz Greenbaum. So we can have separate triplet: subject \"Mutz Greenbaum\", relation \"pseudonym\", object \"Max Greene\". That is okay.\n\n- relation: produced by: Welwyn Studios. So film \"producer\" maybe \"production company\". Use \"production company\". object_type \"organization\". Also location: Great Britain. Could be qualifier \"country\" for production company? Actually \"produced by Welwyn Studios in Great Britain.\" So we can have qualifier on production company: relation \"country\", object \"Great Britain\", object_type \"country\". Or separate triplet: Welwyn Studios \"country\" \"Great Britain\". But qualifier is appropriate: attach to production company triplet.\n\n- Also \"Welwyn Studios\" is a studio, type \"organization\" or \"film studio\". Use \"film studio\".\n\n- Also \"Great Britain\" type \"country\".\n\n- Also \"Mutz Greenbaum\" as director, also known as Max Greene (alias). So we have separate triplet for alias.\n\n- Also \"The Man from Morocco\" is a film, type \"film\". Could also have \"language\"? Not given.\n\nNow construct JSON list.\n\nNeed each dict with keys: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nDefine types:\n\n- \"The Man from Morocco\": film (type \"film\" or \"motion picture\"). Use \"film\".\n- \"1945\": year (type \"year\").\n- \"action\": genre (type \"genre\").\n- \"adventure\": genre (type \"genre\").\n- \"Mutz Greenbaum\": human (type \"human\").\n- \"Max Greene\": name? Could be \"human\" if it's a pseudonym of same person. But treat as \"human\"? Actually alias is a name, but we can set type \"human\" as same person. Might be okay. Use \"human\".\n- \"Welwyn Studios\": organization (type \"film studio\" or \"organization\"). Use \"film studio\".\n- \"Great Britain\": country (type \"country\").\n\nNow qualifiers:\n\n- For director triplet, maybe qualifier \"alias\" linking Mutz Greenbaum to Max Greene? But we already have separate alias triplet. Could also add qualifier \"pseudonym\". But spec says qualifiers attach to a triplet. Could add qualifier to director triplet: relation \"pseudonym\", object \"Max Greene\". That would convey that the director is known as Max Greene. That seems appropriate.\n\n- For production company triplet, qualifier \"country\" \"Great Britain\".\n\nNow produce JSON:\n\n{\n \"triplets\": [\n   {subject:\"The Man from Morocco\", relation:\"date of release\", object:\"1945\", qualifiers:[], subject_type:\"film\", object_type:\"year\"},\n   {subject:\"The Man from Morocco\", relation:\"genre\", object:\"action\", qualifiers:[], subject_type:\"film\", object_type:\"genre\"},\n   {subject:\"The Man from Morocco\", relation:\"genre\", object:\"adventure\", qualifiers:[], subject_type:\"film\", object_type:\"genre\"},\n   {subject:\"The Man from Morocco\", relation:\"director\", object:\"Mutz Greenbaum\", qualifiers:[{\"relation\":\"pseudonym\",\"object\":\"Max Greene\",\"object_type\":\"human\"}], subject_type:\"film\", object_type:\"human\"},\n   {subject:\"The Man from Morocco\", relation:\"production company\", object:\"Welwyn Studios\", qualifiers:[{\"relation\":\"country\",\"object\":\"Great Britain\",\"object_type\":\"country\"}], subject_type:\"film\", object_type:\"film studio\"},\n   {subject:\"Mutz Greenbaum\", relation:\"pseudonym\", object:\"Max Greene\", qualifiers:[], subject_type:\"human\", object_type:\"human\"},\n   {subject:\"Welwyn Studios\", relation:\"country\", object:\"Great Britain\", qualifiers:[], subject_type:\"film studio\", object_type:\"country\"}\n ]\n}\n\nBut note we have duplicate relation \"pseudonym\". Might be okay.\n\nCheck spec: qualifiers list each dict with relation, object, object_type. Good.\n\nNow produce final JSON without extra text.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract entities and relations.\n\nText: Title \"The Man from Morocco\". It's a 1945 action adventure film directed by Mutz Greenbaum as Max Greene. The film was produced by Welwyn Studios in Great Britain.\n\nWe need triplets:\n\n- The Man from Morocco (film) instance type: film (maybe \"film\" or \"motion picture\").\n- relation: publication date? \"date of release\" or \"publication date\". Use \"publication date\" maybe \"date of release\". Use \"date of release\" with object \"1945\". object_type \"year\".\n- relation: genre? It says \"action adventure film\". Could split into two: genre \"action\" and genre \"adventure\". So two triplets: subject film, relation \"genre\", object \"action\". object_type \"genre\". same for adventure.\n- relation: director: Mutz Greenbaum as Max Greene. Means Mutz Greenbaum (person) also known as Max Greene (pseudonym). So we have director relation: subject film, relation \"director\", object \"Mutz Greenbaum\". object_type \"human\". Also qualifier maybe \"pseudonym\" linking Mutz Greenbaum to Max Greene? But qualifiers must attach to a triplet. Could add qualifier to director triplet: relation \"pseudonym\", object \"Max Greene\", object_type \"human\"? Actually Max Greene is a pseudonym (name) not a person. Could treat as \"alias\". But spec: qualifiers are relations connecting object and qualifier. The qualifier attaches to the main triplet. So we could have qualifier: relation \"alias\", object \"Max Greene\", object_type \"name\". But maybe better to have separate triplet: \"Mutz Greenbaum\" \"pseudonym\" \"Max Greene\". However that would be a separate fact, not a qualifier. The instruction: qualifiers must be attached to a triplet and never exist as standalone. But we can also have separate triplet for pseudonym. It's a fact about Mutz Greenbaum. So we can have separate triplet: subject \"Mutz Greenbaum\", relation \"pseudonym\", object \"Max Greene\". That is okay.\n\n- relation: produced by: Welwyn Studios. So film \"producer\" maybe \"production company\". Use \"production company\". object_type \"organization\". Also location: Great Britain. Could be qualifier \"country\" for production company? Actually \"produced by Welwyn Studios in Great Britain.\" So we can have qualifier on production company: relation \"country\", object \"Great Britain\", object_type \"country\". Or separate triplet: Welwyn Studios \"country\" \"Great Britain\". But qualifier is appropriate: attach to production company triplet.\n\n- Also \"Welwyn Studios\" is a studio, type \"organization\" or \"film studio\". Use \"film studio\".\n\n- Also \"Great Britain\" type \"country\".\n\n- Also \"Mutz Greenbaum\" as director, also known as Max Greene (alias). So we have separate triplet for alias.\n\n- Also \"The Man from Morocco\" is a film, type \"film\". Could also have \"language\"? Not given.\n\nNow construct JSON list.\n\nNeed each dict with keys: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nDefine types:\n\n- \"The Man from Morocco\": film (type \"film\" or \"motion picture\"). Use \"film\".\n- \"1945\": year (type \"year\").\n- \"action\": genre (type \"genre\").\n- \"adventure\": genre (type \"genre\").\n- \"Mutz Greenbaum\": human (type \"human\").\n- \"Max Greene\": name? Could be \"human\" if it's a pseudonym of same person. But treat as \"human\"? Actually alias is a name, but we can set type \"human\" as same person. Might be okay. Use \"human\".\n- \"Welwyn Studios\": organization (type \"film studio\" or \"organization\"). Use \"film studio\".\n- \"Great Britain\": country (type \"country\").\n\nNow qualifiers:\n\n- For director triplet, maybe qualifier \"alias\" linking Mutz Greenbaum to Max Greene? But we already have separate alias triplet. Could also add qualifier \"pseudonym\". But spec says qualifiers attach to a triplet. Could add qualifier to director triplet: relation \"pseudonym\", object \"Max Greene\". That would convey that the director is known as Max Greene. That seems appropriate.\n\n- For production company triplet, qualifier \"country\" \"Great Britain\".\n\nNow produce JSON:\n\n{\n \"triplets\": [\n   {subject:\"The Man from Morocco\", relation:\"date of release\", object:\"1945\", qualifiers:[], subject_type:\"film\", object_type:\"year\"},\n   {subject:\"The Man from Morocco\", relation:\"genre\", object:\"action\", qualifiers:[], subject_type:\"film\", object_type:\"genre\"},\n   {subject:\"The Man from Morocco\", relation:\"genre\", object:\"adventure\", qualifiers:[], subject_type:\"film\", object_type:\"genre\"},\n   {subject:\"The Man from Morocco\", relation:\"director\", object:\"Mutz Greenbaum\", qualifiers:[{\"relation\":\"pseudonym\",\"object\":\"Max Greene\",\"object_type\":\"human\"}], subject_type:\"film\", object_type:\"human\"},\n   {subject:\"The Man from Morocco\", relation:\"production company\", object:\"Welwyn Studios\", qualifiers:[{\"relation\":\"country\",\"object\":\"Great Britain\",\"object_type\":\"country\"}], subject_type:\"film\", object_type:\"film studio\"},\n   {subject:\"Mutz Greenbaum\", relation:\"pseudonym\", object:\"Max Greene\", qualifiers:[], subject_type:\"human\", object_type:\"human\"},\n   {subject:\"Welwyn Studios\", relation:\"country\", object:\"Great Britain\", qualifiers:[], subject_type:\"film studio\", object_type:\"country\"}\n ]\n}\n\nBut note we have duplicate relation \"pseudonym\". Might be okay.\n\nCheck spec: qualifiers list each dict with relation, object, object_type. Good.\n\nNow produce final JSON without extra text.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1392,
+      "completion_tokens": 1674,
+      "total_tokens": 3066,
+      "cost": 0.0004875,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0004875,
+        "upstream_inference_prompt_cost": 6.951444376152428e-05,
+        "upstream_inference_completions_cost": 0.00041798555623847575
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1328,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"date of release\",\n            \"object\": \"1945\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"genre\",\n            \"object\": \"action\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"genre\",\n            \"object\": \"adventure\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"director\",\n            \"object\": \"Mutz Greenbaum\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"pseudonym\",\n                    \"object\": \"Max Greene\",\n                    \"object_type\": \"human\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"The Man from Morocco\",\n            \"relation\": \"production company\",\n            \"object\": \"Welwyn Studios\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Great Britain\",\n                    \"object_type\": \"country\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"film studio\"\n        },\n        {\n            \"subject\": \"Mutz Greenbaum\",\n            \"relation\": \"pseudonym\",\n            \"object\": \"Max Greene\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Welwyn Studios\",\n            \"relation\": \"country\",\n            \"object\": \"Great Britain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film studio\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "The Man from Morocco",
+        "relation": "date of release",
+        "object": "1945",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "year"
+      },
+      {
+        "subject": "The Man from Morocco",
+        "relation": "genre",
+        "object": "action",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "genre"
+      },
+      {
+        "subject": "The Man from Morocco",
+        "relation": "genre",
+        "object": "adventure",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "genre"
+      },
+      {
+        "subject": "The Man from Morocco",
+        "relation": "director",
+        "object": "Mutz Greenbaum",
+        "qualifiers": [
+          {
+            "relation": "pseudonym",
+            "object": "Max Greene"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "human"
+      },
+      {
+        "subject": "The Man from Morocco",
+        "relation": "production company",
+        "object": "Welwyn Studios",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "Great Britain"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "film studio"
+      },
+      {
+        "subject": "Mutz Greenbaum",
+        "relation": "pseudonym",
+        "object": "Max Greene",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Welwyn Studios",
+        "relation": "country",
+        "object": "Great Britain",
+        "qualifiers": [],
+        "subject_type": "film studio",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1392,
+    "completion_tokens": 1674,
+    "total_tokens": 3066,
+    "cost": 0.0004875,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0004875,
+      "upstream_inference_prompt_cost": 6.951444376152428e-05,
+      "upstream_inference_completions_cost": 0.00041798555623847575
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1328,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 650,
+    "output_tokens_est": 523
+  },
+  "attempts": 1,
+  "latency_s": 27.803887112000666,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T19:09:08.307676+00:00",
+  "cache_key": "8011f346979ebbf1cfa8643a405454d2"
+}

@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "079dfbe9fe22cbf4",
+    "input_hash": "fbd7ca9984e1ee45b26af14aa0b2b08856b9cf41d29eebc37cbc3d8de0c49d90",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c740257f18d7b48de36a56317dfd7340",
+    "object": "chat.completion",
+    "created": 1791547057,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"instance of\",\n            \"object\": \"stadium\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"stadium\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"location\",\n            \"object\": \"University of Central Florida\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"city\",\n                    \"object\": \"Orlando\"\n                },\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Florida\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"university\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"capacity\",\n            \"object\": \"2,000 seats\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"home venue for\",\n            \"object\": \"UCF Knights track and field team\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"home venue for\",\n            \"object\": \"UCF Knights cross country team\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"home venue for\",\n            \"object\": \"UCF Knights soccer team\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"UCF Knights\",\n            \"relation\": \"member of\",\n            \"object\": \"American Athletic Conference\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"sports league\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text. Identify entities: UCF Soccer and Track Stadium, University of Central Florida, Orlando, Florida, United States, UCF Knights track and field, cross country and soccer teams (maybe separate), UCF Knights, American Athletic Conference (The American). Also \"2,000-seat stadium\" indicates capacity.\n\nTriplets:\n\n1. (UCF Soccer and Track Stadium, instance of, stadium) maybe but we need factual statements: \"is a multi-purpose stadium\". So relation: \"instance of\" or \"type\". Use \"instance of\" maybe. object_type: \"stadium\". subject_type: \"facility\". Might use \"type\" but we need Wikidata style: \"instance of\". We'll include.\n\n2. (UCF Soccer and Track Stadium, location, University of Central Florida) but text says \"located on the main campus of the University of Central Florida in Orlando, Florida, United States\". So location could be \"University of Central Florida\". Also location qualifier \"point in time\"? Not needed. So relation: \"located on campus of\". Use \"location\". object_type: \"university\". Also maybe separate location: \"Orlando\", \"Florida\", \"United States\". Could have hierarchical location: Use qualifiers for city, state, country. Possibly attach qualifiers to the location triplet: qualifiers: {\"relation\":\"located in city\",\"object\":\"Orlando\"} etc. But guidelines: qualifiers give more context; we can attach qualifiers to the location claim. So main triplet: (UCF Soccer and Track Stadium, location, University of Central Florida). qualifiers: point in time? Not. Use qualifiers: {\"relation\":\"located in city\",\"object\":\"Orlando\"}, {\"relation\":\"located in state\",\"object\":\"Florida\"}, {\"relation\":\"located in country\",\"object\":\"United States\"}.\n\nCheck if these qualifiers are allowed: they are relations connecting the object (University of Central Florida) to city etc? Actually qualifiers connect to the main triplet, not to object. So qualifier relation describes attribute of the claim, like \"city\", \"state\". We'll use \"city\" etc.\n\n3. (UCF Soccer and Track Stadium, capacity, \"2,000 seats\") relation: \"capacity\". object_type: \"quantity\". qualifiers maybe none.\n\n4. (UCF Soccer and Track Stadium, home venue for, UCF Knights track and field team). Also cross country team, soccer team. Might split: (UCF Soccer and Track Stadium, home venue for, UCF Knights track and field team); (UCF Soccer and Track Stadium, home venue for, UCF Knights cross country team); (UCF Soccer and Track Stadium, home venue for, UCF Knights soccer team). Need subject_type: \"stadium\". object_type: \"sports team\". Also note that \"UCF Knights track and field, cross country and soccer teams\" could be considered as three separate teams. We'll list three.\n\n5. (UCF Knights, member of, American Athletic Conference) but text says \"The Knights compete in the American Athletic Conference (The American)\". So relation: \"member of\" or \"competition league\". Use \"member of\". subject_type: \"sports team\". object_type: \"sports league\". Also maybe qualifier: \"sport\" but not needed.\n\nPotential also: (UCF Knights, sport, track and field), etc but not explicitly.\n\nWe need subject_type and object_type for each.\n\nDefine types: stadium, university, city, state, country, quantity, sports team, sports league.\n\nNow construct JSON.\n\nMake sure qualifiers list is list of dicts.\n\nLet's craft.\n\nTriplets list:\n\n1. subject: \"UCF Soccer and Track Stadium\", relation: \"instance of\", object: \"stadium\", qualifiers: [], subject_type: \"facility\", object_type: \"stadium\".\n\n2. subject: \"UCF Soccer and Track Stadium\", relation: \"location\", object: \"University of Central Florida\", qualifiers: [{\"relation\":\"city\",\"object\":\"Orlando\"},{\"relation\":\"state\",\"object\":\"Florida\"},{\"relation\":\"country\",\"object\":\"United States\"}], subject_type: \"facility\", object_type: \"university\".\n\n3. subject: \"UCF Soccer and Track Stadium\", relation: \"capacity\", object: \"2,000 seats\", qualifiers: [], subject_type: \"facility\", object_type: \"quantity\".\n\n4. subject: \"UCF Soccer and Track Stadium\", relation: \"home venue for\", object: \"UCF Knights track and field team\", qualifiers: [], subject_type: \"facility\", object_type: \"sports team\".\n\n5. subject: \"UCF Soccer and Track Stadium\", relation: \"home venue for\", object: \"UCF Knights cross country team\", qualifiers: [], subject_type: \"facility\", object_type: \"sports team\".\n\n6. subject: \"UCF Soccer and Track Stadium\", relation: \"home venue for\", object: \"UCF Knights soccer team\", qualifiers: [], subject_type: \"facility\", object_type: \"sports team\".\n\n7. subject: \"UCF Knights\", relation: \"member of\", object: \"American Athletic Conference\", qualifiers: [], subject_type: \"sports team\", object_type: \"sports league\".\n\nCheck naming: \"American Athletic Conference (The American)\" we can just \"American Athletic Conference\". Good.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1660,
+      "total_tokens": 3227,
+      "completion_tokens": 1567,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"instance of\",\n            \"object\": \"stadium\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"stadium\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"location\",\n            \"object\": \"University of Central Florida\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"city\",\n                    \"object\": \"Orlando\"\n                },\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Florida\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"university\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"capacity\",\n            \"object\": \"2,000 seats\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"home venue for\",\n            \"object\": \"UCF Knights track and field team\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"home venue for\",\n            \"object\": \"UCF Knights cross country team\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"UCF Soccer and Track Stadium\",\n            \"relation\": \"home venue for\",\n            \"object\": \"UCF Knights soccer team\",\n            \"qualifiers\": [],\n            \"subject_type\": \"facility\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"UCF Knights\",\n            \"relation\": \"member of\",\n            \"object\": \"American Athletic Conference\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"sports league\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "UCF Soccer and Track Stadium",
+        "relation": "instance of",
+        "object": "stadium",
+        "qualifiers": [],
+        "subject_type": "facility",
+        "object_type": "stadium"
+      },
+      {
+        "subject": "UCF Soccer and Track Stadium",
+        "relation": "location",
+        "object": "University of Central Florida",
+        "qualifiers": [
+          {
+            "relation": "city",
+            "object": "Orlando"
+          },
+          {
+            "relation": "state",
+            "object": "Florida"
+          },
+          {
+            "relation": "country",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "facility",
+        "object_type": "university"
+      },
+      {
+        "subject": "UCF Soccer and Track Stadium",
+        "relation": "capacity",
+        "object": "2,000 seats",
+        "qualifiers": [],
+        "subject_type": "facility",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "UCF Soccer and Track Stadium",
+        "relation": "home venue for",
+        "object": "UCF Knights track and field team",
+        "qualifiers": [],
+        "subject_type": "facility",
+        "object_type": "sports team"
+      },
+      {
+        "subject": "UCF Soccer and Track Stadium",
+        "relation": "home venue for",
+        "object": "UCF Knights cross country team",
+        "qualifiers": [],
+        "subject_type": "facility",
+        "object_type": "sports team"
+      },
+      {
+        "subject": "UCF Soccer and Track Stadium",
+        "relation": "home venue for",
+        "object": "UCF Knights soccer team",
+        "qualifiers": [],
+        "subject_type": "facility",
+        "object_type": "sports team"
+      },
+      {
+        "subject": "UCF Knights",
+        "relation": "member of",
+        "object": "American Athletic Conference",
+        "qualifiers": [],
+        "subject_type": "sports team",
+        "object_type": "sports league"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1660,
+    "total_tokens": 3227,
+    "completion_tokens": 1567,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 668,
+    "output_tokens_est": 576
+  },
+  "attempts": 1,
+  "latency_s": 18.181463671004167,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T11:57:55.439452+00:00",
+  "cache_key": "66bd039113293b7ec4326bfa947db831"
+}

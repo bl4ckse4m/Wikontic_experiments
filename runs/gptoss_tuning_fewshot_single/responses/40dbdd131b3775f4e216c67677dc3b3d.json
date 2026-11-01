@@ -1,0 +1,130 @@
+{
+  "task": {
+    "input_id": "2c16e23b3627290b",
+    "input_hash": "6e7fe35837f1973dee5fc074da40a2b5c0c312b9878c2a304da7a8727da6bc29",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-f27bd0822b81da6c5270f5def6705919",
+    "object": "chat.completion",
+    "created": 1791516145,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"In San Francisco\",\n            \"relation\": \"instance of\",\n            \"object\": \"live album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album type\"\n        },\n        {\n            \"subject\": \"In San Francisco\",\n            \"relation\": \"artist\",\n            \"object\": \"Ravi Shankar\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"In San Francisco\",\n            \"relation\": \"date of release\",\n            \"object\": \"1967\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"format\",\n                    \"object\": \"vinyl\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"In San Francisco\",\n            \"relation\": \"release format\",\n            \"object\": \"CD\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"publisher\",\n                    \"object\": \"Angel Records\"\n                },\n                {\n                    \"relation\": \"remastering\",\n                    \"object\": \"digital\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"format\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"In San Francisco\n\nIn San Francisco is a live album by Hindustani classical musician Ravi Shankar. It was released in 1967 on vinyl. It was later digitally remastered and released in CD format through Angel Records.\"\n\nWe have entity: \"In San Francisco\" (album). Subject: In San Francisco (album). Relation: \"instance of\" maybe \"album\". But we need specific relations: \"album\" maybe \"type\". Could use \"genre\" or \"format\". The text says \"live album\". So we can have relation \"type\" or \"format\". In examples they used \"occupation\", \"award received\". For album, we could use \"instance of\" = \"album\". But they didn't have that relation in examples. However we can use \"genre\" maybe \"live album\". Let's think: \"In San Francisco is a live album by Hindustani classical musician Ravi Shankar.\" So we have:\n\n- subject: In San Francisco (album)\n- relation: \"artist\" or \"performer\" maybe \"creator\". Could be \"performer\" = Ravi Shankar. Use \"artist\". We'll choose \"artist\". object: Ravi Shankar. subject_type: \"album\". object_type: \"human\".\n\n- relation: \"type\" = \"live album\". object_type: \"album type\". Or \"genre\". Let's use \"genre\" = \"live\". But \"live album\" is a type. Use \"format\" maybe \"vinyl\". Actually later: \"It was released in 1967 on vinyl.\" So we have release event.\n\nWe need to capture release event: album released in 1967 on vinyl. So:\n\n- subject: In San Francisco (album)\n- relation: \"release date\" = 1967 (date). qualifiers: maybe \"medium\" = \"vinyl\". Use qualifier \"format\" with object \"vinyl\". So relation \"date of release\". object \"1967\". qualifiers: {\"relation\":\"format\",\"object\":\"vinyl\"}.\n\n- Also \"It was later digitally remastered and released in CD format through Angel Records.\" So we have a later release event: remastered and released in CD format through Angel Records. Could be two facts: \"remastering\" event, and \"release format CD\". Also \"publisher\" or \"label\" = Angel Records.\n\nWe can capture:\n\n- subject: In San Francisco (album)\n- relation: \"remastering\" maybe \"remastered\". object: \"digitally\". But we need object entity. Could be \"digital remaster\". Might be okay to have relation \"remastered\" with object \"digitally\". But better: relation \"remastering\" with qualifier \"format\" CD and \"publisher\" Angel Records, and \"point in time\" unknown (not given). Since no date, we just capture release in CD format through Angel Records.\n\nThus:\n\n- relation: \"release format\" = \"CD\". qualifiers: {\"relation\":\"publisher\",\"object\":\"Angel Records\"}.\n\nBut also \"remastered\" qualifier: maybe \"remastering\" = \"digital\". Could add qualifier \"remastering\" with object \"digital\". However qualifiers are limited to defined relations like \"modality\", \"condition\". Not sure.\n\nSimplify: create a triplet: subject In San Francisco, relation \"released in format\", object \"CD\". qualifiers: publisher Angel Records, \"remastering\" maybe \"digital\". But we can include qualifier \"remastering\" as relation \"remastering\" with object \"digital\". However qualifiers list expects relation and object strings; we can add multiple qualifiers.\n\nThus final triplets:\n\n1. Album type: In San Francisco - relation \"instance of\" - object \"live album\". subject_type \"album\", object_type \"album type\". (maybe \"album type\").\n\n2. Artist: In San Francisco - relation \"artist\" - object \"Ravi Shankar\". subject_type \"album\", object_type \"human\".\n\n3. Release date: In San Francisco - relation \"date of release\" - object \"1967\". qualifiers: format vinyl. subject_type \"album\", object_type \"date\". Also qualifier \"format\" object \"vinyl\". (format type maybe \"medium\").\n\n4. Release format CD: In San Francisco - relation \"release format\" - object \"CD\". qualifiers: publisher Angel Records, \"remastering\" \"digital\". subject_type \"album\", object_type \"format\".\n\nWe need to ensure qualifiers are proper relation names. Use \"publisher\" for Angel Records. Use \"remastering\" maybe \"remastering method\". Could use \"remastering\" as relation.\n\nLet's produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1637,
+      "total_tokens": 2881,
+      "completion_tokens": 1244,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"In San Francisco\",\n            \"relation\": \"instance of\",\n            \"object\": \"live album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album type\"\n        },\n        {\n            \"subject\": \"In San Francisco\",\n            \"relation\": \"artist\",\n            \"object\": \"Ravi Shankar\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"In San Francisco\",\n            \"relation\": \"date of release\",\n            \"object\": \"1967\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"format\",\n                    \"object\": \"vinyl\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"In San Francisco\",\n            \"relation\": \"release format\",\n            \"object\": \"CD\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"publisher\",\n                    \"object\": \"Angel Records\"\n                },\n                {\n                    \"relation\": \"remastering\",\n                    \"object\": \"digital\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"format\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "In San Francisco",
+        "relation": "instance of",
+        "object": "live album",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "album type"
+      },
+      {
+        "subject": "In San Francisco",
+        "relation": "artist",
+        "object": "Ravi Shankar",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "human"
+      },
+      {
+        "subject": "In San Francisco",
+        "relation": "date of release",
+        "object": "1967",
+        "qualifiers": [
+          {
+            "relation": "format",
+            "object": "vinyl"
+          }
+        ],
+        "subject_type": "album",
+        "object_type": "date"
+      },
+      {
+        "subject": "In San Francisco",
+        "relation": "release format",
+        "object": "CD",
+        "qualifiers": [
+          {
+            "relation": "publisher",
+            "object": "Angel Records"
+          },
+          {
+            "relation": "remastering",
+            "object": "digital"
+          }
+        ],
+        "subject_type": "album",
+        "object_type": "format"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1637,
+    "total_tokens": 2881,
+    "completion_tokens": 1244,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 436,
+    "output_tokens_est": 344
+  },
+  "attempts": 1,
+  "latency_s": 15.328807915997459,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:22:41.541493+00:00",
+  "cache_key": "40dbdd131b3775f4e216c67677dc3b3d"
+}

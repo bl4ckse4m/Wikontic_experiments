@@ -1,0 +1,164 @@
+{
+  "task": {
+    "input_id": "072f0384e5fc2924",
+    "input_hash": "bf5550755e95927f0a467d91a4ff8fd14054d53f1c905804c6afccda8a60b030",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793195005-vSP3cWuSW0mIzG0bP0tj",
+    "object": "chat.completion",
+    "created": 1793195005,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DeepInfra",
+    "system_fingerprint": null,
+    "service_tier": "default",
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"service type\",\n            \"object\": \"internet news service\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"nonprofit status\",\n                    \"object\": \"not-for-profit\",\n                    \"object_type\": \"status\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"service\"\n        },\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"headquarters location\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"operator\",\n            \"object\": \"journalist\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"previous employer\",\n                    \"object\": \"BBC\",\n                    \"object_type\": \"organization\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"partner\",\n            \"object\": \"Saint FM\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"partner\",\n            \"object\": \"St Helena Independent\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract facts from the given text.\n\nText:\n\n\"Saint Helena\n\nSt Helena Online is a not-for-profit internet news service run from the UK by a former print and BBC journalist, working in partnership with Saint FM and the St Helena Independent.\"\n\nWe need to parse entities:\n\n- Saint Helena (likely a place). Could be subject? The text just says \"Saint Helena\". Might be a heading, not a statement. Probably we can treat \"Saint Helena\" as an entity but no relation given.\n\n- St Helena Online: an entity (likely organization). It is a not-for-profit internet news service. So we can have:\n\nsubject: St Helena Online\nrelation: instance of (or type) maybe \"organization\" or \"internet news service\". In example they used occupation, award, etc. For organization type, we could use \"service type\" or \"industry\". But we need a relation that expresses that it is a \"not-for-profit internet news service\". Could split into two facts: \"St Helena Online\" - \"service type\" - \"internet news service\". And qualifier \"not-for-profit\" maybe as qualifier \"business model\" or \"nonprofit status\". But we can also have relation \"nonprofit status\" - object \"not-for-profit\". Let's think.\n\nBetter: relation \"service type\" with object \"internet news service\". And qualifier \"business model\" with object \"not-for-profit\". Or \"nonprofit status\" with object \"not-for-profit\". We'll decide.\n\n- \"run from the UK\": indicates location of operation. So relation \"headquarters location\" or \"operating location\" - object \"United Kingdom\". Qualifier maybe \"run from\". Use \"headquarters location\". Provide qualifier maybe \"operation\" but not needed.\n\n- \"by a former print and BBC journalist\": indicates founder/owner? Could be \"operator\" or \"run by\". So relation \"operator\" - object \"former print and BBC journalist\". But we need to identify that journalist as an entity? Not named. Could be generic \"journalist\". So object \"journalist\". Qualifier \"former print and BBC\". Could have qualifiers \"former employer\" \"BBC\" and \"print\". Might be too granular. Maybe just \"operator\" - \"journalist\". And qualifier \"former print and BBC\" as \"previous employer\". But we need object_type for journalist: \"human\" or \"profession\"? Actually object is a person, but we don't have name. Could use \"journalist\" as occupation, but object_type \"human\". Might be okay.\n\n- \"working in partnership with Saint FM and the St Helena Independent.\" So St Helena Online has partnership with Saint FM and St Helena Independent. So two relations: \"partner\" - \"Saint FM\". \"partner\" - \"St Helena Independent\". Both objects are likely organizations (radio station? etc). So object_type \"organization\" or \"media organization\". We'll use \"organization\".\n\n- Also \"Saint FM\" is an entity. \"St Helena Independent\" is an entity.\n\n- \"Saint Helena\" maybe the place. Could have relation \"located in\" - \"Saint Helena\". But not explicit. The heading maybe indicates the subject of article. Could ignore.\n\nThus produce triplets list.\n\nWe need to include subject_type and object_type.\n\nDefine types:\n\n- St Helena Online: organization (maybe \"news service\" but type \"organization\").\n\n- internet news service: maybe \"service\". object_type \"service\". Or \"internet news service\" as a type of service. Use \"service\".\n\n- not-for-profit: could be \"business model\" object_type \"nonprofit status\". But we can treat as \"nonprofit status\" relation with object \"not-for-profit\". object_type \"status\". Or \"nonprofit\" as \"nonprofit organization\". Simpler: relation \"nonprofit status\" - object \"not-for-profit\". object_type \"status\".\n\n- United Kingdom: location, object_type \"country\".\n\n- journalist: human.\n\n- Saint FM: organization.\n\n- St Helena Independent: organization.\n\nNow qualifiers: For the \"service type\" relation, we can add qualifier \"nonprofit status\" as above, but qualifiers are attached to triplet. The spec says qualifiers must be attached to a triplet, not separate. So we could have triplet: subject St Helena Online, relation \"service type\", object \"internet news service\". qualifiers: [{\"relation\":\"nonprofit status\",\"object\":\"not-for-profit\",\"object_type\":\"status\"}].\n\nAlso we could add qualifier \"headquarters location\" as separate qualifier to same triplet? Actually location is separate relation, but could be separate triplet: St Helena Online - \"headquarters location\" - United Kingdom. No qualifiers needed.\n\nTriplet for operator: St Helena Online - \"operator\" - journalist. Qualifier: maybe \"former print and BBC\" as \"previous employer\". Could add qualifier \"previous employer\" - \"BBC\". But also \"print\". Might be too much. Simpler: qualifier \"previous employer\" - \"BBC\". object_type \"organization\". Also qualifier \"previous field\" - \"print\". object_type \"industry\". But spec: qualifiers are list of dicts each with relation, object, object_type. So we can include one qualifier: previous employer BBC.\n\nThus triplet: subject St Helena Online, relation \"operator\", object \"journalist\". qualifiers: [{\"relation\":\"previous employer\",\"object\":\"BBC\",\"object_type\":\"organization\"}].\n\nBut also \"former print\" maybe \"previous employer\" - \"print\". Not a specific organization. Could ignore.\n\nNow partnership: two separate triplets.\n\nTriplet: St Helena Online - \"partner\" - Saint FM. No qualifiers.\n\nTriplet: St Helena Online - \"partner\" - St Helena Independent.\n\nNow also maybe \"Saint FM\" - \"type\" - \"radio station\"? Not in text.\n\nThus final JSON.\n\nNeed top-level key \"triplets\": list.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\", \"subject_type\", \"object_type\".\n\nLet's assign types:\n\n- St Helena Online: \"organization\"\n\n- internet news service: \"service\"\n\n- not-for-profit: \"status\"\n\n- United Kingdom: \"country\"\n\n- journalist: \"human\"\n\n- BBC: \"organization\"\n\n- Saint FM: \"organization\"\n\n- St Helena Independent: \"organization\"\n\nNow qualifiers for service type: relation \"nonprofit status\". object \"not-for-profit\". object_type \"status\".\n\nQualifiers for operator: relation \"previous employer\". object \"BBC\". object_type \"organization\".\n\nNow produce JSON.\n\nCheck formatting: no extra text, no code fences.\n\nLet's craft.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract facts from the given text.\n\nText:\n\n\"Saint Helena\n\nSt Helena Online is a not-for-profit internet news service run from the UK by a former print and BBC journalist, working in partnership with Saint FM and the St Helena Independent.\"\n\nWe need to parse entities:\n\n- Saint Helena (likely a place). Could be subject? The text just says \"Saint Helena\". Might be a heading, not a statement. Probably we can treat \"Saint Helena\" as an entity but no relation given.\n\n- St Helena Online: an entity (likely organization). It is a not-for-profit internet news service. So we can have:\n\nsubject: St Helena Online\nrelation: instance of (or type) maybe \"organization\" or \"internet news service\". In example they used occupation, award, etc. For organization type, we could use \"service type\" or \"industry\". But we need a relation that expresses that it is a \"not-for-profit internet news service\". Could split into two facts: \"St Helena Online\" - \"service type\" - \"internet news service\". And qualifier \"not-for-profit\" maybe as qualifier \"business model\" or \"nonprofit status\". But we can also have relation \"nonprofit status\" - object \"not-for-profit\". Let's think.\n\nBetter: relation \"service type\" with object \"internet news service\". And qualifier \"business model\" with object \"not-for-profit\". Or \"nonprofit status\" with object \"not-for-profit\". We'll decide.\n\n- \"run from the UK\": indicates location of operation. So relation \"headquarters location\" or \"operating location\" - object \"United Kingdom\". Qualifier maybe \"run from\". Use \"headquarters location\". Provide qualifier maybe \"operation\" but not needed.\n\n- \"by a former print and BBC journalist\": indicates founder/owner? Could be \"operator\" or \"run by\". So relation \"operator\" - object \"former print and BBC journalist\". But we need to identify that journalist as an entity? Not named. Could be generic \"journalist\". So object \"journalist\". Qualifier \"former print and BBC\". Could have qualifiers \"former employer\" \"BBC\" and \"print\". Might be too granular. Maybe just \"operator\" - \"journalist\". And qualifier \"former print and BBC\" as \"previous employer\". But we need object_type for journalist: \"human\" or \"profession\"? Actually object is a person, but we don't have name. Could use \"journalist\" as occupation, but object_type \"human\". Might be okay.\n\n- \"working in partnership with Saint FM and the St Helena Independent.\" So St Helena Online has partnership with Saint FM and St Helena Independent. So two relations: \"partner\" - \"Saint FM\". \"partner\" - \"St Helena Independent\". Both objects are likely organizations (radio station? etc). So object_type \"organization\" or \"media organization\". We'll use \"organization\".\n\n- Also \"Saint FM\" is an entity. \"St Helena Independent\" is an entity.\n\n- \"Saint Helena\" maybe the place. Could have relation \"located in\" - \"Saint Helena\". But not explicit. The heading maybe indicates the subject of article. Could ignore.\n\nThus produce triplets list.\n\nWe need to include subject_type and object_type.\n\nDefine types:\n\n- St Helena Online: organization (maybe \"news service\" but type \"organization\").\n\n- internet news service: maybe \"service\". object_type \"service\". Or \"internet news service\" as a type of service. Use \"service\".\n\n- not-for-profit: could be \"business model\" object_type \"nonprofit status\". But we can treat as \"nonprofit status\" relation with object \"not-for-profit\". object_type \"status\". Or \"nonprofit\" as \"nonprofit organization\". Simpler: relation \"nonprofit status\" - object \"not-for-profit\". object_type \"status\".\n\n- United Kingdom: location, object_type \"country\".\n\n- journalist: human.\n\n- Saint FM: organization.\n\n- St Helena Independent: organization.\n\nNow qualifiers: For the \"service type\" relation, we can add qualifier \"nonprofit status\" as above, but qualifiers are attached to triplet. The spec says qualifiers must be attached to a triplet, not separate. So we could have triplet: subject St Helena Online, relation \"service type\", object \"internet news service\". qualifiers: [{\"relation\":\"nonprofit status\",\"object\":\"not-for-profit\",\"object_type\":\"status\"}].\n\nAlso we could add qualifier \"headquarters location\" as separate qualifier to same triplet? Actually location is separate relation, but could be separate triplet: St Helena Online - \"headquarters location\" - United Kingdom. No qualifiers needed.\n\nTriplet for operator: St Helena Online - \"operator\" - journalist. Qualifier: maybe \"former print and BBC\" as \"previous employer\". Could add qualifier \"previous employer\" - \"BBC\". But also \"print\". Might be too much. Simpler: qualifier \"previous employer\" - \"BBC\". object_type \"organization\". Also qualifier \"previous field\" - \"print\". object_type \"industry\". But spec: qualifiers are list of dicts each with relation, object, object_type. So we can include one qualifier: previous employer BBC.\n\nThus triplet: subject St Helena Online, relation \"operator\", object \"journalist\". qualifiers: [{\"relation\":\"previous employer\",\"object\":\"BBC\",\"object_type\":\"organization\"}].\n\nBut also \"former print\" maybe \"previous employer\" - \"print\". Not a specific organization. Could ignore.\n\nNow partnership: two separate triplets.\n\nTriplet: St Helena Online - \"partner\" - Saint FM. No qualifiers.\n\nTriplet: St Helena Online - \"partner\" - St Helena Independent.\n\nNow also maybe \"Saint FM\" - \"type\" - \"radio station\"? Not in text.\n\nThus final JSON.\n\nNeed top-level key \"triplets\": list.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\", \"subject_type\", \"object_type\".\n\nLet's assign types:\n\n- St Helena Online: \"organization\"\n\n- internet news service: \"service\"\n\n- not-for-profit: \"status\"\n\n- United Kingdom: \"country\"\n\n- journalist: \"human\"\n\n- BBC: \"organization\"\n\n- Saint FM: \"organization\"\n\n- St Helena Independent: \"organization\"\n\nNow qualifiers for service type: relation \"nonprofit status\". object \"not-for-profit\". object_type \"status\".\n\nQualifiers for operator: relation \"previous employer\". object \"BBC\". object_type \"organization\".\n\nNow produce JSON.\n\nCheck formatting: no extra text, no code fences.\n\nLet's craft.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1378,
+      "completion_tokens": 1683,
+      "total_tokens": 3061,
+      "cost": 0.000337096,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000337096,
+        "upstream_inference_prompt_cost": 5.0986e-05,
+        "upstream_inference_completions_cost": 0.00028611
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1544,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"service type\",\n            \"object\": \"internet news service\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"nonprofit status\",\n                    \"object\": \"not-for-profit\",\n                    \"object_type\": \"status\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"service\"\n        },\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"headquarters location\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"operator\",\n            \"object\": \"journalist\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"previous employer\",\n                    \"object\": \"BBC\",\n                    \"object_type\": \"organization\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"partner\",\n            \"object\": \"Saint FM\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"St Helena Online\",\n            \"relation\": \"partner\",\n            \"object\": \"St Helena Independent\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "St Helena Online",
+        "relation": "service type",
+        "object": "internet news service",
+        "qualifiers": [
+          {
+            "relation": "nonprofit status",
+            "object": "not-for-profit"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "service"
+      },
+      {
+        "subject": "St Helena Online",
+        "relation": "headquarters location",
+        "object": "United Kingdom",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "country"
+      },
+      {
+        "subject": "St Helena Online",
+        "relation": "operator",
+        "object": "journalist",
+        "qualifiers": [
+          {
+            "relation": "previous employer",
+            "object": "BBC"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "human"
+      },
+      {
+        "subject": "St Helena Online",
+        "relation": "partner",
+        "object": "Saint FM",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "St Helena Online",
+        "relation": "partner",
+        "object": "St Helena Independent",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1378,
+    "completion_tokens": 1683,
+    "total_tokens": 3061,
+    "cost": 0.000337096,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000337096,
+      "upstream_inference_prompt_cost": 5.0986e-05,
+      "upstream_inference_completions_cost": 0.00028611
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1544,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 549,
+    "output_tokens_est": 422
+  },
+  "attempts": 1,
+  "latency_s": 95.49693769200167,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T13:44:59.971555+00:00",
+  "cache_key": "1d1258356b9617c89f63345dbc610a2e"
+}

@@ -1,0 +1,161 @@
+{
+  "task": {
+    "input_id": "e5745ff120fd2e85",
+    "input_hash": "22bd1049d06c3b993222a5ae822c91977d3220ae65a2d468c78080c27164f79c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-6777d7a37fea7a89ee34a10c61bb1714",
+    "object": "chat.completion",
+    "created": 1791522309,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"original name\",\n            \"object\": \"Fantasque's River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"name\"\n        },\n        {\n            \"subject\": \"Fantasque's River\",\n            \"relation\": \"named after\",\n            \"object\": \"chief of the Sekani people\",\n            \"qualifiers\": [],\n            \"subject_type\": \"name\",\n            \"object_type\": \"person\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"located in\",\n            \"object\": \"British Columbia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"located in\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"origin\",\n            \"object\": \"Alberta\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"joins\",\n            \"object\": \"Sikanni Chief River\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"southeast of Fort Nelson\"\n                }\n            ],\n            \"subject_type\": \"river\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"forms\",\n            \"object\": \"Fort Nelson River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Fort Nelson\",\n            \"relation\": \"instance of\",\n            \"object\": \"town\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Fort Nelson\",\n            \"relation\": \"located in\",\n            \"object\": \"British Columbia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"province\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Fontas River\n\nThe Fontas River, originally Fantasque's River, after the name of a chief of the Sekien people, is a river in northeastern British Columbia, Canada, having its origin in northwestern Alberta, Canada. It joins the Sikanni Chief River southeast of the town of Fort Nelson, British Columbia, forming the Fort Nelson River.\"\n\nWe need to parse.\n\nEntities: Fontas River, Fantasque's River (original name), chief of the Sekani people (maybe name?), Sekani people (ethnic group), British Columbia (province), Canada (country), northwestern Alberta (region), Sikanni Chief River, Fort Nelson (town), Fort Nelson River.\n\nRelations:\n\n- Fontas River has alternative name \"Fantasque's River\". Relation: \"has name\" or \"original name\". Use \"original name\". object: Fantasque's River. Subject_type: river. object_type: name? maybe \"name\". But we can treat as \"name\". Could also be \"named after\". Actually phrase: \"originally Fantasque's River, after the name of a chief of the Sekani people\". Means the original name was Fantasque's River, which was named after a chief of the Sekani people. So we have two facts:\n\n1. Fontas River – original name – Fantasque's River.\n2. Fantasque's River – named after – chief of the Sekani people. But \"chief of the Sekani people\" is not a specific name, just a chief. Could treat as \"chief of the Sekani people\" as entity. Relation: \"named after\". Subject_type: name? maybe \"name\". But we can still produce.\n\n- Fontas River – located in – northeastern British Columbia, Canada. Could split: location region: \"northeastern British Columbia\". Also \"Canada\". Could have two location relations: \"located in\" with qualifiers maybe \"region\" but we can just have two.\n\n- Fontas River – origin – northwestern Alberta, Canada. Relation: \"origin\". object: northwestern Alberta. Also Canada.\n\n- Fontas River – joins – Sikanni Chief River. Qualifier: \"point in time\"? not given. Also \"southeast of the town of Fort Nelson, British Columbia\". So we can add qualifier \"place\" maybe \"southeast of Fort Nelson\". Use qualifier relation \"place\" with object \"southeast of Fort Nelson\". Or \"direction\". Use \"place\". Also \"forming the Fort Nelson River\" indicates that the joining forms Fort Nelson River. Could have relation \"forms\" maybe \"forms\" relation: Fontas River + Sikanni Chief River together form Fort Nelson River. But we can capture: \"Fort Nelson River\" – formed by – Fontas River and Sikanni Chief River. But we need subject single. Could have: \"Fontas River\" – part of formation of – Fort Nelson River. Might be ambiguous. Simpler: \"Fort Nelson River\" – formed by – joining of Fontas River and Sikanni Chief River. But we need explicit fact: \"forming the Fort Nelson River\". So we can have relation \"forms\" with object \"Fort Nelson River\". Subject: Fontas River (or the joining). We'll create: Fontas River – forms – Fort Nelson River. Qualifier maybe \"with\" but not needed.\n\n- Sikanni Chief River – location? Not needed.\n\n- Fort Nelson – is a town in British Columbia. Not explicit but \"town of Fort Nelson, British Columbia\". Could have: Fort Nelson – instance of – town. Relation: \"instance of\". But maybe not needed.\n\n- Sekani people – are a people (ethnic group). Not needed.\n\nWe need subject_type and object_type. Provide plausible types: river, name, chief, ethnic group, province, country, region, town, river.\n\nDefine types:\n\n- Fontas River: river\n- Fantasque's River: name (or alternative name). Could be \"name\". Use \"name\".\n- chief of the Sekani people: person (chief). Use \"person\".\n- Sekani people: ethnic group.\n- British Columbia: province (or administrative region). Use \"province\".\n- Canada: country.\n- northwestern Alberta: region (province). Use \"province\".\n- Alberta: province.\n- Sikanni Chief River: river.\n- Fort Nelson: town.\n- Fort Nelson River: river.\n\nNow qualifiers:\n\n- For original name: no qualifiers.\n\n- For named after: maybe qualifier \"after\" but relation already \"named after\". No qualifiers.\n\n- For location: \"northeastern British Columbia, Canada\". Could have two qualifiers: maybe \"region\" qualifier? But we can just have two separate relations: \"located in\" British Columbia, \"located in\" Canada. Could also add qualifier \"direction\" \"northeastern\". Use qualifier \"direction\" maybe \"point in time\"? Not needed. Use qualifier \"direction\" relation \"direction\" with object \"northeastern\". But spec didn't list \"direction\" as qualifier type; allowed qualifiers include \"place\", \"point in time\", etc. Could treat \"northeastern\" as qualifier \"direction\". Not defined. Safer: create two relations: \"located in\" with object \"British Columbia\". And add qualifier \"region\" maybe \"northeastern\". But not defined. Might skip directional qualifier.\n\n- For origin: \"northwestern Alberta, Canada\". Could have relation \"origin\" with object \"Alberta\". Add qualifier \"direction\" \"northwestern\". Might skip.\n\n- For joins: relation \"joins\". Qualifier \"place\" with object \"southeast of Fort Nelson\". Use \"place\". Also \"province\" maybe \"British Columbia\". Could add qualifier \"place\" with object \"British Columbia\". But we already have location.\n\n- For forms: relation \"forms\". No qualifiers.\n\nNow produce JSON.\n\nList triplets:\n\n1. Fontas River – original name – Fantasque's River. qualifiers [].\n\n2. Fantasque's River – named after – chief of the Sekani people. qualifiers [].\n\n3. Fontas River – located in – British Columbia. qualifiers [].\n\n4. Fontas River – located in – Canada. qualifiers [].\n\n5. Fontas River – origin – Alberta. qualifiers [].\n\n6. Fontas River – joins – Sikanni Chief River. qualifiers [{\"relation\":\"place\",\"object\":\"southeast of Fort Nelson\"}].\n\n7. Fontas River – forms – Fort Nelson River. qualifiers [].\n\n8. Fort Nelson – instance of – town. qualifiers [].\n\n9. Fort Nelson – located in – British Columbia. qualifiers [].\n\n10. Sikanni Chief River – located in – British Columbia? Not explicit. Not needed.\n\nWe also might include \"northwestern Alberta\" as region. Could have origin – northwestern Alberta. Use object \"northwestern Alberta\". But object_type maybe \"region\". Let's keep as \"Alberta\". Could also include qualifier \"direction\" \"northwestern\". Not required.\n\nAlso include \"Sekani people\" – type \"ethnic group\". Not needed.\n\nNow assign subject_type and object_type:\n\n1. subject_type: river, object_type: name.\n\n2. subject_type: name, object_type: person.\n\n3. subject_type: river, object_type: province.\n\n4. subject_type: river, object_type: country.\n\n5. subject_type: river, object_type: province.\n\n6. subject_type: river, object_type: river.\n\n7. subject_type: river, object_type: river.\n\n8. subject_type: town, object_type: \"type\" maybe \"settlement type\". Use \"settlement type\". But we can use \"category\". Use \"settlement\". Or \"town\" as object_type \"settlement type\". Let's use \"settlement type\".\n\n9. subject_type: town, object_type: province.\n\nNow produce JSON list.\n\nCheck qualifiers format: list of dicts with relation and object strings.\n\nFor triplet 6 qualifiers: place \"southeast of Fort Nelson\". Could also include \"British Columbia\". But we already have location.\n\nOk produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1662,
+      "total_tokens": 3837,
+      "completion_tokens": 2175,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"original name\",\n            \"object\": \"Fantasque's River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"name\"\n        },\n        {\n            \"subject\": \"Fantasque's River\",\n            \"relation\": \"named after\",\n            \"object\": \"chief of the Sekani people\",\n            \"qualifiers\": [],\n            \"subject_type\": \"name\",\n            \"object_type\": \"person\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"located in\",\n            \"object\": \"British Columbia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"located in\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"origin\",\n            \"object\": \"Alberta\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"joins\",\n            \"object\": \"Sikanni Chief River\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"southeast of Fort Nelson\"\n                }\n            ],\n            \"subject_type\": \"river\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Fontas River\",\n            \"relation\": \"forms\",\n            \"object\": \"Fort Nelson River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Fort Nelson\",\n            \"relation\": \"instance of\",\n            \"object\": \"town\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Fort Nelson\",\n            \"relation\": \"located in\",\n            \"object\": \"British Columbia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"province\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Fontas River",
+        "relation": "original name",
+        "object": "Fantasque's River",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "name"
+      },
+      {
+        "subject": "Fantasque's River",
+        "relation": "named after",
+        "object": "chief of the Sekani people",
+        "qualifiers": [],
+        "subject_type": "name",
+        "object_type": "person"
+      },
+      {
+        "subject": "Fontas River",
+        "relation": "located in",
+        "object": "British Columbia",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "province"
+      },
+      {
+        "subject": "Fontas River",
+        "relation": "located in",
+        "object": "Canada",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "country"
+      },
+      {
+        "subject": "Fontas River",
+        "relation": "origin",
+        "object": "Alberta",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "province"
+      },
+      {
+        "subject": "Fontas River",
+        "relation": "joins",
+        "object": "Sikanni Chief River",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "southeast of Fort Nelson"
+          }
+        ],
+        "subject_type": "river",
+        "object_type": "river"
+      },
+      {
+        "subject": "Fontas River",
+        "relation": "forms",
+        "object": "Fort Nelson River",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "river"
+      },
+      {
+        "subject": "Fort Nelson",
+        "relation": "instance of",
+        "object": "town",
+        "qualifiers": [],
+        "subject_type": "town",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Fort Nelson",
+        "relation": "located in",
+        "object": "British Columbia",
+        "qualifiers": [],
+        "subject_type": "town",
+        "object_type": "province"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1662,
+    "total_tokens": 3837,
+    "completion_tokens": 2175,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 679,
+    "output_tokens_est": 586
+  },
+  "attempts": 1,
+  "latency_s": 24.8260538320028,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T05:05:34.711148+00:00",
+  "cache_key": "35d9d21f708a65ff570e851918c564f5"
+}

@@ -1,0 +1,159 @@
+{
+  "task": {
+    "input_id": "a3199cb2eec9978a",
+    "input_hash": "72e6d17f35d7c15b5400e71a94eceda35355c9362f81c8f35b2e75449e1ec68c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-529c40e6a58dd80b514ee447bee7bb01",
+    "object": "chat.completion",
+    "created": 1791520224,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"also known as\",\n            \"object\": \"Jim Dandy to the Rescue\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"writer\",\n            \"object\": \"Lincoln Chase\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"first recorded by\",\n            \"object\": \"LaVern Baker\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1956\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"reached top of chart\",\n            \"object\": \"R&B chart\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"chart position\",\n            \"object\": \"pop chart\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"17\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"included in\",\n            \"object\": \"The Rock and Roll Hall of Fame's 500 Songs that Shaped Rock and Roll\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"list\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"ranked\",\n            \"object\": \"Rolling Stone's 500 Greatest Songs of All Time\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"352\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"list\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Jim Dandy (song)\n\n``Jim Dandy ''(sometimes known as`` Jim Dandy to the Rescue'') is a song written [by] Lincoln Chase, and was first recorded by American R&B singer LaVern Baker in 1956. It reached the top of the R&B chart and # 17 on the pop charts in the United States. It was named one of The Rock and Roll Hall of Fame's 500 Songs that Shaped Rock and Roll and was ranked # 352 on Rolling Stone's 500 Greatest Songs of All Time.\"\n\nWe need triplets.\n\nEntities: Jim Dandy (song) - subject.\n\nRelations:\n\n- \"instance of\" maybe? Not required unless explicit. It's a song, so we could have relation \"instance of\" with object \"song\". But example includes occupation etc. We can include \"instance of\" relation.\n\n- \"title\" maybe? Not needed.\n\n- \"also known as\" relation: sometimes known as \"Jim Dandy to the Rescue\". So triplet: subject Jim Dandy (song), relation \"also known as\", object \"Jim Dandy to the Rescue\". qualifiers none. subject_type: song, object_type: song title? maybe \"song title\". We'll use \"song\".\n\n- \"writer\" or \"composer\": written by Lincoln Chase. So relation \"author\" or \"writer\". Use \"writer\". object Lincoln Chase. qualifiers none. subject_type song, object_type human.\n\n- \"first recorded by\": first recorded by American R&B singer LaVern Baker in 1956. So relation \"first recorded by\", object LaVern Baker, qualifier point in time 1956. Also maybe qualifier \"occupation\" of LaVern Baker? Not needed.\n\n- \"chart performance\": reached the top of the R&B chart and #17 on the pop charts in the United States. Could split into two facts.\n\n   1) relation \"chart position\" object \"R&B chart\", qualifier \"position\" top? Actually \"reached the top\" meaning #1. So we could have relation \"chart position\" with object \"R&B chart\", qualifier \"position\" \"1\". But we have limited relation set. Could use \"reached\" as relation? In examples they used \"found\" etc. Might use \"reached\" relation. Let's create two triplets:\n\n   - subject Jim Dandy (song), relation \"reached\", object \"top of the R&B chart\". qualifiers maybe \"place\" \"United States\". But \"top of the R&B chart\" is a statement. Could treat object as \"R&B chart\". Use qualifier \"position\" \"1\". But we don't have \"position\" qualifier type defined; we can use \"quantity\". Might be okay.\n\nBetter: relation \"chart position\" with object \"R&B chart\", qualifiers: {\"relation\":\"position\",\"object\":\"1\"} maybe \"point in time\"? Not given. We'll just include qualifier \"position\" \"1\". But spec says qualifiers can be any relation like \"point in time\", \"place\", \"unit\", etc. \"position\" not listed but could be custom. Probably okay.\n\nSimplify: Use relation \"reached top of chart\" with object \"R&B chart\". No qualifiers.\n\nSecond: reached #17 on pop charts in United States. So relation \"chart position\", object \"pop chart\", qualifiers: {\"relation\":\"position\",\"object\":\"17\"},{\"relation\":\"place\",\"object\":\"United States\"}.\n\n- \"named one of The Rock and Roll Hall of Fame's 500 Songs that Shaped Rock and Roll\". So relation \"named as\", object \"one of The Rock and Roll Hall of Fame's 500 Songs that Shaped Rock and Roll\". Could be relation \"included in list\". Use \"included in\". object \"The Rock and Roll Hall of Fame's 500 Songs that Shaped Rock and Roll\". qualifiers none.\n\n- \"ranked #352 on Rolling Stone's 500 Greatest Songs of All Time\". Relation \"ranked\", object \"Rolling Stone's 500 Greatest Songs of All Time\", qualifier \"position\" \"352\". Also maybe \"point in time\"? Not given.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- Jim Dandy (song): subject_type \"song\".\n- Lincoln Chase: human.\n- LaVern Baker: human.\n- R&B chart: chart (maybe \"music chart\").\n- pop chart: chart.\n- The Rock and Roll Hall of Fame's 500 Songs that Shaped Rock and Roll: list (maybe \"list\").\n- Rolling Stone's 500 Greatest Songs of All Time: list.\n\nAlso \"Jim Dandy to the Rescue\": maybe \"song title\" or \"song\". We'll set \"song\".\n\nNow create JSON.\n\nTriplets list order.\n\nLet's craft.\n\nTriplet 1: also known as.\n\nTriplet 2: writer.\n\nTriplet 3: first recorded by with qualifier point in time 1956.\n\nTriplet 4: reached top of R&B chart. relation \"reached top of chart\". object \"R&B chart\". qualifiers maybe \"place\" \"United States\"? Not mentioned but chart is US chart. Could include place but not explicit. We'll omit.\n\nTriplet 5: chart position pop chart #17 United States. Use relation \"chart position\". object \"pop chart\". qualifiers: position 17, place United States.\n\nTriplet 6: included in list Rock and Roll Hall of Fame 500 Songs. relation \"included in\". object \"The Rock and Roll Hall of Fame's 500 Songs that Shaped Rock and Roll\". qualifiers none.\n\nTriplet 7: ranked #352 on Rolling Stone list. relation \"ranked\". object \"Rolling Stone's 500 Greatest Songs of All Time\". qualifiers: position 352.\n\nCheck qualifiers format: list of {\"relation\": \"...\", \"object\": \"...\"}.\n\nFor point in time qualifier: {\"relation\":\"point in time\",\"object\":\"1956\"}.\n\nFor position qualifier: maybe \"position\". Use that.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1704,
+      "total_tokens": 3454,
+      "completion_tokens": 1750,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"also known as\",\n            \"object\": \"Jim Dandy to the Rescue\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"writer\",\n            \"object\": \"Lincoln Chase\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"first recorded by\",\n            \"object\": \"LaVern Baker\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1956\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"reached top of chart\",\n            \"object\": \"R&B chart\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"chart position\",\n            \"object\": \"pop chart\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"17\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"included in\",\n            \"object\": \"The Rock and Roll Hall of Fame's 500 Songs that Shaped Rock and Roll\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"list\"\n        },\n        {\n            \"subject\": \"Jim Dandy (song)\",\n            \"relation\": \"ranked\",\n            \"object\": \"Rolling Stone's 500 Greatest Songs of All Time\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"352\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"list\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Jim Dandy (song)",
+        "relation": "also known as",
+        "object": "Jim Dandy to the Rescue",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "song"
+      },
+      {
+        "subject": "Jim Dandy (song)",
+        "relation": "writer",
+        "object": "Lincoln Chase",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Jim Dandy (song)",
+        "relation": "first recorded by",
+        "object": "LaVern Baker",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1956"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Jim Dandy (song)",
+        "relation": "reached top of chart",
+        "object": "R&B chart",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "music chart"
+      },
+      {
+        "subject": "Jim Dandy (song)",
+        "relation": "chart position",
+        "object": "pop chart",
+        "qualifiers": [
+          {
+            "relation": "position",
+            "object": "17"
+          },
+          {
+            "relation": "place",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "music chart"
+      },
+      {
+        "subject": "Jim Dandy (song)",
+        "relation": "included in",
+        "object": "The Rock and Roll Hall of Fame's 500 Songs that Shaped Rock and Roll",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "list"
+      },
+      {
+        "subject": "Jim Dandy (song)",
+        "relation": "ranked",
+        "object": "Rolling Stone's 500 Greatest Songs of All Time",
+        "qualifiers": [
+          {
+            "relation": "position",
+            "object": "352"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "list"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1704,
+    "total_tokens": 3454,
+    "completion_tokens": 1750,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 680,
+    "output_tokens_est": 587
+  },
+  "attempts": 1,
+  "latency_s": 21.580257649999112,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:30:45.948669+00:00",
+  "cache_key": "ef56af027d4a6fd48e143691683b1b57"
+}

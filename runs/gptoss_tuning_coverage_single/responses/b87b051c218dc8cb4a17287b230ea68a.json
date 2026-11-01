@@ -1,0 +1,129 @@
+{
+  "task": {
+    "input_id": "2c639d7cc4646cc1",
+    "input_hash": "5cdf89683f9192d3c5f4183055bd13baea1a0fdd331eb22835ff1fa95a3dd140",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-4ff900a1ceaae09dc613c22bbbd241e8",
+    "object": "chat.completion",
+    "created": 1791501940,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"You Sang to Me\",\n            \"relation\": \"publication date\",\n            \"object\": \"2000\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"You Sang to Me\",\n            \"relation\": \"performer\",\n            \"object\": \"Marc Anthony\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"You Sang to Me\",\n            \"relation\": \"part of album\",\n            \"object\": \"Marc Anthony (album)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"3\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Marc Anthony (album)\",\n            \"relation\": \"language\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"language\"\n        },\n        {\n            \"subject\": \"Marc Anthony (album)\",\n            \"relation\": \"ordinal\",\n            \"object\": \"first\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"ordinal number\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"\\\"You Sang to Me\\\"\\n\\n\\\"You Sang to Me\\\" is a 2000 hit song by Marc Anthony, and was released as the third single of his first English language album \\\"Marc Anthony\\\".\"\n\nWe have facts:\n\n- \"You Sang to Me\" is a hit song. So (You Sang to Me, instance of, song) or (You Sang to Me, genre, hit song) but better: relation \"instance of\" with object \"song\". Also \"hit song\" maybe \"type\" but we can use \"genre\" or \"type\". Use \"instance of\" = song.\n\n- Year 2000: \"2000 hit song\". So we can have qualifier point in time = 2000 for the song's release? Actually \"2000 hit song\" indicates it was a hit song in 2000. Could be qualifier \"point in time\" 2000 for the claim \"hit song\". But we can also have \"date of release\" = 2000. The text says \"is a 2000 hit song\". So we can have (You Sang to Me, point in time, 2000) as qualifier for relation \"hit\". But maybe better: (You Sang to Me, award received? no). Let's create a triplet: (You Sang to Me, genre, hit song) with qualifier point in time 2000. Or (You Sang to Me, musical work type, song) with qualifier point in time 2000.\n\n- By Marc Anthony: (You Sang to Me, performer, Marc Anthony) or \"artist\". Use relation \"performer\" or \"artist\". We'll use \"performer\".\n\n- Released as the third single of his first English language album \"Marc Anthony\". So (You Sang to Me, release format, single) with qualifier \"ordinal\" maybe \"third\". Also relation \"part of album\" maybe \"album\" = Marc Anthony (album). So (You Sang to Me, part of album, Marc Anthony (album)). Also qualifier \"ordinal\" = third single. Also qualifier \"point in time\"? Not given.\n\n- Album \"Marc Anthony\" is his first English language album. Could be separate fact: (Marc Anthony (album), language, English) and (Marc Anthony (album), order, first English language album). But we only have info about the song being third single of that album. So we can capture (You Sang to Me, single of album, Marc Anthony (album)) with qualifier \"ordinal\" = third.\n\nWe need subject_type and object_type.\n\n- Subject \"You Sang to Me\" is a song (musical work). So subject_type: \"musical work\" or \"song\". Use \"song\".\n\n- Object \"song\": object_type \"musical work type\"? For instance of relation object_type \"song\". For performer relation object_type \"human\" (Marc Anthony is human). For part of album relation object_type \"album\". For ordinal qualifier object_type \"ordinal number\". For point in time qualifier object_type \"date\" or \"year\". Use \"year\". For genre \"hit song\" object_type \"genre\". Might be okay.\n\nLet's construct triplets list:\n\n1. You Sang to Me - instance of - song. qualifiers: point in time 2000? Actually instance of doesn't need time. Could add qualifier \"point in time\" 2000 to indicate release year. But maybe better separate: (You Sang to Me, publication date, 2000). Use relation \"publication date\". Let's do that.\n\nTriplet: subject \"You Sang to Me\", relation \"publication date\", object \"2000\". qualifiers none. subject_type \"song\", object_type \"year\".\n\n2. You Sang to Me, performer, Marc Anthony. qualifiers none. subject_type \"song\", object_type \"human\".\n\n3. You Sang to Me, part of album, Marc Anthony (album). qualifiers: {\"relation\":\"ordinal\",\"object\":\"third single\"}? Actually ordinal is \"third\". Could have qualifier relation \"ordinal\" object \"3\". Also maybe qualifier \"single type\" = \"single\". But we can just include ordinal.\n\nSo qualifier: {\"relation\":\"ordinal\",\"object\":\"3\"}.\n\nsubject_type \"song\", object_type \"album\".\n\n4. Marc Anthony (album) - language - English. Not directly in text? It says \"first English language album\". So we can have (Marc Anthony (album), language, English). qualifiers: maybe \"order\" = first. Could add qualifier \"order\" object \"first\". But maybe separate: (Marc Anthony (album), language, English) and (Marc Anthony (album), sequence rank, first). We'll include one.\n\nBut the instruction: extract every explicitly stated fact. The phrase \"first English language album\" includes two facts: it's an album, it's English language, and it's his first English language album (i.e., order). So we can capture.\n\nTriplet: Marc Anthony (album), language, English. qualifiers none. subject_type \"album\", object_type \"language\".\n\nTriplet: Marc Anthony (album), rank, first. But \"first\" relative to his English language albums. Could be \"ordinal\" qualifier. Might be okay.\n\nBut maybe we need a relation \"ordinal\" with object \"first\". So (Marc Anthony (album), ordinal, first). subject_type \"album\", object_type \"ordinal number\".\n\nAlso we need to indicate that it's his first English language album, which implies it's his album. Already known.\n\nWe also might need to capture that the album is his first English language album, but we already have language and ordinal.\n\nNow ensure qualifiers format: list of dicts.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1624,
+      "total_tokens": 3093,
+      "completion_tokens": 1469,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"You Sang to Me\",\n            \"relation\": \"publication date\",\n            \"object\": \"2000\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"You Sang to Me\",\n            \"relation\": \"performer\",\n            \"object\": \"Marc Anthony\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"You Sang to Me\",\n            \"relation\": \"part of album\",\n            \"object\": \"Marc Anthony (album)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"3\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Marc Anthony (album)\",\n            \"relation\": \"language\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"language\"\n        },\n        {\n            \"subject\": \"Marc Anthony (album)\",\n            \"relation\": \"ordinal\",\n            \"object\": \"first\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"ordinal number\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "You Sang to Me",
+        "relation": "publication date",
+        "object": "2000",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "year"
+      },
+      {
+        "subject": "You Sang to Me",
+        "relation": "performer",
+        "object": "Marc Anthony",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "You Sang to Me",
+        "relation": "part of album",
+        "object": "Marc Anthony (album)",
+        "qualifiers": [
+          {
+            "relation": "ordinal",
+            "object": "3"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "album"
+      },
+      {
+        "subject": "Marc Anthony (album)",
+        "relation": "language",
+        "object": "English",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "language"
+      },
+      {
+        "subject": "Marc Anthony (album)",
+        "relation": "ordinal",
+        "object": "first",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "ordinal number"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1624,
+    "total_tokens": 3093,
+    "completion_tokens": 1469,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 433,
+    "output_tokens_est": 340
+  },
+  "attempts": 1,
+  "latency_s": 17.978313530999003,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:25:58.250432+00:00",
+  "cache_key": "b87b051c218dc8cb4a17287b230ea68a"
+}

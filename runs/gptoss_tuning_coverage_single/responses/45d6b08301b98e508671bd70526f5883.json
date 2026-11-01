@@ -1,0 +1,155 @@
+{
+  "task": {
+    "input_id": "775d0c738ad2e4a0",
+    "input_hash": "17ae1cc0741e14fd6d5674703ec1e3ddee152ea0337157bd5de46a56b9189f6e",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-f62d91fdff9d26639dc04d190edabd29",
+    "object": "chat.completion",
+    "created": 1791504220,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"date of birth\",\n            \"object\": \"February 24, 1827\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"date of death\",\n            \"object\": \"November 6, 1862\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"occupation\",\n            \"object\": \"general\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"conflict\",\n                    \"object\": \"American Civil War\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"candidate for office\",\n            \"object\": \"Governor of Maine\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"party\",\n                    \"object\": \"Democratic Party\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"disease contracted\",\n            \"object\": \"camp fever\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Battle of Fair Oaks\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"disease\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"return to location\",\n            \"object\": \"Maine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"place of death\",\n            \"object\": \"in transit\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Charles Davis Jameson\n\nCharles Davis Jameson (February 24, 1827 – November 6, 1862) was an American Civil War general and Democratic Party candidate for Governor of Maine. He contracted \"camp fever\" (typhoid) at the Battle of Fair Oaks, returned to his native state of Maine, dying in transit or soon after.\"\n\nWe need triplets:\n\n- date of birth: 24 February 1827 (or February 24, 1827). Use format as given.\n\n- date of death: November 6, 1862.\n\n- occupation: general (maybe \"military rank\" but occupation \"general\").\n\n- occupation: Democratic Party candidate for Governor of Maine (maybe relation \"candidate for office\" or \"political candidacy\". Use \"candidate for office\". object: Governor of Maine. Also need qualifier \"political party\": Democratic Party. Could be separate: \"member of political party\" but not explicit. The phrase \"Democratic Party candidate for Governor of Maine\" indicates candidate for that office representing Democratic Party. We'll create triplet: (Charles Davis Jameson, candidate for office, Governor of Maine) with qualifier party Democratic Party. Use relation \"political party\" as qualifier? In Wikidata, qualifier \"party\" is used. So qualifier relation \"party\", object \"Democratic Party\".\n\n- He was a \"American Civil War general\". Could also have relation \"conflict\" or \"war\". But we can have (Charles Davis Jameson, military conflict, American Civil War) maybe \"conflict\" relation. But the phrase \"American Civil War general\" indicates he served as a general in that war. So we could have (Charles Davis Jameson, military rank, general) and qualifier \"conflict\" American Civil War. Or simpler: occupation \"general\". We'll include qualifier \"conflict\" American Civil War.\n\n- He contracted \"camp fever\" (typhoid) at the Battle of Fair Oaks. So (Charles Davis Jameson, disease contracted, camp fever) with qualifier \"point in time\"? Not given. Also qualifier \"location\" Battle of Fair Oaks. Also note that camp fever is typhoid, but we can keep object \"camp fever\". Could also have relation \"cause of death\"? Not yet.\n\n- He returned to his native state of Maine. So (Charles Davis Jameson, returned to, Maine) maybe relation \"return to location\". Not typical but we can use \"return to\". Might be okay.\n\n- Dying in transit or soon after. So death location ambiguous. Could have (Charles Davis Jameson, cause of death, unknown) but not explicit. We can capture that he died in transit. So (Charles Davis Jameson, death location, transit) with qualifier \"polarity\" negative? Not needed. We'll just capture \"died in transit\". Use relation \"place of death\" with object \"transit\". But \"transit\" is not a location. Might be \"in transit\". We'll use object \"in transit\". Also qualifier \"approximation\" maybe \"soon after\". Not needed.\n\nWe need subject_type and object_type.\n\nDefine types:\n\n- human for subject.\n\n- date for date objects.\n\n- profession for occupation.\n\n- political office for Governor of Maine.\n\n- political party for Democratic Party.\n\n- disease for camp fever.\n\n- battle for Battle of Fair Oaks (object type \"battle\").\n\n- location for Maine (state).\n\n- location for transit? maybe \"transport\" but we can use \"location\".\n\nNow produce JSON.\n\nList triplets:\n\n1. date of birth.\n\n2. date of death.\n\n3. occupation: general.\n\n   qualifiers: conflict American Civil War.\n\n4. candidate for office: Governor of Maine, qualifier party Democratic Party.\n\n5. disease contracted: camp fever, qualifier location Battle of Fair Oaks.\n\n6. return to location: Maine (maybe relation \"return to location\").\n\n7. place of death: in transit (qualifier approximation \"soon after\"? maybe not). Could also add qualifier \"point in time\" November 6, 1862 but that's already date of death.\n\nWe need to ensure qualifiers are attached correctly.\n\nLet's craft.\n\nTriplet 3 qualifiers: {\"relation\":\"conflict\",\"object\":\"American Civil War\"}\n\nTriplet 4 qualifiers: {\"relation\":\"party\",\"object\":\"Democratic Party\"}\n\nTriplet 5 qualifiers: {\"relation\":\"location\",\"object\":\"Battle of Fair Oaks\"}\n\nTriplet 7 qualifiers: maybe {\"relation\":\"approximation\",\"object\":\"soon after\"} but \"soon after\" refers to after returning to Maine, not necessarily death location. Could add qualifier \"time after return\" but not needed.\n\nWe'll include qualifier \"point in time\" November 6, 1862? Not needed because date of death already separate.\n\nOk.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1659,
+      "total_tokens": 3120,
+      "completion_tokens": 1461,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"date of birth\",\n            \"object\": \"February 24, 1827\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"date of death\",\n            \"object\": \"November 6, 1862\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"occupation\",\n            \"object\": \"general\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"conflict\",\n                    \"object\": \"American Civil War\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"candidate for office\",\n            \"object\": \"Governor of Maine\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"party\",\n                    \"object\": \"Democratic Party\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"disease contracted\",\n            \"object\": \"camp fever\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Battle of Fair Oaks\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"disease\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"return to location\",\n            \"object\": \"Maine\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Charles Davis Jameson\",\n            \"relation\": \"place of death\",\n            \"object\": \"in transit\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Charles Davis Jameson",
+        "relation": "date of birth",
+        "object": "February 24, 1827",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Charles Davis Jameson",
+        "relation": "date of death",
+        "object": "November 6, 1862",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Charles Davis Jameson",
+        "relation": "occupation",
+        "object": "general",
+        "qualifiers": [
+          {
+            "relation": "conflict",
+            "object": "American Civil War"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Charles Davis Jameson",
+        "relation": "candidate for office",
+        "object": "Governor of Maine",
+        "qualifiers": [
+          {
+            "relation": "party",
+            "object": "Democratic Party"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political office"
+      },
+      {
+        "subject": "Charles Davis Jameson",
+        "relation": "disease contracted",
+        "object": "camp fever",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Battle of Fair Oaks"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "disease"
+      },
+      {
+        "subject": "Charles Davis Jameson",
+        "relation": "return to location",
+        "object": "Maine",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "region"
+      },
+      {
+        "subject": "Charles Davis Jameson",
+        "relation": "place of death",
+        "object": "in transit",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "location"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1659,
+    "total_tokens": 3120,
+    "completion_tokens": 1461,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 651,
+    "output_tokens_est": 559
+  },
+  "attempts": 1,
+  "latency_s": 18.19740942799399,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:03:59.131101+00:00",
+  "cache_key": "45d6b08301b98e508671bd70526f5883"
+}

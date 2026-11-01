@@ -1,0 +1,149 @@
+{
+  "task": {
+    "input_id": "10ba64b20726e73a",
+    "input_hash": "a1421eefe67369a3e15860ab173ca81d6856f944c1bbb674c0b168c5ea9688fd",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-48fb2e69c3a8c693c52a2cadf9aa847d",
+    "object": "chat.completion",
+    "created": 1791547743,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"instance of\",\n            \"object\": \"ancient river valley\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"geologic feature\"\n        },\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"located in\",\n            \"object\": \"Syrtis Major quadrangle\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"coordinate latitude\",\n                    \"object\": \"14.1° north\"\n                },\n                {\n                    \"relation\": \"coordinate longitude\",\n                    \"object\": \"289.5° west\"\n                }\n            ],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"located on\",\n            \"object\": \"Mars\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"planet\"\n        },\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"length\",\n            \"object\": \"280 km\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"distance\"\n        },\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"named after\",\n            \"object\": \"Arno River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Arno River\",\n            \"relation\": \"located in\",\n            \"object\": \"Tuscany, Italy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Arno River\",\n            \"relation\": \"former name\",\n            \"object\": \"Arena Rupes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"geologic feature\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Arnor Vallis\\n\\nArnus Vallis is an ancient river valley in the Syrtis Major quadrangle of Mars, located at 14.1° north latitude and 289.5° west longitude. It is 280 km long and was named after the classical and present day Arno River in Tuscany, Italy (previously named Arena Rupes).\"\n\nWe have entity: Arnus Vallis (note first line \"Arnus Vallis\" maybe a heading). It's a geographic feature on Mars.\n\nRelations:\n\n- instance of / subclass? Probably \"geologic feature\" or \"river valley\". Use relation \"instance of\" (or \"type of\")? In examples they used occupation etc. We need suitable Wikidata-style relation: \"instance of\" or \"type\". We'll use \"instance of\" with object \"ancient river valley\". object_type: \"geologic feature\". subject_type: \"geographic feature\" maybe \"landform\". Let's set subject_type \"geographic feature\".\n\n- location: \"located in\" relation? They said \"in the Syrtis Major quadrangle of Mars\". So relation \"located in\" object \"Syrtis Major quadrangle\". subject_type: geographic feature; object_type: \"region\". Also \"on planetary body\" maybe \"located on\" Mars. Could create separate triplet: (Arnus Vallis, location on planetary body, Mars). But we need to decide. The phrase \"in the Syrtis Major quadrangle of Mars\" indicates it's within that quadrangle, which itself is on Mars. Could capture both.\n\n- coordinates: latitude and longitude. Could be qualifiers for location. But they said qualifiers can be attached to triplet. For a location triplet we can have qualifiers point in time? No. Use qualifiers \"coordinate latitude\" and \"coordinate longitude\". But qualifiers are relations attached to the triplet. So we could have a triplet (Arnus Vallis, location coordinate, ???). Better to have separate qualifiers for the location triplet: relation \"coordinate latitude\" object \"14.1° north\". relation \"coordinate longitude\" object \"289.5° west\". We'll attach them to the location triplet.\n\n- length: \"It is 280 km long\". So relation \"length\" object \"280 km\". object_type \"distance\". subject_type same.\n\n- named after: \"was named after the classical and present day Arno River in Tuscany, Italy (previously named Arena Rupes)\". So relation \"named after\" object \"Arno River\". object_type \"river\". Also maybe qualifier \"location\" of Arno River is \"Tuscany, Italy\". But that's extra not in text; we can include as a separate triplet: (Arno River, location, Tuscany, Italy). But that's not about Arnus Vallis. The text says Arno River is in Tuscany, Italy. So we can extract (Arno River, location, Tuscany, Italy). But need to ensure it's explicit: \"Arno River in Tuscany, Italy\". Yes.\n\n- Also note previously named Arena Rupes: That is a former name of the Arno River? Actually says \"previously named Arena Rupes\". It refers to the Arno River? It says \"the classical and present day Arno River in Tuscany, Italy (previously named Arena Rupes)\". So qualifier maybe \"previous name\" relation \"Arena Rupes\". Could attach qualifier to the \"named after\" triplet? Actually it's a qualifier about the object Arno River: its previous name. Could create separate triplet: (Arno River, former name, Arena Rupes). Provide that.\n\nNow types: subject_type for Arno River: \"river\". object_type for Arena Rupes: \"geologic feature\"? Might be a ridge? Not needed.\n\nNow compile triplets list.\n\nTriplet 1:\nsubject: \"Arnus Vallis\"\nrelation: \"instance of\"\nobject: \"ancient river valley\"\nqualifiers: []\nsubject_type: \"geographic feature\"\nobject_type: \"geologic feature\" (or \"landform\").\n\nTriplet 2:\nsubject: \"Arnus Vallis\"\nrelation: \"located in\"\nobject: \"Syrtis Major quadrangle\"\nqualifiers: [\n  {\"relation\":\"coordinate latitude\",\"object\":\"14.1° north\"},\n  {\"relation\":\"coordinate longitude\",\"object\":\"289.5° west\"}\n]\nsubject_type: \"geographic feature\"\nobject_type: \"region\"\n\nTriplet 3:\nsubject: \"Arnus Vallis\"\nrelation: \"located on\"\nobject: \"Mars\"\nqualifiers: []\nsubject_type: \"geographic feature\"\nobject_type: \"planet\"\n\nTriplet 4:\nsubject: \"Arnus Vallis\"\nrelation: \"length\"\nobject: \"280 km\"\nqualifiers: []\nsubject_type: \"geographic feature\"\nobject_type: \"distance\"\n\nTriplet 5:\nsubject: \"Arnus Vallis\"\nrelation: \"named after\"\nobject: \"Arno River\"\nqualifiers: []\nsubject_type: \"geographic feature\"\nobject_type: \"river\"\n\nTriplet 6:\nsubject: \"Arno River\"\nrelation: \"located in\"\nobject: \"Tuscany, Italy\"\nqualifiers: []\nsubject_type: \"river\"\nobject_type: \"region\"\n\nTriplet 7:\nsubject: \"Arno River\"\nrelation: \"former name\"\nobject: \"Arena Rupes\"\nqualifiers: []\nsubject_type: \"river\"\nobject_type: \"geologic feature\"\n\nCheck for any other facts: \"previously named Arena Rupes\" qualifies Arno River.\n\nMake sure qualifiers for coordinate: need object types maybe \"coordinate\". We'll set object_type \"coordinate\". But qualifiers have object_type not needed; only main triplet includes subject_type and object_type. The qualifier objects are strings; no type.\n\nNow output JSON with \"triplets\" list. Ensure each dictionary includes qualifiers list (maybe empty). Provide subject_type and object_type strings.\n\nLet's craft final."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1659,
+      "total_tokens": 3346,
+      "completion_tokens": 1687,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"instance of\",\n            \"object\": \"ancient river valley\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"geologic feature\"\n        },\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"located in\",\n            \"object\": \"Syrtis Major quadrangle\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"coordinate latitude\",\n                    \"object\": \"14.1° north\"\n                },\n                {\n                    \"relation\": \"coordinate longitude\",\n                    \"object\": \"289.5° west\"\n                }\n            ],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"located on\",\n            \"object\": \"Mars\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"planet\"\n        },\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"length\",\n            \"object\": \"280 km\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"distance\"\n        },\n        {\n            \"subject\": \"Arnus Vallis\",\n            \"relation\": \"named after\",\n            \"object\": \"Arno River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"geographic feature\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Arno River\",\n            \"relation\": \"located in\",\n            \"object\": \"Tuscany, Italy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Arno River\",\n            \"relation\": \"former name\",\n            \"object\": \"Arena Rupes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"geologic feature\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Arnus Vallis",
+        "relation": "instance of",
+        "object": "ancient river valley",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "geologic feature"
+      },
+      {
+        "subject": "Arnus Vallis",
+        "relation": "located in",
+        "object": "Syrtis Major quadrangle",
+        "qualifiers": [
+          {
+            "relation": "coordinate latitude",
+            "object": "14.1° north"
+          },
+          {
+            "relation": "coordinate longitude",
+            "object": "289.5° west"
+          }
+        ],
+        "subject_type": "geographic feature",
+        "object_type": "region"
+      },
+      {
+        "subject": "Arnus Vallis",
+        "relation": "located on",
+        "object": "Mars",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "planet"
+      },
+      {
+        "subject": "Arnus Vallis",
+        "relation": "length",
+        "object": "280 km",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "distance"
+      },
+      {
+        "subject": "Arnus Vallis",
+        "relation": "named after",
+        "object": "Arno River",
+        "qualifiers": [],
+        "subject_type": "geographic feature",
+        "object_type": "river"
+      },
+      {
+        "subject": "Arno River",
+        "relation": "located in",
+        "object": "Tuscany, Italy",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "region"
+      },
+      {
+        "subject": "Arno River",
+        "relation": "former name",
+        "object": "Arena Rupes",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "geologic feature"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1659,
+    "total_tokens": 3346,
+    "completion_tokens": 1687,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 609,
+    "output_tokens_est": 517
+  },
+  "attempts": 1,
+  "latency_s": 20.958254341996508,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:09:24.604285+00:00",
+  "cache_key": "4a8b2447882b11a662408bc354fee605"
+}

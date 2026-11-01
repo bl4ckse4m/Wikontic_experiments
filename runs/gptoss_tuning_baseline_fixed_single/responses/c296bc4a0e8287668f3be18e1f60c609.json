@@ -1,0 +1,149 @@
+{
+  "task": {
+    "input_id": "0529e057da4bc039",
+    "input_hash": "5f27a7c69f98a68afef96a353adab90718300a08d0011df5a45ccf573e4beb67",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-521dad225af4dbfd6229f3c0ebffbd3a",
+    "object": "chat.completion",
+    "created": 1791508618,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ladies' single skating competition\",\n            \"relation\": \"part of\",\n            \"object\": \"2014 Winter Olympics\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"sports event\"\n        },\n        {\n            \"subject\": \"Ladies' single skating competition\",\n            \"relation\": \"venue\",\n            \"object\": \"Iceberg Skating Palace\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"venue\"\n        },\n        {\n            \"subject\": \"Iceberg Skating Palace\",\n            \"relation\": \"located in\",\n            \"object\": \"Sochi, Russia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"venue\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Ladies' single skating competition\",\n            \"relation\": \"date of short program\",\n            \"object\": \"19 February 2014\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Ladies' single skating competition\",\n            \"relation\": \"date of free skating\",\n            \"object\": \"20 February 2014\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Adelina Sotnikova\",\n            \"relation\": \"award received\",\n            \"object\": \"gold medal\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"for\",\n                    \"object\": \"Ladies' single skating competition at the 2014 Winter Olympics\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"award\"\n        },\n        {\n            \"subject\": \"Adelina Sotnikova\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Russia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: \"Figure skating at the 2014 Winter Olympics – Ladies' singles\" (event), \"2014 Winter Olympics\" (event), \"ladies' single skating competition\" (event), \"Iceberg Skating Palace\" (venue), \"Sochi, Russia\" (location), \"short program\" (segment), date \"19 February 2014\", \"free skating\" (segment) date \"20 February 2014\", \"Adelina Sotnikova\" (human), \"Russia\" (country), \"gold medal\" (award).\n\nRelations: \"instance of\" maybe not needed. Use typical relations: \"part of\", \"venue\", \"location\", \"date of event\", \"winner\", \"award received\", \"competition format\", etc.\n\nWe need subject_type and object_type.\n\nLet's create triplets:\n\n1. Subject: \"Ladies' single skating competition at the 2014 Winter Olympics\", relation: \"part of\", object: \"2014 Winter Olympics\". subject_type: \"sports competition\", object_type: \"sports event\".\n\nBut maybe better: \"Ladies' single skating competition\" as subject.\n\n2. Subject: \"Ladies' single skating competition\", relation: \"sport\", object: \"figure skating\". subject_type: \"sports competition\", object_type: \"sport\". Might be optional.\n\n3. Subject: \"Ladies' single skating competition\", relation: \"venue\", object: \"Iceberg Skating Palace\". subject_type: \"sports competition\", object_type: \"venue\".\n\n4. Subject: \"Iceberg Skating Palace\", relation: \"located in\", object: \"Sochi, Russia\". subject_type: \"venue\", object_type: \"city\".\n\n5. Subject: \"Ladies' single skating competition\", relation: \"date of short program\", object: \"19 February 2014\". qualifiers maybe none. subject_type: \"sports competition\", object_type: \"date\". Could use relation \"date of short program\". Or generic \"date\" with qualifier \"phase\". But we can treat as separate.\n\n6. Subject: \"Ladies' single skating competition\", relation: \"date of free skating\", object: \"20 February 2014\". subject_type: \"sports competition\", object_type: \"date\".\n\n7. Subject: \"Adelina Sotnikova\", relation: \"won\", object: \"gold medal\". qualifiers: maybe \"event\" relation to competition. Could also have \"award received\". Use \"award received\". object_type: \"award\". qualifiers: relation \"for\", object \"Ladies' single skating competition at the 2014 Winter Olympics\". Also qualifier \"point in time\" \"2014\". But we have date of competition? Could add.\n\nBetter: Triplet: subject \"Adelina Sotnikova\", relation \"award received\", object \"gold medal\", qualifiers: [{\"relation\":\"for\",\"object\":\"Ladies' single skating competition at the 2014 Winter Olympics\"},{\"relation\":\"point in time\",\"object\":\"2014\"}].\n\nSubject_type: \"human\". Object_type: \"award\".\n\n8. Subject: \"Adelina Sotnikova\", relation \"country of citizenship\", object \"Russia\". subject_type \"human\", object_type \"country\". Might be inferred from \"of Russia\". Use.\n\n9. Subject: \"Ladies' single skating competition\", relation \"sport discipline\", object \"ladies' singles\". maybe not needed.\n\nWe need to ensure each triplet includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nLet's compile list.\n\nTriplet list:\n\n- (Ladies' single skating competition, part of, 2014 Winter Olympics) subject_type: sports competition, object_type: sports event.\n\n- (Ladies' single skating competition, venue, Iceberg Skating Palace) subject_type: sports competition, object_type: venue.\n\n- (Iceberg Skating Palace, located in, Sochi, Russia) subject_type: venue, object_type: city.\n\n- (Ladies' single skating competition, date of short program, 19 February 2014) subject_type: sports competition, object_type: date.\n\n- (Ladies' single skating competition, date of free skating, 20 February 2014) subject_type: sports competition, object_type: date.\n\n- (Adelina Sotnikova, award received, gold medal) qualifiers: for competition, point in time 2014. subject_type human, object_type award.\n\n- (Adelina Sotnikova, country of citizenship, Russia) subject_type human, object_type country.\n\nPotential also: (Gold medal, instance of, award) but not needed.\n\nMake sure JSON format.\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1011,
+      "total_tokens": 2426,
+      "completion_tokens": 1415,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ladies' single skating competition\",\n            \"relation\": \"part of\",\n            \"object\": \"2014 Winter Olympics\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"sports event\"\n        },\n        {\n            \"subject\": \"Ladies' single skating competition\",\n            \"relation\": \"venue\",\n            \"object\": \"Iceberg Skating Palace\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"venue\"\n        },\n        {\n            \"subject\": \"Iceberg Skating Palace\",\n            \"relation\": \"located in\",\n            \"object\": \"Sochi, Russia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"venue\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Ladies' single skating competition\",\n            \"relation\": \"date of short program\",\n            \"object\": \"19 February 2014\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Ladies' single skating competition\",\n            \"relation\": \"date of free skating\",\n            \"object\": \"20 February 2014\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports competition\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Adelina Sotnikova\",\n            \"relation\": \"award received\",\n            \"object\": \"gold medal\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"for\",\n                    \"object\": \"Ladies' single skating competition at the 2014 Winter Olympics\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2014\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"award\"\n        },\n        {\n            \"subject\": \"Adelina Sotnikova\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Russia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Ladies' single skating competition",
+        "relation": "part of",
+        "object": "2014 Winter Olympics",
+        "qualifiers": [],
+        "subject_type": "sports competition",
+        "object_type": "sports event"
+      },
+      {
+        "subject": "Ladies' single skating competition",
+        "relation": "venue",
+        "object": "Iceberg Skating Palace",
+        "qualifiers": [],
+        "subject_type": "sports competition",
+        "object_type": "venue"
+      },
+      {
+        "subject": "Iceberg Skating Palace",
+        "relation": "located in",
+        "object": "Sochi, Russia",
+        "qualifiers": [],
+        "subject_type": "venue",
+        "object_type": "city"
+      },
+      {
+        "subject": "Ladies' single skating competition",
+        "relation": "date of short program",
+        "object": "19 February 2014",
+        "qualifiers": [],
+        "subject_type": "sports competition",
+        "object_type": "date"
+      },
+      {
+        "subject": "Ladies' single skating competition",
+        "relation": "date of free skating",
+        "object": "20 February 2014",
+        "qualifiers": [],
+        "subject_type": "sports competition",
+        "object_type": "date"
+      },
+      {
+        "subject": "Adelina Sotnikova",
+        "relation": "award received",
+        "object": "gold medal",
+        "qualifiers": [
+          {
+            "relation": "for",
+            "object": "Ladies' single skating competition at the 2014 Winter Olympics"
+          },
+          {
+            "relation": "point in time",
+            "object": "2014"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "award"
+      },
+      {
+        "subject": "Adelina Sotnikova",
+        "relation": "country of citizenship",
+        "object": "Russia",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1011,
+    "total_tokens": 2426,
+    "completion_tokens": 1415,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 651,
+    "output_tokens_est": 553
+  },
+  "attempts": 1,
+  "latency_s": 16.846452439989662,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:17:15.246189+00:00",
+  "cache_key": "c296bc4a0e8287668f3be18e1f60c609"
+}

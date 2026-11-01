@@ -1,0 +1,167 @@
+{
+  "task": {
+    "input_id": "ab1b326e77686b5f",
+    "input_hash": "d08c29ba5b472ae64a11515fd3e25d62fb7997ae7776beb50512bd2fabd91ddc",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793209198-UK0jJhU4BfkKFMpvGHcG",
+    "object": "chat.completion",
+    "created": 1793209198,
+    "model": "openai/gpt-oss-120b",
+    "provider": "CoreWeave",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Henry E. Moore\",\n            \"relation\": \"place of residence\",\n            \"object\": \"Concord, New Hampshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Henry E. Moore\",\n            \"relation\": \"nationality\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Henry E. Moore\",\n            \"relation\": \"occupation\",\n            \"object\": \"singing school master\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Henry E. Moore\",\n            \"relation\": \"organizer\",\n            \"object\": \"first convention of singing masters\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1840\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"first convention of singing masters\",\n            \"relation\": \"location\",\n            \"object\": \"Boston Academy of Music\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"first convention of singing masters\",\n            \"relation\": \"point in time\",\n            \"object\": \"1840\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"year\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Henry E. Moore\\n\\nHenry E. Moore, of Concord, New Hampshire, was an American singing school master who is best known for organizing the first of many conventions of singing masters in the country. The first convention began with an ordinary class at the Boston Academy of Music, but became a convention in 1840.\"\n\nWe need to parse facts.\n\nEntities:\n\n- Henry E. Moore (human)\n- Concord, New Hampshire (place, city)\n- American (nationality)\n- singing school master (occupation)\n- first convention of singing masters (event)\n- country (maybe United States)\n- Boston Academy of Music (organization)\n- 1840 (year)\n\nRelations:\n\n- place of residence? \"of Concord, New Hampshire\" indicates location (maybe \"place of residence\" or \"location\"). Use \"place of residence\" or \"location\". We'll use \"place of residence\".\n- nationality: \"American\" -> relation \"country of citizenship\" or \"nationality\". Use \"nationality\".\n- occupation: \"singing school master\" -> relation \"occupation\".\n- known for: \"organizing the first of many conventions of singing masters in the country\". So relation \"organizer of\" maybe \"organizer\" or \"organised event\". Use \"organizer\" linking to \"first convention of singing masters\". Or \"organizer of event\". We'll create triplet: subject Henry E. Moore, relation \"organizer\", object \"first convention of singing masters\". object_type \"event\". Qualifier maybe \"point in time\" 1840? Actually the first convention became a convention in 1840. The event started as ordinary class then became a convention in 1840. So we can have a triplet: \"first convention of singing masters\" relation \"start time\" 1840. But that is a qualifier on the event. However qualifiers attach to a triplet, not standalone. So we could have a triplet: subject \"first convention of singing masters\", relation \"start time\", object \"1840\". But that violates rule: qualifiers must be attached to a triplet, not standalone. So we need a main triplet for which 1840 is a qualifier. For example, \"first convention of singing masters\" relation \"type\" \"convention\" with qualifier \"point in time\" 1840? Not ideal.\n\nBetter: Triplet: subject Henry E. Moore, relation \"organized\", object \"first convention of singing masters\", qualifiers: point in time 1840. That captures that he organized it in 1840. So we can have qualifier.\n\nAlso need triplet for Boston Academy of Music: The first convention began with an ordinary class at the Boston Academy of Music. So relation \"location\" maybe \"held at\". So subject \"first convention of singing masters\", relation \"location\", object \"Boston Academy of Music\". Also qualifier maybe \"point in time\" 1840? Already used.\n\nAlso \"first convention began with an ordinary class at the Boston Academy of Music\". Could also have triplet: subject \"first convention of singing masters\", relation \"originated as\", object \"ordinary class\". But maybe not needed.\n\nLet's list entities and types:\n\n- Henry E. Moore: human\n- Concord, New Hampshire: city (or place)\n- United States: country (maybe not needed)\n- singing school master: profession\n- first convention of singing masters: event\n- Boston Academy of Music: organization (music school)\n- 1840: year\n\nNow produce triplets:\n\n1. Henry E. Moore - place of residence - Concord, New Hampshire (qualifiers none)\n2. Henry E. Moore - nationality - United States (or \"American\" as nationality). Use object \"United States\" type country. Could also use object \"American\" type \"nationality\". But better to use country. We'll use \"United States\".\n3. Henry E. Moore - occupation - singing school master (object_type \"profession\")\n4. Henry E. Moore - organizer - first convention of singing masters (qualifier point in time 1840)\n5. first convention of singing masters - location - Boston Academy of Music\n6. first convention of singing masters - start time - 1840? But we already used qualifier. Could still add separate triplet: first convention of singing masters - point in time - 1840 (object_type year). However that would be a separate fact, not a qualifier. It's okay to have both. But rule says qualifiers must be attached to a triplet, not standalone. But a separate triplet is okay if it's a factual relation \"point in time\". That's a relation. So we can have that.\n\nBut we need to ensure relation names are short and reusable. Use \"start time\" or \"point in time\". In example they used \"point in time\". We'll use \"point in time\".\n\nThus triplet: first convention of singing masters - point in time - 1840.\n\nNow also maybe \"first convention of singing masters\" - instance of - convention (object_type \"event type\"). Not required.\n\nAlso \"Boston Academy of Music\" - location - Boston (city). Not needed.\n\nNow produce JSON with \"triplets\": [ ... ].\n\nEach dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Henry E. Moore: human\n- Concord, New Hampshire: city (or place). Use \"city\".\n- United States: country\n- singing school master: profession\n- first convention of singing masters: event\n- Boston Academy of Music: organization (music school)\n- 1840: year\n\nNow qualifiers: For triplet 4, qualifier relation \"point in time\", object \"1840\", object_type \"year\".\n\nTriplet 5 maybe also qualifier? No.\n\nTriplet 6 maybe no qualifiers.\n\nNow produce JSON.\n\nCheck format: top-level key \"triplets\" with list.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\", \"subject_type\", \"object_type\".\n\nQualifiers list entries have \"relation\", \"object\", \"object_type\".\n\nLet's craft.\n\nTriplet 1:\n\nsubject: \"Henry E. Moore\"\nrelation: \"place of residence\"\nobject: \"Concord, New Hampshire\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"city\"\n\nTriplet 2:\n\nsubject: \"Henry E. Moore\"\nrelation: \"nationality\"\nobject: \"United States\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"country\"\n\nTriplet 3:\n\nsubject: \"Henry E. Moore\"\nrelation: \"occupation\"\nobject: \"singing school master\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"profession\"\n\nTriplet 4:\n\nsubject: \"Henry E. Moore\"\nrelation: \"organizer\"\nobject: \"first convention of singing masters\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1840\",\"object_type\":\"year\"}]\nsubject_type: \"human\"\nobject_type: \"event\"\n\nTriplet 5:\n\nsubject: \"first convention of singing masters\"\nrelation: \"location\"\nobject: \"Boston Academy of Music\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"organization\"\n\nTriplet 6:\n\nsubject: \"first convention of singing masters\"\nrelation: \"point in time\"\nobject: \"1840\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"year\"\n\nPotential duplication of point in time, but okay.\n\nNow output JSON.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text.\n\nText: \"Henry E. Moore\\n\\nHenry E. Moore, of Concord, New Hampshire, was an American singing school master who is best known for organizing the first of many conventions of singing masters in the country. The first convention began with an ordinary class at the Boston Academy of Music, but became a convention in 1840.\"\n\nWe need to parse facts.\n\nEntities:\n\n- Henry E. Moore (human)\n- Concord, New Hampshire (place, city)\n- American (nationality)\n- singing school master (occupation)\n- first convention of singing masters (event)\n- country (maybe United States)\n- Boston Academy of Music (organization)\n- 1840 (year)\n\nRelations:\n\n- place of residence? \"of Concord, New Hampshire\" indicates location (maybe \"place of residence\" or \"location\"). Use \"place of residence\" or \"location\". We'll use \"place of residence\".\n- nationality: \"American\" -> relation \"country of citizenship\" or \"nationality\". Use \"nationality\".\n- occupation: \"singing school master\" -> relation \"occupation\".\n- known for: \"organizing the first of many conventions of singing masters in the country\". So relation \"organizer of\" maybe \"organizer\" or \"organised event\". Use \"organizer\" linking to \"first convention of singing masters\". Or \"organizer of event\". We'll create triplet: subject Henry E. Moore, relation \"organizer\", object \"first convention of singing masters\". object_type \"event\". Qualifier maybe \"point in time\" 1840? Actually the first convention became a convention in 1840. The event started as ordinary class then became a convention in 1840. So we can have a triplet: \"first convention of singing masters\" relation \"start time\" 1840. But that is a qualifier on the event. However qualifiers attach to a triplet, not standalone. So we could have a triplet: subject \"first convention of singing masters\", relation \"start time\", object \"1840\". But that violates rule: qualifiers must be attached to a triplet, not standalone. So we need a main triplet for which 1840 is a qualifier. For example, \"first convention of singing masters\" relation \"type\" \"convention\" with qualifier \"point in time\" 1840? Not ideal.\n\nBetter: Triplet: subject Henry E. Moore, relation \"organized\", object \"first convention of singing masters\", qualifiers: point in time 1840. That captures that he organized it in 1840. So we can have qualifier.\n\nAlso need triplet for Boston Academy of Music: The first convention began with an ordinary class at the Boston Academy of Music. So relation \"location\" maybe \"held at\". So subject \"first convention of singing masters\", relation \"location\", object \"Boston Academy of Music\". Also qualifier maybe \"point in time\" 1840? Already used.\n\nAlso \"first convention began with an ordinary class at the Boston Academy of Music\". Could also have triplet: subject \"first convention of singing masters\", relation \"originated as\", object \"ordinary class\". But maybe not needed.\n\nLet's list entities and types:\n\n- Henry E. Moore: human\n- Concord, New Hampshire: city (or place)\n- United States: country (maybe not needed)\n- singing school master: profession\n- first convention of singing masters: event\n- Boston Academy of Music: organization (music school)\n- 1840: year\n\nNow produce triplets:\n\n1. Henry E. Moore - place of residence - Concord, New Hampshire (qualifiers none)\n2. Henry E. Moore - nationality - United States (or \"American\" as nationality). Use object \"United States\" type country. Could also use object \"American\" type \"nationality\". But better to use country. We'll use \"United States\".\n3. Henry E. Moore - occupation - singing school master (object_type \"profession\")\n4. Henry E. Moore - organizer - first convention of singing masters (qualifier point in time 1840)\n5. first convention of singing masters - location - Boston Academy of Music\n6. first convention of singing masters - start time - 1840? But we already used qualifier. Could still add separate triplet: first convention of singing masters - point in time - 1840 (object_type year). However that would be a separate fact, not a qualifier. It's okay to have both. But rule says qualifiers must be attached to a triplet, not standalone. But a separate triplet is okay if it's a factual relation \"point in time\". That's a relation. So we can have that.\n\nBut we need to ensure relation names are short and reusable. Use \"start time\" or \"point in time\". In example they used \"point in time\". We'll use \"point in time\".\n\nThus triplet: first convention of singing masters - point in time - 1840.\n\nNow also maybe \"first convention of singing masters\" - instance of - convention (object_type \"event type\"). Not required.\n\nAlso \"Boston Academy of Music\" - location - Boston (city). Not needed.\n\nNow produce JSON with \"triplets\": [ ... ].\n\nEach dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Henry E. Moore: human\n- Concord, New Hampshire: city (or place). Use \"city\".\n- United States: country\n- singing school master: profession\n- first convention of singing masters: event\n- Boston Academy of Music: organization (music school)\n- 1840: year\n\nNow qualifiers: For triplet 4, qualifier relation \"point in time\", object \"1840\", object_type \"year\".\n\nTriplet 5 maybe also qualifier? No.\n\nTriplet 6 maybe no qualifiers.\n\nNow produce JSON.\n\nCheck format: top-level key \"triplets\" with list.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\", \"subject_type\", \"object_type\".\n\nQualifiers list entries have \"relation\", \"object\", \"object_type\".\n\nLet's craft.\n\nTriplet 1:\n\nsubject: \"Henry E. Moore\"\nrelation: \"place of residence\"\nobject: \"Concord, New Hampshire\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"city\"\n\nTriplet 2:\n\nsubject: \"Henry E. Moore\"\nrelation: \"nationality\"\nobject: \"United States\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"country\"\n\nTriplet 3:\n\nsubject: \"Henry E. Moore\"\nrelation: \"occupation\"\nobject: \"singing school master\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"profession\"\n\nTriplet 4:\n\nsubject: \"Henry E. Moore\"\nrelation: \"organizer\"\nobject: \"first convention of singing masters\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1840\",\"object_type\":\"year\"}]\nsubject_type: \"human\"\nobject_type: \"event\"\n\nTriplet 5:\n\nsubject: \"first convention of singing masters\"\nrelation: \"location\"\nobject: \"Boston Academy of Music\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"organization\"\n\nTriplet 6:\n\nsubject: \"first convention of singing masters\"\nrelation: \"point in time\"\nobject: \"1840\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"year\"\n\nPotential duplication of point in time, but okay.\n\nNow output JSON.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1417,
+      "completion_tokens": 1924,
+      "total_tokens": 3341,
+      "cost": 0.00036959,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 32,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00036959,
+        "upstream_inference_prompt_cost": 4.251e-05,
+        "upstream_inference_completions_cost": 0.00032708
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1555,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Henry E. Moore\",\n            \"relation\": \"place of residence\",\n            \"object\": \"Concord, New Hampshire\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Henry E. Moore\",\n            \"relation\": \"nationality\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Henry E. Moore\",\n            \"relation\": \"occupation\",\n            \"object\": \"singing school master\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Henry E. Moore\",\n            \"relation\": \"organizer\",\n            \"object\": \"first convention of singing masters\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1840\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"first convention of singing masters\",\n            \"relation\": \"location\",\n            \"object\": \"Boston Academy of Music\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"first convention of singing masters\",\n            \"relation\": \"point in time\",\n            \"object\": \"1840\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"year\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Henry E. Moore",
+        "relation": "place of residence",
+        "object": "Concord, New Hampshire",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Henry E. Moore",
+        "relation": "nationality",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Henry E. Moore",
+        "relation": "occupation",
+        "object": "singing school master",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Henry E. Moore",
+        "relation": "organizer",
+        "object": "first convention of singing masters",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1840"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "first convention of singing masters",
+        "relation": "location",
+        "object": "Boston Academy of Music",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "organization"
+      },
+      {
+        "subject": "first convention of singing masters",
+        "relation": "point in time",
+        "object": "1840",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "year"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1417,
+    "completion_tokens": 1924,
+    "total_tokens": 3341,
+    "cost": 0.00036959,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 32,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00036959,
+      "upstream_inference_prompt_cost": 4.251e-05,
+      "upstream_inference_completions_cost": 0.00032708
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1555,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 565,
+    "output_tokens_est": 438
+  },
+  "attempts": 1,
+  "latency_s": 33.86949174699839,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T17:40:31.655974+00:00",
+  "cache_key": "87a81e4fd8f48f8adeb1332a9c98c381"
+}

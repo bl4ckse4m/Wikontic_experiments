@@ -1,0 +1,175 @@
+{
+  "task": {
+    "input_id": "1371223b81ee4eac",
+    "input_hash": "b6a09217df78be14b436336ecd8ea5e94901cdc494081e0c11ac9a38b9af62c3",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-21f7ef33b16f3bbefc2ec9d8fb7ef770",
+    "object": "chat.completion",
+    "created": 1791547963,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Spanish\",\n            \"relation\": \"language introduced to\",\n            \"object\": \"Mexico\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"16th century\"\n                }\n            ],\n            \"subject_type\": \"language\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Spain\",\n            \"relation\": \"language spoken\",\n            \"object\": \"Spanish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"language\"\n        },\n        {\n            \"subject\": \"Spanish\",\n            \"relation\": \"has dialect\",\n            \"object\": \"accents and varieties\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Mexico\"\n                }\n            ],\n            \"subject_type\": \"language\",\n            \"object_type\": \"dialect\"\n        },\n        {\n            \"subject\": \"Central Mexican variety\",\n            \"relation\": \"is variety of\",\n            \"object\": \"Spanish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dialect\",\n            \"object_type\": \"language\"\n        },\n        {\n            \"subject\": \"Central Mexican variety\",\n            \"relation\": \"best known outside of\",\n            \"object\": \"Mexico\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dialect\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Mexico City\",\n            \"relation\": \"hosts\",\n            \"object\": \"mass communication media\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"most of\"\n                },\n                {\n                    \"relation\": \"attribute\",\n                    \"object\": \"international projection\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"media\"\n        },\n        {\n            \"subject\": \"Film dubbing\",\n            \"relation\": \"identified abroad with label\",\n            \"object\": \"Mexican Spanish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"media production\",\n            \"object_type\": \"dialect\"\n        },\n        {\n            \"subject\": \"Film dubbing\",\n            \"relation\": \"identified abroad with label\",\n            \"object\": \"Latin American Spanish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"media production\",\n            \"object_type\": \"dialect\"\n        },\n        {\n            \"subject\": \"Film dubbing\",\n            \"relation\": \"corresponds to\",\n            \"object\": \"Central Mexican variety\",\n            \"qualifiers\": [],\n            \"subject_type\": \"media production\",\n            \"object_type\": \"dialect\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text. Identify entities: Spanish language, Mexico, 16th century, central Mexico, Mexico City, mass communication media, film dubbing, Mexican Spanish, Latin American Spanish. Relations: \"language brought to\", \"point in time\", \"region\", \"varieties exist in\", \"best known outside of the country\", \"hosts\", \"identified abroad with label\", etc.\n\nWe must use Wikidata-style relations. Need subject_type and object_type.\n\nLet's parse sentences.\n\nSentence 1: \"Spanish was brought to Mexico in the 16th century.\"\n\nTriplet: (Spanish, language introduced to, Mexico) with qualifier point in time 16th century. Relation maybe \"language spoken in\" or \"language introduced to\". Use \"language introduced to\". Subject_type: language. Object_type: country.\n\nAdd qualifier point in time \"16th century\" (object_type date/century). Could be \"point in time\" qualifier.\n\nSentence 2: \"As in all other Spanish-speaking countries (including Spain), different accents and varieties of the language exist in different parts of the country, for both historical and sociological reasons.\"\n\nFact: Different accents and varieties of Spanish exist in different parts of Mexico (implied \"the country\" referring to Mexico). So triplet: (Spanish, has dialect, various accents and varieties) but need more specific. Could capture: (Spanish, dialect exists in, Mexico) with qualifier \"different parts of the country\". Might be too vague. Possibly split: (Spanish, has dialect, accents) and (Spanish, has dialect, varieties). But better: (Spanish, dialect, accents) - but object_type \"dialect\". Not explicit list. Might skip due to vague.\n\nAlso note \"including Spain\" as an example of Spanish-speaking countries. Could have triplet: (Spain, language spoken, Spanish). But not explicit \"Spanish spoken in Spain\". The text says \"including Spain\". Could produce (Spain, language spoken, Spanish). Let's include.\n\nTriplet: (Spain, official language, Spanish) maybe \"language spoken\". Use \"language spoken\". Subject_type: country, object_type: language.\n\nAlso \"different accents and varieties of the language exist in different parts of the country\". Could be (Spanish, dialect presence, various parts of Mexico). Might be too generic; we can capture (Spanish, dialect, various accents and varieties) with qualifier \"location\" = Mexico. Let's include one.\n\nTriplet: (Spanish, dialect, accents and varieties) qualifiers: location \"Mexico\". Not ideal but okay.\n\nSentence 3: \"Among these, the varieties that are best known outside of the country are those of central Mexico -- both educated and uneducated varieties -- largely because the capital, Mexico City, hosts most of the mass communication media with international projection.\"\n\nFacts:\n\n- Varieties best known outside of the country are those of central Mexico. So (Central Mexican Spanish, is best known outside of, Mexico). Relation maybe \"notability region\". Could be \"has notability outside of country\". Might be \"most known outside of country\". Use relation \"most known outside of\". Subject_type: language variety. Object: Mexico (country). Could also be (Central Mexican Spanish, is variety of, Spanish). That's a clear fact.\n\n- \"Mexico City hosts most of the mass communication media with international projection.\" Triplet: (Mexico City, hosts, mass communication media) with qualifier \"most of\". Could also add qualifier \"with international projection\". Also \"mass communication media\" is an entity type \"media organization\". Use object_type: media.\n\n- Also \"mass communication media with international projection\" indicates it's media with international reach. Could include qualifier \"international projection\". We'll add.\n\nSentence 4: \"For this reason, most of the film dubbing identified abroad with the label ``Mexican Spanish ''or`` Latin American Spanish'' actually corresponds to the central Mexican variety.\"\n\nFacts:\n\n- Film dubbing identified abroad with label \"Mexican Spanish\" or \"Latin American Spanish\" actually corresponds to the central Mexican variety.\n\nTriplet: (Film dubbing, identified abroad with label, Mexican Spanish) qualifiers maybe none. Also another: (Film dubbing, identified abroad with label, Latin American Spanish). Also (Film dubbing, corresponds to, central Mexican variety). So we can have two label relations and one correspondence.\n\nNow we need to assign subject_type and object_type.\n\nDefine types:\n\n- Spanish: language\n- Mexico: country\n- 16th century: century (date)\n- Spain: country\n- accents and varieties: dialect (or \"dialect\" as type)\n- Central Mexican variety: language variety (dialect)\n- Mexico City: city\n- mass communication media: media (media organization)\n- film dubbing: media production (or \"film dubbing\" type)\n- Mexican Spanish: language variety (or \"dialect\")\n- Latin American Spanish: language variety (dialect)\n\nLet's produce triplets list.\n\nTriplet 1:\nsubject: Spanish\nrelation: language introduced to\nobject: Mexico\nqualifiers: point in time 16th century\nsubject_type: language\nobject_type: country\n\nTriplet 2:\nsubject: Spain\nrelation: language spoken\nobject: Spanish\nqualifiers: []\nsubject_type: country\nobject_type: language\n\nTriplet 3:\nsubject: Spanish\nrelation: has dialect\nobject: accents and varieties\nqualifiers: location Mexico\nsubject_type: language\nobject_type: dialect\n\nTriplet 4:\nsubject: Central Mexican variety\nrelation: is variety of\nobject: Spanish\nqualifiers: []\nsubject_type: dialect\nobject_type: language\n\nTriplet 5:\nsubject: Central Mexican variety\nrelation: best known outside of\nobject: Mexico\nqualifiers: []\nsubject_type: dialect\nobject_type: country\n\nTriplet 6:\nsubject: Mexico City\nrelation: hosts\nobject: mass communication media\nqualifiers: {\"relation\":\"extent\",\"object\":\"most of\"},{\"relation\":\"qualifier\",\"object\":\"international projection\"} maybe use \"extent\" but not defined. Use qualifier \"extent\" maybe not allowed. Could use \"qualifier\" but need relation name. Could use \"quantity\" but not. Perhaps we just include qualifier \"scope\" \"most of\". Use relation \"quantity\" with object \"most of\". We'll use qualifier relation \"quantity\" object \"most of\". Also qualifier \"international projection\" with relation \"attribute\". We'll do two qualifiers.\n\nTriplet 7:\nsubject: Film dubbing\nrelation: identified abroad with label\nobject: Mexican Spanish\nqualifiers: []\nsubject_type: media production\nobject_type: dialect\n\nTriplet 8:\nsubject: Film dubbing\nrelation: identified abroad with label\nobject: Latin American Spanish\nqualifiers: []\nsubject_type: media production\nobject_type: dialect\n\nTriplet 9:\nsubject: Film dubbing\nrelation: corresponds to\nobject: Central Mexican variety\nqualifiers: []\nsubject_type: media production\nobject_type: dialect\n\nCheck if any more: maybe \"mass communication media\" could be type \"media\". Use \"media\".\n\nNow produce JSON.\n\nNeed qualifiers as list of dicts with relation and object strings.\n\nFor triplet 1 qualifiers: [{\"relation\":\"point in time\",\"object\":\"16th century\"}]\n\nTriplet 3 qualifiers: [{\"relation\":\"location\",\"object\":\"Mexico\"}]\n\nTriplet 6 qualifiers: [{\"relation\":\"quantity\",\"object\":\"most of\"},{\"relation\":\"attribute\",\"object\":\"international projection\"}]\n\nMake sure subject_type and object_type strings.\n\nLet's craft final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1715,
+      "total_tokens": 3847,
+      "completion_tokens": 2132,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Spanish\",\n            \"relation\": \"language introduced to\",\n            \"object\": \"Mexico\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"16th century\"\n                }\n            ],\n            \"subject_type\": \"language\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Spain\",\n            \"relation\": \"language spoken\",\n            \"object\": \"Spanish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"language\"\n        },\n        {\n            \"subject\": \"Spanish\",\n            \"relation\": \"has dialect\",\n            \"object\": \"accents and varieties\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Mexico\"\n                }\n            ],\n            \"subject_type\": \"language\",\n            \"object_type\": \"dialect\"\n        },\n        {\n            \"subject\": \"Central Mexican variety\",\n            \"relation\": \"is variety of\",\n            \"object\": \"Spanish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dialect\",\n            \"object_type\": \"language\"\n        },\n        {\n            \"subject\": \"Central Mexican variety\",\n            \"relation\": \"best known outside of\",\n            \"object\": \"Mexico\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dialect\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Mexico City\",\n            \"relation\": \"hosts\",\n            \"object\": \"mass communication media\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"most of\"\n                },\n                {\n                    \"relation\": \"attribute\",\n                    \"object\": \"international projection\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"media\"\n        },\n        {\n            \"subject\": \"Film dubbing\",\n            \"relation\": \"identified abroad with label\",\n            \"object\": \"Mexican Spanish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"media production\",\n            \"object_type\": \"dialect\"\n        },\n        {\n            \"subject\": \"Film dubbing\",\n            \"relation\": \"identified abroad with label\",\n            \"object\": \"Latin American Spanish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"media production\",\n            \"object_type\": \"dialect\"\n        },\n        {\n            \"subject\": \"Film dubbing\",\n            \"relation\": \"corresponds to\",\n            \"object\": \"Central Mexican variety\",\n            \"qualifiers\": [],\n            \"subject_type\": \"media production\",\n            \"object_type\": \"dialect\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Spanish",
+        "relation": "language introduced to",
+        "object": "Mexico",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "16th century"
+          }
+        ],
+        "subject_type": "language",
+        "object_type": "country"
+      },
+      {
+        "subject": "Spain",
+        "relation": "language spoken",
+        "object": "Spanish",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "language"
+      },
+      {
+        "subject": "Spanish",
+        "relation": "has dialect",
+        "object": "accents and varieties",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Mexico"
+          }
+        ],
+        "subject_type": "language",
+        "object_type": "dialect"
+      },
+      {
+        "subject": "Central Mexican variety",
+        "relation": "is variety of",
+        "object": "Spanish",
+        "qualifiers": [],
+        "subject_type": "dialect",
+        "object_type": "language"
+      },
+      {
+        "subject": "Central Mexican variety",
+        "relation": "best known outside of",
+        "object": "Mexico",
+        "qualifiers": [],
+        "subject_type": "dialect",
+        "object_type": "country"
+      },
+      {
+        "subject": "Mexico City",
+        "relation": "hosts",
+        "object": "mass communication media",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "most of"
+          },
+          {
+            "relation": "attribute",
+            "object": "international projection"
+          }
+        ],
+        "subject_type": "city",
+        "object_type": "media"
+      },
+      {
+        "subject": "Film dubbing",
+        "relation": "identified abroad with label",
+        "object": "Mexican Spanish",
+        "qualifiers": [],
+        "subject_type": "media production",
+        "object_type": "dialect"
+      },
+      {
+        "subject": "Film dubbing",
+        "relation": "identified abroad with label",
+        "object": "Latin American Spanish",
+        "qualifiers": [],
+        "subject_type": "media production",
+        "object_type": "dialect"
+      },
+      {
+        "subject": "Film dubbing",
+        "relation": "corresponds to",
+        "object": "Central Mexican variety",
+        "qualifiers": [],
+        "subject_type": "media production",
+        "object_type": "dialect"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1715,
+    "total_tokens": 3847,
+    "completion_tokens": 2132,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 810,
+    "output_tokens_est": 717
+  },
+  "attempts": 1,
+  "latency_s": 24.57825561601203,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:13:08.376440+00:00",
+  "cache_key": "773c69ec0b4960d1f4abab33d8b37f4d"
+}

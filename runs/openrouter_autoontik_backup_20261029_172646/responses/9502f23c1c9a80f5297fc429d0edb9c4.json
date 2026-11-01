@@ -1,0 +1,170 @@
+{
+  "task": {
+    "input_id": "c8dda186dc8167f2",
+    "input_hash": "7e7de5a342da6da2b167bec527d4c0e69c991f85677be60b5992e3714cbaac53",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793211345-xMU7ROSPSlHG67WFZTbC",
+    "object": "chat.completion",
+    "created": 1793211345,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Venice",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Greater Hesse\",\n            \"relation\": \"provisional name for\",\n            \"object\": \"German territory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"created by\",\n                    \"object\": \"US military administration\",\n                    \"object_type\": \"organization\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"end of World War II\",\n                    \"object_type\": \"event\"\n                }\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Greater Hesse\",\n            \"relation\": \"formed by\",\n            \"object\": \"Allied Control Council\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"19 September 1945\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Greater Hesse\",\n            \"relation\": \"became\",\n            \"object\": \"Hesse\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1 December 1946\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"German territory\",\n            \"relation\": \"created by\",\n            \"object\": \"US military administration\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"end of World War II\",\n                    \"object_type\": \"event\"\n                }\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to parse the text and extract triplets.\n\nText: \"Greater Hesse\n\nGreater Hesse () was the provisional name given for a section of German territory created by the US military administration in at the end of World War II. It was formed ...\"\n\nWe need entities: Greater Hesse (entity, maybe \"Greater Hesse\" as a provisional name). US military administration (entity). German territory (maybe \"German territory\" as a concept). Allied Control Council (entity). Hesse (modern German state). Dates: end of World War II (maybe date? but we can treat as event). The formation date: 19 September 1945. Became modern German state of Hesse on 1 December 1946.\n\nRelations: \"provisional name for\" maybe \"named after\"? Actually \"Greater Hesse was the provisional name given for a section of German territory\". So relation: \"provisional name of\" maybe \"name\". Could be \"name\" relation linking \"Greater Hesse\" (subject) to \"section of German territory\" (object). But better: \"subject\": \"Greater Hesse\", \"relation\": \"provisional name for\", \"object\": \"section of German territory\". However we need object_type: maybe \"region\". We'll use \"region\". Also qualifiers: \"created by\" US military administration, \"time\": \"end of World War II\". So we can have qualifiers attached to that triplet.\n\nSecond sentence: \"It was formed by the Allied Control Council on 19 September 1945\". So triplet: subject \"Greater Hesse\", relation \"formed by\", object \"Allied Control Council\", qualifier \"point in time\": \"19 September 1945\". Also maybe \"formation date\" as qualifier.\n\nThird: \"and became the modern German state of Hesse on 1 December 1946.\" So triplet: subject \"Greater Hesse\", relation \"became\", object \"Hesse\", qualifier \"point in time\": \"1 December 1946\". Also object_type: \"state\". Also maybe \"modern German state\" qualifies Hesse.\n\nWe also might have a triplet: \"Hesse\" is a \"state of Germany\". But not directly in text.\n\nAlso \"US military administration\" created the section of German territory. Could be separate: subject \"section of German territory\", relation \"created by\", object \"US military administration\". But the text says \"section of German territory created by the US military administration\". So we can have that.\n\nAlso \"section of German territory\" maybe \"German territory\". We'll treat as \"German territory\". So triplet: subject \"German territory\", relation \"created by\", object \"US military administration\". Qualifier: \"point in time\": \"end of World War II\". But \"end of World War II\" is a period; we can treat as \"event\". We'll set object_type \"event\". For qualifier object_type \"event\".\n\nAlso \"Greater Hesse\" is a provisional name. Could have relation \"type\": \"provisional name\". But we already have.\n\nNow need to produce JSON with \"triplets\": [ ... ].\n\nEach triplet includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Greater Hesse: \"historical region\" maybe \"region\". We'll set \"region\".\n- Section of German territory: \"region\".\n- US military administration: \"organization\".\n- Allied Control Council: \"organization\".\n- Hesse: \"state\".\n- End of World War II: \"event\".\n- Dates: \"19 September 1945\" type \"date\". \"1 December 1946\" type \"date\".\n\nNow produce triplets.\n\nTriplet 1: Greater Hesse provisional name for section of German territory.\n\nsubject: \"Greater Hesse\"\nrelation: \"provisional name for\"\nobject: \"German territory\"\nqualifiers: [{\"relation\":\"created by\",\"object\":\"US military administration\",\"object_type\":\"organization\"},{\"relation\":\"point in time\",\"object\":\"end of World War II\",\"object_type\":\"event\"}]\nsubject_type: \"region\"\nobject_type: \"region\"\n\nBut maybe object should be \"section of German territory\". We'll just use \"German territory\". Good.\n\nTriplet 2: Greater Hesse formed by Allied Control Council.\n\nsubject: \"Greater Hesse\"\nrelation: \"formed by\"\nobject: \"Allied Control Council\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"19 September 1945\",\"object_type\":\"date\"}]\nsubject_type: \"region\"\nobject_type: \"organization\"\n\nTriplet 3: Greater Hesse became Hesse.\n\nsubject: \"Greater Hesse\"\nrelation: \"became\"\nobject: \"Hesse\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1 December 1946\",\"object_type\":\"date\"}]\nsubject_type: \"region\"\nobject_type: \"state\"\n\nTriplet 4: German territory created by US military administration.\n\nsubject: \"German territory\"\nrelation: \"created by\"\nobject: \"US military administration\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"end of World War II\",\"object_type\":\"event\"}]\nsubject_type: \"region\"\nobject_type: \"organization\"\n\nPotential duplicate info but okay.\n\nNow produce JSON.\n\nMake sure qualifiers list each dict includes relation, object, object_type.\n\nReturn as:\n\n{\n \"triplets\": [\n   {...},\n   {...},\n   {...},\n   {...}\n ]\n}\n\nNo extra text.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to parse the text and extract triplets.\n\nText: \"Greater Hesse\n\nGreater Hesse () was the provisional name given for a section of German territory created by the US military administration in at the end of World War II. It was formed ...\"\n\nWe need entities: Greater Hesse (entity, maybe \"Greater Hesse\" as a provisional name). US military administration (entity). German territory (maybe \"German territory\" as a concept). Allied Control Council (entity). Hesse (modern German state). Dates: end of World War II (maybe date? but we can treat as event). The formation date: 19 September 1945. Became modern German state of Hesse on 1 December 1946.\n\nRelations: \"provisional name for\" maybe \"named after\"? Actually \"Greater Hesse was the provisional name given for a section of German territory\". So relation: \"provisional name of\" maybe \"name\". Could be \"name\" relation linking \"Greater Hesse\" (subject) to \"section of German territory\" (object). But better: \"subject\": \"Greater Hesse\", \"relation\": \"provisional name for\", \"object\": \"section of German territory\". However we need object_type: maybe \"region\". We'll use \"region\". Also qualifiers: \"created by\" US military administration, \"time\": \"end of World War II\". So we can have qualifiers attached to that triplet.\n\nSecond sentence: \"It was formed by the Allied Control Council on 19 September 1945\". So triplet: subject \"Greater Hesse\", relation \"formed by\", object \"Allied Control Council\", qualifier \"point in time\": \"19 September 1945\". Also maybe \"formation date\" as qualifier.\n\nThird: \"and became the modern German state of Hesse on 1 December 1946.\" So triplet: subject \"Greater Hesse\", relation \"became\", object \"Hesse\", qualifier \"point in time\": \"1 December 1946\". Also object_type: \"state\". Also maybe \"modern German state\" qualifies Hesse.\n\nWe also might have a triplet: \"Hesse\" is a \"state of Germany\". But not directly in text.\n\nAlso \"US military administration\" created the section of German territory. Could be separate: subject \"section of German territory\", relation \"created by\", object \"US military administration\". But the text says \"section of German territory created by the US military administration\". So we can have that.\n\nAlso \"section of German territory\" maybe \"German territory\". We'll treat as \"German territory\". So triplet: subject \"German territory\", relation \"created by\", object \"US military administration\". Qualifier: \"point in time\": \"end of World War II\". But \"end of World War II\" is a period; we can treat as \"event\". We'll set object_type \"event\". For qualifier object_type \"event\".\n\nAlso \"Greater Hesse\" is a provisional name. Could have relation \"type\": \"provisional name\". But we already have.\n\nNow need to produce JSON with \"triplets\": [ ... ].\n\nEach triplet includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Greater Hesse: \"historical region\" maybe \"region\". We'll set \"region\".\n- Section of German territory: \"region\".\n- US military administration: \"organization\".\n- Allied Control Council: \"organization\".\n- Hesse: \"state\".\n- End of World War II: \"event\".\n- Dates: \"19 September 1945\" type \"date\". \"1 December 1946\" type \"date\".\n\nNow produce triplets.\n\nTriplet 1: Greater Hesse provisional name for section of German territory.\n\nsubject: \"Greater Hesse\"\nrelation: \"provisional name for\"\nobject: \"German territory\"\nqualifiers: [{\"relation\":\"created by\",\"object\":\"US military administration\",\"object_type\":\"organization\"},{\"relation\":\"point in time\",\"object\":\"end of World War II\",\"object_type\":\"event\"}]\nsubject_type: \"region\"\nobject_type: \"region\"\n\nBut maybe object should be \"section of German territory\". We'll just use \"German territory\". Good.\n\nTriplet 2: Greater Hesse formed by Allied Control Council.\n\nsubject: \"Greater Hesse\"\nrelation: \"formed by\"\nobject: \"Allied Control Council\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"19 September 1945\",\"object_type\":\"date\"}]\nsubject_type: \"region\"\nobject_type: \"organization\"\n\nTriplet 3: Greater Hesse became Hesse.\n\nsubject: \"Greater Hesse\"\nrelation: \"became\"\nobject: \"Hesse\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1 December 1946\",\"object_type\":\"date\"}]\nsubject_type: \"region\"\nobject_type: \"state\"\n\nTriplet 4: German territory created by US military administration.\n\nsubject: \"German territory\"\nrelation: \"created by\"\nobject: \"US military administration\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"end of World War II\",\"object_type\":\"event\"}]\nsubject_type: \"region\"\nobject_type: \"organization\"\n\nPotential duplicate info but okay.\n\nNow produce JSON.\n\nMake sure qualifiers list each dict includes relation, object, object_type.\n\nReturn as:\n\n{\n \"triplets\": [\n   {...},\n   {...},\n   {...},\n   {...}\n ]\n}\n\nNo extra text.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1419,
+      "completion_tokens": 1509,
+      "total_tokens": 2928,
+      "cost": 0.00026892,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1024,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00026892,
+        "upstream_inference_prompt_cost": 4.257e-05,
+        "upstream_inference_completions_cost": 0.00022635
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1116,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Greater Hesse\",\n            \"relation\": \"provisional name for\",\n            \"object\": \"German territory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"created by\",\n                    \"object\": \"US military administration\",\n                    \"object_type\": \"organization\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"end of World War II\",\n                    \"object_type\": \"event\"\n                }\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Greater Hesse\",\n            \"relation\": \"formed by\",\n            \"object\": \"Allied Control Council\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"19 September 1945\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Greater Hesse\",\n            \"relation\": \"became\",\n            \"object\": \"Hesse\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1 December 1946\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"German territory\",\n            \"relation\": \"created by\",\n            \"object\": \"US military administration\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"end of World War II\",\n                    \"object_type\": \"event\"\n                }\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Greater Hesse",
+        "relation": "provisional name for",
+        "object": "German territory",
+        "qualifiers": [
+          {
+            "relation": "created by",
+            "object": "US military administration"
+          },
+          {
+            "relation": "point in time",
+            "object": "end of World War II"
+          }
+        ],
+        "subject_type": "region",
+        "object_type": "region"
+      },
+      {
+        "subject": "Greater Hesse",
+        "relation": "formed by",
+        "object": "Allied Control Council",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "19 September 1945"
+          }
+        ],
+        "subject_type": "region",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Greater Hesse",
+        "relation": "became",
+        "object": "Hesse",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1 December 1946"
+          }
+        ],
+        "subject_type": "region",
+        "object_type": "state"
+      },
+      {
+        "subject": "German territory",
+        "relation": "created by",
+        "object": "US military administration",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "end of World War II"
+          }
+        ],
+        "subject_type": "region",
+        "object_type": "organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1419,
+    "completion_tokens": 1509,
+    "total_tokens": 2928,
+    "cost": 0.00026892,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00026892,
+      "upstream_inference_prompt_cost": 4.257e-05,
+      "upstream_inference_completions_cost": 0.00022635
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1116,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 625,
+    "output_tokens_est": 497
+  },
+  "attempts": 1,
+  "latency_s": 35.043806544999825,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:16:20.052136+00:00",
+  "cache_key": "9502f23c1c9a80f5297fc429d0edb9c4"
+}

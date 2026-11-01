@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "71af7652ba854668",
+    "input_hash": "aa384c6cac4b496fac97d16c145409c1fa0ed94e130582803b4903dfbec040d5",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d7a17828577db86ab4b7da6faefe6b1d",
+    "object": "chat.completion",
+    "created": 1791518467,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"title\",\n            \"object\": \"Czar of Russia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"title\",\n            \"object\": \"King of Poland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"title\",\n            \"object\": \"Grand Duke of Finland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"rule ended with\",\n            \"object\": \"Russian Revolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"date of death\",\n            \"object\": \"17 July 1918\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"cause of death\",\n            \"object\": \"killed\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"17 July 1918\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Allied leaders of World War I\n\nNicholas II -- last Czar of Russia, titular King of Poland, and Grand Duke of Finland. His rule ended with the Russian Revolution. Nicholas was killed on 17 July 1918.\"\n\nWe have subject Nicholas II. Relations:\n\n- \"last Czar of Russia\" => relation \"position held\" maybe \"title\". Use \"position held\" or \"title\". In examples they used \"occupation\", \"developer\". For royalty, maybe \"title\". We'll use \"title\". Object \"Czar of Russia\". Qualifier maybe \"ordinal\" but not needed. Also \"last\" is an approximation? It's a qualifier \"approximation\"? Actually \"last\" is not approximation but indicates order. Could be qualifier \"qualifier\": {\"relation\":\"ordinal\",\"object\":\"last\"} but not defined. Probably ignore. Use separate triplets for each title.\n\n- \"titular King of Poland\" => title \"King of Poland\". Could add qualifier \"titular\". So relation title, object \"King of Poland\", qualifier \"qualifier\": {\"relation\":\"qualifier\",\"object\":\"titular\"}? Not defined. There's \"condition\", \"modality\". Not appropriate. Might just include title as is \"titular King of Poland\". Simpler.\n\n- \"Grand Duke of Finland\" => title.\n\n- \"His rule ended with the Russian Revolution.\" So subject Nicholas II, relation \"rule ended with\", object \"Russian Revolution\". Use relation \"rule ended with\". Qualifier none.\n\n- \"Nicholas was killed on 17 July 1918.\" So subject Nicholas II, relation \"death\", object maybe \"killed\". But we need date of death. Could have \"date of death\" relation with object \"17 July 1918\". Also \"killed\" is cause of death. Could have \"cause of death\" relation \"killed\". But we need explicit fact: \"Nicholas was killed on 17 July 1918.\" So we can produce two triplets: one \"date of death\" and one \"cause of death\". The text says he was killed, not specifying by whom. So cause of death \"killed\". Use relation \"cause of death\". object \"killed\". Also date qualifier.\n\nBut guidelines: extract every explicitly stated fact. So date of death is explicit. Also cause of death is explicit (killed). So produce both.\n\nSubject type: Nicholas II is human. Object types: title: \"title\" maybe \"position\". Use \"title\". For Russian Revolution: event. For date: date. For cause: \"killed\" is an action; object type maybe \"event\" or \"cause\". Could use \"event\". We'll set object_type \"event\". For title objects: \"Czar of Russia\" is a title (position). Use object_type \"title\". For \"King of Poland\" title. For \"Grand Duke of Finland\" title.\n\nAlso \"Allied leaders of World War I\" is heading, not a fact. Could be a group but not explicit. Might ignore.\n\nNow construct JSON.\n\nTriplets list:\n\n1. Nicholas II - title - Czar of Russia (qualifiers maybe \"ordinal\": \"last\"? Not required). We'll just include title as \"Czar of Russia\". No qualifiers.\n\n2. Nicholas II - title - King of Poland (qualifier \"titular\"? Could add qualifier relation \"qualifier\" but not defined. Might ignore \"titular\". Could include qualifier \"qualifier\": \"titular\". But not a defined qualifier type. There's \"condition\", \"modality\", \"approximation\". Not appropriate. So ignore.\n\n3. Nicholas II - title - Grand Duke of Finland.\n\n4. Nicholas II - rule ended with - Russian Revolution.\n\n5. Nicholas II - date of death - 17 July 1918.\n\n6. Nicholas II - cause of death - killed (qualifier point in time 17 July 1918 maybe). Could attach date qualifier to cause of death. But we already have date of death. Could also add qualifier. The rule: qualifiers attach only to the claim they modify. The cause of death claim includes date? Not in text. The phrase \"was killed on 17 July 1918\" includes both cause and date. Could represent as one triplet with relation \"death\" and qualifiers cause and date. But we already have date of death. Might combine: relation \"death\" object \"killed\" with qualifier date. But we also have date of death. Both are explicit. Might produce both.\n\nBetter: Use relation \"death\" with object \"killed\" and qualifier date. And also separate date of death? The text says \"Nicholas was killed on 17 July 1918.\" That gives date of death implicitly. In example they used \"date of death\" relation for Marie Curie. So we can produce date of death. That's fine.\n\nThus cause of death triplet: subject Nicholas II, relation \"cause of death\", object \"killed\", qualifier point in time 17 July 1918.\n\nNow assign types:\n\n- subject_type \"human\".\n- object_type for title: \"title\".\n- object_type for Russian Revolution: \"event\".\n- object_type for date: \"date\".\n- object_type for cause: \"event\" or \"action\". Use \"event\".\n\nNow qualifiers: For date of death, no qualifiers.\n\nFor cause of death, qualifier point in time.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1639,
+      "total_tokens": 3119,
+      "completion_tokens": 1480,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"title\",\n            \"object\": \"Czar of Russia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"title\",\n            \"object\": \"King of Poland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"title\",\n            \"object\": \"Grand Duke of Finland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"rule ended with\",\n            \"object\": \"Russian Revolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"date of death\",\n            \"object\": \"17 July 1918\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nicholas II\",\n            \"relation\": \"cause of death\",\n            \"object\": \"killed\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"17 July 1918\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Nicholas II",
+        "relation": "title",
+        "object": "Czar of Russia",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "title"
+      },
+      {
+        "subject": "Nicholas II",
+        "relation": "title",
+        "object": "King of Poland",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "title"
+      },
+      {
+        "subject": "Nicholas II",
+        "relation": "title",
+        "object": "Grand Duke of Finland",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "title"
+      },
+      {
+        "subject": "Nicholas II",
+        "relation": "rule ended with",
+        "object": "Russian Revolution",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "Nicholas II",
+        "relation": "date of death",
+        "object": "17 July 1918",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Nicholas II",
+        "relation": "cause of death",
+        "object": "killed",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "17 July 1918"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "event"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1639,
+    "total_tokens": 3119,
+    "completion_tokens": 1480,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 492,
+    "output_tokens_est": 400
+  },
+  "attempts": 1,
+  "latency_s": 18.54186407799716,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:01:26.655132+00:00",
+  "cache_key": "c9756e301eaba94c476d85b7a680e631"
+}

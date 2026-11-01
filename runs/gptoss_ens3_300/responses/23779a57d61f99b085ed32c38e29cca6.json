@@ -1,0 +1,155 @@
+{
+  "task": {
+    "input_id": "01c25794cb4e8e0d",
+    "input_hash": "5215b0fc7d91add18227d4c0f06920d2fe76cddd2213f9ebcfa743a4eb2140e5",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-6ee4721c99070073db8b5c81bfca2321",
+    "object": "chat.completion",
+    "created": 1791542734,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"location\",\n            \"object\": \"northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"address\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"architect\",\n            \"object\": \"Abraham L. Erlanger\",\n            \"qualifiers\": [],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"date of demolition\",\n            \"object\": \"1978\",\n            \"qualifiers\": [],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"description\",\n            \"object\": \"most elaborately designed live performance theatre in Philadelphia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"considered\"\n                }\n            ],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"qualitative description\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"description\",\n            \"object\": \"one of the most magnificent ever built in the United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"considered\"\n                }\n            ],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"qualitative description\"\n        },\n        {\n            \"subject\": \"Abraham L. Erlanger\",\n            \"relation\": \"occupation\",\n            \"object\": \"theatrical producer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Abraham L. Erlanger\",\n            \"relation\": \"member of\",\n            \"object\": \"Theatrical Syndicate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"role\",\n                    \"object\": \"founding member\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to parse text and extract factual triplets.\n\nText:\n\n\"Erlanger Theatre\n\nThe Erlanger Theatre was one of Philadelphia’s most elaborately designed live performance theaters and was considered one of the most magnificent ever built in the United States. It is located at the northwest corner of 21st and Market Streets in Philadelphia, Pennsylvania and was built by Abraham L. Erlanger, theatrical producer and a founding member of the Theatrical Syndicate. It was demolished in 1978.\"\n\nWe need to extract:\n\n- Subject: Erlanger Theatre (type: theater? building? probably \"theatre\" as \"building\" or \"venue\". We'll set subject_type maybe \"building\" or \"theatre\". Use generic \"building\" maybe.\n\nRelations:\n\n1. location: (Erlanger Theatre, location, northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania). Could be \"located in\" or \"address\". Use \"location\". object_type: \"place\" maybe \"intersection\". We'll keep as \"northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania\". It's location.\n\n2. built by: (Erlanger Theatre, architect or builder, Abraham L. Erlanger). Relation \"architect\" maybe not exactly; \"built by\" is like \"architect\" or \"builder\". Use \"architect\". object_type: \"human\". Subject_type: \"building\".\n\n3. demolition date: (Erlanger Theatre, date of demolition, 1978). object_type: \"date\". relation \"date of demolition\" maybe not standard but okay.\n\n4. consideration: \"was considered one of the most magnificent ever built in the United States\". That's a claim of opinion. Use relation \"notability\" or \"description\". Could be \"statement\" but we need factual claim: \"considered one of the most magnificent ever built in the United States\". This is a qualitative statement; we can capture as (Erlanger Theatre, notable for, \"most magnificent ever built in the United States\") but need to preserve modality? It's considered, not absolute. So we might add qualifier \"polarity\"? It's positive but it's \"considered\". Might treat as \"statement\" with attribution maybe implicit? Not given source. Could omit because it's not a concrete fact? The instruction: extract meaningful triplets that represent factual relationships. \"was considered one of the most magnificent ever built in the United States\" is a reported assessment, but no source. It's still a claim, could be captured with relation \"description\" and qualifier \"modality\": \"considered\". Use modality qualifier.\n\nThus:\n\nTriplet: subject Erlanger Theatre, relation \"description\", object \"most magnificent ever built in the United States\". qualifiers: {\"relation\":\"modality\",\"object\":\"considered\"}.\n\nsubject_type: building; object_type: \"qualitative description\".\n\n5. \"was one of Philadelphia’s most elaborately designed live performance theaters\". Another descriptive claim. Could have separate triplet: (Erlanger Theatre, description, \"most elaborately designed live performance theater in Philadelphia\"). qualifier modality \"considered\". Might combine but separate.\n\nWe'll produce two description triplets.\n\nAlso \"Theatrical Syndicate\" membership: Abraham L. Erlanger is a founding member. That's about Abraham L. Erlanger, not Erlanger Theatre. Not needed unless we include as fact about builder. The text says \"built by Abraham L. Erlanger, theatrical producer and a founding member of the Theatrical Syndicate.\" So we can also extract (Abraham L. Erlanger, occupation, theatrical producer) and (Abraham L. Erlanger, member of, Theatrical Syndicate) with qualifier \"founding member\". But the focus is the theatre; but we can still extract about Abraham. The instruction: extract meaningful triplets from text. So include.\n\nThus:\n\n- (Abraham L. Erlanger, occupation, theatrical producer) subject_type human, object_type profession.\n\n- (Abraham L. Erlanger, member of, Theatrical Syndicate) qualifiers: {\"relation\":\"role\",\"object\":\"founding member\"}? Actually \"founding member\" is a role. Could use qualifier \"role\" with object \"founding member\". Or relation \"member of\" and qualifier \"role\" = \"founding\". We'll use qualifier relation \"role\" object \"founding member\". object_type \"organization\". For member of relation, object_type \"organization\".\n\nNow date of demolition: 1978 (just year). object_type date.\n\nNow location: we might break intersection into components: \"northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania\". object_type \"address\". Good.\n\nNow we need subject_type for Erlanger Theatre: maybe \"theatre\" or \"building\". Use \"theatre\". object_type for location: \"intersection\". For description objects: \"qualitative description\". For demolition date: date.\n\nNow format JSON.\n\nTriplet list order not crucial.\n\nEach triplet includes qualifiers list possibly empty.\n\nLet's craft.\n\nTriplet 1:\nsubject: \"Erlanger Theatre\"\nrelation: \"location\"\nobject: \"northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania\"\nqualifiers: []\nsubject_type: \"theatre\"\nobject_type: \"address\"\n\nTriplet 2:\nsubject: \"Erlanger Theatre\"\nrelation: \"architect\"\nobject: \"Abraham L. Erlanger\"\nqualifiers: []\nsubject_type: \"theatre\"\nobject_type: \"human\"\n\nTriplet 3:\nsubject: \"Erlanger Theatre\"\nrelation: \"date of demolition\"\nobject: \"1978\"\nqualifiers: []\nsubject_type: \"theatre\"\nobject_type: \"date\"\n\nTriplet 4:\nsubject: \"Erlanger Theatre\"\nrelation: \"description\"\nobject: \"most elaborately designed live performance theatre in Philadelphia\"\nqualifiers: [{\"relation\":\"modality\",\"object\":\"considered\"}]\nsubject_type: \"theatre\"\nobject_type: \"qualitative description\"\n\nTriplet 5:\nsubject: \"Erlanger Theatre\"\nrelation: \"description\"\nobject: \"one of the most magnificent ever built in the United States\"\nqualifiers: [{\"relation\":\"modality\",\"object\":\"considered\"}]\nsubject_type: \"theatre\"\nobject_type: \"qualitative description\"\n\nTriplet 6:\nsubject: \"Abraham L. Erlanger\"\nrelation: \"occupation\"\nobject: \"theatrical producer\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"profession\"\n\nTriplet 7:\nsubject: \"Abraham L. Erlanger\"\nrelation: \"member of\"\nobject: \"Theatrical Syndicate\"\nqualifiers: [{\"relation\":\"role\",\"object\":\"founding member\"}]\nsubject_type: \"human\"\nobject_type: \"organization\"\n\nCheck qualifiers naming: Use \"role\" as relation. It's allowed.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1671,
+      "total_tokens": 3573,
+      "completion_tokens": 1902,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"location\",\n            \"object\": \"northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"address\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"architect\",\n            \"object\": \"Abraham L. Erlanger\",\n            \"qualifiers\": [],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"date of demolition\",\n            \"object\": \"1978\",\n            \"qualifiers\": [],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"description\",\n            \"object\": \"most elaborately designed live performance theatre in Philadelphia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"considered\"\n                }\n            ],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"qualitative description\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"description\",\n            \"object\": \"one of the most magnificent ever built in the United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"considered\"\n                }\n            ],\n            \"subject_type\": \"theatre\",\n            \"object_type\": \"qualitative description\"\n        },\n        {\n            \"subject\": \"Abraham L. Erlanger\",\n            \"relation\": \"occupation\",\n            \"object\": \"theatrical producer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Abraham L. Erlanger\",\n            \"relation\": \"member of\",\n            \"object\": \"Theatrical Syndicate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"role\",\n                    \"object\": \"founding member\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Erlanger Theatre",
+        "relation": "location",
+        "object": "northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania",
+        "qualifiers": [],
+        "subject_type": "theatre",
+        "object_type": "address"
+      },
+      {
+        "subject": "Erlanger Theatre",
+        "relation": "architect",
+        "object": "Abraham L. Erlanger",
+        "qualifiers": [],
+        "subject_type": "theatre",
+        "object_type": "human"
+      },
+      {
+        "subject": "Erlanger Theatre",
+        "relation": "date of demolition",
+        "object": "1978",
+        "qualifiers": [],
+        "subject_type": "theatre",
+        "object_type": "date"
+      },
+      {
+        "subject": "Erlanger Theatre",
+        "relation": "description",
+        "object": "most elaborately designed live performance theatre in Philadelphia",
+        "qualifiers": [
+          {
+            "relation": "modality",
+            "object": "considered"
+          }
+        ],
+        "subject_type": "theatre",
+        "object_type": "qualitative description"
+      },
+      {
+        "subject": "Erlanger Theatre",
+        "relation": "description",
+        "object": "one of the most magnificent ever built in the United States",
+        "qualifiers": [
+          {
+            "relation": "modality",
+            "object": "considered"
+          }
+        ],
+        "subject_type": "theatre",
+        "object_type": "qualitative description"
+      },
+      {
+        "subject": "Abraham L. Erlanger",
+        "relation": "occupation",
+        "object": "theatrical producer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Abraham L. Erlanger",
+        "relation": "member of",
+        "object": "Theatrical Syndicate",
+        "qualifiers": [
+          {
+            "relation": "role",
+            "object": "founding member"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1671,
+    "total_tokens": 3573,
+    "completion_tokens": 1902,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 686,
+    "output_tokens_est": 593
+  },
+  "attempts": 1,
+  "latency_s": 23.21338630799437,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T10:45:58.412911+00:00",
+  "cache_key": "23779a57d61f99b085ed32c38e29cca6"
+}

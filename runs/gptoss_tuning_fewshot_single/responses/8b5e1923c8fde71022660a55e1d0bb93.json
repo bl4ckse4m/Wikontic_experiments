@@ -1,0 +1,162 @@
+{
+  "task": {
+    "input_id": "755c5ca426473d8e",
+    "input_hash": "7e86f03b2e727f29177fcb52f302b1f6340e1246781f222fba639f690e29dfc3",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-2b0bce2cdd6ccdd06290516989047a9e",
+    "object": "chat.completion",
+    "created": 1791518577,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"date of birth\",\n            \"object\": \"November 1955\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"occupation\",\n            \"object\": \"businessperson\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"occupation\",\n            \"object\": \"lawyer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"member of\",\n            \"object\": \"Board of Regents of the University of Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Governor of Michigan\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                },\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"rumor\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"political affiliation\",\n            \"object\": \"Democratic Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"met with\",\n            \"object\": \"White House\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"early January\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"declined to run for\",\n            \"object\": \"Governor of Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText:\n\n\"Denise Ilitch\n\nDenise Ilitch (born November 1955) is a Detroit-area businessperson, lawyer, and member of the Board of Regents of the University of Michigan. Ilus? Actually \"Ilitch was rumored to be a Democratic Party candidate for Governor of Michigan in 2010, after having met with the White House in early January to discuss a potential run, though she later declined to run.\"\n\nWe need to parse.\n\nFirst sentence: \"Denise Ilitch (born November 1955) is a Detroit-area businessperson, lawyer, and member of the Board of Regents of the University of Michigan.\"\n\nSo facts:\n\n- Denise Ilitch date of birth: November 1955 (no day). So relation \"date of birth\". object \"November 1955\". qualifier none. subject_type human, object_type date.\n\n- Denise Ilitch occupation: businessperson (maybe \"businessperson\" as profession). Also \"lawyer\". So two occupation facts.\n\n- Also \"member of the Board of Regents of the University of Michigan\". So relation \"member of\" maybe \"member of organization\". object \"Board of Regents of the University of Michigan\". Could also be \"position held\". We'll use \"member of\". object_type \"organization\". Also maybe qualifier \"position\" but not needed.\n\nSecond sentence: \"Ilitch was rumored to be a Democratic Party candidate for Governor of Michigan in 2010, after having met with the White House in early January to discuss a potential run, though she later declined to run.\"\n\nWe need to capture rumor: relation \"candidate\" maybe \"candidate for\". But it's rumored, so we need qualifier \"polarity\" negative? Actually \"rumored to be a candidate\" is not confirmed. So we treat as claim with qualifier \"attribution\" maybe \"rumor\". The instruction: preserve modality, attribution. So we can have relation \"candidate for\" object \"Governor of Michigan\". Qualifiers: \"point in time\" 2010 (the election year). Also \"attribution\" \"rumor\". Also \"political party\" \"Democratic Party\". Could also have \"political affiliation\". The phrase \"Democratic Party candidate\". So we could have separate fact: \"Denise Ilitch\" \"political affiliation\" \"Democratic Party\". But that's not explicit; it's candidate for Democratic Party. Might be better to have \"candidate for\" with qualifier \"political party\" \"Democratic Party\". But we need to keep qualifiers as defined: \"political party\" not listed; but we can use \"party\" as qualifier? The allowed qualifier relations include \"polarity\", \"modality\", \"attribution\", \"condition\", \"unit\", \"approximation\", \"point in time\", \"place\". Not \"party\". So we may need separate relation: \"candidate for\" object \"Governor of Michigan\". Qualifiers: point in time \"2010\". Also \"attribution\" \"rumor\". Also maybe \"political party\" not allowed; we could include as part of object phrase: \"Democratic Party candidate for Governor of Michigan\". But object should be \"Governor of Michigan\". The phrase \"Democratic Party candidate\" indicates party, but we cannot encode that as qualifier unless we use \"political party\" which is not in list. Might be okay to include in object phrase: \"Democratic Party candidate for Governor of Michigan\". But that duplicates. Better: relation \"candidate for\" object \"Governor of Michigan\". qualifiers: {\"relation\":\"political party\",\"object\":\"Democratic Party\"} not allowed. So maybe we treat as separate relation: \"political affiliation\" \"Democratic Party\". That is a fact (explicit). The sentence says \"Democratic Party candidate\". That implies affiliation. Could be considered explicit. We'll include.\n\nAlso \"after having met with the White House in early January to discuss a potential run\". So fact: Denise Ilitch met with the White House. Relation \"met with\". Object \"White House\". Qualifier \"point in time\" \"early January\". Need year? Not given; context maybe 2010? The sentence: \"Ilitch was rumored to be a Democratic Party candidate for Governor of Michigan in 2010, after having met with the White House in early January to discuss a potential run\". Likely early January 2010. But not explicit. We cannot infer year. So just \"early January\". Could be qualifier \"point in time\" \"early January\". That's okay.\n\nAlso \"though she later declined to run.\" So fact: Denise Ilitch declined to run for Governor of Michigan. Relation \"declined\" maybe \"declined to run for\". Object \"Governor of Michigan\". Qualifier \"polarity\"? Actually it's a negative action (declined). Could be \"polarity\" negative? In examples, they used \"polarity\" negative for \"built\" not built. Here \"declined to run\" is a positive statement of action (decline). Not a negated claim. So we just record \"declined to run for\" object \"Governor of Michigan\". Could also add qualifier \"point in time\" maybe after early January, but not explicit.\n\nWe need subject_type and object_type.\n\nDefine types:\n\n- Denise Ilitch: human\n- November 1955: date\n- businessperson: profession\n- lawyer: profession\n- Board of Regents of the University of Michigan: organization (maybe \"board\" but organization)\n- Governor of Michigan: political office (position)\n- Democratic Party: political party (organization)\n- White House: building/government building (organization)\n- \"run\" maybe not needed.\n\nNow qualifiers list format: list of dicts.\n\nFor rumor: need qualifier \"attribution\" \"rumor\". Also \"point in time\" \"2010\". Also maybe \"modality\" \"rumored\". But we already have attribution. Use attribution.\n\nFor meeting: qualifier \"point in time\" \"early January\". Could also add \"approximation\" \"early\". But \"early January\" is a phrase; we can keep as point in time \"early January\". Might be okay.\n\nFor declined: maybe qualifier \"point in time\" not given. Could ignore.\n\nNow produce JSON.\n\nTriplets list order not important.\n\nLet's craft each.\n\n1. {\"subject\":\"Denise Ilitch\",\"relation\":\"date of birth\",\"object\":\"November 1955\",\"qualifiers\":[],\"subject_type\":\"human\",\"object_type\":\"date\"}\n\n2. {\"subject\":\"Denise Ilitch\",\"relation\":\"occupation\",\"object\":\"businessperson\",\"qualifiers\":[],\"subject_type\":\"human\",\"object_type\":\"profession\"}\n\n3. {\"subject\":\"Denise Ilitch\",\"relation\":\"occupation\",\"object\":\"lawyer\",\"qualifiers\":[],\"subject_type\":\"human\",\"object_type\":\"profession\"}\n\n4. {\"subject\":\"Denise Ilitch\",\"relation\":\"member of\",\"object\":\"Board of Regents of the University of Michigan\",\"qualifiers\":[],\"subject_type\":\"human\",\"object_type\":\"organization\"}\n\n5. {\"subject\":\"Denise Ilitch\",\"relation\":\"candidate for\",\"object\":\"Governor of Michigan\",\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"2010\"},{\"relation\":\"attribution\",\"object\":\"rumor\"}],\"subject_type\":\"human\",\"object_type\":\"political office\"}\n\n6. {\"subject\":\"Denise Ilitch\",\"relation\":\"political affiliation\",\"object\":\"Democratic Party\",\"qualifiers\":[],\"subject_type\":\"human\",\"object_type\":\"political party\"}\n\n7. {\"subject\":\"Denise Ilitch\",\"relation\":\"met with\",\"object\":\"White House\",\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"early January\"}],\"subject_type\":\"human\",\"object_type\":\"organization\"}\n\n8. {\"subject\":\"Denise Ilitch\",\"relation\":\"declined to run for\",\"object\":\"Governor of Michigan\",\"qualifiers\":[],\"subject_type\":\"human\",\"object_type\":\"political office\"}\n\nCheck if any other qualifiers needed: For meeting, maybe also \"purpose\" but not allowed.\n\nAll good.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1671,
+      "total_tokens": 3829,
+      "completion_tokens": 2158,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"date of birth\",\n            \"object\": \"November 1955\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"occupation\",\n            \"object\": \"businessperson\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"occupation\",\n            \"object\": \"lawyer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"member of\",\n            \"object\": \"Board of Regents of the University of Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Governor of Michigan\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                },\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"rumor\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"political affiliation\",\n            \"object\": \"Democratic Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"met with\",\n            \"object\": \"White House\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"early January\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Denise Ilitch\",\n            \"relation\": \"declined to run for\",\n            \"object\": \"Governor of Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Denise Ilitch",
+        "relation": "date of birth",
+        "object": "November 1955",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Denise Ilitch",
+        "relation": "occupation",
+        "object": "businessperson",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Denise Ilitch",
+        "relation": "occupation",
+        "object": "lawyer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Denise Ilitch",
+        "relation": "member of",
+        "object": "Board of Regents of the University of Michigan",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Denise Ilitch",
+        "relation": "candidate for",
+        "object": "Governor of Michigan",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          },
+          {
+            "relation": "attribution",
+            "object": "rumor"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political office"
+      },
+      {
+        "subject": "Denise Ilitch",
+        "relation": "political affiliation",
+        "object": "Democratic Party",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "political party"
+      },
+      {
+        "subject": "Denise Ilitch",
+        "relation": "met with",
+        "object": "White House",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "early January"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Denise Ilitch",
+        "relation": "declined to run for",
+        "object": "Governor of Michigan",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "political office"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1671,
+    "total_tokens": 3829,
+    "completion_tokens": 2158,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 709,
+    "output_tokens_est": 616
+  },
+  "attempts": 1,
+  "latency_s": 26.821967540003243,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:03:25.003893+00:00",
+  "cache_key": "8b5e1923c8fde71022660a55e1d0bb93"
+}

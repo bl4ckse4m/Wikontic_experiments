@@ -1,0 +1,193 @@
+{
+  "task": {
+    "input_id": "cbd52b68d65c3c19",
+    "input_hash": "78a55ae6f8e205c3fa46fde1595610b863f0275068e2d088e28c83b7c814ba52",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793211582-ahQcG3TRUtyeaBbY9gQh",
+    "object": "chat.completion",
+    "created": 1793211582,
+    "model": "openai/gpt-oss-120b",
+    "provider": "CoreWeave",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"diplomatic mission of\",\n            \"object\": \"Bulgaria\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"located in\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"located in\",\n            \"object\": \"London\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Bulgaria\",\n            \"relation\": \"diplomatic relations with\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1879\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"established\",\n            \"object\": \"1903\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"housed in\",\n            \"object\": \"building on the east side of Queen's Gate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"heritage status\",\n                    \"object\": \"Grade II listed\",\n                    \"object_type\": \"heritage designation\"\n                }\n            ],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"building on the east side of Queen's Gate\",\n            \"relation\": \"located on\",\n            \"object\": \"Queen's Gate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"side\",\n                    \"object\": \"east\",\n                    \"object_type\": \"direction\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"building on the east side of Queen's Gate\",\n            \"relation\": \"located in\",\n            \"object\": \"City of Westminster\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText:\n\n\"Embassy of Bulgaria, London\n\nThe Embassy of Bulgaria in London is the diplomatic mission of Bulgaria in the United Kingdom. Diplomatic relations between the two countries date from 1879 and there has been a Bulgarian embassy in London since 1903. The embassy is currently housed in a building on the east side of Queen's Gate, just within the City of Westminster, which is Grade II listed.\"\n\nWe need to identify entities: Embassy of Bulgaria in London, Bulgaria, United Kingdom, diplomatic relations, 1879, Bulgarian embassy in London, 1903, building, east side of Queen's Gate, City of Westminster, Grade II listed (maybe building's heritage status).\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine types: embassy (building or diplomatic mission), country, diplomatic mission, diplomatic relation, year, building, street, city, heritage status.\n\nLet's parse sentences.\n\nSentence 1: \"The Embassy of Bulgaria in London is the diplomatic mission of Bulgaria in the United Kingdom.\"\n\nTriplet: subject: Embassy of Bulgaria in London, relation: \"instance of\" or \"type\"? But we need factual relation: \"diplomatic mission of\". So subject: Embassy of Bulgaria in London, relation: \"diplomatic mission of\", object: Bulgaria. But also \"in the United Kingdom\" indicates location. Could have two relations: \"located in country\" or \"location\". So we can have:\n\n- (Embassy of Bulgaria in London, diplomatic mission of, Bulgaria)\n- (Embassy of Bulgaria in London, located in, United Kingdom)\n\nAlso maybe \"location city\": London (but not explicitly said? It says \"in London\". So location city: London. Could add.\n\nBut we need to keep subject_type: \"embassy\" or \"diplomatic mission\". object_type: \"country\". For location: object_type: \"city\" or \"country\".\n\nSecond sentence: \"Diplomatic relations between the two countries date from 1879 and there has been a Bulgarian embassy in London since 1903.\"\n\nWe have two facts:\n\n- Diplomatic relations between Bulgaria and United Kingdom date from 1879. So subject: diplomatic relations (maybe \"Bulgaria–United Kingdom diplomatic relations\") relation: \"start time\" object: 1879. Or we could have (Bulgaria, diplomatic relations with, United Kingdom) with qualifier start time 1879.\n\nBetter: subject: Bulgaria, relation: \"diplomatic relations with\", object: United Kingdom, qualifier: start time 1879.\n\n- There has been a Bulgarian embassy in London since 1903. So subject: Embassy of Bulgaria in London (or Bulgarian embassy in London) relation: \"inception\" or \"start time\" 1903. Could be \"established\" relation. Use \"inception\" maybe. We'll use relation \"established\" with qualifier point in time 1903. Or just relation \"start time\". The spec uses qualifiers for point in time. Example: award received with qualifier point in time. So we could have (Embassy of Bulgaria in London, inception, 1903) but object_type year. Or (Embassy of Bulgaria in London, start time, 1903). Let's follow pattern: relation \"established\" object \"1903\" with object_type \"year\". Or we could have \"start time\" as qualifier on a relation like \"building\". But simpler: relation \"inception\" object \"1903\". We'll decide.\n\nThird sentence: \"The embassy is currently housed in a building on the east side of Queen's Gate, just within the City of Westminster, which is Grade II listed.\"\n\nFacts:\n\n- Embassy of Bulgaria in London is housed in a building. So relation: \"located in building\" or \"housed in\". Use \"housed in\". Subject: Embassy of Bulgaria in London, relation: \"housed in\", object: building (maybe name unknown). Could create entity \"building on the east side of Queen's Gate\". We'll call object: \"building on the east side of Queen's Gate\". object_type: \"building\". Qualifier: maybe \"heritage status\" Grade II listed.\n\n- The building is on the east side of Queen's Gate. So relation: \"located on\", object: \"east side of Queen's Gate\". object_type: \"street location\". Could also have \"address\". We'll create.\n\n- The building is within the City of Westminster. So relation: \"located in\", object: City of Westminster, object_type: \"city\". Also \"just within the City of Westminster\". So we can have that.\n\n- The building is Grade II listed. So relation: \"heritage status\", object: \"Grade II listed\", object_type: \"heritage designation\".\n\nWe need to include qualifiers where appropriate. For \"housed in\", we could add qualifier \"heritage status\" but spec says qualifiers attach to triplet, not separate triplet. So we could have a qualifier on the \"housed in\" triplet: relation \"heritage status\", object \"Grade II listed\". That would satisfy \"which is Grade II listed\". So we can attach as qualifier.\n\nAlso maybe include qualifier \"point in time\" for \"currently\" but not needed.\n\nNow compile list of entities and types.\n\nDefine types:\n\n- Embassy of Bulgaria in London: type \"embassy\" (or \"diplomatic mission\").\n- Bulgaria: type \"country\".\n- United Kingdom: type \"country\".\n- London: type \"city\".\n- Diplomatic relations: maybe not needed as separate entity; we use relation between countries.\n- 1879: type \"year\".\n- 1903: type \"year\".\n- building on the east side of Queen's Gate: type \"building\".\n- east side of Queen's Gate: type \"street location\" or \"street\". We'll use \"street\".\n- Queen's Gate: type \"street\".\n- City of Westminster: type \"city\".\n- Grade II listed: type \"heritage designation\".\n\nNow produce JSON list.\n\nTriplets:\n\n1. subject: \"Embassy of Bulgaria in London\", relation: \"diplomatic mission of\", object: \"Bulgaria\", qualifiers: [], subject_type: \"embassy\", object_type: \"country\".\n\n2. subject: \"Embassy of Bulgaria in London\", relation: \"located in country\", object: \"United Kingdom\", qualifiers: [], subject_type: \"embassy\", object_type: \"country\". Or \"located in\" object \"United Kingdom\". We'll use \"located in\". But we also have location city London. Could add separate.\n\n3. subject: \"Embassy of Bulgaria in London\", relation: \"located in city\", object: \"London\", qualifiers: [], subject_type: \"embassy\", object_type: \"city\".\n\n4. subject: \"Bulgaria\", relation: \"diplomatic relations with\", object: \"United Kingdom\", qualifiers: [{relation: \"start time\", object: \"1879\", object_type: \"year\"}], subject_type: \"country\", object_type: \"country\".\n\n5. subject: \"Embassy of Bulgaria in London\", relation: \"established\", object: \"1903\", qualifiers: [], subject_type: \"embassy\", object_type: \"year\". Or we could use \"inception\". Use \"established\".\n\n6. subject: \"Embassy of Bulgaria in London\", relation: \"housed in\", object: \"building on the east side of Queen's Gate\", qualifiers: [{relation: \"heritage status\", object: \"Grade II listed\", object_type: \"heritage designation\"}], subject_type: \"embassy\", object_type: \"building\".\n\n7. subject: \"building on the east side of Queen's Gate\", relation: \"located on\", object: \"Queen's Gate\", qualifiers: [{relation: \"position\", object: \"east side\", object_type: \"direction\"}]? Might be too detailed. Simpler: relation \"located on\", object: \"Queen's Gate\". qualifiers: [{relation: \"side\", object: \"east\", object_type: \"direction\"}]. But spec: qualifiers are attached to triplet. Could do that. Let's include qualifier side.\n\nSo:\n\nsubject: \"building on the east side of Queen's Gate\", relation: \"located on\", object: \"Queen's Gate\", qualifiers: [{\"relation\":\"side\",\"object\":\"east\",\"object_type\":\"direction\"}], subject_type:\"building\", object_type:\"street\".\n\n8. subject: \"building on the east side of Queen's Gate\", relation: \"located in\", object: \"City of Westminster\", qualifiers: [], subject_type:\"building\", object_type:\"city\".\n\nPotentially also \"City of Westminster\" is within \"London\"? Not needed.\n\nNow ensure JSON format: top-level key \"triplets\": list.\n\nCheck each dictionary includes \"qualifiers\": list (maybe empty). Include \"subject_type\" and \"object_type\".\n\nMake sure object_type for year is \"year\". For heritage designation: \"heritage designation\". For direction: \"direction\". For street: \"street\". For city: \"city\". For building: \"building\". For embassy: \"embassy\". For country: \"country\". For diplomatic relation maybe \"diplomatic relation\" but we used relation \"diplomatic relations with\". object_type \"country\". That's fine.\n\nNow produce final JSON.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text.\n\nText:\n\n\"Embassy of Bulgaria, London\n\nThe Embassy of Bulgaria in London is the diplomatic mission of Bulgaria in the United Kingdom. Diplomatic relations between the two countries date from 1879 and there has been a Bulgarian embassy in London since 1903. The embassy is currently housed in a building on the east side of Queen's Gate, just within the City of Westminster, which is Grade II listed.\"\n\nWe need to identify entities: Embassy of Bulgaria in London, Bulgaria, United Kingdom, diplomatic relations, 1879, Bulgarian embassy in London, 1903, building, east side of Queen's Gate, City of Westminster, Grade II listed (maybe building's heritage status).\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine types: embassy (building or diplomatic mission), country, diplomatic mission, diplomatic relation, year, building, street, city, heritage status.\n\nLet's parse sentences.\n\nSentence 1: \"The Embassy of Bulgaria in London is the diplomatic mission of Bulgaria in the United Kingdom.\"\n\nTriplet: subject: Embassy of Bulgaria in London, relation: \"instance of\" or \"type\"? But we need factual relation: \"diplomatic mission of\". So subject: Embassy of Bulgaria in London, relation: \"diplomatic mission of\", object: Bulgaria. But also \"in the United Kingdom\" indicates location. Could have two relations: \"located in country\" or \"location\". So we can have:\n\n- (Embassy of Bulgaria in London, diplomatic mission of, Bulgaria)\n- (Embassy of Bulgaria in London, located in, United Kingdom)\n\nAlso maybe \"location city\": London (but not explicitly said? It says \"in London\". So location city: London. Could add.\n\nBut we need to keep subject_type: \"embassy\" or \"diplomatic mission\". object_type: \"country\". For location: object_type: \"city\" or \"country\".\n\nSecond sentence: \"Diplomatic relations between the two countries date from 1879 and there has been a Bulgarian embassy in London since 1903.\"\n\nWe have two facts:\n\n- Diplomatic relations between Bulgaria and United Kingdom date from 1879. So subject: diplomatic relations (maybe \"Bulgaria–United Kingdom diplomatic relations\") relation: \"start time\" object: 1879. Or we could have (Bulgaria, diplomatic relations with, United Kingdom) with qualifier start time 1879.\n\nBetter: subject: Bulgaria, relation: \"diplomatic relations with\", object: United Kingdom, qualifier: start time 1879.\n\n- There has been a Bulgarian embassy in London since 1903. So subject: Embassy of Bulgaria in London (or Bulgarian embassy in London) relation: \"inception\" or \"start time\" 1903. Could be \"established\" relation. Use \"inception\" maybe. We'll use relation \"established\" with qualifier point in time 1903. Or just relation \"start time\". The spec uses qualifiers for point in time. Example: award received with qualifier point in time. So we could have (Embassy of Bulgaria in London, inception, 1903) but object_type year. Or (Embassy of Bulgaria in London, start time, 1903). Let's follow pattern: relation \"established\" object \"1903\" with object_type \"year\". Or we could have \"start time\" as qualifier on a relation like \"building\". But simpler: relation \"inception\" object \"1903\". We'll decide.\n\nThird sentence: \"The embassy is currently housed in a building on the east side of Queen's Gate, just within the City of Westminster, which is Grade II listed.\"\n\nFacts:\n\n- Embassy of Bulgaria in London is housed in a building. So relation: \"located in building\" or \"housed in\". Use \"housed in\". Subject: Embassy of Bulgaria in London, relation: \"housed in\", object: building (maybe name unknown). Could create entity \"building on the east side of Queen's Gate\". We'll call object: \"building on the east side of Queen's Gate\". object_type: \"building\". Qualifier: maybe \"heritage status\" Grade II listed.\n\n- The building is on the east side of Queen's Gate. So relation: \"located on\", object: \"east side of Queen's Gate\". object_type: \"street location\". Could also have \"address\". We'll create.\n\n- The building is within the City of Westminster. So relation: \"located in\", object: City of Westminster, object_type: \"city\". Also \"just within the City of Westminster\". So we can have that.\n\n- The building is Grade II listed. So relation: \"heritage status\", object: \"Grade II listed\", object_type: \"heritage designation\".\n\nWe need to include qualifiers where appropriate. For \"housed in\", we could add qualifier \"heritage status\" but spec says qualifiers attach to triplet, not separate triplet. So we could have a qualifier on the \"housed in\" triplet: relation \"heritage status\", object \"Grade II listed\". That would satisfy \"which is Grade II listed\". So we can attach as qualifier.\n\nAlso maybe include qualifier \"point in time\" for \"currently\" but not needed.\n\nNow compile list of entities and types.\n\nDefine types:\n\n- Embassy of Bulgaria in London: type \"embassy\" (or \"diplomatic mission\").\n- Bulgaria: type \"country\".\n- United Kingdom: type \"country\".\n- London: type \"city\".\n- Diplomatic relations: maybe not needed as separate entity; we use relation between countries.\n- 1879: type \"year\".\n- 1903: type \"year\".\n- building on the east side of Queen's Gate: type \"building\".\n- east side of Queen's Gate: type \"street location\" or \"street\". We'll use \"street\".\n- Queen's Gate: type \"street\".\n- City of Westminster: type \"city\".\n- Grade II listed: type \"heritage designation\".\n\nNow produce JSON list.\n\nTriplets:\n\n1. subject: \"Embassy of Bulgaria in London\", relation: \"diplomatic mission of\", object: \"Bulgaria\", qualifiers: [], subject_type: \"embassy\", object_type: \"country\".\n\n2. subject: \"Embassy of Bulgaria in London\", relation: \"located in country\", object: \"United Kingdom\", qualifiers: [], subject_type: \"embassy\", object_type: \"country\". Or \"located in\" object \"United Kingdom\". We'll use \"located in\". But we also have location city London. Could add separate.\n\n3. subject: \"Embassy of Bulgaria in London\", relation: \"located in city\", object: \"London\", qualifiers: [], subject_type: \"embassy\", object_type: \"city\".\n\n4. subject: \"Bulgaria\", relation: \"diplomatic relations with\", object: \"United Kingdom\", qualifiers: [{relation: \"start time\", object: \"1879\", object_type: \"year\"}], subject_type: \"country\", object_type: \"country\".\n\n5. subject: \"Embassy of Bulgaria in London\", relation: \"established\", object: \"1903\", qualifiers: [], subject_type: \"embassy\", object_type: \"year\". Or we could use \"inception\". Use \"established\".\n\n6. subject: \"Embassy of Bulgaria in London\", relation: \"housed in\", object: \"building on the east side of Queen's Gate\", qualifiers: [{relation: \"heritage status\", object: \"Grade II listed\", object_type: \"heritage designation\"}], subject_type: \"embassy\", object_type: \"building\".\n\n7. subject: \"building on the east side of Queen's Gate\", relation: \"located on\", object: \"Queen's Gate\", qualifiers: [{relation: \"position\", object: \"east side\", object_type: \"direction\"}]? Might be too detailed. Simpler: relation \"located on\", object: \"Queen's Gate\". qualifiers: [{relation: \"side\", object: \"east\", object_type: \"direction\"}]. But spec: qualifiers are attached to triplet. Could do that. Let's include qualifier side.\n\nSo:\n\nsubject: \"building on the east side of Queen's Gate\", relation: \"located on\", object: \"Queen's Gate\", qualifiers: [{\"relation\":\"side\",\"object\":\"east\",\"object_type\":\"direction\"}], subject_type:\"building\", object_type:\"street\".\n\n8. subject: \"building on the east side of Queen's Gate\", relation: \"located in\", object: \"City of Westminster\", qualifiers: [], subject_type:\"building\", object_type:\"city\".\n\nPotentially also \"City of Westminster\" is within \"London\"? Not needed.\n\nNow ensure JSON format: top-level key \"triplets\": list.\n\nCheck each dictionary includes \"qualifiers\": list (maybe empty). Include \"subject_type\" and \"object_type\".\n\nMake sure object_type for year is \"year\". For heritage designation: \"heritage designation\". For direction: \"direction\". For street: \"street\". For city: \"city\". For building: \"building\". For embassy: \"embassy\". For country: \"country\". For diplomatic relation maybe \"diplomatic relation\" but we used relation \"diplomatic relations with\". object_type \"country\". That's fine.\n\nNow produce final JSON.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 2495,
+      "total_tokens": 3928,
+      "cost": 0.00046714,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1344,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00046714,
+        "upstream_inference_prompt_cost": 4.299e-05,
+        "upstream_inference_completions_cost": 0.00042415
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1933,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"diplomatic mission of\",\n            \"object\": \"Bulgaria\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"located in\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"located in\",\n            \"object\": \"London\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Bulgaria\",\n            \"relation\": \"diplomatic relations with\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1879\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"established\",\n            \"object\": \"1903\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Embassy of Bulgaria in London\",\n            \"relation\": \"housed in\",\n            \"object\": \"building on the east side of Queen's Gate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"heritage status\",\n                    \"object\": \"Grade II listed\",\n                    \"object_type\": \"heritage designation\"\n                }\n            ],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"building on the east side of Queen's Gate\",\n            \"relation\": \"located on\",\n            \"object\": \"Queen's Gate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"side\",\n                    \"object\": \"east\",\n                    \"object_type\": \"direction\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"building on the east side of Queen's Gate\",\n            \"relation\": \"located in\",\n            \"object\": \"City of Westminster\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Embassy of Bulgaria in London",
+        "relation": "diplomatic mission of",
+        "object": "Bulgaria",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "country"
+      },
+      {
+        "subject": "Embassy of Bulgaria in London",
+        "relation": "located in",
+        "object": "United Kingdom",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "country"
+      },
+      {
+        "subject": "Embassy of Bulgaria in London",
+        "relation": "located in",
+        "object": "London",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "city"
+      },
+      {
+        "subject": "Bulgaria",
+        "relation": "diplomatic relations with",
+        "object": "United Kingdom",
+        "qualifiers": [
+          {
+            "relation": "start time",
+            "object": "1879"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Embassy of Bulgaria in London",
+        "relation": "established",
+        "object": "1903",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "year"
+      },
+      {
+        "subject": "Embassy of Bulgaria in London",
+        "relation": "housed in",
+        "object": "building on the east side of Queen's Gate",
+        "qualifiers": [
+          {
+            "relation": "heritage status",
+            "object": "Grade II listed"
+          }
+        ],
+        "subject_type": "embassy",
+        "object_type": "building"
+      },
+      {
+        "subject": "building on the east side of Queen's Gate",
+        "relation": "located on",
+        "object": "Queen's Gate",
+        "qualifiers": [
+          {
+            "relation": "side",
+            "object": "east"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "street"
+      },
+      {
+        "subject": "building on the east side of Queen's Gate",
+        "relation": "located in",
+        "object": "City of Westminster",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "city"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1433,
+    "completion_tokens": 2495,
+    "total_tokens": 3928,
+    "cost": 0.00046714,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1344,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00046714,
+      "upstream_inference_prompt_cost": 4.299e-05,
+      "upstream_inference_completions_cost": 0.00042415
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1933,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 801,
+    "output_tokens_est": 674
+  },
+  "attempts": 1,
+  "latency_s": 45.29418068400264,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:20:27.161697+00:00",
+  "cache_key": "e6c6b97143c42fbc275f634fd63924ad"
+}

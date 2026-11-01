@@ -1,0 +1,154 @@
+{
+  "task": {
+    "input_id": "dca9a9c37d0daa63",
+    "input_hash": "526ad973aa408c1c49683697e49177d8a2dddeaba52947b24259fd4a84b7505c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-0af16a39afa412169fe1ff15f29632e2",
+    "object": "chat.completion",
+    "created": 1791507391,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"date of birth\",\n            \"object\": \"13 October 1924\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"date of death\",\n            \"object\": \"30 January 2012\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"occupation\",\n            \"object\": \"fencer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"ranking\",\n            \"object\": \"fourth place\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"1960 Summer Olympics\"\n                },\n                {\n                    \"relation\": \"team\",\n                    \"object\": \"German foil team\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"ranking\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"medal won\",\n            \"object\": \"medal\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"3\"\n                },\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"World Fencing Championships\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1957–1959\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"award\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Heli Höhle (13 October 1924 – 30 January 2012) was a German fencer. She finished in fourth place with the German foil team at the 1960 Summer Olympics. She won three medals in this event at the world championships in 1957–1959.\"\n\nFirst, subject: Helmi Höhle (human). Provide date of birth, date of death.\n\nTriplet 1: subject Helmi Höhle, relation date of birth, object 13 October 1924, type date.\n\nTriplet 2: date of death 30 January 2012.\n\nOccupation: fencer. Also nationality: German (maybe relation \"country of citizenship\" or \"nationality\". Use \"country of citizenship\". object German (country). subject_type human, object_type country.\n\nRelation: \"occupation\" object \"fencer\". object_type profession/sport? Use \"sport\" maybe \"fencer\" is a profession. Use \"profession\". We'll set object_type \"profession\".\n\nNow achievements.\n\nShe finished in fourth place with the German foil team at the 1960 Summer Olympics.\n\nTriplet: subject Helmi Höhle, relation \"position held\" maybe \"ranking\" or \"place achieved\". Use \"position\" maybe \"ranking\". In Wikidata there is \"position held\" for offices, but for sports results there is \"position\" (P1352) \"position\". Could use \"ranking\". We'll use \"ranking\". object \"fourth place\". qualifiers: point in time 1960 Summer Olympics (event). Also \"with the German foil team\" indicates team participation. Could also have triplet: subject Helmi Höhle, relation \"member of sports team\", object \"German foil team\". qualifiers: point in time 1960 Summer Olympics (or maybe \"participated in\" event). But we need to capture the fact she was part of the German foil team at 1960 Olympics and they finished fourth.\n\nSimplify: create triplet: (Helmi Höhle, competition result, \"fourth place\") with qualifiers: {\"relation\":\"event\",\"object\":\"1960 Summer Olympics\"}, {\"relation\":\"team\",\"object\":\"German foil team\"}.\n\nBut need to use known relation names. Could use \"award received\" but not award. Use \"position\" maybe.\n\nLet's create:\n\nTriplet: subject Helmi Höhle, relation \"ranking\", object \"fourth place\". qualifiers: event 1960 Summer Olympics, team \"German foil team\". subject_type human, object_type \"ordinal number\" maybe \"ranking\". We'll set object_type \"ranking\".\n\nNow second achievement: She won three medals in this event at the world championships in 1957–1959.\n\nInterpretation: She won three medals in this event (the foil team event) at the world championships across years 1957, 1958, 1959. So we need to capture that she won medals, number three, at world championships, years 1957-1959.\n\nTriplet: subject Helmi Höhle, relation \"award received\" or \"medal won\". object \"medal\". But need specifics: three medals. Could create triplet with object \"medal\" and qualifier \"quantity\" 3, and \"event\" world championships, \"point in time\" 1957–1959 (range). Use qualifier \"point in time\" with object \"1957–1959\". Also maybe \"sport\" \"foil\". But we can include qualifier \"event\" \"World Fencing Championships\". The text says \"world championships\". We'll use \"World Fencing Championships\". Provide qualifiers.\n\nThus:\n\nTriplet: subject Helmi Höhle, relation \"medal won\", object \"medal\". qualifiers: {\"relation\":\"quantity\",\"object\":\"3\"}, {\"relation\":\"event\",\"object\":\"World Fencing Championships\"}, {\"relation\":\"point in time\",\"object\":\"1957–1959\"}.\n\nobject_type \"award\" maybe \"medal\". We'll set \"award\".\n\nNow also maybe \"team\" involvement: \"this event\" refers to foil team event. Could add qualifier \"event type\" \"foil team\". But optional.\n\nNow also \"German fencer\" includes nationality. Already captured.\n\nNow ensure each triplet includes subject_type and object_type.\n\nDefine subject_type \"human\". object_type for date: \"date\". For occupation: \"profession\". For nationality: \"country\". For ranking: \"ranking\". For medal: \"award\". For team: \"sports team\". For event: \"sports competition\". For quantity: maybe \"quantity\". But qualifiers are separate; they have relation and object; object_type not needed for qualifiers.\n\nWe need to include qualifiers list of dicts with relation and object only (no type). So fine.\n\nNow produce JSON.\n\nCheck pronoun resolution: \"She\" refers to Helmi Höhle.\n\nNow final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1651,
+      "total_tokens": 3098,
+      "completion_tokens": 1447,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"date of birth\",\n            \"object\": \"13 October 1924\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"date of death\",\n            \"object\": \"30 January 2012\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"occupation\",\n            \"object\": \"fencer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"ranking\",\n            \"object\": \"fourth place\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"1960 Summer Olympics\"\n                },\n                {\n                    \"relation\": \"team\",\n                    \"object\": \"German foil team\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"ranking\"\n        },\n        {\n            \"subject\": \"Helmi Höhle\",\n            \"relation\": \"medal won\",\n            \"object\": \"medal\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"3\"\n                },\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"World Fencing Championships\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1957–1959\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"award\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Helmi Höhle",
+        "relation": "date of birth",
+        "object": "13 October 1924",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Helmi Höhle",
+        "relation": "date of death",
+        "object": "30 January 2012",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Helmi Höhle",
+        "relation": "occupation",
+        "object": "fencer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Helmi Höhle",
+        "relation": "country of citizenship",
+        "object": "Germany",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Helmi Höhle",
+        "relation": "ranking",
+        "object": "fourth place",
+        "qualifiers": [
+          {
+            "relation": "event",
+            "object": "1960 Summer Olympics"
+          },
+          {
+            "relation": "team",
+            "object": "German foil team"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "ranking"
+      },
+      {
+        "subject": "Helmi Höhle",
+        "relation": "medal won",
+        "object": "medal",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "3"
+          },
+          {
+            "relation": "event",
+            "object": "World Fencing Championships"
+          },
+          {
+            "relation": "point in time",
+            "object": "1957–1959"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "award"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1651,
+    "total_tokens": 3098,
+    "completion_tokens": 1447,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 622,
+    "output_tokens_est": 529
+  },
+  "attempts": 1,
+  "latency_s": 17.63257811799849,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:56:49.836263+00:00",
+  "cache_key": "35895dbd8ae58fc9442f23fbed2c230c"
+}

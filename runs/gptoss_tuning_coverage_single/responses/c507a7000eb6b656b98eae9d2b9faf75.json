@@ -1,0 +1,147 @@
+{
+  "task": {
+    "input_id": "d3618cda122a78af",
+    "input_hash": "4b1df87474d726fce8b6182094f189c75d40c7acba1a0e6d040e3154aa85862b",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c4f87cae2fd12e6504a23144da5bf0dc",
+    "object": "chat.completion",
+    "created": 1791507102,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Western Allies\",\n            \"relation\": \"ceded\",\n            \"object\": \"eastern Germany\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"recipient\",\n                    \"object\": \"Red Army\"\n                }\n            ],\n            \"subject_type\": \"political organization\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Western Allies\",\n            \"relation\": \"ceded\",\n            \"object\": \"Berlin\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"recipient\",\n                    \"object\": \"Red Army\"\n                }\n            ],\n            \"subject_type\": \"political organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Western Allies\",\n            \"relation\": \"made agreement with\",\n            \"object\": \"Soviet Union\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Yalta\"\n                }\n            ],\n            \"subject_type\": \"political organization\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Western Allies' decision\",\n            \"relation\": \"has consequence\",\n            \"object\": \"serious repercussions\",\n            \"qualifiers\": [],\n            \"subject_type\": \"decision\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Cold War\",\n            \"relation\": \"emerged\",\n            \"object\": \"post-war era\",\n            \"qualifiers\": [],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"historical period\"\n        },\n        {\n            \"subject\": \"Cold War\",\n            \"relation\": \"expanded\",\n            \"object\": \"post-war era\",\n            \"qualifiers\": [],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"historical period\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Race to Berlin\n\nThe western Allies' decision to leave eastern Germany and the city of Berlin to the Red Army -- honoring the agreement they made with the Soviet Union at Yalta -- eventually had serious repercussions as the Cold War emerged and expanded in the post‑war era.\"\n\nWe need to parse facts.\n\nKey entities: western Allies, eastern Germany, city of Berlin, Red Army, agreement, Soviet Union, Yalta, Cold War, post-war era.\n\nRelations:\n\n- \"western Allies' decision to leave eastern Germany and the city of Berlin to the Red Army\". So a decision (subject: western Allies) relation: \"decision\" maybe \"decision made\" but we need a relation connecting subject and object: \"decision to leave ... to ...\" Could be \"decision\" relation \"decision\" but we need a predicate like \"decision made\" or \"decision to transfer\". In Wikidata style, there is \"decision\" maybe not. Could use \"decision\" as relation, object: \"leave eastern Germany and the city of Berlin to the Red Army\". But we should split: \"western Allies\" decided to leave \"eastern Germany\" to \"Red Army\". Also \"city of Berlin\" to \"Red Army\". So two separate triplets: (western Allies, decision to leave, eastern Germany) and (western Allies, decision to leave, Berlin). But need relation name: maybe \"decision to cede\" or \"decision to transfer\". Use \"decision to cede\" as relation? Not sure. Could use \"decision\" as relation and object as \"eastern Germany\". Might be okay.\n\nAlso \"honoring the agreement they made with the Soviet Union at Yalta\". So the decision honored an agreement. So we have a relation: (western Allies' decision, honors, agreement). Or (agreement, made by, western Allies) and (agreement, with, Soviet Union) and (agreement, location, Yalta). Let's extract:\n\n- \"they made\" refers to western Allies (the Allies). So: (western Allies, agreement made with, Soviet Union) maybe relation \"agreement made with\". Could break: (western Allies, made, agreement) and (agreement, with, Soviet Union) and (agreement, location, Yalta). Use relation \"agreement made with\" maybe.\n\nBetter: (western Allies, made, agreement) with qualifier \"with Soviet Union\" and \"point in time\" maybe not given. But we have location Yalta.\n\nWe also have \"the agreement they made with the Soviet Union at Yalta\". So we can extract:\n\n- (western Allies, agreement, \"agreement with Soviet Union\") not good.\n\nMaybe we treat \"agreement\" as an entity: \"Yalta agreement\". So we can have (Western Allies, signed, Yalta Agreement) but text says \"made\". Could use relation \"agreement made with\". Let's produce:\n\n- subject: Western Allies, relation: \"agreement made with\", object: Soviet Union, qualifiers: [{\"relation\":\"point in time\",\"object\":\"Yalta\"}]? Actually Yalta is location, not time. Use \"location\": Yalta.\n\nBut we need relation names from Wikidata style: \"agreement with\" maybe \"agreement with\". Use \"agreement with\". So (Western Allies, agreement with, Soviet Union) qualifiers: location Yalta.\n\nAlso \"the decision ... eventually had serious repercussions as the Cold War emerged and expanded in the post-war era.\"\n\nSo relation: (Western Allies' decision, had consequence, serious repercussions). Could be \"resulted in\". So (Western Allies' decision, resulted in, serious repercussions). Object \"serious repercussions\" maybe type \"event\". Also \"as the Cold War emerged and expanded in the post-war era\" indicates that the Cold War emerged and expanded. So we can have (Cold War, emerged in, post-war era) and (Cold War, expanded in, post-war era). Also maybe (Cold War, emerged, post-war era) but we need relation \"emerged\" and qualifier \"point in time\" maybe \"post-war era\". Use \"point in time\" qualifier.\n\nAlso \"the decision ... had serious repercussions as the Cold War emerged and expanded\". So we could link: (Cold War, emerged, post-war era) and (Cold War, expanded, post-war era). Also maybe (Western Allies' decision, had repercussion, Cold War) but not explicit.\n\nLet's produce triplets:\n\n1. Subject: Western Allies, relation: \"decision to leave\", object: eastern Germany. Qualifiers maybe none. subject_type: \"political organization\" (or \"alliance\"). object_type: \"region\". Use \"region\".\n\n2. Subject: Western Allies, relation: \"decision to leave\", object: Berlin. object_type: \"city\".\n\nBut we need to capture \"to the Red Army\". So maybe relation: \"decision to leave ... to\". So object could be \"Red Army\". Actually the decision is to leave eastern Germany and Berlin to the Red Army. So the object is Red Army (the recipient). The thing being left is eastern Germany and Berlin. Could be two relations: (Western Allies, decided to cede, eastern Germany) with qualifier \"to Red Army\". Similarly for Berlin. Let's do that.\n\nTriplet A: (Western Allies, cede, eastern Germany) qualifiers: [{\"relation\":\"to\",\"object\":\"Red Army\"}].\n\nTriplet B: (Western Allies, cede, Berlin) qualifiers: [{\"relation\":\"to\",\"object\":\"Red Army\"}].\n\nSubject_type: \"political organization\". Object_type: \"region\" for eastern Germany, \"city\" for Berlin.\n\nNow agreement:\n\nTriplet C: (Western Allies, made agreement with, Soviet Union) qualifiers: [{\"relation\":\"location\",\"object\":\"Yalta\"}].\n\nsubject_type: \"political organization\". object_type: \"political organization\". maybe \"state\".\n\nNow Cold War:\n\nTriplet D: (Cold War, emerged, post-war era) qualifiers: [].\n\nsubject_type: \"conflict\". object_type: \"historical period\".\n\nTriplet E: (Cold War, expanded, post-war era) qualifiers: [].\n\nNow \"serious repercussions\" maybe not an entity. Could be \"repercussions\". But we could have (Western Allies' decision, had consequence, serious repercussions). Use relation \"has consequence\". object_type \"event\". Provide.\n\nTriplet F: (Western Allies' decision, has consequence, serious repercussions). subject_type \"decision\". object_type \"event\". No qualifiers.\n\nBut \"Western Allies' decision\" is not a named entity; we could treat as \"decision of Western Allies\". Use subject \"Western Allies' decision\". Accept.\n\nNow we need to ensure each triplet includes subject_type and object_type.\n\nDefine types:\n\n- Western Allies: \"political organization\" or \"military alliance\". Use \"political organization\".\n- Red Army: \"military organization\".\n- Eastern Germany: \"region\".\n- Berlin: \"city\".\n- Soviet Union: \"state\".\n- Yalta: \"city\".\n- Cold War: \"conflict\".\n- post-war era: \"historical period\".\n- serious repercussions: \"event\".\n- decision: maybe \"decision\".\n\nNow produce JSON.\n\nCheck qualifiers: we used \"to\" relation; is that allowed? Qualifier relation names should be like \"to\". Might be okay. Could also use \"recipient\". Use \"recipient\". Let's use \"recipient\". For location qualifier, use \"location\". Good.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1638,
+      "total_tokens": 3581,
+      "completion_tokens": 1943,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Western Allies\",\n            \"relation\": \"ceded\",\n            \"object\": \"eastern Germany\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"recipient\",\n                    \"object\": \"Red Army\"\n                }\n            ],\n            \"subject_type\": \"political organization\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Western Allies\",\n            \"relation\": \"ceded\",\n            \"object\": \"Berlin\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"recipient\",\n                    \"object\": \"Red Army\"\n                }\n            ],\n            \"subject_type\": \"political organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Western Allies\",\n            \"relation\": \"made agreement with\",\n            \"object\": \"Soviet Union\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Yalta\"\n                }\n            ],\n            \"subject_type\": \"political organization\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Western Allies' decision\",\n            \"relation\": \"has consequence\",\n            \"object\": \"serious repercussions\",\n            \"qualifiers\": [],\n            \"subject_type\": \"decision\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Cold War\",\n            \"relation\": \"emerged\",\n            \"object\": \"post-war era\",\n            \"qualifiers\": [],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"historical period\"\n        },\n        {\n            \"subject\": \"Cold War\",\n            \"relation\": \"expanded\",\n            \"object\": \"post-war era\",\n            \"qualifiers\": [],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"historical period\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Western Allies",
+        "relation": "ceded",
+        "object": "eastern Germany",
+        "qualifiers": [
+          {
+            "relation": "recipient",
+            "object": "Red Army"
+          }
+        ],
+        "subject_type": "political organization",
+        "object_type": "region"
+      },
+      {
+        "subject": "Western Allies",
+        "relation": "ceded",
+        "object": "Berlin",
+        "qualifiers": [
+          {
+            "relation": "recipient",
+            "object": "Red Army"
+          }
+        ],
+        "subject_type": "political organization",
+        "object_type": "city"
+      },
+      {
+        "subject": "Western Allies",
+        "relation": "made agreement with",
+        "object": "Soviet Union",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Yalta"
+          }
+        ],
+        "subject_type": "political organization",
+        "object_type": "state"
+      },
+      {
+        "subject": "Western Allies' decision",
+        "relation": "has consequence",
+        "object": "serious repercussions",
+        "qualifiers": [],
+        "subject_type": "decision",
+        "object_type": "event"
+      },
+      {
+        "subject": "Cold War",
+        "relation": "emerged",
+        "object": "post-war era",
+        "qualifiers": [],
+        "subject_type": "conflict",
+        "object_type": "historical period"
+      },
+      {
+        "subject": "Cold War",
+        "relation": "expanded",
+        "object": "post-war era",
+        "qualifiers": [],
+        "subject_type": "conflict",
+        "object_type": "historical period"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1638,
+    "total_tokens": 3581,
+    "completion_tokens": 1943,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 581,
+    "output_tokens_est": 488
+  },
+  "attempts": 1,
+  "latency_s": 23.26118819000112,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:52:05.578194+00:00",
+  "cache_key": "c507a7000eb6b656b98eae9d2b9faf75"
+}

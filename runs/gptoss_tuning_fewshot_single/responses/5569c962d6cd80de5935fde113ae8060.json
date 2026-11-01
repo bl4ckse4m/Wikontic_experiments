@@ -1,0 +1,161 @@
+{
+  "task": {
+    "input_id": "db1ed2ca55994da6",
+    "input_hash": "a6fc5ea10f6c416fa4e2af2d5bcb118832812c000cc4fda752dafe6a71b34722",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-62984b1fd34de356eb699dabf9e3385d",
+    "object": "chat.completion",
+    "created": 1791522049,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"instance of\",\n            \"object\": \"protected area\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"type\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"located in\",\n            \"object\": \"South Africa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"part of\",\n            \"object\": \"latest park developments\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"development\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"named after\",\n            \"object\": \"Madikwe River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"named after\",\n            \"object\": \"Marico River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"inception\",\n            \"object\": \"1991\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"area\",\n            \"object\": \"750\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"km²\"\n                }\n            ],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"number\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"north of\",\n            \"object\": \"Groot-Marico\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"bordering\",\n            \"object\": \"Botswana\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Madikwe Game Reserve\n\nThe Madikwe Game Reserve is a protected area in South Africa, part of the latest park developments in the country. Named after the Madikwe or Marico River, on whose basin it is located, it was opened in 1991 and comprises 750 km² of bushland north of the small town Groot-Marico up to the Botswana border.\"\n\nWe need to parse sentences.\n\nFirst sentence: \"The Madikwe Game Reserve is a protected area in South Africa, part of the latest park developments in the country.\"\n\nTriplets:\n\n- subject: Madikwe Game Reserve, relation: instance of? but we need \"protected area\" as type. Could be relation \"instance of\" with object \"protected area\". But examples use \"occupation\", \"award received\". For location, they use \"location\" or \"country\". Here \"protected area in South Africa\". So we can have:\n\n1) Madikwe Game Reserve — \"instance of\" — \"protected area\". subject_type: \"protected area\"? Actually subject_type: \"protected area\"? In examples, subject_type is \"human\". For a place, maybe \"protected area\". object_type: \"type\" or \"category\". But we need to follow pattern: they used \"occupation\" relation with object \"physicist\". For location they used \"place of birth\". Not sure. Could use relation \"located in country\" or \"country\". Let's produce two relations:\n\n- relation: \"located in\" object: \"South Africa\". qualifiers none. subject_type: \"protected area\", object_type: \"country\".\n\n- relation: \"part of\" object: \"latest park developments in the country\". That's a phrase. Could be \"part of\" relation with object \"latest park developments\". Might be okay.\n\nSecond sentence: \"Named after the Madikwe or Marico River, on whose basin it is located, it was opened in 1991 and comprises 750 km² of bushland north of the small town Groot-Marico up to the Botswana border.\"\n\nWe have facts:\n\n- Madikwe Game Reserve — \"named after\" — \"Madikwe River\" (or \"Marico River\"? It says \"Madikwe or Marico River\". Could treat as two names. Maybe create two triplets: named after Madikwe River, named after Marico River. Use object_type \"river\". subject_type \"protected area\".\n\n- It is located on the basin of that river. Could be \"located in basin of\" relation. But maybe not needed.\n\n- It was opened in 1991. So relation \"inception\" or \"opened\". Use \"inception\" with object \"1991\" as date qualifier? In examples they used \"award received\" with point in time qualifier. For opening date, could use relation \"inception\" with object \"1991\" as point in time qualifier? Actually \"inception\" object could be date. But we can have relation \"inception\" object \"1991\". No qualifiers.\n\n- It comprises 750 km² of bushland. So relation \"area\" object \"750 km²\". Use qualifier \"unit\": \"km²\". But they treat unit as qualifier. In example they used \"quantity\" qualifier for percentage. Here we can have relation \"area\" object \"750\". qualifiers: unit \"km²\". Or relation \"area\" object \"750 km²\". Simpler: object \"750 km²\". object_type \"area\". But they want unit qualifier. Let's do: relation \"area\" object \"750\". qualifiers: {\"relation\":\"unit\",\"object\":\"km²\"}.\n\n- The bushland is north of the small town Groot-Marico up to the Botswana border. This describes location: \"located north of Groot-Marico\" and \"located up to Botswana border\". Could produce two location relations with qualifiers.\n\nWe can have:\n\n- Madikwe Game Reserve — \"located north of\" — \"Groot-Marico\". qualifiers maybe \"place\". object_type \"town\".\n\n- Madikwe Game Reserve — \"located up to\" — \"Botswana border\". relation maybe \"bordering\". Use \"bordering\" relation with object \"Botswana\". But phrase \"up to the Botswana border\" indicates its extent reaches border. Could use relation \"bordering\" object \"Botswana\". Let's do \"bordering\" relation object \"Botswana\". subject_type \"protected area\", object_type \"country\".\n\nAlso \"north of the small town Groot-Marico\". So location relation \"north of\". Use \"north of\" relation.\n\nNow we need to assign subject_type and object_type.\n\nDefine types:\n\n- Madikwe Game Reserve: protected area (or \"game reserve\").\n\n- South Africa: country.\n\n- latest park developments: maybe \"development\". Could be \"park development\". object_type \"development\".\n\n- Madikwe River: river.\n\n- Marico River: river.\n\n- 1991: date.\n\n- 750: quantity? object_type \"number\". But we have unit qualifier.\n\n- Groot-Marico: town.\n\n- Botswana: country.\n\nNow qualifiers: For area, we add unit.\n\nFor opening date maybe we could add qualifier \"point in time\" if we use relation \"opened\". Let's use relation \"opened\" object \"1991\" with no qualifier.\n\nBut maybe better: relation \"inception\" object \"1991\". We'll just use \"inception\" with object \"1991\". No qualifiers.\n\nNow produce JSON.\n\nList of triplets:\n\n1) subject \"Madikwe Game Reserve\", relation \"instance of\", object \"protected area\". qualifiers [].\n\n2) subject \"Madikwe Game Reserve\", relation \"located in\", object \"South Africa\". qualifiers [].\n\n3) subject \"Madikwe Game Reserve\", relation \"part of\", object \"latest park developments\". qualifiers [].\n\n4) subject \"Madikwe Game Reserve\", relation \"named after\", object \"Madikwe River\". qualifiers [].\n\n5) subject \"Madikwe Game Reserve\", relation \"named after\", object \"Marico River\". qualifiers [].\n\n6) subject \"Madikwe Game Reserve\", relation \"inception\", object \"1991\". qualifiers [].\n\n7) subject \"Madikwe Game Reserve\", relation \"area\", object \"750\". qualifiers [{\"relation\":\"unit\",\"object\":\"km²\"}].\n\n8) subject \"Madikwe Game Reserve\", relation \"north of\", object \"Groot-Marico\". qualifiers [].\n\n9) subject \"Madikwe Game Reserve\", relation \"bordering\", object \"Botswana\". qualifiers [].\n\nCheck if any qualifiers for \"area\" also need \"quantity\". In examples they used \"quantity\" qualifier for percentage. Here we can just use unit.\n\nNow assign types:\n\n- subject_type for all: \"protected area\" (or \"game reserve\").\n\n- object_type per object:\n\n1) object_type \"protected area\" (type). Might be \"category\". Use \"type\".\n\n2) object_type \"country\".\n\n3) object_type \"development\".\n\n4) object_type \"river\".\n\n5) object_type \"river\".\n\n6) object_type \"date\".\n\n7) object_type \"number\". (or \"quantity\").\n\n8) object_type \"town\".\n\n9) object_type \"country\".\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1670,
+      "total_tokens": 3698,
+      "completion_tokens": 2028,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"instance of\",\n            \"object\": \"protected area\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"type\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"located in\",\n            \"object\": \"South Africa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"part of\",\n            \"object\": \"latest park developments\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"development\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"named after\",\n            \"object\": \"Madikwe River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"named after\",\n            \"object\": \"Marico River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"inception\",\n            \"object\": \"1991\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"area\",\n            \"object\": \"750\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"km²\"\n                }\n            ],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"number\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"north of\",\n            \"object\": \"Groot-Marico\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Madikwe Game Reserve\",\n            \"relation\": \"bordering\",\n            \"object\": \"Botswana\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Madikwe Game Reserve",
+        "relation": "instance of",
+        "object": "protected area",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "type"
+      },
+      {
+        "subject": "Madikwe Game Reserve",
+        "relation": "located in",
+        "object": "South Africa",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "country"
+      },
+      {
+        "subject": "Madikwe Game Reserve",
+        "relation": "part of",
+        "object": "latest park developments",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "development"
+      },
+      {
+        "subject": "Madikwe Game Reserve",
+        "relation": "named after",
+        "object": "Madikwe River",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "river"
+      },
+      {
+        "subject": "Madikwe Game Reserve",
+        "relation": "named after",
+        "object": "Marico River",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "river"
+      },
+      {
+        "subject": "Madikwe Game Reserve",
+        "relation": "inception",
+        "object": "1991",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "date"
+      },
+      {
+        "subject": "Madikwe Game Reserve",
+        "relation": "area",
+        "object": "750",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "km²"
+          }
+        ],
+        "subject_type": "protected area",
+        "object_type": "number"
+      },
+      {
+        "subject": "Madikwe Game Reserve",
+        "relation": "north of",
+        "object": "Groot-Marico",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "town"
+      },
+      {
+        "subject": "Madikwe Game Reserve",
+        "relation": "bordering",
+        "object": "Botswana",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1670,
+    "total_tokens": 3698,
+    "completion_tokens": 2028,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 701,
+    "output_tokens_est": 609
+  },
+  "attempts": 1,
+  "latency_s": 24.07330426000408,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T05:01:14.003425+00:00",
+  "cache_key": "5569c962d6cd80de5935fde113ae8060"
+}

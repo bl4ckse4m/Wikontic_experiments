@@ -1,0 +1,196 @@
+{
+  "task": {
+    "input_id": "7247aa8cb29537df",
+    "input_hash": "cca56b89b1a830a6e9267629433c56e3c0b051a5300622d1b0a37e621de077d7",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793204120-UMKGIUiV5apseXzVs9jj",
+    "object": "chat.completion",
+    "created": 1793204120,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Near AI",
+    "system_fingerprint": "vllm-0.31.0-5e5536ce",
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"instance of\",\n            \"object\": \"school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"school\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"educational level\",\n            \"object\": \"K-12\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"education level\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"located in\",\n            \"object\": \"Fort Resolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"located in\",\n            \"object\": \"Northwest Territories\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"territory\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"located in\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"serves\",\n            \"object\": \"youth\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Fort Resolution\",\n                    \"object_type\": \"town\"\n                }\n            ],\n            \"subject_type\": \"school\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"student population\",\n            \"object\": \"125\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximate\",\n                    \"object\": \"true\",\n                    \"object_type\": \"boolean\"\n                }\n            ],\n            \"subject_type\": \"school\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"administered by\",\n            \"object\": \"South Slave Divisional Education Council\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"South Slave Divisional Education Council\",\n            \"relation\": \"abbreviation\",\n            \"object\": \"SSDEC\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nFirst, identify entities:\n\n- Deninu School (entity, type: school)\n- K-12 public school (type: school type)\n- Fort Resolution (place, town)\n- Northwest Territories (region)\n- Canada (country)\n- South Slave Divisional Education Council (SSDEC) (organization)\n- student population (maybe count)\n- approximately 125 students (quantity)\n- youth (maybe demographic)\n- hamlet (maybe Fort Resolution is a hamlet)\n- public education option (maybe concept)\n- administration (maybe concept)\n- responsibility (maybe relation)\n\nWe need to produce triplets with subject, relation, object, qualifiers, subject_type, object_type.\n\nLet's parse sentences:\n\nSentence 1: \"Deninu School is a K-12 public school located in Fort Resolution, Northwest Territories, Canada.\"\n\nTriplets:\n- Deninu School — instance of — school (type school). Relation could be \"instance of\" or \"type\". In examples they used occupation etc. For school, we can use \"instance of\" with object_type \"school\". Or \"school type\". Use \"instance of\". Provide subject_type \"school\"? Actually subject_type is class of subject: Deninu School is a school, so subject_type \"school\". object_type \"school\". Might be redundant but okay.\n\n- Deninu School — location — Fort Resolution. Relation \"located in\". object_type \"settlement\" or \"town\". Use \"town\". Provide qualifier maybe \"country\" etc. Could also have separate triplet for location in Northwest Territories and Canada. Since location is hierarchical, we can have multiple location relations: \"located in\" Fort Resolution, \"located in\" Northwest Territories, \"located in\" Canada. Or we could have qualifiers for region. But guidelines: each fact separate. So we can produce three location triplets.\n\n- Deninu School — school level — K-12. Relation \"educational level\". object_type \"education level\". subject_type \"school\". Provide qualifier maybe \"type\". We'll just have relation \"educational level\".\n\nSentence 2: \"The school currently represents the only public education option for youth in the hamlet and serves a student population of approximately 125 students.\"\n\nTriplets:\n- Deninu School — is only public education option for — youth in the hamlet. Relation \"provides education for\". object \"youth\". Could also have \"public education option\" as concept. Might be better: Deninu School — public education option — hamlet youth. But we need clear relation. Could use \"serves\" relation: Deninu School — serves — youth. object_type \"human\". Provide qualifier \"location\" hamlet (Fort Resolution). Or we can have two triplets: Deninu School — serves — youth. And Deninu School — serves — student population (125 students). Actually \"serves a student population of approximately 125 students.\" So we can have:\n\n- Deninu School — student population — 125. Relation \"student population\". object_type \"quantity\". Provide qualifier \"approximate\" maybe not needed.\n\n- Deninu School — serves — youth. object_type \"human\". Provide qualifier \"location\" Fort Resolution (or hamlet). Could also have \"demographic\" qualifier.\n\n- Deninu School — is only public education option for — youth. Could be captured by same serves relation.\n\nWe'll include both.\n\nSentence 3: \"The administration of the school is the responsibility of the South Slave Divisional Education Council (SSDEC).\"\n\nTriplets:\n- Deninu School — administered by — South Slave Divisional Education Council. Relation \"administered by\". object_type \"organization\".\n\n- South Slave Divisional Education Council — abbreviation — SSDEC. Could be separate but maybe not needed.\n\nAlso \"administration of the school\" is responsibility of SSDEC. So we can have \"responsibility\" relation.\n\nWe'll produce triplets:\n\n1. Deninu School — instance of — school.\n2. Deninu School — educational level — K-12.\n3. Deninu School — located in — Fort Resolution.\n4. Deninu School — located in — Northwest Territories.\n5. Deninu School — located in — Canada.\n6. Deninu School — serves — youth.\n   qualifiers: maybe \"location\" Fort Resolution, \"demographic\" \"youth\". But we already have location separate. Could add qualifier \"location\" Fort Resolution.\n7. Deninu School — student population — 125.\n   qualifiers: {\"relation\":\"approximate\", \"object\":\"true\",\"object_type\":\"boolean\"}? Not needed. Could add qualifier \"point in time\" maybe current. Not required.\n\n8. Deninu School — administered by — South Slave Divisional Education Council.\n   qualifiers maybe none.\n\n9. South Slave Divisional Education Council — abbreviation — SSDEC. (optional)\n\nWe need to include subject_type and object_type for each.\n\nDefine types:\n\n- school: \"school\"\n- K-12: \"education level\"\n- Fort Resolution: \"town\" or \"settlement\". Use \"town\".\n- Northwest Territories: \"territory\" (region)\n- Canada: \"country\"\n- youth: \"human\" (or \"demographic group\"). Use \"human\".\n- student population: maybe \"quantity\". object_type \"number\".\n- South Slave Divisional Education Council: \"organization\"\n- SSDEC: \"organization\" (or \"abbreviation\").\n\nNow qualifiers: For triplet 6 (serves youth) we can add qualifier location Fort Resolution. Provide qualifier relation \"location\" object \"Fort Resolution\" object_type \"town\". Also maybe \"demographic\" but not needed.\n\nFor triplet 7 (student population) we could add qualifier \"approximate\" true, but guidelines require qualifier object_type. Could use \"approximate\" relation with object \"true\" type \"boolean\". Might be okay.\n\nBut maybe simpler: no qualifiers unless needed.\n\nThe guidelines: qualifiers must always be attached to a triplet and never standalone. Provide list even if empty.\n\nThus produce JSON with \"triplets\": [ ... ].\n\nLet's craft each dictionary.\n\nTriplet 1:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"instance of\",\n \"object\":\"school\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"school\"\n}\n\nTriplet 2:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"educational level\",\n \"object\":\"K-12\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"education level\"\n}\n\nTriplet 3:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"located in\",\n \"object\":\"Fort Resolution\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"town\"\n}\n\nTriplet 4:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"located in\",\n \"object\":\"Northwest Territories\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"territory\"\n}\n\nTriplet 5:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"located in\",\n \"object\":\"Canada\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"country\"\n}\n\nTriplet 6:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"serves\",\n \"object\":\"youth\",\n \"qualifiers\":[\n   {\"relation\":\"location\",\"object\":\"Fort Resolution\",\"object_type\":\"town\"}\n ],\n \"subject_type\":\"school\",\n \"object_type\":\"human\"\n}\n\nTriplet 7:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"student population\",\n \"object\":\"125\",\n \"qualifiers\":[\n   {\"relation\":\"approximate\",\"object\":\"true\",\"object_type\":\"boolean\"}\n ],\n \"subject_type\":\"school\",\n \"object_type\":\"quantity\"\n}\n\nTriplet 8:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"administered by\",\n \"object\":\"South Slave Divisional Education Council\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"organization\"\n}\n\nTriplet 9:\n{\n \"subject\":\"South Slave Divisional Education Council\",\n \"relation\":\"abbreviation\",\n \"object\":\"SSDEC\",\n \"qualifiers\":[],\n \"subject_type\":\"organization\",\n \"object_type\":\"organization\"\n}\n\nCheck if any other facts: \"only public education option\" maybe captured but we have serves youth. Could add \"only public education option for\" but maybe redundant.\n\nWe'll output JSON with key \"triplets\". Ensure proper formatting, no extra text.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nFirst, identify entities:\n\n- Deninu School (entity, type: school)\n- K-12 public school (type: school type)\n- Fort Resolution (place, town)\n- Northwest Territories (region)\n- Canada (country)\n- South Slave Divisional Education Council (SSDEC) (organization)\n- student population (maybe count)\n- approximately 125 students (quantity)\n- youth (maybe demographic)\n- hamlet (maybe Fort Resolution is a hamlet)\n- public education option (maybe concept)\n- administration (maybe concept)\n- responsibility (maybe relation)\n\nWe need to produce triplets with subject, relation, object, qualifiers, subject_type, object_type.\n\nLet's parse sentences:\n\nSentence 1: \"Deninu School is a K-12 public school located in Fort Resolution, Northwest Territories, Canada.\"\n\nTriplets:\n- Deninu School — instance of — school (type school). Relation could be \"instance of\" or \"type\". In examples they used occupation etc. For school, we can use \"instance of\" with object_type \"school\". Or \"school type\". Use \"instance of\". Provide subject_type \"school\"? Actually subject_type is class of subject: Deninu School is a school, so subject_type \"school\". object_type \"school\". Might be redundant but okay.\n\n- Deninu School — location — Fort Resolution. Relation \"located in\". object_type \"settlement\" or \"town\". Use \"town\". Provide qualifier maybe \"country\" etc. Could also have separate triplet for location in Northwest Territories and Canada. Since location is hierarchical, we can have multiple location relations: \"located in\" Fort Resolution, \"located in\" Northwest Territories, \"located in\" Canada. Or we could have qualifiers for region. But guidelines: each fact separate. So we can produce three location triplets.\n\n- Deninu School — school level — K-12. Relation \"educational level\". object_type \"education level\". subject_type \"school\". Provide qualifier maybe \"type\". We'll just have relation \"educational level\".\n\nSentence 2: \"The school currently represents the only public education option for youth in the hamlet and serves a student population of approximately 125 students.\"\n\nTriplets:\n- Deninu School — is only public education option for — youth in the hamlet. Relation \"provides education for\". object \"youth\". Could also have \"public education option\" as concept. Might be better: Deninu School — public education option — hamlet youth. But we need clear relation. Could use \"serves\" relation: Deninu School — serves — youth. object_type \"human\". Provide qualifier \"location\" hamlet (Fort Resolution). Or we can have two triplets: Deninu School — serves — youth. And Deninu School — serves — student population (125 students). Actually \"serves a student population of approximately 125 students.\" So we can have:\n\n- Deninu School — student population — 125. Relation \"student population\". object_type \"quantity\". Provide qualifier \"approximate\" maybe not needed.\n\n- Deninu School — serves — youth. object_type \"human\". Provide qualifier \"location\" Fort Resolution (or hamlet). Could also have \"demographic\" qualifier.\n\n- Deninu School — is only public education option for — youth. Could be captured by same serves relation.\n\nWe'll include both.\n\nSentence 3: \"The administration of the school is the responsibility of the South Slave Divisional Education Council (SSDEC).\"\n\nTriplets:\n- Deninu School — administered by — South Slave Divisional Education Council. Relation \"administered by\". object_type \"organization\".\n\n- South Slave Divisional Education Council — abbreviation — SSDEC. Could be separate but maybe not needed.\n\nAlso \"administration of the school\" is responsibility of SSDEC. So we can have \"responsibility\" relation.\n\nWe'll produce triplets:\n\n1. Deninu School — instance of — school.\n2. Deninu School — educational level — K-12.\n3. Deninu School — located in — Fort Resolution.\n4. Deninu School — located in — Northwest Territories.\n5. Deninu School — located in — Canada.\n6. Deninu School — serves — youth.\n   qualifiers: maybe \"location\" Fort Resolution, \"demographic\" \"youth\". But we already have location separate. Could add qualifier \"location\" Fort Resolution.\n7. Deninu School — student population — 125.\n   qualifiers: {\"relation\":\"approximate\", \"object\":\"true\",\"object_type\":\"boolean\"}? Not needed. Could add qualifier \"point in time\" maybe current. Not required.\n\n8. Deninu School — administered by — South Slave Divisional Education Council.\n   qualifiers maybe none.\n\n9. South Slave Divisional Education Council — abbreviation — SSDEC. (optional)\n\nWe need to include subject_type and object_type for each.\n\nDefine types:\n\n- school: \"school\"\n- K-12: \"education level\"\n- Fort Resolution: \"town\" or \"settlement\". Use \"town\".\n- Northwest Territories: \"territory\" (region)\n- Canada: \"country\"\n- youth: \"human\" (or \"demographic group\"). Use \"human\".\n- student population: maybe \"quantity\". object_type \"number\".\n- South Slave Divisional Education Council: \"organization\"\n- SSDEC: \"organization\" (or \"abbreviation\").\n\nNow qualifiers: For triplet 6 (serves youth) we can add qualifier location Fort Resolution. Provide qualifier relation \"location\" object \"Fort Resolution\" object_type \"town\". Also maybe \"demographic\" but not needed.\n\nFor triplet 7 (student population) we could add qualifier \"approximate\" true, but guidelines require qualifier object_type. Could use \"approximate\" relation with object \"true\" type \"boolean\". Might be okay.\n\nBut maybe simpler: no qualifiers unless needed.\n\nThe guidelines: qualifiers must always be attached to a triplet and never standalone. Provide list even if empty.\n\nThus produce JSON with \"triplets\": [ ... ].\n\nLet's craft each dictionary.\n\nTriplet 1:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"instance of\",\n \"object\":\"school\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"school\"\n}\n\nTriplet 2:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"educational level\",\n \"object\":\"K-12\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"education level\"\n}\n\nTriplet 3:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"located in\",\n \"object\":\"Fort Resolution\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"town\"\n}\n\nTriplet 4:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"located in\",\n \"object\":\"Northwest Territories\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"territory\"\n}\n\nTriplet 5:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"located in\",\n \"object\":\"Canada\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"country\"\n}\n\nTriplet 6:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"serves\",\n \"object\":\"youth\",\n \"qualifiers\":[\n   {\"relation\":\"location\",\"object\":\"Fort Resolution\",\"object_type\":\"town\"}\n ],\n \"subject_type\":\"school\",\n \"object_type\":\"human\"\n}\n\nTriplet 7:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"student population\",\n \"object\":\"125\",\n \"qualifiers\":[\n   {\"relation\":\"approximate\",\"object\":\"true\",\"object_type\":\"boolean\"}\n ],\n \"subject_type\":\"school\",\n \"object_type\":\"quantity\"\n}\n\nTriplet 8:\n{\n \"subject\":\"Deninu School\",\n \"relation\":\"administered by\",\n \"object\":\"South Slave Divisional Education Council\",\n \"qualifiers\":[],\n \"subject_type\":\"school\",\n \"object_type\":\"organization\"\n}\n\nTriplet 9:\n{\n \"subject\":\"South Slave Divisional Education Council\",\n \"relation\":\"abbreviation\",\n \"object\":\"SSDEC\",\n \"qualifiers\":[],\n \"subject_type\":\"organization\",\n \"object_type\":\"organization\"\n}\n\nCheck if any other facts: \"only public education option\" maybe captured but we have serves youth. Could add \"only public education option for\" but maybe redundant.\n\nWe'll output JSON with key \"triplets\". Ensure proper formatting, no extra text.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1424,
+      "completion_tokens": 2276,
+      "total_tokens": 3700,
+      "cost": 0.0003834,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 48,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0003834,
+        "upstream_inference_prompt_cost": 4.2e-05,
+        "upstream_inference_completions_cost": 0.0003414
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1728,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"instance of\",\n            \"object\": \"school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"school\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"educational level\",\n            \"object\": \"K-12\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"education level\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"located in\",\n            \"object\": \"Fort Resolution\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"located in\",\n            \"object\": \"Northwest Territories\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"territory\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"located in\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"serves\",\n            \"object\": \"youth\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Fort Resolution\",\n                    \"object_type\": \"town\"\n                }\n            ],\n            \"subject_type\": \"school\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"student population\",\n            \"object\": \"125\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximate\",\n                    \"object\": \"true\",\n                    \"object_type\": \"boolean\"\n                }\n            ],\n            \"subject_type\": \"school\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Deninu School\",\n            \"relation\": \"administered by\",\n            \"object\": \"South Slave Divisional Education Council\",\n            \"qualifiers\": [],\n            \"subject_type\": \"school\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"South Slave Divisional Education Council\",\n            \"relation\": \"abbreviation\",\n            \"object\": \"SSDEC\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Deninu School",
+        "relation": "instance of",
+        "object": "school",
+        "qualifiers": [],
+        "subject_type": "school",
+        "object_type": "school"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "educational level",
+        "object": "K-12",
+        "qualifiers": [],
+        "subject_type": "school",
+        "object_type": "education level"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "located in",
+        "object": "Fort Resolution",
+        "qualifiers": [],
+        "subject_type": "school",
+        "object_type": "town"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "located in",
+        "object": "Northwest Territories",
+        "qualifiers": [],
+        "subject_type": "school",
+        "object_type": "territory"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "located in",
+        "object": "Canada",
+        "qualifiers": [],
+        "subject_type": "school",
+        "object_type": "country"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "serves",
+        "object": "youth",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Fort Resolution"
+          }
+        ],
+        "subject_type": "school",
+        "object_type": "human"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "student population",
+        "object": "125",
+        "qualifiers": [
+          {
+            "relation": "approximate",
+            "object": "true"
+          }
+        ],
+        "subject_type": "school",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Deninu School",
+        "relation": "administered by",
+        "object": "South Slave Divisional Education Council",
+        "qualifiers": [],
+        "subject_type": "school",
+        "object_type": "organization"
+      },
+      {
+        "subject": "South Slave Divisional Education Council",
+        "relation": "abbreviation",
+        "object": "SSDEC",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1424,
+    "completion_tokens": 2276,
+    "total_tokens": 3700,
+    "cost": 0.0003834,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 48,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0003834,
+      "upstream_inference_prompt_cost": 4.2e-05,
+      "upstream_inference_completions_cost": 0.0003414
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1728,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 785,
+    "output_tokens_est": 657
+  },
+  "attempts": 1,
+  "latency_s": 49.847199210002145,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T16:16:09.636397+00:00",
+  "cache_key": "7e4e124b6ad3df6f188bcdefafb66356"
+}

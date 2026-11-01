@@ -1,0 +1,132 @@
+{
+  "task": {
+    "input_id": "5c3de5dcd08dd11b",
+    "input_hash": "abc69c22971b1e5fc4ee5ee97e76e8f29cc267b657577b7ceda3b8dbb7fa92ab",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-60d207a3cac3dcf24a7d7486b22c8053",
+    "object": "chat.completion",
+    "created": 1791517799,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"ZEC Bras-Coupé-Desert\",\n            \"relation\": \"type\",\n            \"object\": \"controlled harvesting zone\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"zone type\"\n        },\n        {\n            \"subject\": \"ZEC Bras-Coupé-Desert\",\n            \"relation\": \"located in\",\n            \"object\": \"Lac-Pythonga\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"unorganized territory\"\n        },\n        {\n            \"subject\": \"Lac-Pythonga\",\n            \"relation\": \"located in\",\n            \"object\": \"La Vallée-de-la-Gatineau Regional County Municipality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"unorganized territory\",\n            \"object_type\": \"regional county municipality\"\n        },\n        {\n            \"subject\": \"La Vallée-de-la-Gatineau Regional County Municipality\",\n            \"relation\": \"located in\",\n            \"object\": \"Outaouais\",\n            \"qualifiers\": [],\n            \"subject_type\": \"regional county municipality\",\n            \"object_type\": \"administrative region\"\n        },\n        {\n            \"subject\": \"Outaouais\",\n            \"relation\": \"located in\",\n            \"object\": \"Quebec\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative region\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Quebec\",\n            \"relation\": \"located in\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"province\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts. Text mentions \"Zec Bras-Coupé–Désert\" (maybe the name). Then description: \"The ZEC Bras-Coupé-Desert is a \"zone d'exploitation contrôlée\" (controlled harvesting zone) (ZEC), located in the unorganized territory of Lac-Pythonga in La Vallée-de-la-Gatineau Regional County Municipality, in the administrative region of Outaouais, in Quebec, in Canada.\"\n\nWe need to produce triplets:\n\n- Subject: ZEC Bras-Coupé-Desert (maybe \"ZEC Bras-Coupé-Desert\" as entity). Relation: \"instance of\" or \"type\"? The text says it is a \"zone d'exploitation contrôlée\" (controlled harvesting zone) (ZEC). So relation could be \"instance of\" with object \"controlled harvesting zone\". Use object_type maybe \"zone\". We'll follow pattern: relation \"instance of\" or \"type\". In examples they used \"occupation\", \"award received\". For type they used \"field of work\". Not sure. Could use \"type\" or \"instance of\". Let's use \"instance of\". object_type: \"zone\". subject_type: \"zone\"? Actually subject_type maybe \"administrative region\"? But it's a ZEC, a type of protected area. So subject_type: \"protected area\". object_type: \"protected area type\"? Might be \"zone d'exploitation contrôlée\". We'll set object_type: \"protected area type\". But we need simple.\n\nBetter: relation \"type\" with object \"controlled harvesting zone\". subject_type \"protected area\". object_type \"zone type\". We'll decide.\n\nNext: location facts.\n\n- ZEC Bras-Coupé-Desert located in unorganized territory of Lac-Pythonga. So relation \"located in\" object \"Lac-Pythonga\". qualifiers maybe \"administrative division\"? Not needed.\n\n- Lac-Pythonga is in La Vallée-de-la-Gatineau Regional County Municipality. So we could have a separate triplet: \"Lac-Pythonga\" located in \"La Vallée-de-la-Gatineau Regional County Municipality\". But the text says \"located in the unorganized territory of Lac-Pythonga in La Vallée-de-la-Gatineau Regional County Municipality\". So we can capture that Lac-Pythonga is an unorganized territory, but not explicitly said. We can just capture location of ZEC: \"located in La Vallée-de-la-Gatineau Regional County Municipality\". Could also include hierarchical qualifiers: maybe we can attach qualifiers for each level: \"point in time\"? Not needed.\n\nBetter to produce multiple location triplets:\n\n1. ZEC Bras-Coupé-Desert located in Lac-Pythonga (unorganized territory). qualifiers maybe \"administrative level\": \"unorganized territory\". But we can just have object \"Lac-Pythonga\". subject_type \"protected area\". object_type \"unorganized territory\".\n\n2. Lac-Pythonga located in La Vallée-de-la-Gatineau Regional County Municipality. subject_type \"unorganized territory\". object_type \"regional county municipality\".\n\n3. La Vallée-de-la-Gatineau Regional County Municipality located in Outaouais (administrative region). subject_type \"regional county municipality\". object_type \"administrative region\".\n\n4. Outaouais located in Quebec. subject_type \"administrative region\". object_type \"province\".\n\n5. Quebec located in Canada. subject_type \"province\". object_type \"country\".\n\nWe need to ensure each fact is explicitly stated. The text says \"in the administrative region of Outaouais, in Quebec, in Canada.\" So we can directly link ZEC to Outaouais, Quebec, Canada as nested location. But we can also break down.\n\nBut rule: extract every explicitly stated fact. The text explicitly states ZEC located in Lac-Pythonga, which is in La Vallée-de-la-Gatineau Regional County Municipality, which is in Outaouais, which is in Quebec, which is in Canada. So we can produce chain.\n\nWe also need to capture that ZEC is a \"zone d'exploitation contrôlée\" (controlled harvesting zone). So relation \"type\" or \"instance of\". Use \"type\" maybe.\n\nDefine subject_type and object_type: For ZEC, subject_type \"protected area\". For object \"controlled harvesting zone\", object_type \"zone type\". For locations, appropriate.\n\nLet's decide:\n\nTriplet 1:\nsubject: \"ZEC Bras-Coupé-Desert\"\nrelation: \"type\"\nobject: \"controlled harvesting zone\"\nqualifiers: []\nsubject_type: \"protected area\"\nobject_type: \"zone type\"\n\nTriplet 2:\nsubject: \"ZEC Bras-Coupé-Desert\"\nrelation: \"located in\"\nobject: \"Lac-Pythonga\"\nqualifiers: []\nsubject_type: \"protected area\"\nobject_type: \"unorganized territory\"\n\nTriplet 3:\nsubject: \"Lac-Pythonga\"\nrelation: \"located in\"\nobject: \"La Vallée-de-la-Gatineau Regional County Municipality\"\nqualifiers: []\nsubject_type: \"unorganized territory\"\nobject_type: \"regional county municipality\"\n\nTriplet 4:\nsubject: \"La Vallée-de-la-Gatineau Regional County Municipality\"\nrelation: \"located in\"\nobject: \"Outaouais\"\nqualifiers: []\nsubject_type: \"regional county municipality\"\nobject_type: \"administrative region\"\n\nTriplet 5:\nsubject: \"Outaouais\"\nrelation: \"located in\"\nobject: \"Quebec\"\nqualifiers: []\nsubject_type: \"administrative region\"\nobject_type: \"province\"\n\nTriplet 6:\nsubject: \"Quebec\"\nrelation: \"located in\"\nobject: \"Canada\"\nqualifiers: []\nsubject_type: \"province\"\nobject_type: \"country\"\n\nCheck pronoun resolution: none.\n\nNo qualifiers needed.\n\nReturn JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1669,
+      "total_tokens": 3256,
+      "completion_tokens": 1587,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"ZEC Bras-Coupé-Desert\",\n            \"relation\": \"type\",\n            \"object\": \"controlled harvesting zone\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"zone type\"\n        },\n        {\n            \"subject\": \"ZEC Bras-Coupé-Desert\",\n            \"relation\": \"located in\",\n            \"object\": \"Lac-Pythonga\",\n            \"qualifiers\": [],\n            \"subject_type\": \"protected area\",\n            \"object_type\": \"unorganized territory\"\n        },\n        {\n            \"subject\": \"Lac-Pythonga\",\n            \"relation\": \"located in\",\n            \"object\": \"La Vallée-de-la-Gatineau Regional County Municipality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"unorganized territory\",\n            \"object_type\": \"regional county municipality\"\n        },\n        {\n            \"subject\": \"La Vallée-de-la-Gatineau Regional County Municipality\",\n            \"relation\": \"located in\",\n            \"object\": \"Outaouais\",\n            \"qualifiers\": [],\n            \"subject_type\": \"regional county municipality\",\n            \"object_type\": \"administrative region\"\n        },\n        {\n            \"subject\": \"Outaouais\",\n            \"relation\": \"located in\",\n            \"object\": \"Quebec\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative region\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Quebec\",\n            \"relation\": \"located in\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"province\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "ZEC Bras-Coupé-Desert",
+        "relation": "type",
+        "object": "controlled harvesting zone",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "zone type"
+      },
+      {
+        "subject": "ZEC Bras-Coupé-Desert",
+        "relation": "located in",
+        "object": "Lac-Pythonga",
+        "qualifiers": [],
+        "subject_type": "protected area",
+        "object_type": "unorganized territory"
+      },
+      {
+        "subject": "Lac-Pythonga",
+        "relation": "located in",
+        "object": "La Vallée-de-la-Gatineau Regional County Municipality",
+        "qualifiers": [],
+        "subject_type": "unorganized territory",
+        "object_type": "regional county municipality"
+      },
+      {
+        "subject": "La Vallée-de-la-Gatineau Regional County Municipality",
+        "relation": "located in",
+        "object": "Outaouais",
+        "qualifiers": [],
+        "subject_type": "regional county municipality",
+        "object_type": "administrative region"
+      },
+      {
+        "subject": "Outaouais",
+        "relation": "located in",
+        "object": "Quebec",
+        "qualifiers": [],
+        "subject_type": "administrative region",
+        "object_type": "province"
+      },
+      {
+        "subject": "Quebec",
+        "relation": "located in",
+        "object": "Canada",
+        "qualifiers": [],
+        "subject_type": "province",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1669,
+    "total_tokens": 3256,
+    "completion_tokens": 1587,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 511,
+    "output_tokens_est": 419
+  },
+  "attempts": 1,
+  "latency_s": 19.78328207199229,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:50:19.851907+00:00",
+  "cache_key": "44053d235d3da76c160845fa949e4287"
+}

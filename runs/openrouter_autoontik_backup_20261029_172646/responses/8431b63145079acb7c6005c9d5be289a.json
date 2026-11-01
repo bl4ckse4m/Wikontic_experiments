@@ -1,0 +1,200 @@
+{
+  "task": {
+    "input_id": "f2d69265d8925fa1",
+    "input_hash": "70d723d58141a3c4cfc2a5387ea5c700d48bd5ab6bd559ebfd9baa78f693d63d",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793214427-cU5E7ltS5wWamTwDH4w1",
+    "object": "chat.completion",
+    "created": 1793214427,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"instance of\",\n            \"object\": \"compilation album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"artist\",\n            \"object\": \"Keith Whitley\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Keith Whitley\",\n            \"relation\": \"occupation\",\n            \"object\": \"country music singer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Keith Whitley\",\n            \"relation\": \"nationality\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"publisher\",\n            \"object\": \"RCA Records Nashville\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"September 1991\",\n                    \"object_type\": \"date\"\n                },\n                {\n                    \"relation\": \"posthumous\",\n                    \"object\": \"true\",\n                    \"object_type\": \"boolean\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"record label\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"contains\",\n            \"object\": \"previously released song\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"4\",\n                    \"object_type\": \"number\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"contains\",\n            \"object\": \"re-orchestrated demo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"demo\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"contains\",\n            \"object\": \"previously unreleased song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"contains\",\n            \"object\": \"snippet from live performance\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"recording\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text.\n\nFirst identify entities:\n\n- Kentucky Bluebird (album)\n- Keith Whitley (human, singer)\n- RCA Records Nashville (record label)\n- September 1991 (date)\n- compilation album (type)\n- American country music singer (occupation)\n- posthumous album (attribute)\n- four previously released songs (maybe not needed as separate entity)\n- re-orchestrated demos (maybe not needed)\n- previously unreleased songs (maybe not needed)\n- snippets from live performances (maybe not needed)\n- professional music career (maybe not needed)\n\nWe need to produce triplets with subject_type and object_type.\n\nLet's list facts:\n\n1. Kentucky Bluebird is a compilation album.\n   subject: Kentucky Bluebird\n   relation: instance of (or type) maybe \"album type\"? In example they used \"occupation\" etc. For album, we could use \"instance of\" with object \"compilation album\". But they used \"occupation\" for human. For album, maybe \"genre\" or \"type\". Use \"instance of\" relation? The spec says relation should be short predicate like \"instance of\". We'll use \"instance of\". object_type: \"album\". Actually \"compilation album\" is a type of album. So object_type: \"album\". subject_type: \"album\". But subject_type is class of subject: \"album\". object_type is class of object: \"album\". Might be okay.\n\n2. Kentucky Bluebird is by American country music singer Keith Whitley. So relation: \"artist\" or \"performer\". Use \"artist\". object: Keith Whitley. subject_type: \"album\". object_type: \"human\". Also we can capture that Keith Whitley is an American country music singer. That's separate.\n\n3. Keith Whitley is an American country music singer. So relation: \"occupation\". object: \"country music singer\". object_type: \"profession\". Also maybe \"nationality\": \"American\". So separate triplet: \"nationality\" relation.\n\n4. Kentucky Bluebird is his first posthumous album. So relation: \"posthumous\". Could be \"posthumous\" as qualifier? Might be a qualifier on album release. Could be separate triplet: \"posthumous\" relation with object \"yes\"? Not typical. Maybe we can have relation \"posthumous\" with object \"true\". But object_type maybe \"boolean\". Not sure. Could also treat as qualifier on release: release type \"posthumous\". We'll add qualifier to release triplet.\n\n5. Kentucky Bluebird was released via RCA Records Nashville in September 1991. So relation: \"record label\" or \"publisher\". Use \"publisher\". object: RCA Records Nashville. qualifier: \"point in time\" = September 1991. So main triplet: subject Kentucky Bluebird, relation \"publisher\", object RCA Records Nashville. qualifiers list includes point in time.\n\nsubject_type: album, object_type: record label (company).\n\n6. The album consists of four previously released songs, re-orchestrated demos, and other previously unreleased songs, as well as snippets from live performances that predate his professional music career.\n\nWe could extract that album \"has part\" or \"contains\". Use relation \"contains\". Objects: \"previously released song\", \"re-orchestrated demo\", \"previously unreleased song\", \"snippet from live performance\". Might be many. But we can create separate triplets for each type.\n\n- relation: \"contains\" object: \"previously released song\". object_type: \"song\". qualifier maybe \"quantity\" = 4. Use qualifier \"quantity\" with object \"4\". object_type \"number\". Also \"re-orchestrated demo\" object_type \"demo\". \"previously unreleased song\" object_type \"song\". \"snippet from live performance\" object_type \"recording\". Also \"live performance\" predate his professional music career. Could add qualifier \"point in time\" relative? Might be too complex.\n\nSimplify: create triplet: Kentucky Bluebird contains \"previously released song\". qualifier quantity 4. Another: contains \"re-orchestrated demo\". Another: contains \"previously unreleased song\". Another: contains \"snippet from live performance\". For each, subject_type album, object_type appropriate.\n\n7. The snippets are from live performances that predate his professional music career. Could make triplet: snippet from live performance \"originates from\" \"live performance\". But maybe not needed.\n\nWe also need to capture that RCA Records Nashville is a record label (type). Could add but not required.\n\nNow produce JSON list.\n\nNeed each dict includes \"qualifiers\": list of dicts with relation, object, object_type.\n\nAlso include \"subject_type\" and \"object_type\".\n\nDefine types:\n\n- Kentucky Bluebird: album\n- compilation album: album (type)\n- Keith Whitley: human\n- American: nationality (maybe \"country\")\n- country music singer: profession\n- RCA Records Nashville: record label (company)\n- September 1991: date (year-month? Use \"date\")\n- previously released song: song\n- re-orchestrated demo: demo (maybe \"recording\")\n- previously unreleased song: song\n- snippet from live performance: recording\n\nQualifiers:\n\n- point in time: September 1991 (date)\n- quantity: 4 (number)\n- posthumous: true? Could be qualifier \"posthumous\" with object \"true\" type \"boolean\". But spec expects object_type. We'll include.\n\nLet's create triplets:\n\n1. Kentucky Bluebird - instance of - compilation album\n2. Kentucky Bluebird - artist - Keith Whitley\n3. Keith Whitley - occupation - country music singer\n4. Keith Whitley - nationality - United States (or \"American\") object_type \"country\"\n5. Kentucky Bluebird - publisher - RCA Records Nashville, qualifier point in time September 1991\n6. Kentucky Bluebird - contains - previously released song, qualifier quantity 4\n7. Kentucky Bluebird - contains - re-orchestrated demo\n8. Kentucky Bluebird - contains - previously unreleased song\n9. Kentucky Bluebird - contains - snippet from live performance\n10. Kentucky Bluebird - posthumous - true (maybe as qualifier on release). Could be separate triplet: Kentucky Bluebird - posthumous - true.\n\nBut maybe better to attach qualifier \"posthumous\" to release triplet. However qualifiers are attached to a triplet, not separate. So we could add qualifier \"posthumous\" with object \"true\". So modify triplet 5 to have two qualifiers: point in time and posthumous. That works.\n\nThus triplet 5 qualifiers list includes two entries.\n\nNow produce JSON.\n\nCheck each dict fields: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nDefine object_type for \"true\": boolean.\n\nDefine object_type for \"quantity\" qualifier: number.\n\nDefine object_type for \"posthumous\": boolean.\n\nNow produce final JSON list under key \"triplets\". Ensure proper formatting.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text.\n\nFirst identify entities:\n\n- Kentucky Bluebird (album)\n- Keith Whitley (human, singer)\n- RCA Records Nashville (record label)\n- September 1991 (date)\n- compilation album (type)\n- American country music singer (occupation)\n- posthumous album (attribute)\n- four previously released songs (maybe not needed as separate entity)\n- re-orchestrated demos (maybe not needed)\n- previously unreleased songs (maybe not needed)\n- snippets from live performances (maybe not needed)\n- professional music career (maybe not needed)\n\nWe need to produce triplets with subject_type and object_type.\n\nLet's list facts:\n\n1. Kentucky Bluebird is a compilation album.\n   subject: Kentucky Bluebird\n   relation: instance of (or type) maybe \"album type\"? In example they used \"occupation\" etc. For album, we could use \"instance of\" with object \"compilation album\". But they used \"occupation\" for human. For album, maybe \"genre\" or \"type\". Use \"instance of\" relation? The spec says relation should be short predicate like \"instance of\". We'll use \"instance of\". object_type: \"album\". Actually \"compilation album\" is a type of album. So object_type: \"album\". subject_type: \"album\". But subject_type is class of subject: \"album\". object_type is class of object: \"album\". Might be okay.\n\n2. Kentucky Bluebird is by American country music singer Keith Whitley. So relation: \"artist\" or \"performer\". Use \"artist\". object: Keith Whitley. subject_type: \"album\". object_type: \"human\". Also we can capture that Keith Whitley is an American country music singer. That's separate.\n\n3. Keith Whitley is an American country music singer. So relation: \"occupation\". object: \"country music singer\". object_type: \"profession\". Also maybe \"nationality\": \"American\". So separate triplet: \"nationality\" relation.\n\n4. Kentucky Bluebird is his first posthumous album. So relation: \"posthumous\". Could be \"posthumous\" as qualifier? Might be a qualifier on album release. Could be separate triplet: \"posthumous\" relation with object \"yes\"? Not typical. Maybe we can have relation \"posthumous\" with object \"true\". But object_type maybe \"boolean\". Not sure. Could also treat as qualifier on release: release type \"posthumous\". We'll add qualifier to release triplet.\n\n5. Kentucky Bluebird was released via RCA Records Nashville in September 1991. So relation: \"record label\" or \"publisher\". Use \"publisher\". object: RCA Records Nashville. qualifier: \"point in time\" = September 1991. So main triplet: subject Kentucky Bluebird, relation \"publisher\", object RCA Records Nashville. qualifiers list includes point in time.\n\nsubject_type: album, object_type: record label (company).\n\n6. The album consists of four previously released songs, re-orchestrated demos, and other previously unreleased songs, as well as snippets from live performances that predate his professional music career.\n\nWe could extract that album \"has part\" or \"contains\". Use relation \"contains\". Objects: \"previously released song\", \"re-orchestrated demo\", \"previously unreleased song\", \"snippet from live performance\". Might be many. But we can create separate triplets for each type.\n\n- relation: \"contains\" object: \"previously released song\". object_type: \"song\". qualifier maybe \"quantity\" = 4. Use qualifier \"quantity\" with object \"4\". object_type \"number\". Also \"re-orchestrated demo\" object_type \"demo\". \"previously unreleased song\" object_type \"song\". \"snippet from live performance\" object_type \"recording\". Also \"live performance\" predate his professional music career. Could add qualifier \"point in time\" relative? Might be too complex.\n\nSimplify: create triplet: Kentucky Bluebird contains \"previously released song\". qualifier quantity 4. Another: contains \"re-orchestrated demo\". Another: contains \"previously unreleased song\". Another: contains \"snippet from live performance\". For each, subject_type album, object_type appropriate.\n\n7. The snippets are from live performances that predate his professional music career. Could make triplet: snippet from live performance \"originates from\" \"live performance\". But maybe not needed.\n\nWe also need to capture that RCA Records Nashville is a record label (type). Could add but not required.\n\nNow produce JSON list.\n\nNeed each dict includes \"qualifiers\": list of dicts with relation, object, object_type.\n\nAlso include \"subject_type\" and \"object_type\".\n\nDefine types:\n\n- Kentucky Bluebird: album\n- compilation album: album (type)\n- Keith Whitley: human\n- American: nationality (maybe \"country\")\n- country music singer: profession\n- RCA Records Nashville: record label (company)\n- September 1991: date (year-month? Use \"date\")\n- previously released song: song\n- re-orchestrated demo: demo (maybe \"recording\")\n- previously unreleased song: song\n- snippet from live performance: recording\n\nQualifiers:\n\n- point in time: September 1991 (date)\n- quantity: 4 (number)\n- posthumous: true? Could be qualifier \"posthumous\" with object \"true\" type \"boolean\". But spec expects object_type. We'll include.\n\nLet's create triplets:\n\n1. Kentucky Bluebird - instance of - compilation album\n2. Kentucky Bluebird - artist - Keith Whitley\n3. Keith Whitley - occupation - country music singer\n4. Keith Whitley - nationality - United States (or \"American\") object_type \"country\"\n5. Kentucky Bluebird - publisher - RCA Records Nashville, qualifier point in time September 1991\n6. Kentucky Bluebird - contains - previously released song, qualifier quantity 4\n7. Kentucky Bluebird - contains - re-orchestrated demo\n8. Kentucky Bluebird - contains - previously unreleased song\n9. Kentucky Bluebird - contains - snippet from live performance\n10. Kentucky Bluebird - posthumous - true (maybe as qualifier on release). Could be separate triplet: Kentucky Bluebird - posthumous - true.\n\nBut maybe better to attach qualifier \"posthumous\" to release triplet. However qualifiers are attached to a triplet, not separate. So we could add qualifier \"posthumous\" with object \"true\". So modify triplet 5 to have two qualifiers: point in time and posthumous. That works.\n\nThus triplet 5 qualifiers list includes two entries.\n\nNow produce JSON.\n\nCheck each dict fields: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nDefine object_type for \"true\": boolean.\n\nDefine object_type for \"quantity\" qualifier: number.\n\nDefine object_type for \"posthumous\": boolean.\n\nNow produce final JSON list under key \"triplets\". Ensure proper formatting.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 2054,
+      "total_tokens": 3487,
+      "cost": 0.000427088,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000427088,
+        "upstream_inference_prompt_cost": 4.299e-05,
+        "upstream_inference_completions_cost": 0.000384098
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1637,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"instance of\",\n            \"object\": \"compilation album\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"artist\",\n            \"object\": \"Keith Whitley\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Keith Whitley\",\n            \"relation\": \"occupation\",\n            \"object\": \"country music singer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Keith Whitley\",\n            \"relation\": \"nationality\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"publisher\",\n            \"object\": \"RCA Records Nashville\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"September 1991\",\n                    \"object_type\": \"date\"\n                },\n                {\n                    \"relation\": \"posthumous\",\n                    \"object\": \"true\",\n                    \"object_type\": \"boolean\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"record label\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"contains\",\n            \"object\": \"previously released song\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"4\",\n                    \"object_type\": \"number\"\n                }\n            ],\n            \"subject_type\": \"album\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"contains\",\n            \"object\": \"re-orchestrated demo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"demo\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"contains\",\n            \"object\": \"previously unreleased song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Kentucky Bluebird\",\n            \"relation\": \"contains\",\n            \"object\": \"snippet from live performance\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"recording\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Kentucky Bluebird",
+        "relation": "instance of",
+        "object": "compilation album",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "album"
+      },
+      {
+        "subject": "Kentucky Bluebird",
+        "relation": "artist",
+        "object": "Keith Whitley",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "human"
+      },
+      {
+        "subject": "Keith Whitley",
+        "relation": "occupation",
+        "object": "country music singer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Keith Whitley",
+        "relation": "nationality",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Kentucky Bluebird",
+        "relation": "publisher",
+        "object": "RCA Records Nashville",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "September 1991"
+          },
+          {
+            "relation": "posthumous",
+            "object": "true"
+          }
+        ],
+        "subject_type": "album",
+        "object_type": "record label"
+      },
+      {
+        "subject": "Kentucky Bluebird",
+        "relation": "contains",
+        "object": "previously released song",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "4"
+          }
+        ],
+        "subject_type": "album",
+        "object_type": "song"
+      },
+      {
+        "subject": "Kentucky Bluebird",
+        "relation": "contains",
+        "object": "re-orchestrated demo",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "demo"
+      },
+      {
+        "subject": "Kentucky Bluebird",
+        "relation": "contains",
+        "object": "previously unreleased song",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "song"
+      },
+      {
+        "subject": "Kentucky Bluebird",
+        "relation": "contains",
+        "object": "snippet from live performance",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "recording"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1433,
+    "completion_tokens": 2054,
+    "total_tokens": 3487,
+    "cost": 0.000427088,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000427088,
+      "upstream_inference_prompt_cost": 4.299e-05,
+      "upstream_inference_completions_cost": 0.000384098
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1637,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 829,
+    "output_tokens_est": 702
+  },
+  "attempts": 1,
+  "latency_s": 22.927206230000593,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T19:07:30.074332+00:00",
+  "cache_key": "8431b63145079acb7c6005c9d5be289a"
+}

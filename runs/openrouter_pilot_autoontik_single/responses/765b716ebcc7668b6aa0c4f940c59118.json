@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "672cc7864f3a1194",
+    "input_hash": "4aae0d21aef64e98aafa066c1d07a7e3e7987f1907cf10e14047842b6a569b74",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793203306-TzgrvY6zwZkUeE7ze9Do",
+    "object": "chat.completion",
+    "created": 1793203306,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Near AI",
+    "system_fingerprint": "vllm-0.31.0-5e5536ce",
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"maternal mortality rate\",\n            \"object\": \"560 deaths per 100,000 live births\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"rate\"\n        },\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"infant mortality rate\",\n            \"object\": \"59.34 deaths per 1,000 live births\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"rate\"\n        },\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"female genital mutilation prevalence\",\n            \"object\": \"rare\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"geographic restriction\",\n                    \"object\": \"limited geographic areas\",\n                    \"object_type\": \"area\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"qualitative assessment\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Republic of the Congo\n\nAs of 2010, the maternal mortality rate was 560 deaths/100,000 live births, and the infant mortality rate was 59.34 deaths/1,000 live births. Female genital mutilation (FGM) is rare in the country, being confined to limited geographic areas of the country.\"\n\nWe need entities: Republic of the Congo (country). Maternal mortality rate (maybe a statistic). Infant mortality rate. Female genital mutilation (FGM). Also \"as of 2010\" qualifier for rates.\n\nWe need to produce triplets: (Republic of the Congo, maternal mortality rate, 560 deaths per 100,000 live births) with qualifier point in time 2010. Also object_type: maybe \"rate\" or \"statistic\". subject_type: \"country\". object_type: \"rate\". Also maybe separate triplet for infant mortality rate.\n\nAlso triplet: (Republic of the Congo, infant mortality rate, 59.34 deaths per 1,000 live births) with qualifier point in time 2010.\n\nAlso triplet: (Female genital mutilation, prevalence, rare) with qualifier location Republic of the Congo? Actually \"Female genital mutilation (FGM) is rare in the country, being confined to limited geographic areas of the country.\" So we can have (Female genital mutilation, prevalence, rare) with qualifier location Republic of the Congo. Or (Republic of the Congo, female genital mutilation prevalence, rare). Better: subject: Republic of the Congo, relation: \"female genital mutilation prevalence\", object: \"rare\". But \"rare\" is a qualitative descriptor; object_type maybe \"qualitative assessment\". Could also have (Republic of the Congo, has practice, Female genital mutilation) with qualifier extent limited geographic areas. But guidelines: use short predicates.\n\nMaybe produce two triplets: (Republic of the Congo, female genital mutilation prevalence, rare) with qualifier \"geographic restriction\" limited geographic areas, and qualifier \"location\" Republic of the Congo? That seems redundant.\n\nBetter: (Female genital mutilation, occurrence in, Republic of the Congo) with qualifier \"prevalence\", \"rare\". But object is country.\n\nLet's decide: Use subject Republic of the Congo for all. So:\n\nTriplet 1: subject \"Republic of the Congo\", relation \"maternal mortality rate\", object \"560 deaths per 100,000 live births\". qualifiers: point in time 2010.\n\nTriplet 2: subject \"Republic of the Congo\", relation \"infant mortality rate\", object \"59.34 deaths per 1,000 live births\". qualifiers: point in time 2010.\n\nTriplet 3: subject \"Republic of the Congo\", relation \"female genital mutilation prevalence\", object \"rare\". qualifiers: \"geographic restriction\", \"limited geographic areas\". Also maybe \"practice\" but okay.\n\nNow need types: subject_type \"country\". object_type for rates: maybe \"rate\". For rare: maybe \"qualitative assessment\". For geographic restriction: object_type \"area\" or \"geographic area\". For point in time: object_type \"year\". For \"2010\" year.\n\nDefine qualifiers list with relation, object, object_type.\n\nLet's craft JSON.\n\nMake sure each triplet includes \"qualifiers\": [] if none.\n\nTriplet 1 qualifiers: point in time 2010 (object_type year). Also maybe \"unit\" but not required.\n\nTriplet 2 same.\n\nTriplet 3 qualifiers: \"geographic restriction\" object \"limited geographic areas\" object_type \"area\". Also maybe \"location\" but we already have subject as country.\n\nThus output JSON with key \"triplets\": list.\n\nLet's format.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nText: \"Republic of the Congo\n\nAs of 2010, the maternal mortality rate was 560 deaths/100,000 live births, and the infant mortality rate was 59.34 deaths/1,000 live births. Female genital mutilation (FGM) is rare in the country, being confined to limited geographic areas of the country.\"\n\nWe need entities: Republic of the Congo (country). Maternal mortality rate (maybe a statistic). Infant mortality rate. Female genital mutilation (FGM). Also \"as of 2010\" qualifier for rates.\n\nWe need to produce triplets: (Republic of the Congo, maternal mortality rate, 560 deaths per 100,000 live births) with qualifier point in time 2010. Also object_type: maybe \"rate\" or \"statistic\". subject_type: \"country\". object_type: \"rate\". Also maybe separate triplet for infant mortality rate.\n\nAlso triplet: (Republic of the Congo, infant mortality rate, 59.34 deaths per 1,000 live births) with qualifier point in time 2010.\n\nAlso triplet: (Female genital mutilation, prevalence, rare) with qualifier location Republic of the Congo? Actually \"Female genital mutilation (FGM) is rare in the country, being confined to limited geographic areas of the country.\" So we can have (Female genital mutilation, prevalence, rare) with qualifier location Republic of the Congo. Or (Republic of the Congo, female genital mutilation prevalence, rare). Better: subject: Republic of the Congo, relation: \"female genital mutilation prevalence\", object: \"rare\". But \"rare\" is a qualitative descriptor; object_type maybe \"qualitative assessment\". Could also have (Republic of the Congo, has practice, Female genital mutilation) with qualifier extent limited geographic areas. But guidelines: use short predicates.\n\nMaybe produce two triplets: (Republic of the Congo, female genital mutilation prevalence, rare) with qualifier \"geographic restriction\" limited geographic areas, and qualifier \"location\" Republic of the Congo? That seems redundant.\n\nBetter: (Female genital mutilation, occurrence in, Republic of the Congo) with qualifier \"prevalence\", \"rare\". But object is country.\n\nLet's decide: Use subject Republic of the Congo for all. So:\n\nTriplet 1: subject \"Republic of the Congo\", relation \"maternal mortality rate\", object \"560 deaths per 100,000 live births\". qualifiers: point in time 2010.\n\nTriplet 2: subject \"Republic of the Congo\", relation \"infant mortality rate\", object \"59.34 deaths per 1,000 live births\". qualifiers: point in time 2010.\n\nTriplet 3: subject \"Republic of the Congo\", relation \"female genital mutilation prevalence\", object \"rare\". qualifiers: \"geographic restriction\", \"limited geographic areas\". Also maybe \"practice\" but okay.\n\nNow need types: subject_type \"country\". object_type for rates: maybe \"rate\". For rare: maybe \"qualitative assessment\". For geographic restriction: object_type \"area\" or \"geographic area\". For point in time: object_type \"year\". For \"2010\" year.\n\nDefine qualifiers list with relation, object, object_type.\n\nLet's craft JSON.\n\nMake sure each triplet includes \"qualifiers\": [] if none.\n\nTriplet 1 qualifiers: point in time 2010 (object_type year). Also maybe \"unit\" but not required.\n\nTriplet 2 same.\n\nTriplet 3 qualifiers: \"geographic restriction\" object \"limited geographic areas\" object_type \"area\". Also maybe \"location\" but we already have subject as country.\n\nThus output JSON with key \"triplets\": list.\n\nLet's format.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1421,
+      "completion_tokens": 1065,
+      "total_tokens": 2486,
+      "cost": 0.00018246,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1328,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00018246,
+        "upstream_inference_prompt_cost": 2.271e-05,
+        "upstream_inference_completions_cost": 0.00015975
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 771,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"maternal mortality rate\",\n            \"object\": \"560 deaths per 100,000 live births\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"rate\"\n        },\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"infant mortality rate\",\n            \"object\": \"59.34 deaths per 1,000 live births\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"rate\"\n        },\n        {\n            \"subject\": \"Republic of the Congo\",\n            \"relation\": \"female genital mutilation prevalence\",\n            \"object\": \"rare\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"geographic restriction\",\n                    \"object\": \"limited geographic areas\",\n                    \"object_type\": \"area\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"qualitative assessment\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Republic of the Congo",
+        "relation": "maternal mortality rate",
+        "object": "560 deaths per 100,000 live births",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "rate"
+      },
+      {
+        "subject": "Republic of the Congo",
+        "relation": "infant mortality rate",
+        "object": "59.34 deaths per 1,000 live births",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "rate"
+      },
+      {
+        "subject": "Republic of the Congo",
+        "relation": "female genital mutilation prevalence",
+        "object": "rare",
+        "qualifiers": [
+          {
+            "relation": "geographic restriction",
+            "object": "limited geographic areas"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "qualitative assessment"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1421,
+    "completion_tokens": 1065,
+    "total_tokens": 2486,
+    "cost": 0.00018246,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1328,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00018246,
+      "upstream_inference_prompt_cost": 2.271e-05,
+      "upstream_inference_completions_cost": 0.00015975
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 771,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 486,
+    "output_tokens_est": 359
+  },
+  "attempts": 1,
+  "latency_s": 22.22652654099511,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T16:02:08.910923+00:00",
+  "cache_key": "765b716ebcc7668b6aa0c4f940c59118"
+}

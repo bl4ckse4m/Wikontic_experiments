@@ -1,0 +1,140 @@
+{
+  "task": {
+    "input_id": "f728fe02faea465f",
+    "input_hash": "669e9958e2aa01d0b407ceb91dc28e12f090ca0631d1ec3ca10f6c83bd51be28",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-1c9459baf5d78b9148bc95163df314ee",
+    "object": "chat.completion",
+    "created": 1791508213,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Hopewell\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Hopewell\",\n            \"relation\": \"located in\",\n            \"object\": \"Sparta Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Sparta Township\",\n            \"relation\": \"located in\",\n            \"object\": \"Sussex County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Sussex County\",\n            \"relation\": \"located in\",\n            \"object\": \"New Jersey\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"New Jersey\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Hopewell\",\n            \"relation\": \"elevation above sea level\",\n            \"object\": \"1,093 feet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"length\"\n        },\n        {\n            \"subject\": \"Hopewell\",\n            \"relation\": \"elevation above sea level\",\n            \"object\": \"333 m\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"length\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Hopewell, Sussex County, New Jersey\n\nHopewell is an unincorporated community located within Sparta Township in Sussex County, New Jersey, United States. It lies at an elevation of 1,093 feet (333 m).\"\n\nWe have entities: Hopewell (the community), Sussex County, New Jersey, Sparta Township, United States.\n\nFacts:\n\n- Hopewell is an unincorporated community. So (Hopewell, instance of, unincorporated community) or (Hopewell, type, unincorporated community) but relation likely \"instance of\" or \"subclass of\"? In examples they used \"occupation\". For location they used \"located in\". Use \"instance of\" maybe. But we need a Wikidata-style relation. Could use \"instance of\". We'll set subject_type \"human\"? No, it's a place. So subject_type \"settlement\" maybe. object_type \"human\"? No. Use \"unincorporated community\" as object_type \"settlement type\". We'll decide.\n\n- Hopewell located within Sparta Township. So (Hopewell, located in, Sparta Township). qualifiers maybe none. subject_type \"settlement\". object_type \"administrative territorial entity\" maybe \"township\". We'll use generic.\n\n- Sparta Township is in Sussex County, New Jersey, United States. The phrase \"located within Sparta Township in Sussex County, New Jersey, United States.\" Means Hopewell is within Sparta Township, which is within Sussex County, which is within New Jersey, which is within United States. We can extract hierarchical location: (Hopewell, located in, Sussex County) maybe but we need to be careful: The text says \"located within Sparta Township in Sussex County, New Jersey, United States.\" So we can extract that Hopewell is located in Sparta Township, and also that Sparta Township is located in Sussex County, New Jersey, United States. But we only have direct statements about Hopewell. We could also infer location of Sparta Township but that's not explicitly about Hopewell. However we can extract \"Sparta Township is located in Sussex County\". The text: \"located within Sparta Township in Sussex County, New Jersey, United States.\" The phrase \"in Sussex County, New Jersey, United States\" modifies Sparta Township? Actually \"Sparta Township in Sussex County, New Jersey, United States\" is a description of Sparta Township. So we can extract (Sparta Township, located in, Sussex County). Also (Sussex County, located in, New Jersey). (New Jersey, located in, United States). Those are explicit? The phrase \"Sparta Township in Sussex County, New Jersey, United States\" implies that Sparta Township is in Sussex County, which is in New Jersey, which is in United States. So we can extract those.\n\n- Elevation: \"It lies at an elevation of 1,093 feet (333 m).\" So (Hopewell, elevation above sea level, 1,093 feet) with qualifier maybe also metric. Could have two objects? Could have separate triplet for metric. Use object \"1,093 feet\". object_type \"length\". Also maybe include metric as qualifier: {\"relation\":\"approximation\",\"object\":\"333 m\"}? Actually it's conversion, not approximation. Could have separate triplet for metric. But we can include both as separate objects? Might be okay to have two triplets: one with feet, one with meters. Use same relation \"elevation above sea level\". Provide qualifiers maybe \"unit\" but not required. We'll create two triplets.\n\nNow define subject_type and object_type.\n\nSubject types:\n- Hopewell: \"unincorporated community\" is a type of \"human settlement\". So subject_type \"human settlement\".\n- Sparta Township: \"township\" also a \"administrative territorial entity\". So subject_type \"administrative territorial entity\".\n- Sussex County: \"county\" also \"administrative territorial entity\".\n- New Jersey: \"state\" (political subdivision).\n- United States: \"country\".\n\nObject types:\n- unincorporated community: \"settlement type\".\n- Sparta Township: \"administrative territorial entity\".\n- Sussex County: \"administrative territorial entity\".\n- New Jersey: \"state\".\n- United States: \"country\".\n- Elevation: numeric length: object_type \"length\". Provide value as string.\n\nNow produce JSON.\n\nTriplets list:\n\n1. Hopewell - instance of - unincorporated community (qualifiers none)\n2. Hopewell - located in - Sparta Township\n3. Sparta Township - located in - Sussex County\n4. Sussex County - located in - New Jersey\n5. New Jersey - located in - United States\n6. Hopewell - elevation above sea level - 1,093 feet\n7. Hopewell - elevation above sea level - 333 m\n\nCheck qualifiers: none needed.\n\nNow produce JSON with required fields.\n\nMake sure each dict includes \"qualifiers\": [].\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1633,
+      "total_tokens": 3056,
+      "completion_tokens": 1423,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Hopewell\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Hopewell\",\n            \"relation\": \"located in\",\n            \"object\": \"Sparta Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Sparta Township\",\n            \"relation\": \"located in\",\n            \"object\": \"Sussex County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Sussex County\",\n            \"relation\": \"located in\",\n            \"object\": \"New Jersey\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"New Jersey\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Hopewell\",\n            \"relation\": \"elevation above sea level\",\n            \"object\": \"1,093 feet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"length\"\n        },\n        {\n            \"subject\": \"Hopewell\",\n            \"relation\": \"elevation above sea level\",\n            \"object\": \"333 m\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"length\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Hopewell",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Hopewell",
+        "relation": "located in",
+        "object": "Sparta Township",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Sparta Township",
+        "relation": "located in",
+        "object": "Sussex County",
+        "qualifiers": [],
+        "subject_type": "administrative territorial entity",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Sussex County",
+        "relation": "located in",
+        "object": "New Jersey",
+        "qualifiers": [],
+        "subject_type": "administrative territorial entity",
+        "object_type": "state"
+      },
+      {
+        "subject": "New Jersey",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "Hopewell",
+        "relation": "elevation above sea level",
+        "object": "1,093 feet",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "length"
+      },
+      {
+        "subject": "Hopewell",
+        "relation": "elevation above sea level",
+        "object": "333 m",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "length"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1633,
+    "total_tokens": 3056,
+    "completion_tokens": 1423,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 563,
+    "output_tokens_est": 471
+  },
+  "attempts": 1,
+  "latency_s": 17.76342937599111,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:10:31.715886+00:00",
+  "cache_key": "dbcefe642f365b27ad24cd795d85bcfd"
+}

@@ -1,0 +1,158 @@
+{
+  "task": {
+    "input_id": "87d37e417a00ae92",
+    "input_hash": "12f2f215625df61ca774fbe0500549f46a2f119da7f7f9173e91c5f3a52aec79",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-507f65b355811e55cf4fab4364c29b88",
+    "object": "chat.completion",
+    "created": 1791519243,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"IATA code\",\n            \"object\": \"NAS\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"ICAO code\",\n            \"object\": \"MYNN\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"former name\",\n            \"object\": \"Nassau International Airport\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1957 - 2006\"\n                }\n            ],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"airport\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"largest airport in\",\n            \"object\": \"Bahamas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"largest international gateway in\",\n            \"object\": \"Bahamas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"hub for\",\n            \"object\": \"Bahamasair\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"airline\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"located in\",\n            \"object\": \"New Providence island\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"western\"\n                }\n            ],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"near\",\n            \"object\": \"Nassau\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText:\n\n\"Lynden Pindling International Airport\n\nLynden Pindling International Airport (IATA: NAS, ICAO: MYNN), formerly known as Nassau International Airport (1957 - 2006), is the largest airport in the Bahamas and the largest international gateway into the country. It is a major hub for Bahamasair and is located in western New Providence island near the capital city of Nassau.\"\n\nWe need to parse facts:\n\n- Subject: Lynden Pindling International Airport. Relation: IATA code, object: NAS. Probably relation \"IATA code\". object_type \"code\". subject_type \"airport\". qualifiers none.\n\n- Relation: ICAO code, object: MYNN.\n\n- Formerly known as: Nassau International Airport, with time period 1957-2006. So relation \"former name\" maybe \"named after\"? Use relation \"former name\". Include qualifiers point in time? Actually it's a period. Could use qualifiers \"point in time\" start and end? We have only one qualifier relation allowed. Could use \"point in time\" with \"1957-2006\". Or maybe two qualifiers \"start time\" and \"end time\". But spec only mentions \"point in time\". We'll put qualifier \"point in time\" object \"1957 - 2006\". Also maybe \"qualifier\" \"name period\". We'll just use point in time.\n\n- It is the largest airport in the Bahamas. Relation: \"largest airport in\". Object: Bahamas. Could be \"largest airport in\" relation. object_type \"country\". subject_type \"airport\". No qualifiers.\n\n- It is the largest international gateway into the country. Relation: \"largest international gateway in\". Object: Bahamas (or \"the country\" referring to Bahamas). Could treat as same relation \"largest international gateway in\". We'll produce separate triplet.\n\n- It is a major hub for Bahamasair. Relation: \"hub for\". Object: Bahamasair. subject_type airport, object_type airline. No qualifiers.\n\n- It is located in western New Providence island near the capital city of Nassau. So location: western New Providence island. Relation: \"located in\". Object: western New Providence island. Could treat as location with qualifier \"direction\" maybe \"western\". But we can include qualifier \"direction\" relation \"west\". However spec only includes qualifiers like \"place\". Could include qualifier \"direction\" but not defined. Simpler: object \"New Providence island\". qualifier \"qualifier\": \"direction\" \"western\". Also near the capital city of Nassau: maybe another relation \"near\". Relation: \"near\". Object: Nassau. Could also have qualifier \"capital city\". But we can just have separate triplet: subject located in New Providence island, qualifier \"direction\" \"western\". And another triplet: subject \"near\" object \"Nassau\". Also we need object_type for Nassau (city). subject_type airport.\n\nWe need subject_type and object_type for each.\n\nDefine types:\n\n- Airport: \"airport\"\n- Code: \"code\"\n- Airline: \"airline\"\n- Country: \"country\"\n- Island: \"island\"\n- City: \"city\"\n\nNow produce JSON.\n\nTriplets list:\n\n1. subject: Lynden Pindling International Airport, relation: IATA code, object: NAS, qualifiers [], subject_type: airport, object_type: code.\n\n2. subject: Lynden Pindling International Airport, relation: ICAO code, object: MYNN, qualifiers [], subject_type: airport, object_type: code.\n\n3. subject: Lynden Pindling International Airport, relation: former name, object: Nassau International Airport, qualifiers [{relation: point in time, object: \"1957 - 2006\"}], subject_type: airport, object_type: airport (or \"name\"? but use airport). Could be \"airport\". We'll set object_type \"airport\".\n\n4. subject: Lynden Pindling International Airport, relation: largest airport in, object: Bahamas, qualifiers [], subject_type: airport, object_type: country.\n\n5. subject: Lynden Pindling International Airport, relation: largest international gateway in, object: Bahamas, qualifiers [], subject_type: airport, object_type: country.\n\n6. subject: Lynden Pindling International Airport, relation: hub for, object: Bahamasair, qualifiers [], subject_type: airport, object_type: airline.\n\n7. subject: Lynden Pindling International Airport, relation: located in, object: New Providence island, qualifiers [{relation: direction, object: western}], subject_type: airport, object_type: island.\n\n8. subject: Lynden Pindling International Airport, relation: near, object: Nassau, qualifiers [], subject_type: airport, object_type: city.\n\nCheck qualifiers: direction not defined but allowed as custom? The spec mentions qualifiers can be any relation like \"place\", \"point in time\". It didn't restrict to a set. So okay.\n\nReturn JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1673,
+      "total_tokens": 3218,
+      "completion_tokens": 1545,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"IATA code\",\n            \"object\": \"NAS\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"ICAO code\",\n            \"object\": \"MYNN\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"former name\",\n            \"object\": \"Nassau International Airport\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1957 - 2006\"\n                }\n            ],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"airport\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"largest airport in\",\n            \"object\": \"Bahamas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"largest international gateway in\",\n            \"object\": \"Bahamas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"hub for\",\n            \"object\": \"Bahamasair\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"airline\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"located in\",\n            \"object\": \"New Providence island\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"western\"\n                }\n            ],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"Lynden Pindling International Airport\",\n            \"relation\": \"near\",\n            \"object\": \"Nassau\",\n            \"qualifiers\": [],\n            \"subject_type\": \"airport\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Lynden Pindling International Airport",
+        "relation": "IATA code",
+        "object": "NAS",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "code"
+      },
+      {
+        "subject": "Lynden Pindling International Airport",
+        "relation": "ICAO code",
+        "object": "MYNN",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "code"
+      },
+      {
+        "subject": "Lynden Pindling International Airport",
+        "relation": "former name",
+        "object": "Nassau International Airport",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1957 - 2006"
+          }
+        ],
+        "subject_type": "airport",
+        "object_type": "airport"
+      },
+      {
+        "subject": "Lynden Pindling International Airport",
+        "relation": "largest airport in",
+        "object": "Bahamas",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "country"
+      },
+      {
+        "subject": "Lynden Pindling International Airport",
+        "relation": "largest international gateway in",
+        "object": "Bahamas",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "country"
+      },
+      {
+        "subject": "Lynden Pindling International Airport",
+        "relation": "hub for",
+        "object": "Bahamasair",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "airline"
+      },
+      {
+        "subject": "Lynden Pindling International Airport",
+        "relation": "located in",
+        "object": "New Providence island",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "western"
+          }
+        ],
+        "subject_type": "airport",
+        "object_type": "island"
+      },
+      {
+        "subject": "Lynden Pindling International Airport",
+        "relation": "near",
+        "object": "Nassau",
+        "qualifiers": [],
+        "subject_type": "airport",
+        "object_type": "city"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1673,
+    "total_tokens": 3218,
+    "completion_tokens": 1545,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 701,
+    "output_tokens_est": 609
+  },
+  "attempts": 1,
+  "latency_s": 19.41361016999872,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:14:23.329846+00:00",
+  "cache_key": "fe4e18b90ad6210f187d64f31fabb664"
+}

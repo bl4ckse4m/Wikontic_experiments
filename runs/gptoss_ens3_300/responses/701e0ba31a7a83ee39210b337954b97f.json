@@ -1,0 +1,179 @@
+{
+  "task": {
+    "input_id": "08547a7ff1358c79",
+    "input_hash": "561dcb4fb79fe789936be9928bcfacc7a167c615b482dc30bae98c83f4dda29e",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-7cf22eabb5fc96a96795c27371141c35",
+    "object": "chat.completion",
+    "created": 1791547110,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"birth name\",\n            \"object\": \"Nathan Bogard\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human name\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1887\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"possible\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1893\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"possible\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1896\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"possible\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Colbert, Mississippi\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"date of death\",\n            \"object\": \"May 15, 1970\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"place of death\",\n            \"object\": \"Memphis, Tennessee\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"occupation\",\n            \"object\": \"blues singer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"occupation\",\n            \"object\": \"guitarist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"ethnic group\",\n            \"object\": \"African-American\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"ethnic group\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need extract facts from text.\n\nText: \"Nathan Beauregard\n\nNathan Beauregard, real name Nathan Bogard, (*1887, 1893 or 1896 in Colbert, Mississippi; died May 15, 1970 in Memphis, Tennessee) was an African-American blues singer and guitarist.\"\n\nInterpretations:\n\n- Subject: Nathan Beauregard (person)\n- Real name: Nathan Bogard (alias)\n- Birth year: ambiguous: 1887, 1893 or 1896. The text says \"*1887, 1893 or 1896 in Colbert, Mississippi\". So we have multiple possible birth years and birthplace.\n\nWe need to capture birth date? It's just year(s). Could produce separate triplets for each possible year with qualifier \"approximation\"? Possibly representation: object is \"1887\" with qualifier approximation? But there are three possibilities, maybe separate triplets each with qualifier \"approximation\". But guidelines: \"Numbers, quantities, measurements, rankings, with their units as given.\" For ambiguous dates, we can record each as separate triplet with qualifier \"approximation\". Or could use object \"1887 or 1893 or 1896\". Not ideal.\n\nBetter: create three triplets: (Nathan Beauregard, date of birth, 1887) with qualifier approximation maybe \"possible\". However guidelines: For possible/uncertain, use modality? Actually \"approximation\" qualifier for \"about\", \"nearly\", \"over\". For uncertain multiple possibilities, maybe use \"modality\" with object \"possible\". Or we could note \"approximation\" with object \"1887/1893/1896\". I think make three separate triplets each with qualifier {\"relation\":\"modality\",\"object\":\"possible\"}.\n\nBut also we have place of birth: Colbert, Mississippi.\n\nTriplet: (Nathan Beauregard, place of birth, Colbert, Mississippi) with qualifier maybe \"point in time\" the year? but ambiguous. Could add qualifier \"modality\":\"possible\"? But place is given with all possible years, but location likely certain. So we can include place of birth.\n\nDeath date: May 15, 1970.\n\nDeath place: Memphis, Tennessee.\n\nOccupation: blues singer, guitarist.\n\nEthnicity: African-American (maybe relation \"ethnic group\" or \"ethnicity\").\n\nWe also have alias: real name Nathan Bogard. Relation \"named after\"? Actually \"real name\" corresponds to \"birth name\". Use relation \"birth name\". So (Nathan Beauregard, birth name, Nathan Bogard).\n\nNow need subject_type: human. object_type for each.\n\nDefine object types: date, location, profession, ethnic group, etc.\n\nLet's list triplets:\n\n1. Nathan Beauregard - birth name - Nathan Bogard\n2. Nathan Beauregard - date of birth - 1887 (qualifier modality possible)\n3. Nathan Beauregard - date of birth - 1893 (qualifier modality possible)\n4. Nathan Beauregard - date of birth - 1896 (qualifier modality possible)\n5. Nathan Beauregard - place of birth - Colbert, Mississippi\n6. Nathan Beauregard - date of death - May 15, 1970\n7. Nathan Beauregard - place of death - Memphis, Tennessee\n8. Nathan Beauregard - occupation - blues singer\n9. Nathan Beauregard - occupation - guitarist\n10. Nathan Beauregard - ethnicity - African-American (or \"ethnic group\").\n\nCheck qualifiers: For date of birth uncertain, we use modality \"possible\". For place of birth maybe also uncertain due to years, but location is given as same. No qualifier needed.\n\nNow need to assign object_type: birth name -> \"human name\"? maybe \"string\". Use \"human name\". For date -> \"date\". Place -> \"location\". occupation -> \"profession\". ethnicity -> \"ethnic group\".\n\nNow format JSON.\n\nEach triplet includes \"qualifiers\": list of dicts. For uncertain dates: [{\"relation\":\"modality\",\"object\":\"possible\"}].\n\nNo other qualifiers.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1640,
+      "total_tokens": 3111,
+      "completion_tokens": 1471,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"birth name\",\n            \"object\": \"Nathan Bogard\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human name\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1887\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"possible\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1893\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"possible\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1896\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"possible\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Colbert, Mississippi\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"date of death\",\n            \"object\": \"May 15, 1970\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"place of death\",\n            \"object\": \"Memphis, Tennessee\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"occupation\",\n            \"object\": \"blues singer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"occupation\",\n            \"object\": \"guitarist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Nathan Beauregard\",\n            \"relation\": \"ethnic group\",\n            \"object\": \"African-American\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"ethnic group\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "birth name",
+        "object": "Nathan Bogard",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "human name"
+      },
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "date of birth",
+        "object": "1887",
+        "qualifiers": [
+          {
+            "relation": "modality",
+            "object": "possible"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "date of birth",
+        "object": "1893",
+        "qualifiers": [
+          {
+            "relation": "modality",
+            "object": "possible"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "date of birth",
+        "object": "1896",
+        "qualifiers": [
+          {
+            "relation": "modality",
+            "object": "possible"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "place of birth",
+        "object": "Colbert, Mississippi",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "location"
+      },
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "date of death",
+        "object": "May 15, 1970",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "place of death",
+        "object": "Memphis, Tennessee",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "location"
+      },
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "occupation",
+        "object": "blues singer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "occupation",
+        "object": "guitarist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Nathan Beauregard",
+        "relation": "ethnic group",
+        "object": "African-American",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "ethnic group"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1640,
+    "total_tokens": 3111,
+    "completion_tokens": 1471,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 816,
+    "output_tokens_est": 724
+  },
+  "attempts": 1,
+  "latency_s": 18.093581591005204,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T11:58:48.492244+00:00",
+  "cache_key": "701e0ba31a7a83ee39210b337954b97f"
+}

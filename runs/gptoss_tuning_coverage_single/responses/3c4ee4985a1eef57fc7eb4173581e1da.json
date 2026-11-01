@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "746d51bb5c171b82",
+    "input_hash": "5895f7b88006de959602612897569a1d6d9e91d826c1f9a308db2e0ae1394db6",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-0a569f087ff1444ec6511e00a2b63ea8",
+    "object": "chat.completion",
+    "created": 1791504118,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"instance of\",\n            \"object\": \"census-designated place\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"census-designated place\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Will County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Illinois\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"population\",\n            \"object\": \"17,084\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2000 census\"\n                }\n            ],\n            \"subject_type\": \"place\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"dissolved\",\n            \"object\": \"Homer Glen, Illinois\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2001\"\n                }\n            ],\n            \"subject_type\": \"place\",\n            \"object_type\": \"village\"\n        },\n        {\n            \"subject\": \"Homer Glen, Illinois\",\n            \"relation\": \"instance of\",\n            \"object\": \"village\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"village\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nEntities: Goodings Grove (place), Illinois (state), Will County (county), United States (country), population 17,084 at 2000 census, census-designated place, ceased to exist as an entity upon incorporation of village of Homer Glen, Illinois in 2001.\n\nTriplets:\n\n1. Goodings Grove - instance of - census-designated place (or type). relation maybe \"instance of\" or \"subclass of\"? Use \"instance of\". object_type: \"census-designated place\". subject_type: \"place\". Could also include location: Goodings Grove - located in - Will County, Illinois, United States. Might need separate location hierarchy.\n\n2. Goodings Grove - located in administrative territorial entity - Will County. Use relation \"located in the administrative territorial entity\". object_type: \"county\". Also maybe \"located in the administrative territorial entity\" -> Illinois (state) and United States (country). Could have multiple.\n\nBut we need explicit statements: \"Goodings Grove was a census-designated place in northern Will County, Illinois, United States.\" So we can extract:\n\n- Goodings Grove, relation \"instance of\", object \"census-designated place\".\n- Goodings Grove, relation \"located in\", object \"Will County\".\n- Goodings Grove, relation \"located in\", object \"Illinois\".\n- Goodings Grove, relation \"located in\", object \"United States\".\n\nBut maybe combine: \"in northern Will County, Illinois, United States\" indicates location hierarchy. We'll produce three location relations.\n\n3. Population: \"The population was 17,084 at the 2000 census.\" So relation \"population\" with object \"17,084\". Qualifier point in time \"2000 census\". object_type: \"quantity\". subject_type: \"place\". Provide qualifier.\n\n4. Ceased to exist: \"It ceased to exist as an entity upon the incorporation of the village of Homer Glen, Illinois in 2001.\" So relation \"dissolved\" or \"end of existence\". Use \"dissolved\" maybe. object \"incorporation of the village of Homer Glen, Illinois\". Could be relation \"dissolved\" with qualifier \"point in time\" 2001. Or \"dissolved\" object \"Homer Glen, Illinois\". But the text says ceased to exist upon incorporation of the village of Homer Glen, Illinois in 2001. So we can have:\n\n- Goodings Grove - dissolved - \"Homer Glen, Illinois\". Qualifier \"point in time\" 2001. Or maybe relation \"dissolved by\" but not sure. Use \"dissolved\" with object \"Homer Glen, Illinois\". Provide qualifier.\n\nAlso need entity \"Homer Glen, Illinois\" as a village.\n\nAdd triplet: \"Homer Glen, Illinois\" - instance of - village.\n\nBut not explicitly said \"village of Homer Glen, Illinois\". It says \"the village of Homer Glen, Illinois\". So we can extract.\n\nThus triplets list.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- Goodings Grove: place (maybe \"census-designated place\" but type \"place\").\n- census-designated place: \"census-designated place\" (type \"administrative division\"? Use \"census-designated place\").\n- Will County: \"county\".\n- Illinois: \"state\".\n- United States: \"country\".\n- population number: \"quantity\".\n- Homer Glen, Illinois: \"village\".\n- dissolution: maybe object type \"event\" or \"village\". We'll set object_type \"village\".\n\nNow qualifiers: For population, qualifier relation \"point in time\" object \"2000 census\". For dissolved, qualifier \"point in time\" object \"2001\". Also maybe qualifier \"cause\" object \"incorporation of the village of Homer Glen, Illinois\". But we already used object as that village. Could add qualifier \"cause\" but not required.\n\nWe'll produce JSON.\n\nCheck format: each triplet dict includes \"qualifiers\": list of dicts.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1647,
+      "total_tokens": 2934,
+      "completion_tokens": 1287,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"instance of\",\n            \"object\": \"census-designated place\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"census-designated place\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Will County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Illinois\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"population\",\n            \"object\": \"17,084\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2000 census\"\n                }\n            ],\n            \"subject_type\": \"place\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Goodings Grove\",\n            \"relation\": \"dissolved\",\n            \"object\": \"Homer Glen, Illinois\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2001\"\n                }\n            ],\n            \"subject_type\": \"place\",\n            \"object_type\": \"village\"\n        },\n        {\n            \"subject\": \"Homer Glen, Illinois\",\n            \"relation\": \"instance of\",\n            \"object\": \"village\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"village\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Goodings Grove",
+        "relation": "instance of",
+        "object": "census-designated place",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "census-designated place"
+      },
+      {
+        "subject": "Goodings Grove",
+        "relation": "located in the administrative territorial entity",
+        "object": "Will County",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "county"
+      },
+      {
+        "subject": "Goodings Grove",
+        "relation": "located in the administrative territorial entity",
+        "object": "Illinois",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "state"
+      },
+      {
+        "subject": "Goodings Grove",
+        "relation": "located in the administrative territorial entity",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "country"
+      },
+      {
+        "subject": "Goodings Grove",
+        "relation": "population",
+        "object": "17,084",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2000 census"
+          }
+        ],
+        "subject_type": "place",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Goodings Grove",
+        "relation": "dissolved",
+        "object": "Homer Glen, Illinois",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2001"
+          }
+        ],
+        "subject_type": "place",
+        "object_type": "village"
+      },
+      {
+        "subject": "Homer Glen, Illinois",
+        "relation": "instance of",
+        "object": "village",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "village"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1647,
+    "total_tokens": 2934,
+    "completion_tokens": 1287,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 626,
+    "output_tokens_est": 534
+  },
+  "attempts": 1,
+  "latency_s": 15.846153106998827,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:02:15.095487+00:00",
+  "cache_key": "3c4ee4985a1eef57fc7eb4173581e1da"
+}

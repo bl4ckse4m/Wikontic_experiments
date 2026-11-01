@@ -1,0 +1,144 @@
+{
+  "task": {
+    "input_id": "240732bd88916611",
+    "input_hash": "22d299afe8686f469c8c1c35b7de07d1d7bf7b06a7a3bd0c8edb0343946e2899",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-4e3231d592001ce9b82bf9dc915708a6",
+    "object": "chat.completion",
+    "created": 1791549486,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"party leader\",\n            \"relation\": \"position held\",\n            \"object\": \"leader of parliamentary group\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"party is represented by members in the lower house of parliament\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"position\"\n        },\n        {\n            \"subject\": \"Westminster-based parties\",\n            \"relation\": \"allows formation of\",\n            \"object\": \"frontbench teams of senior fellow members of the parliamentary group\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"minimum number of seats held\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"group\"\n        },\n        {\n            \"subject\": \"party's parliamentary group\",\n            \"relation\": \"forms\",\n            \"object\": \"Official Opposition\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"party becomes the largest party not part of the Government\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"political organization\"\n        },\n        {\n            \"subject\": \"Official Opposition frontbench team members\",\n            \"relation\": \"form\",\n            \"object\": \"Official Opposition Shadow cabinet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"government body\"\n        },\n        {\n            \"subject\": \"party's frontbench\",\n            \"relation\": \"becomes\",\n            \"object\": \"Cabinet of government ministers\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"party achieves enough seats in an election to form a majority\"\n                }\n            ],\n            \"subject_type\": \"group\",\n            \"object_type\": \"government body\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract factual relationships from the text. The text is about political parties, parliamentary groups, leaders, frontbench, opposition, cabinet.\n\nWe need to identify entities: \"party\", \"lower house of parliament\", \"party leader\", \"parliamentary group\", \"full party representation\", \"Westminster-based parties\", \"leaders\", \"frontbench teams\", \"senior fellow members of the parliamentary group\", \"critics of aspects of government policy\", \"largest party not part of the Government\", \"Official Opposition\", \"Official Opposition frontbench team members\", \"Official Opposition Shadow cabinet\", \"majority\", \"Cabinet of government ministers\".\n\nWe must produce triplets. The subject should be a named entity or concept. Since many are generic, we may use generic terms like \"political party\", \"parliamentary group\", etc.\n\nLet's parse sentences:\n\n1. \"When the party is represented by members in the lower house of parliament, the party leader simultaneously serves as the leader of the parliamentary group of that full party representation;\"\n\n=> This implies: If party represented by members in lower house, then party leader serves as leader of parliamentary group of that representation. So a conditional claim. Use qualifier \"condition\". Main triplet: (party leader, position held, leader of parliamentary group). But need subject \"party leader\". Relation maybe \"position held\". object \"leader of parliamentary group\". Qualifier: condition \"party is represented by members in the lower house of parliament\". Also maybe \"point in time\"? Not given.\n\nWe need subject_type: \"human\"? Party leader is a person. object_type: \"position\". Qualifier relation \"condition\" object: \"party is represented by members in the lower house of parliament\". Use short phrase.\n\n2. \"depending on a minimum number of seats held, Westminster-based parties typically allow for leaders to form frontfront teams of senior fellow members of the parliamentary group to serve as critics of aspects of government policy.\"\n\nInterpretation: Based on minimum seats, parties allow leaders to form frontbench teams of senior members to serve as critics of government policy aspects. So we can extract: (Westminster-based parties, allow, leaders to form frontbench teams). But object is a phrase. Perhaps separate: (Westminster-based parties, allow formation of, frontbench teams). Could also have relation \"minimum seats held\" as condition.\n\nLet's break: Triplet: (Westminster-based parties, allow, leaders to form frontbench teams). Subject_type: \"organization\". Object_type: \"activity\" maybe \"formation of frontbench teams\". Qualifier: condition \"minimum number of seats held\". Also purpose \"to serve as critics of aspects of government policy\" could be qualifier \"purpose\". But not required. Use condition qualifier.\n\n3. \"When a party becomes the largest party not part of the Government, the party's parliamentary group forms the Official Opposition, with Official Opposition frontbench team members often forming the Official Opposition Shadow cabinet.\"\n\nTwo statements:\n\na) Conditional: If party becomes largest party not part of Government, then parliamentary group forms Official Opposition.\n\nTriplet: (party's parliamentary group, forms, Official Opposition). Condition qualifier: \"party becomes the largest party not part of the Government\". Subject_type: \"organization\". Object_type: \"political entity\".\n\nb) Also: Official Opposition frontbench team members often form the Official Opposition Shadow cabinet.\n\nTriplet: (Official Opposition frontbench team members, form, Official Opposition Shadow cabinet). Possibly qualifier \"frequency\" but not needed. Could add qualifier \"often\". Not required.\n\n4. \"When a party achieves enough seats in an election to form a majority, the party's frontbench becomes the Cabinet of government ministers.\"\n\nTriplet: (party's frontbench, becomes, Cabinet of government ministers). Condition qualifier: \"party achieves enough seats in an election to form a majority\".\n\nNow compile triplets.\n\nNeed to ensure each triplet includes qualifiers list (maybe empty). Use proper relation names: \"position held\", \"allows\", \"forms\", \"becomes\", \"forms\" again.\n\nBut need to follow Wikidata-like predicates: e.g., \"head of government\", \"member of\", but we can approximate.\n\nLet's define relations:\n\n- \"position held\" for leader role.\n- \"allows\" maybe \"allows formation of\". Use \"allows formation of\".\n- \"forms\" for creating opposition.\n- \"forms\" also for frontbench members forming shadow cabinet.\n- \"becomes\" for frontbench becomes cabinet.\n\nNow subject/object types:\n\n- party leader: \"human\"\n- leader of parliamentary group: \"position\"\n- Westminster-based parties: \"organization\"\n- frontbench teams: \"group\"\n- parliamentary group: \"organization\"\n- Official Opposition: \"political organization\"\n- Official Opposition frontbench team members: \"human\" (members)\n- Official Opposition Shadow cabinet: \"government body\"\n- party's frontbench: \"group\"\n- Cabinet of government ministers: \"government body\"\n\nNow qualifiers:\n\n- condition qualifiers with relation \"condition\" and object as phrase.\n\nMake sure qualifiers list each as dict with \"relation\" and \"object\".\n\nNow produce JSON.\n\nCheck each triplet:\n\n1.\nsubject: \"party leader\"\nrelation: \"position held\"\nobject: \"leader of parliamentary group\"\nqualifiers: [{\"relation\":\"condition\",\"object\":\"party is represented by members in the lower house of parliament\"}]\nsubject_type: \"human\"\nobject_type: \"position\"\n\n2.\nsubject: \"Westminster-based parties\"\nrelation: \"allows formation of\"\nobject: \"frontbench teams of senior fellow members of the parliamentary group\"\nqualifiers: [{\"relation\":\"condition\",\"object\":\"minimum number of seats held\"}]\nsubject_type: \"organization\"\nobject_type: \"group\"\n\n3.\nsubject: \"party's parliamentary group\"\nrelation: \"forms\"\nobject: \"Official Opposition\"\nqualifiers: [{\"relation\":\"condition\",\"object\":\"party becomes the largest party not part of the Government\"}]\nsubject_type: \"organization\"\nobject_type: \"political organization\"\n\n4.\nsubject: \"Official Opposition frontbench team members\"\nrelation: \"form\"\nobject: \"Official Opposition Shadow cabinet\"\nqualifiers: [] (maybe add qualifier \"frequency\":\"often\" but optional). Could add qualifier \"modality\":\"often\" but \"often\" is frequency not modality. Not defined. Could ignore.\n\nsubject_type: \"human\"\nobject_type: \"government body\"\n\n5.\nsubject: \"party's frontbench\"\nrelation: \"becomes\"\nobject: \"Cabinet of government ministers\"\nqualifiers: [{\"relation\":\"condition\",\"object\":\"party achieves enough seats in an election to form a majority\"}]\nsubject_type: \"group\"\nobject_type: \"government body\"\n\nCheck for other possible triplets: \"parliamentary group of that full party representation\". Could be separate: (parliamentary group, part of, full party representation). Not explicit.\n\nAlso \"lower house of parliament\" could be object.\n\nBut we have enough.\n\nNow ensure JSON format."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1723,
+      "total_tokens": 3554,
+      "completion_tokens": 1831,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"party leader\",\n            \"relation\": \"position held\",\n            \"object\": \"leader of parliamentary group\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"party is represented by members in the lower house of parliament\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"position\"\n        },\n        {\n            \"subject\": \"Westminster-based parties\",\n            \"relation\": \"allows formation of\",\n            \"object\": \"frontbench teams of senior fellow members of the parliamentary group\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"minimum number of seats held\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"group\"\n        },\n        {\n            \"subject\": \"party's parliamentary group\",\n            \"relation\": \"forms\",\n            \"object\": \"Official Opposition\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"party becomes the largest party not part of the Government\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"political organization\"\n        },\n        {\n            \"subject\": \"Official Opposition frontbench team members\",\n            \"relation\": \"form\",\n            \"object\": \"Official Opposition Shadow cabinet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"government body\"\n        },\n        {\n            \"subject\": \"party's frontbench\",\n            \"relation\": \"becomes\",\n            \"object\": \"Cabinet of government ministers\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"party achieves enough seats in an election to form a majority\"\n                }\n            ],\n            \"subject_type\": \"group\",\n            \"object_type\": \"government body\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "party leader",
+        "relation": "position held",
+        "object": "leader of parliamentary group",
+        "qualifiers": [
+          {
+            "relation": "condition",
+            "object": "party is represented by members in the lower house of parliament"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "position"
+      },
+      {
+        "subject": "Westminster-based parties",
+        "relation": "allows formation of",
+        "object": "frontbench teams of senior fellow members of the parliamentary group",
+        "qualifiers": [
+          {
+            "relation": "condition",
+            "object": "minimum number of seats held"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "group"
+      },
+      {
+        "subject": "party's parliamentary group",
+        "relation": "forms",
+        "object": "Official Opposition",
+        "qualifiers": [
+          {
+            "relation": "condition",
+            "object": "party becomes the largest party not part of the Government"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "political organization"
+      },
+      {
+        "subject": "Official Opposition frontbench team members",
+        "relation": "form",
+        "object": "Official Opposition Shadow cabinet",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "government body"
+      },
+      {
+        "subject": "party's frontbench",
+        "relation": "becomes",
+        "object": "Cabinet of government ministers",
+        "qualifiers": [
+          {
+            "relation": "condition",
+            "object": "party achieves enough seats in an election to form a majority"
+          }
+        ],
+        "subject_type": "group",
+        "object_type": "government body"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1723,
+    "total_tokens": 3554,
+    "completion_tokens": 1831,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 635,
+    "output_tokens_est": 543
+  },
+  "attempts": 1,
+  "latency_s": 22.359073391009588,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:38:28.740654+00:00",
+  "cache_key": "73e7b858a54b08a43bb4df4be8edfb9b"
+}

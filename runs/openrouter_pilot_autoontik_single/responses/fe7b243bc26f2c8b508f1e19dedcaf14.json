@@ -1,0 +1,199 @@
+{
+  "task": {
+    "input_id": "a883ed6d0080584a",
+    "input_hash": "39ecdc927051313d6c38d73a73844c3f9f1901ac859eefe836e2c751de5efc47",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793208882-HMB9q7w4WKjqXLQQXgNc",
+    "object": "chat.completion",
+    "created": 1793208882,
+    "model": "openai/gpt-oss-120b",
+    "provider": "CoreWeave",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"instance of\",\n            \"object\": \"hydroelectric dam\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"dam\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"river\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"downstream from\",\n            \"object\": \"Great Falls\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Great Falls\",\n            \"relation\": \"located in\",\n            \"object\": \"Montana\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"located in\",\n            \"object\": \"Montana\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"dam type\",\n            \"object\": \"run-of-river\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"dam type\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"built on\",\n            \"object\": \"Big Falls\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"waterfall\"\n        },\n        {\n            \"subject\": \"Big Falls\",\n            \"relation\": \"also known as\",\n            \"object\": \"Great Falls\",\n            \"qualifiers\": [],\n            \"subject_type\": \"waterfall\",\n            \"object_type\": \"waterfall\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"has power plant\",\n            \"object\": \"six-unit powerhouse\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1915\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"left side\",\n                    \"object_type\": \"side\"\n                },\n                {\n                    \"relation\": \"unit count\",\n                    \"object\": \"6\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"powerhouse\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nFirst identify entities: Ryan Dam (hydroelectric dam), Missouri River, Great Falls (city), Montana (state, US), reservoir, storage capacity (value missing?), run-of-river dam (type), Big Falls (also called Great Falls) which is the largest of the five Great Falls of the Missouri. Also six-unit powerhouse, left side of the dam, since 1915.\n\nWe need to produce JSON with \"triplets\": [ ... ].\n\nWe need subject_type and object_type.\n\nDefine types: Ryan Dam - dam (hydroelectric dam) -> type \"dam\". Missouri River - river. Great Falls (city) - city. Montana - state. United States - country maybe not needed. Reservoir - reservoir (type). Storage capacity - quantity (maybe \"volume\" or \"capacity\"). Run-of-river dam - dam type. Big Falls - waterfall. Great Falls (the falls) - waterfall. Six-unit powerhouse - power plant (type \"powerhouse\" or \"power plant\"). Left side - location side? Could be \"side\". Since 1915 - point in time (year). Also \"six-unit\" indicates number of units.\n\nWe need to capture facts:\n\n1. Ryan Dam is a hydroelectric dam.\nsubject: Ryan Dam, relation: instance of? maybe \"type\" but typical relation \"instance of\" or \"subclass of\"? In examples they used occupation, award etc. For dam, we could use \"type\" or \"instance of\". Use \"instance of\" relation? Not given but we can use \"type of\". Let's use \"instance of\". object: \"hydroelectric dam\". object_type: \"dam\". subject_type: \"dam\". Might be redundant but okay.\n\n2. Ryan Dam is on the Missouri River.\nrelation: \"located on\" or \"river\". Use \"river\". Let's use \"river\". object_type: \"river\". subject_type: \"dam\".\n\n3. Ryan Dam is downstream from the city of Great Falls.\nrelation: \"downstream from\". object: Great Falls (city). object_type: \"city\". subject_type: \"dam\". Possibly qualifier: location: Montana? Not needed.\n\n4. Great Falls is in the U.S. state of Montana. Could include but not central. Might include.\n\n5. Ryan Dam is in Montana. relation: \"located in\". object: Montana (state). object_type: \"state\". subject_type: \"dam\".\n\n6. The dam is long and high; its reservoir is long and has a storage capacity of (value missing). We can capture dimensions: length, height. But values not given. So maybe skip.\n\n7. The dam is a run-of-river dam. relation: \"dam type\". object: \"run-of-river\". object_type: \"dam type\". subject_type: \"dam\".\n\n8. The dam is built on the largest of the five Great Falls of the Missouri, the \"Big Falls\", also sometimes called \"Great Falls\". So relation: \"built on\". object: Big Falls (waterfall). object_type: \"waterfall\". subject_type: \"dam\". Also qualifier: \"largest of the five Great Falls of the Missouri\". Could add qualifier: \"ranking\" maybe. But we can add qualifier: \"rank\" with object \"largest\". object_type maybe \"ordinal\". Or we can add qualifier: \"part of\" relation: \"part of\" Great Falls (the set). Might be too complex.\n\nSimplify: Ryan Dam built on Big Falls. Also note Big Falls also called Great Falls. So we can have a separate triplet: Big Falls \"also known as\" Great Falls. relation: \"alias\". object_type: \"waterfall\". subject_type: \"waterfall\". Or \"has alias\".\n\n9. Since 1915, the six-unit powerhouse on the left side of the dam has occupied a significant portion of the high waterfall. So we have: Ryan Dam has powerhouse. relation: \"has component\" maybe \"powerhouse\". object: \"six-unit powerhouse\". object_type: \"powerhouse\". Also qualifier: \"start time\" 1915. Also qualifier: \"location\" left side of the dam. Could also capture number of units: 6 units. Could be qualifier \"unit count\". Let's include qualifiers: start time 1915 (year). location \"left side\". object_type for location maybe \"side\". Also qualifier \"unit count\" 6 (number). object_type \"quantity\". But qualifiers must have relation and object and object_type.\n\nThus triplet: subject Ryan Dam, relation \"has power plant\", object \"six-unit powerhouse\". qualifiers: start time 1915 (year), location \"left side\" (side), unit count \"6\" (quantity). subject_type dam, object_type powerhouse.\n\nAlso maybe \"powerhouse\" is part of dam.\n\nNow produce JSON.\n\nNeed list under \"triplets\". Each dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types: dam, river, city, state, waterfall, powerhouse, dam type, year, side, quantity.\n\nNow craft.\n\nTriplet 1:\nsubject: \"Ryan Dam\"\nrelation: \"instance of\"\nobject: \"hydroelectric dam\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"dam\"\n\nTriplet 2:\nsubject: \"Ryan Dam\"\nrelation: \"river\"\nobject: \"Missouri River\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"river\"\n\nTriplet 3:\nsubject: \"Ryan Dam\"\nrelation: \"downstream from\"\nobject: \"Great Falls\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"city\"\n\nTriplet 4:\nsubject: \"Great Falls\"\nrelation: \"located in\"\nobject: \"Montana\"\nqualifiers: []\nsubject_type: \"city\"\nobject_type: \"state\"\n\nTriplet 5:\nsubject: \"Ryan Dam\"\nrelation: \"located in\"\nobject: \"Montana\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"state\"\n\nTriplet 6:\nsubject: \"Ryan Dam\"\nrelation: \"dam type\"\nobject: \"run-of-river\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"dam type\"\n\nTriplet 7:\nsubject: \"Ryan Dam\"\nrelation: \"built on\"\nobject: \"Big Falls\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"waterfall\"\n\nTriplet 8:\nsubject: \"Big Falls\"\nrelation: \"also known as\"\nobject: \"Great Falls\"\nqualifiers: []\nsubject_type: \"waterfall\"\nobject_type: \"waterfall\"\n\nTriplet 9:\nsubject: \"Ryan Dam\"\nrelation: \"has power plant\"\nobject: \"six-unit powerhouse\"\nqualifiers: [\n   {\"relation\":\"start time\",\"object\":\"1915\",\"object_type\":\"year\"},\n   {\"relation\":\"location\",\"object\":\"left side\",\"object_type\":\"side\"},\n   {\"relation\":\"unit count\",\"object\":\"6\",\"object_type\":\"quantity\"}\n]\nsubject_type: \"dam\"\nobject_type: \"powerhouse\"\n\nPotential also include reservoir length etc but missing values.\n\nNow produce JSON with top-level \"triplets\". Ensure proper formatting.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nFirst identify entities: Ryan Dam (hydroelectric dam), Missouri River, Great Falls (city), Montana (state, US), reservoir, storage capacity (value missing?), run-of-river dam (type), Big Falls (also called Great Falls) which is the largest of the five Great Falls of the Missouri. Also six-unit powerhouse, left side of the dam, since 1915.\n\nWe need to produce JSON with \"triplets\": [ ... ].\n\nWe need subject_type and object_type.\n\nDefine types: Ryan Dam - dam (hydroelectric dam) -> type \"dam\". Missouri River - river. Great Falls (city) - city. Montana - state. United States - country maybe not needed. Reservoir - reservoir (type). Storage capacity - quantity (maybe \"volume\" or \"capacity\"). Run-of-river dam - dam type. Big Falls - waterfall. Great Falls (the falls) - waterfall. Six-unit powerhouse - power plant (type \"powerhouse\" or \"power plant\"). Left side - location side? Could be \"side\". Since 1915 - point in time (year). Also \"six-unit\" indicates number of units.\n\nWe need to capture facts:\n\n1. Ryan Dam is a hydroelectric dam.\nsubject: Ryan Dam, relation: instance of? maybe \"type\" but typical relation \"instance of\" or \"subclass of\"? In examples they used occupation, award etc. For dam, we could use \"type\" or \"instance of\". Use \"instance of\" relation? Not given but we can use \"type of\". Let's use \"instance of\". object: \"hydroelectric dam\". object_type: \"dam\". subject_type: \"dam\". Might be redundant but okay.\n\n2. Ryan Dam is on the Missouri River.\nrelation: \"located on\" or \"river\". Use \"river\". Let's use \"river\". object_type: \"river\". subject_type: \"dam\".\n\n3. Ryan Dam is downstream from the city of Great Falls.\nrelation: \"downstream from\". object: Great Falls (city). object_type: \"city\". subject_type: \"dam\". Possibly qualifier: location: Montana? Not needed.\n\n4. Great Falls is in the U.S. state of Montana. Could include but not central. Might include.\n\n5. Ryan Dam is in Montana. relation: \"located in\". object: Montana (state). object_type: \"state\". subject_type: \"dam\".\n\n6. The dam is long and high; its reservoir is long and has a storage capacity of (value missing). We can capture dimensions: length, height. But values not given. So maybe skip.\n\n7. The dam is a run-of-river dam. relation: \"dam type\". object: \"run-of-river\". object_type: \"dam type\". subject_type: \"dam\".\n\n8. The dam is built on the largest of the five Great Falls of the Missouri, the \"Big Falls\", also sometimes called \"Great Falls\". So relation: \"built on\". object: Big Falls (waterfall). object_type: \"waterfall\". subject_type: \"dam\". Also qualifier: \"largest of the five Great Falls of the Missouri\". Could add qualifier: \"ranking\" maybe. But we can add qualifier: \"rank\" with object \"largest\". object_type maybe \"ordinal\". Or we can add qualifier: \"part of\" relation: \"part of\" Great Falls (the set). Might be too complex.\n\nSimplify: Ryan Dam built on Big Falls. Also note Big Falls also called Great Falls. So we can have a separate triplet: Big Falls \"also known as\" Great Falls. relation: \"alias\". object_type: \"waterfall\". subject_type: \"waterfall\". Or \"has alias\".\n\n9. Since 1915, the six-unit powerhouse on the left side of the dam has occupied a significant portion of the high waterfall. So we have: Ryan Dam has powerhouse. relation: \"has component\" maybe \"powerhouse\". object: \"six-unit powerhouse\". object_type: \"powerhouse\". Also qualifier: \"start time\" 1915. Also qualifier: \"location\" left side of the dam. Could also capture number of units: 6 units. Could be qualifier \"unit count\". Let's include qualifiers: start time 1915 (year). location \"left side\". object_type for location maybe \"side\". Also qualifier \"unit count\" 6 (number). object_type \"quantity\". But qualifiers must have relation and object and object_type.\n\nThus triplet: subject Ryan Dam, relation \"has power plant\", object \"six-unit powerhouse\". qualifiers: start time 1915 (year), location \"left side\" (side), unit count \"6\" (quantity). subject_type dam, object_type powerhouse.\n\nAlso maybe \"powerhouse\" is part of dam.\n\nNow produce JSON.\n\nNeed list under \"triplets\". Each dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types: dam, river, city, state, waterfall, powerhouse, dam type, year, side, quantity.\n\nNow craft.\n\nTriplet 1:\nsubject: \"Ryan Dam\"\nrelation: \"instance of\"\nobject: \"hydroelectric dam\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"dam\"\n\nTriplet 2:\nsubject: \"Ryan Dam\"\nrelation: \"river\"\nobject: \"Missouri River\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"river\"\n\nTriplet 3:\nsubject: \"Ryan Dam\"\nrelation: \"downstream from\"\nobject: \"Great Falls\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"city\"\n\nTriplet 4:\nsubject: \"Great Falls\"\nrelation: \"located in\"\nobject: \"Montana\"\nqualifiers: []\nsubject_type: \"city\"\nobject_type: \"state\"\n\nTriplet 5:\nsubject: \"Ryan Dam\"\nrelation: \"located in\"\nobject: \"Montana\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"state\"\n\nTriplet 6:\nsubject: \"Ryan Dam\"\nrelation: \"dam type\"\nobject: \"run-of-river\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"dam type\"\n\nTriplet 7:\nsubject: \"Ryan Dam\"\nrelation: \"built on\"\nobject: \"Big Falls\"\nqualifiers: []\nsubject_type: \"dam\"\nobject_type: \"waterfall\"\n\nTriplet 8:\nsubject: \"Big Falls\"\nrelation: \"also known as\"\nobject: \"Great Falls\"\nqualifiers: []\nsubject_type: \"waterfall\"\nobject_type: \"waterfall\"\n\nTriplet 9:\nsubject: \"Ryan Dam\"\nrelation: \"has power plant\"\nobject: \"six-unit powerhouse\"\nqualifiers: [\n   {\"relation\":\"start time\",\"object\":\"1915\",\"object_type\":\"year\"},\n   {\"relation\":\"location\",\"object\":\"left side\",\"object_type\":\"side\"},\n   {\"relation\":\"unit count\",\"object\":\"6\",\"object_type\":\"quantity\"}\n]\nsubject_type: \"dam\"\nobject_type: \"powerhouse\"\n\nPotential also include reservoir length etc but missing values.\n\nNow produce JSON with top-level \"triplets\". Ensure proper formatting.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1465,
+      "completion_tokens": 2051,
+      "total_tokens": 3516,
+      "cost": 0.00039262,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00039262,
+        "upstream_inference_prompt_cost": 4.395e-05,
+        "upstream_inference_completions_cost": 0.00034867
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1490,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"instance of\",\n            \"object\": \"hydroelectric dam\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"dam\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"river\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"downstream from\",\n            \"object\": \"Great Falls\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Great Falls\",\n            \"relation\": \"located in\",\n            \"object\": \"Montana\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"located in\",\n            \"object\": \"Montana\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"dam type\",\n            \"object\": \"run-of-river\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"dam type\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"built on\",\n            \"object\": \"Big Falls\",\n            \"qualifiers\": [],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"waterfall\"\n        },\n        {\n            \"subject\": \"Big Falls\",\n            \"relation\": \"also known as\",\n            \"object\": \"Great Falls\",\n            \"qualifiers\": [],\n            \"subject_type\": \"waterfall\",\n            \"object_type\": \"waterfall\"\n        },\n        {\n            \"subject\": \"Ryan Dam\",\n            \"relation\": \"has power plant\",\n            \"object\": \"six-unit powerhouse\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1915\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"left side\",\n                    \"object_type\": \"side\"\n                },\n                {\n                    \"relation\": \"unit count\",\n                    \"object\": \"6\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"dam\",\n            \"object_type\": \"powerhouse\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Ryan Dam",
+        "relation": "instance of",
+        "object": "hydroelectric dam",
+        "qualifiers": [],
+        "subject_type": "dam",
+        "object_type": "dam"
+      },
+      {
+        "subject": "Ryan Dam",
+        "relation": "river",
+        "object": "Missouri River",
+        "qualifiers": [],
+        "subject_type": "dam",
+        "object_type": "river"
+      },
+      {
+        "subject": "Ryan Dam",
+        "relation": "downstream from",
+        "object": "Great Falls",
+        "qualifiers": [],
+        "subject_type": "dam",
+        "object_type": "city"
+      },
+      {
+        "subject": "Great Falls",
+        "relation": "located in",
+        "object": "Montana",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "state"
+      },
+      {
+        "subject": "Ryan Dam",
+        "relation": "located in",
+        "object": "Montana",
+        "qualifiers": [],
+        "subject_type": "dam",
+        "object_type": "state"
+      },
+      {
+        "subject": "Ryan Dam",
+        "relation": "dam type",
+        "object": "run-of-river",
+        "qualifiers": [],
+        "subject_type": "dam",
+        "object_type": "dam type"
+      },
+      {
+        "subject": "Ryan Dam",
+        "relation": "built on",
+        "object": "Big Falls",
+        "qualifiers": [],
+        "subject_type": "dam",
+        "object_type": "waterfall"
+      },
+      {
+        "subject": "Big Falls",
+        "relation": "also known as",
+        "object": "Great Falls",
+        "qualifiers": [],
+        "subject_type": "waterfall",
+        "object_type": "waterfall"
+      },
+      {
+        "subject": "Ryan Dam",
+        "relation": "has power plant",
+        "object": "six-unit powerhouse",
+        "qualifiers": [
+          {
+            "relation": "start time",
+            "object": "1915"
+          },
+          {
+            "relation": "location",
+            "object": "left side"
+          },
+          {
+            "relation": "unit count",
+            "object": "6"
+          }
+        ],
+        "subject_type": "dam",
+        "object_type": "powerhouse"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1465,
+    "completion_tokens": 2051,
+    "total_tokens": 3516,
+    "cost": 0.00039262,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00039262,
+      "upstream_inference_prompt_cost": 4.395e-05,
+      "upstream_inference_completions_cost": 0.00034867
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1490,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 789,
+    "output_tokens_est": 661
+  },
+  "attempts": 1,
+  "latency_s": 43.70437185099581,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T17:35:26.171946+00:00",
+  "cache_key": "fe7b243bc26f2c8b508f1e19dedcaf14"
+}

@@ -1,0 +1,140 @@
+{
+  "task": {
+    "input_id": "07752eb6531cce8f",
+    "input_hash": "a24434c51b2128583118c50a79edecfb821b0a3df062af4714cd5de1e9fb87a8",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-590ce7a12e5b3aa0d75f4e913322d595",
+    "object": "chat.completion",
+    "created": 1791547022,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"instance of\",\n            \"object\": \"vertical lift rail drawbridge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"bridge type\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"crosses\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"connects\",\n            \"object\": \"Jackson County, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"connects\",\n            \"object\": \"Clay County, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"located in\",\n            \"object\": \"Kansas City, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"main span length\",\n            \"object\": \"427 foot\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"length\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"ranking\",\n            \"object\": \"tenth longest span in the United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"ranking\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to parse the text and extract factual triplets.\n\nText: \"Harry S. Truman Bridge\n\nThe Harry S Truman Bridge is a vertical lift rail drawbridge over the Missouri River connecting Jackson County, Missouri with Clay County, Missouri in Kansas City, Missouri. It has a 427 foot main span, and is the tenth longest span in the United States.\"\n\nWe need entities: Harry S. Truman Bridge (subject). Relations:\n\n- instance of? \"is a vertical lift rail drawbridge\" => relation maybe \"instance of\" or \"type\". Use \"instance of\" relation and object \"vertical lift rail drawbridge\". subject_type: \"infrastructure\" or \"bridge\". object_type: \"bridge type\". We'll pick \"bridge\" as object_type maybe \"bridge type\". Let's follow style: earlier example used \"occupation\". For bridge, maybe \"type\". Use relation \"instance of\". object \"vertical lift rail drawbridge\". object_type \"bridge type\".\n\n- location: \"over the Missouri River\" => relation \"crosses\" maybe. In Wikidata, for bridges, relation \"crosses\" (object: Missouri River). subject_type bridge, object_type \"river\". Also \"located in the administrative territorial entity\": connecting Jackson County, Missouri with Clay County, Missouri in Kansas City, Missouri. So we can have two relations: \"connects\" perhaps \"connects\" (subject, object). Could use \"connects\" relation with object \"Jackson County, Missouri\" and \"connects\" with object \"Clay County, Missouri\". Or \"located in\" relation \"Kansas City, Missouri\". We'll produce three location-related triplets.\n\n- \"has a 427 foot main span\" => relation \"main span length\" maybe use \"length of main span\". object \"427 foot\". object_type \"length\". Include qualifier maybe \"unit\". But they said keep units as given. So object \"427 foot\". relation \"main span length\". subject_type \"bridge\". object_type \"length\".\n\n- \"is the tenth longest span in the United States\" => relation \"ranking\" maybe \"ranking of longest spans\". object \"tenth longest span in the United States\". Could break into relation \"ranking\" with object \"10\". But need to capture qualifier \"in the United States\". Maybe relation \"ranking\" object \"10\". qualifiers: {\"relation\":\"ranking type\",\"object\":\"longest span\"} and {\"relation\":\"located in\",\"object\":\"United States\"}? But need to keep simple. Could use relation \"rank\" with object \"10\". qualifiers: {\"relation\":\"ranking metric\",\"object\":\"longest span\"} and {\"relation\":\"point in time\",\"object\":\"present\"}? Not needed.\n\nSimplify: relation \"rank\" object \"10\". qualifiers: {\"relation\":\"ranking category\",\"object\":\"longest span\"} and {\"relation\":\"located in\",\"object\":\"United States\"}.\n\nBut we must ensure qualifiers are only attached to a triplet, not separate. So we create triplet:\n\nsubject: Harry S. Truman Bridge\nrelation: rank\nobject: 10\nqualifiers: [{\"relation\":\"ranking category\",\"object\":\"longest span\"},{\"relation\":\"located in\",\"object\":\"United States\"}]\nsubject_type: bridge\nobject_type: integer\n\nAlternatively could use relation \"ranking\" object \"tenth longest span in the United States\". That is a phrase, but they say not copy whole clause. But we can treat as object \"tenth longest span in the United States\" of type \"ranking\". Simpler: relation \"ranking\", object \"tenth longest span in the United States\". object_type \"ranking\". That may be acceptable.\n\nLet's produce list of triplets:\n\n1. (Harry S. Truman Bridge, instance of, vertical lift rail drawbridge) subject_type \"bridge\", object_type \"bridge type\".\n2. (Harry S. Truman Bridge, crosses, Missouri River) subject_type \"bridge\", object_type \"river\".\n3. (Harry S. Truman Bridge, connects, Jackson County, Missouri) subject_type \"bridge\", object_type \"administrative territorial entity\".\n4. (Harry S. Truman Bridge, connects, Clay County, Missouri) subject_type \"bridge\", object_type \"administrative territorial entity\".\n5. (Harry S. Truman Bridge, located in, Kansas City, Missouri) subject_type \"bridge\", object_type \"city\".\n6. (Harry S. Truman Bridge, main span length, 427 foot) subject_type \"bridge\", object_type \"length\".\n7. (Harry S. Truman Bridge, ranking, tenth longest span in the United States) subject_type \"bridge\", object_type \"ranking\".\n\nCheck qualifiers: none needed except maybe for ranking. Could attach qualifier \"ranking category\": \"longest span\". But object already includes phrase. Might be okay.\n\nWe need to ensure \"vertical lift rail drawbridge\" is a single entity, maybe \"vertical lift railway drawbridge\". We'll keep as given.\n\nNow produce JSON. Ensure each dict includes \"qualifiers\": [] if none.\n\nLet's craft."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1643,
+      "total_tokens": 3075,
+      "completion_tokens": 1432,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"instance of\",\n            \"object\": \"vertical lift rail drawbridge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"bridge type\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"crosses\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"connects\",\n            \"object\": \"Jackson County, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"connects\",\n            \"object\": \"Clay County, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"located in\",\n            \"object\": \"Kansas City, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"main span length\",\n            \"object\": \"427 foot\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"length\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"ranking\",\n            \"object\": \"tenth longest span in the United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"ranking\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "instance of",
+        "object": "vertical lift rail drawbridge",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "bridge type"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "crosses",
+        "object": "Missouri River",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "river"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "connects",
+        "object": "Jackson County, Missouri",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "connects",
+        "object": "Clay County, Missouri",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "located in",
+        "object": "Kansas City, Missouri",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "city"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "main span length",
+        "object": "427 foot",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "length"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "ranking",
+        "object": "tenth longest span in the United States",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "ranking"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1643,
+    "total_tokens": 3075,
+    "completion_tokens": 1432,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 568,
+    "output_tokens_est": 475
+  },
+  "attempts": 1,
+  "latency_s": 17.35303401600686,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T11:57:19.984454+00:00",
+  "cache_key": "171caee7201d5449ddb73b6eb3cdee91"
+}

@@ -1,0 +1,195 @@
+{
+  "task": {
+    "input_id": "212507781b24f0bf",
+    "input_hash": "183f94aaff9839815237ff85d628f0ce40c5afe1fc7837cae03ca3dd1102f2f6",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793197081-XkTVyyDhSWj1nzYVC4wL",
+    "object": "chat.completion",
+    "created": 1793197081,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DeepInfra",
+    "system_fingerprint": null,
+    "service_tier": "default",
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Brendan Nelson\",\n            \"relation\": \"elected as\",\n            \"object\": \"leader of Liberal Party of Australia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2007\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"elector\",\n                    \"object\": \"Parliamentary Liberal Party\",\n                    \"object_type\": \"political party\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"position\"\n        },\n        {\n            \"subject\": \"Brendan Nelson\",\n            \"relation\": \"lost leadership to\",\n            \"object\": \"Malcolm Turnbull\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"16 September 2008\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Malcolm Turnbull\",\n            \"relation\": \"lost leadership to\",\n            \"object\": \"Tony Abbott\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1 December 2009\",\n                    \"object_type\": \"date\"\n                },\n                {\n                    \"relation\": \"vote result\",\n                    \"object\": \"42 votes to 41\",\n                    \"object_type\": \"string\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Tony Abbott\",\n            \"relation\": \"led\",\n            \"object\": \"Liberal Party of Australia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010 federal election\",\n                    \"object_type\": \"election\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"2010 federal election\",\n            \"relation\": \"resulted in\",\n            \"object\": \"hung parliament\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"since\",\n                    \"object\": \"1940 election\",\n                    \"object_type\": \"election\"\n                }\n            ],\n            \"subject_type\": \"election\",\n            \"object_type\": \"parliamentary outcome\"\n        },\n        {\n            \"subject\": \"Liberal Party of Australia\",\n            \"relation\": \"vote increase\",\n            \"object\": \"2010 federal election\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political party\",\n            \"object_type\": \"election\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text. Entities: Liberal Party of Australia (party), Dr Brendan Nelson (person), Parliamentary Liberal Party (maybe same as Liberal Party of Australia? but it's the parliamentary party). Malcolm Turnbull, Tony Abbott, 2007 Federal Election, 2008 (date), 1 December 2009, 2010 federal election, 1940 election. Also events: leadership election, spill motion, leadership, etc.\n\nWe need subject_type and object_type. Types: human, political party, election, date, office, etc. Use generic types: \"human\", \"political party\", \"election\", \"date\", \"position\", \"vote count\"? For votes maybe \"quantity\". We'll try.\n\nSentences:\n\n1. \"Following the 2007 Federal Election, Dr Brendan Nelson was elected leader by the Parliamentary Liberal Party.\"\n\nTriplets:\n- Dr Brendan Nelson - position held - leader (of Liberal Party?). But relation \"position held\" object \"leader of Liberal Party of Australia\"? Could be \"position held\" with qualifier \"by\" etc. Simpler: subject: Dr Brendan Nelson, relation: \"elected as\", object: \"leader of Liberal Party of Australia\". object_type: \"position\". Qualifier: point in time: 2007? Actually \"Following the 2007 Federal Election\" indicates after that election, but not exact date. Could add qualifier \"point in time\" = \"2007\". We'll include.\n\nAlso \"by the Parliamentary Liberal Party\" indicates the electing body. Could be qualifier \"elector\" = \"Parliamentary Liberal Party\". object_type: \"political party\". So qualifiers list.\n\n2. \"On 16 September 2008, in a second contest following a spill motion, Nelson lost the leadership to Malcolm Turnbull.\"\n\nTriplets:\n- Dr Brendan Nelson - lost leadership to - Malcolm Turnbull. relation: \"lost leadership to\". object_type: \"human\". Qualifier: point in time = \"16 September 2008\". Also qualifier: \"contest type\" maybe \"second contest\". Could ignore.\n\n- Also \"spill motion\" maybe event but not needed.\n\n3. \"On 1 December 2009, a subsequent leadership election saw Turnbull lose the leadership to Tony Abbott by 42 votes to 41 on the second ballot.\"\n\nTriplets:\n- Malcolm Turnbull - lost leadership to - Tony Abbott. qualifier: point in time = \"1 December 2009\". Also qualifier: \"vote margin\" maybe \"42 votes to 41\". Could encode as qualifier \"vote count\" with object \"42-41\". But maybe separate qualifiers: \"votes for winner\" = \"42\", \"votes for loser\" = \"41\". We'll include one qualifier \"vote result\" object \"42 votes to 41\". object_type \"string\" maybe \"text\". But we need type; could be \"quantity\". We'll use \"quantity\". Might be okay.\n\n- Also \"leadership election\" is event; but we already captured.\n\n4. \"Abbott led the party to the 2010 federal election, which saw an increase in the Liberal Party vote and resulted in the first hung parliament since the 1940 election.\"\n\nTriplets:\n- Tony Abbott - led - Liberal Party of Australia (or \"the party\"). object_type: \"political party\". qualifier: point in time = \"2010 federal election\". Could also have relation \"led to election\" but we can do \"led\" with qualifier \"point in time\". Or separate: \"Tony Abbott - led - Liberal Party of Australia\". qualifier: \"point in time\" = \"2010 federal election\". Also maybe \"resulted in\" relation: \"first hung parliament since 1940 election\". So subject: \"2010 federal election\" - result - \"first hung parliament\". object_type: \"parliamentary outcome\". qualifier: \"since\" = \"1940 election\". But maybe better: \"first hung parliament\" is a concept. We'll create triplet: \"first hung parliament\" - occurred after - \"2010 federal election\". But we need subject entity. Could use \"2010 federal election\" as subject, relation \"resulted in\", object \"hung parliament\". object_type \"parliamentary outcome\". qualifier: \"since\" = \"1940 election\". We'll include.\n\nAlso \"increase in the Liberal Party vote\" is a fact: \"Liberal Party of Australia\" - vote increase - \"2010 federal election\". Could be relation \"vote increase\" with qualifier \"point in time\". We'll include.\n\nNow define types:\n\n- Dr Brendan Nelson: human\n- Malcolm Turnbull: human\n- Tony Abbott: human\n- Liberal Party of Australia: political party\n- Parliamentary Liberal Party: political party (maybe same)\n- leader (position): position\n- leadership: maybe \"position\" but we treat as \"leadership\" as position.\n- 2007 Federal Election: election\n- 2008-09-16: date\n- 1 December 2009: date\n- 2010 federal election: election\n- 1940 election: election\n- hung parliament: political event/outcome (type \"parliamentary outcome\")\n- vote result: maybe \"quantity\"\n\nWe'll produce JSON with \"triplets\": [ ... ].\n\nMake sure each dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nLet's craft.\n\nTriplet 1:\n{\n\"subject\":\"Brendan Nelson\",\n\"relation\":\"elected as\",\n\"object\":\"leader of Liberal Party of Australia\",\n\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"2007\",\"object_type\":\"year\"},{\"relation\":\"elector\",\"object\":\"Parliamentary Liberal Party\",\"object_type\":\"political party\"}],\n\"subject_type\":\"human\",\n\"object_type\":\"position\"\n}\n\nBut need consistent naming: \"Dr Brendan Nelson\" maybe include title. Use \"Brendan Nelson\". Use \"Malcolm Turnbull\". Use \"Tony Abbott\". Use \"Liberal Party of Australia\". Use \"Parliamentary Liberal Party\". Use \"2007 Federal Election\" as object? Actually we used point in time.\n\nTriplet 2:\n{\n\"subject\":\"Brendan Nelson\",\n\"relation\":\"lost leadership to\",\n\"object\":\"Malcolm Turnbull\",\n\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"16 September 2008\",\"object_type\":\"date\"}],\n\"subject_type\":\"human\",\n\"object_type\":\"human\"\n}\n\nTriplet 3:\n{\n\"subject\":\"Malcolm Turnbull\",\n\"relation\":\"lost leadership to\",\n\"object\":\"Tony Abbott\",\n\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"1 December 2009\",\"object_type\":\"date\"},{\"relation\":\"vote result\",\"object\":\"42 votes to 41\",\"object_type\":\"string\"}],\n\"subject_type\":\"human\",\n\"object_type\":\"human\"\n}\n\nTriplet 4:\n{\n\"subject\":\"Tony Abbott\",\n\"relation\":\"led\",\n\"object\":\"Liberal Party of Australia\",\n\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"2010 federal election\",\"object_type\":\"election\"}],\n\"subject_type\":\"human\",\n\"object_type\":\"political party\"\n}\n\nTriplet 5:\n{\n\"subject\":\"2010 federal election\",\n\"relation\":\"resulted in\",\n\"object\":\"hung parliament\",\n\"qualifiers\":[{\"relation\":\"since\",\"object\":\"1940 election\",\"object_type\":\"election\"}],\n\"subject_type\":\"election\",\n\"object_type\":\"parliamentary outcome\"\n}\n\nTriplet 6:\n{\n\"subject\":\"Liberal Party of Australia\",\n\"relation\":\"vote increase\",\n\"object\":\"2010 federal election\",\n\"qualifiers\":[],\n\"subject_type\":\"political party\",\n\"object_type\":\"election\"\n}\n\nMaybe also \"leadership election 2009\" but not needed.\n\nMake sure JSON format: {\"triplets\":[ ... ]}. Provide list.\n\nLet's output.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text. Entities: Liberal Party of Australia (party), Dr Brendan Nelson (person), Parliamentary Liberal Party (maybe same as Liberal Party of Australia? but it's the parliamentary party). Malcolm Turnbull, Tony Abbott, 2007 Federal Election, 2008 (date), 1 December 2009, 2010 federal election, 1940 election. Also events: leadership election, spill motion, leadership, etc.\n\nWe need subject_type and object_type. Types: human, political party, election, date, office, etc. Use generic types: \"human\", \"political party\", \"election\", \"date\", \"position\", \"vote count\"? For votes maybe \"quantity\". We'll try.\n\nSentences:\n\n1. \"Following the 2007 Federal Election, Dr Brendan Nelson was elected leader by the Parliamentary Liberal Party.\"\n\nTriplets:\n- Dr Brendan Nelson - position held - leader (of Liberal Party?). But relation \"position held\" object \"leader of Liberal Party of Australia\"? Could be \"position held\" with qualifier \"by\" etc. Simpler: subject: Dr Brendan Nelson, relation: \"elected as\", object: \"leader of Liberal Party of Australia\". object_type: \"position\". Qualifier: point in time: 2007? Actually \"Following the 2007 Federal Election\" indicates after that election, but not exact date. Could add qualifier \"point in time\" = \"2007\". We'll include.\n\nAlso \"by the Parliamentary Liberal Party\" indicates the electing body. Could be qualifier \"elector\" = \"Parliamentary Liberal Party\". object_type: \"political party\". So qualifiers list.\n\n2. \"On 16 September 2008, in a second contest following a spill motion, Nelson lost the leadership to Malcolm Turnbull.\"\n\nTriplets:\n- Dr Brendan Nelson - lost leadership to - Malcolm Turnbull. relation: \"lost leadership to\". object_type: \"human\". Qualifier: point in time = \"16 September 2008\". Also qualifier: \"contest type\" maybe \"second contest\". Could ignore.\n\n- Also \"spill motion\" maybe event but not needed.\n\n3. \"On 1 December 2009, a subsequent leadership election saw Turnbull lose the leadership to Tony Abbott by 42 votes to 41 on the second ballot.\"\n\nTriplets:\n- Malcolm Turnbull - lost leadership to - Tony Abbott. qualifier: point in time = \"1 December 2009\". Also qualifier: \"vote margin\" maybe \"42 votes to 41\". Could encode as qualifier \"vote count\" with object \"42-41\". But maybe separate qualifiers: \"votes for winner\" = \"42\", \"votes for loser\" = \"41\". We'll include one qualifier \"vote result\" object \"42 votes to 41\". object_type \"string\" maybe \"text\". But we need type; could be \"quantity\". We'll use \"quantity\". Might be okay.\n\n- Also \"leadership election\" is event; but we already captured.\n\n4. \"Abbott led the party to the 2010 federal election, which saw an increase in the Liberal Party vote and resulted in the first hung parliament since the 1940 election.\"\n\nTriplets:\n- Tony Abbott - led - Liberal Party of Australia (or \"the party\"). object_type: \"political party\". qualifier: point in time = \"2010 federal election\". Could also have relation \"led to election\" but we can do \"led\" with qualifier \"point in time\". Or separate: \"Tony Abbott - led - Liberal Party of Australia\". qualifier: \"point in time\" = \"2010 federal election\". Also maybe \"resulted in\" relation: \"first hung parliament since 1940 election\". So subject: \"2010 federal election\" - result - \"first hung parliament\". object_type: \"parliamentary outcome\". qualifier: \"since\" = \"1940 election\". But maybe better: \"first hung parliament\" is a concept. We'll create triplet: \"first hung parliament\" - occurred after - \"2010 federal election\". But we need subject entity. Could use \"2010 federal election\" as subject, relation \"resulted in\", object \"hung parliament\". object_type \"parliamentary outcome\". qualifier: \"since\" = \"1940 election\". We'll include.\n\nAlso \"increase in the Liberal Party vote\" is a fact: \"Liberal Party of Australia\" - vote increase - \"2010 federal election\". Could be relation \"vote increase\" with qualifier \"point in time\". We'll include.\n\nNow define types:\n\n- Dr Brendan Nelson: human\n- Malcolm Turnbull: human\n- Tony Abbott: human\n- Liberal Party of Australia: political party\n- Parliamentary Liberal Party: political party (maybe same)\n- leader (position): position\n- leadership: maybe \"position\" but we treat as \"leadership\" as position.\n- 2007 Federal Election: election\n- 2008-09-16: date\n- 1 December 2009: date\n- 2010 federal election: election\n- 1940 election: election\n- hung parliament: political event/outcome (type \"parliamentary outcome\")\n- vote result: maybe \"quantity\"\n\nWe'll produce JSON with \"triplets\": [ ... ].\n\nMake sure each dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nLet's craft.\n\nTriplet 1:\n{\n\"subject\":\"Brendan Nelson\",\n\"relation\":\"elected as\",\n\"object\":\"leader of Liberal Party of Australia\",\n\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"2007\",\"object_type\":\"year\"},{\"relation\":\"elector\",\"object\":\"Parliamentary Liberal Party\",\"object_type\":\"political party\"}],\n\"subject_type\":\"human\",\n\"object_type\":\"position\"\n}\n\nBut need consistent naming: \"Dr Brendan Nelson\" maybe include title. Use \"Brendan Nelson\". Use \"Malcolm Turnbull\". Use \"Tony Abbott\". Use \"Liberal Party of Australia\". Use \"Parliamentary Liberal Party\". Use \"2007 Federal Election\" as object? Actually we used point in time.\n\nTriplet 2:\n{\n\"subject\":\"Brendan Nelson\",\n\"relation\":\"lost leadership to\",\n\"object\":\"Malcolm Turnbull\",\n\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"16 September 2008\",\"object_type\":\"date\"}],\n\"subject_type\":\"human\",\n\"object_type\":\"human\"\n}\n\nTriplet 3:\n{\n\"subject\":\"Malcolm Turnbull\",\n\"relation\":\"lost leadership to\",\n\"object\":\"Tony Abbott\",\n\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"1 December 2009\",\"object_type\":\"date\"},{\"relation\":\"vote result\",\"object\":\"42 votes to 41\",\"object_type\":\"string\"}],\n\"subject_type\":\"human\",\n\"object_type\":\"human\"\n}\n\nTriplet 4:\n{\n\"subject\":\"Tony Abbott\",\n\"relation\":\"led\",\n\"object\":\"Liberal Party of Australia\",\n\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"2010 federal election\",\"object_type\":\"election\"}],\n\"subject_type\":\"human\",\n\"object_type\":\"political party\"\n}\n\nTriplet 5:\n{\n\"subject\":\"2010 federal election\",\n\"relation\":\"resulted in\",\n\"object\":\"hung parliament\",\n\"qualifiers\":[{\"relation\":\"since\",\"object\":\"1940 election\",\"object_type\":\"election\"}],\n\"subject_type\":\"election\",\n\"object_type\":\"parliamentary outcome\"\n}\n\nTriplet 6:\n{\n\"subject\":\"Liberal Party of Australia\",\n\"relation\":\"vote increase\",\n\"object\":\"2010 federal election\",\n\"qualifiers\":[],\n\"subject_type\":\"political party\",\n\"object_type\":\"election\"\n}\n\nMaybe also \"leadership election 2009\" but not needed.\n\nMake sure JSON format: {\"triplets\":[ ... ]}. Provide list.\n\nLet's output.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1460,
+      "completion_tokens": 2198,
+      "total_tokens": 3658,
+      "cost": 0.00042768,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00042768,
+        "upstream_inference_prompt_cost": 5.402e-05,
+        "upstream_inference_completions_cost": 0.00037366
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1698,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Brendan Nelson\",\n            \"relation\": \"elected as\",\n            \"object\": \"leader of Liberal Party of Australia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2007\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"elector\",\n                    \"object\": \"Parliamentary Liberal Party\",\n                    \"object_type\": \"political party\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"position\"\n        },\n        {\n            \"subject\": \"Brendan Nelson\",\n            \"relation\": \"lost leadership to\",\n            \"object\": \"Malcolm Turnbull\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"16 September 2008\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Malcolm Turnbull\",\n            \"relation\": \"lost leadership to\",\n            \"object\": \"Tony Abbott\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1 December 2009\",\n                    \"object_type\": \"date\"\n                },\n                {\n                    \"relation\": \"vote result\",\n                    \"object\": \"42 votes to 41\",\n                    \"object_type\": \"string\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Tony Abbott\",\n            \"relation\": \"led\",\n            \"object\": \"Liberal Party of Australia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010 federal election\",\n                    \"object_type\": \"election\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"2010 federal election\",\n            \"relation\": \"resulted in\",\n            \"object\": \"hung parliament\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"since\",\n                    \"object\": \"1940 election\",\n                    \"object_type\": \"election\"\n                }\n            ],\n            \"subject_type\": \"election\",\n            \"object_type\": \"parliamentary outcome\"\n        },\n        {\n            \"subject\": \"Liberal Party of Australia\",\n            \"relation\": \"vote increase\",\n            \"object\": \"2010 federal election\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political party\",\n            \"object_type\": \"election\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Brendan Nelson",
+        "relation": "elected as",
+        "object": "leader of Liberal Party of Australia",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2007"
+          },
+          {
+            "relation": "elector",
+            "object": "Parliamentary Liberal Party"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "position"
+      },
+      {
+        "subject": "Brendan Nelson",
+        "relation": "lost leadership to",
+        "object": "Malcolm Turnbull",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "16 September 2008"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Malcolm Turnbull",
+        "relation": "lost leadership to",
+        "object": "Tony Abbott",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1 December 2009"
+          },
+          {
+            "relation": "vote result",
+            "object": "42 votes to 41"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Tony Abbott",
+        "relation": "led",
+        "object": "Liberal Party of Australia",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010 federal election"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political party"
+      },
+      {
+        "subject": "2010 federal election",
+        "relation": "resulted in",
+        "object": "hung parliament",
+        "qualifiers": [
+          {
+            "relation": "since",
+            "object": "1940 election"
+          }
+        ],
+        "subject_type": "election",
+        "object_type": "parliamentary outcome"
+      },
+      {
+        "subject": "Liberal Party of Australia",
+        "relation": "vote increase",
+        "object": "2010 federal election",
+        "qualifiers": [],
+        "subject_type": "political party",
+        "object_type": "election"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1460,
+    "completion_tokens": 2198,
+    "total_tokens": 3658,
+    "cost": 0.00042768,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00042768,
+      "upstream_inference_prompt_cost": 5.402e-05,
+      "upstream_inference_completions_cost": 0.00037366
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1698,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 853,
+    "output_tokens_est": 726
+  },
+  "attempts": 1,
+  "latency_s": 55.82257204900088,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T14:18:56.863925+00:00",
+  "cache_key": "58e58f387dfc974e70707725201dc633"
+}

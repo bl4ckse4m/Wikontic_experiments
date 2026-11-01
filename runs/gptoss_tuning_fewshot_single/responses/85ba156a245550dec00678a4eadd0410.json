@@ -1,0 +1,132 @@
+{
+  "task": {
+    "input_id": "5b03e85c911ec73a",
+    "input_hash": "8aedb6264613e38b36e21f0dbfd5a98356ea3a7422b9fd2ed1b84a2993c0967a",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-6a246997f53d39d339390dad1d8f2b72",
+    "object": "chat.completion",
+    "created": 1791517769,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"genre\",\n            \"object\": \"reality television series\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"original network\",\n            \"object\": \"WE tv\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"first aired\",\n            \"object\": \"September 7, 2008\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"follows\",\n            \"object\": \"bakers\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"baker\",\n            \"relation\": \"creates\",\n            \"object\": \"high-end edible art wedding cake\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"food\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Amazing Wedding Cakes is an American reality television series on WE tv that debuted on September 7, 2008. The series follows several bakers from around the country as they create high-end edible art wedding cakes.\"\n\nEntities: Amazing Wedding Cakes (TV series). Relation: instance of? Not needed? We need to capture \"American\" as country of origin, \"reality television series\" as genre, \"broadcast on WE tv\" as network, \"debuted on September 7, 2008\" as date of first broadcast, \"series follows several bakers\" as subject? \"bakers\" as participants. \"bakers\" from around the country (maybe location). \"create high-end edible art wedding cakes\" as activity.\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine relations: \"country of origin\", \"genre\", \"original network\", \"first aired\", \"has participant\", \"participant role\"? maybe \"follows\". Let's keep simple.\n\nTriplet1: subject \"Amazing Wedding Cakes\", relation \"country of origin\", object \"United States\". object_type \"country\". subject_type \"television series\". qualifier none.\n\nTriplet2: subject \"Amazing Wedding Cakes\", relation \"genre\", object \"reality television series\". object_type \"genre\". subject_type \"television series\". Might also separate \"television series\" as type, but okay.\n\nTriplet3: subject \"Amazing Wedding Cakes\", relation \"original network\", object \"WE tv\". qualifiers none. object_type \"television network\". subject_type \"television series\".\n\nTriplet4: subject \"Amazing Wedding Cakes\", relation \"first aired\", object \"7 September 2008\". qualifiers none. object_type \"date\". subject_type \"television series\". Use date format as in example: \"September 7, 2008\". Keep same.\n\nTriplet5: subject \"Amazing Wedding Cakes\", relation \"follows\", object \"bakers\". qualifiers maybe \"role\": \"several bakers\". But we need participants. Could be \"has participant\" relation with object \"baker\". But we need to capture \"several bakers from around the country\". So maybe two triplets: one for participants, one for location.\n\nTriplet5: subject \"Amazing Wedding Cakes\", relation \"has participant\", object \"baker\". qualifiers: maybe \"quantity\": \"several\". Also \"place\": \"United States\". But \"from around the country\" indicates they are from various locations within the US. Could add qualifier \"place\" with \"United States\". Use qualifier relation \"place\". Also \"quantity\" qualifier? Not defined but we can use \"quantity\". However guidelines mention qualifiers include unit, approximation, etc. \"quantity\" not listed but could be okay? Safer to avoid extra qualifiers not defined. Use \"place\" qualifier.\n\nThus: qualifiers: [{\"relation\":\"place\",\"object\":\"United States\"}].\n\nTriplet6: subject \"baker\", relation \"creates\", object \"high-end edible art wedding cake\". But subject is baker, but we need to tie to series? Could be \"activity\" of bakers. Might be okay to have separate triplet: subject \"baker\", relation \"creates\", object \"high-end edible art wedding cake\". object_type \"food\". subject_type \"person\". Qualifiers maybe \"context\": \"as part of Amazing Wedding Cakes\". Could add qualifier \"context\" not defined. Might skip.\n\nBetter to keep only series-level facts. The second sentence: \"The series follows several bakers from around the country as they create high-end edible art wedding cakes.\" So we can have triplet: subject \"Amazing Wedding Cakes\", relation \"follows\", object \"bakers\". qualifiers: maybe \"activity\": \"create high-end edible art wedding cakes\". But not defined.\n\nSimplify: produce one triplet: subject \"Amazing Wedding Cakes\", relation \"follows\", object \"bakers\". qualifiers none.\n\nAlso maybe \"bakers\" create \"high-end edible art wedding cakes\". Provide separate triplet: subject \"baker\", relation \"creates\", object \"high-end edible art wedding cake\". object_type \"food\". subject_type \"human\". No qualifiers.\n\nLet's decide final list:\n\n1 country of origin\n2 genre\n3 original network\n4 first aired\n5 follows (participants)\n6 baker creates cake\n\nCheck types: \"television series\" type for subject. \"country\" type for object. \"genre\" type maybe \"genre\". \"television network\". \"date\". \"baker\" type \"human\". \"high-end edible art wedding cake\" type \"food\". Good.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1638,
+      "total_tokens": 2938,
+      "completion_tokens": 1300,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"genre\",\n            \"object\": \"reality television series\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"original network\",\n            \"object\": \"WE tv\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"first aired\",\n            \"object\": \"September 7, 2008\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Amazing Wedding Cakes\",\n            \"relation\": \"follows\",\n            \"object\": \"bakers\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television series\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"baker\",\n            \"relation\": \"creates\",\n            \"object\": \"high-end edible art wedding cake\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"food\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Amazing Wedding Cakes",
+        "relation": "country of origin",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "country"
+      },
+      {
+        "subject": "Amazing Wedding Cakes",
+        "relation": "genre",
+        "object": "reality television series",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "genre"
+      },
+      {
+        "subject": "Amazing Wedding Cakes",
+        "relation": "original network",
+        "object": "WE tv",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "television network"
+      },
+      {
+        "subject": "Amazing Wedding Cakes",
+        "relation": "first aired",
+        "object": "September 7, 2008",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "date"
+      },
+      {
+        "subject": "Amazing Wedding Cakes",
+        "relation": "follows",
+        "object": "bakers",
+        "qualifiers": [],
+        "subject_type": "television series",
+        "object_type": "human"
+      },
+      {
+        "subject": "baker",
+        "relation": "creates",
+        "object": "high-end edible art wedding cake",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "food"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1638,
+    "total_tokens": 2938,
+    "completion_tokens": 1300,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 490,
+    "output_tokens_est": 398
+  },
+  "attempts": 1,
+  "latency_s": 16.15535924199503,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:49:45.776614+00:00",
+  "cache_key": "85ba156a245550dec00678a4eadd0410"
+}

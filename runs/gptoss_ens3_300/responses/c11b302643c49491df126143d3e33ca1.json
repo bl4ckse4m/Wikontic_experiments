@@ -1,0 +1,139 @@
+{
+  "task": {
+    "input_id": "14dd4e83961c5cbf",
+    "input_hash": "4a5a49577f085ba6aee36c7289745c10ec9806f9c52ee1eeccc17b681a97ec16",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-fa15f11d0ed8e5a3d3352cfaea6e6aed",
+    "object": "chat.completion",
+    "created": 1791548067,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"instance of\",\n            \"object\": \"park\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"park\"\n        },\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"location\",\n            \"object\": \"Chomedey\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"distance from\",\n            \"object\": \"Montreal Island\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"short\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"has part\",\n            \"object\": \"Berthiaume-Du-Tremblay Stadium\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"sport\",\n                    \"object\": \"football/soccer\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"stadium\"\n        },\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"has part\",\n            \"object\": \"baseball stadium\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"sport\",\n                    \"object\": \"baseball\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"stadium\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts. Text mentions Parc Berthiaume-du-Tremblay (note spelling variations). It's a park located in Chomedey, a suburb of Laval, Quebec, Canada, a short distance from Montreal Island. It has a football/soccer stadium, Berthiaume-Du-Tremblay Stadium, and a baseball stadium.\n\nWe need triplets:\n\n- (Parc Berthiaume-du-Tremblay, instance of, park) maybe relation \"instance of\" or \"type\". Use \"instance of\" with object_type \"park\". Not explicitly but \"is a park\". So relation \"instance of\" is okay.\n\n- location: (Parc Berthiaume-du-Tremblay, location, Chomedey). Also maybe location qualifiers: Chomedey is a suburb of Laval, Quebec, Canada. Could add location hierarchy? The text states \"located in Chomedey, a suburb of Laval, Quebec, Canada\". So location is Chomedey. Could also add qualifiers \"located in\" relation with point in time? Not needed.\n\n- Could also have (Chomedey, subclass of, suburb) but not required as subject is not main.\n\n- (Parc Berthiaume-du-Tremblay, located in administrative territorial entity, Laval) maybe as qualifiers? But we should not attach all location levels to each triplet. Only core location is Chomedey.\n\n- Also \"short distance from Montreal Island\" -> relation \"distance from\" maybe. Could create (Parc Berthiaume-du-Tremblay, distance from, Montreal Island) with qualifier \"approximate\" maybe \"short\". Use qualifier \"approximation\" with object \"short\". But spec says qualifiers for approximation: relation \"approximation\", object e.g. \"short\". So we can attach qualifier.\n\n- It has a football/soccer stadium, Berthiaume-Du-Tremblay Stadium, and a baseball stadium. So we have facilities.\n\nWe need separate triplets for each stadium? The football/soccer stadium is named Berthiaume-Du-Tremblay Stadium (maybe same as the stadium). The baseball stadium is unnamed. Could be (Parc Berthiaume-du-Tremblay, has part, Berthiaume-Du-Tremblay Stadium) with object_type \"stadium\". And (Parc..., has part, unnamed baseball stadium) but we need a name. Could use \"baseball stadium (Parc Berthiaume-du-Tremblay)\" but maybe leave generic \"baseball stadium\". Use object_type \"stadium\". Provide relation \"has part\". Or \"contains\". Use \"has part\".\n\nAlso could have (Berthiaume-Du-Tremblay Stadium, sport, football/soccer). But not explicitly said it's football/soccer stadium, but \"football/soccer stadium, Berthiaume-Du-Tremblay Stadium\". So we can have (Parc..., has part, Berthiaume-Du-Tremblay Stadium) with qualifier \"sport\", but qualifiers attached to triplet; maybe we add qualifier relation \"sport\" object \"football/soccer\". But spec: qualifiers can be any relation. So we could add qualifier to that triplet: {\"relation\":\"sport\",\"object\":\"football/soccer\"}.\n\nAlso for baseball stadium, could add qualifier sport \"baseball\". Could do separate triplet (Parc..., has part, baseball stadium) with qualifier sport baseball.\n\nNeed subject_type: \"park\". object_type: for park type, \"park\". For location: object_type \"city\" maybe \"Chomedey\" is a district, but class \"city\" or \"district\". Use \"city\". For distance: object_type \"island\". Montreal Island is an island. Use \"island\". For stadium: object_type \"stadium\". For sport qualifiers: object_type \"sport\".\n\nNow format JSON.\n\nList of triplets:\n\n1. Parc Berthiaume-du-Tremblay - instance of - park\n2. Parc Berthiaume-du-Tremblay - location - Chomedey\n   qualifiers maybe none.\n3. Parc Berthiaume-du-Tremblay - distance from - Montreal Island, qualifier approximation short.\n4. Parc Berthiaume-du-Tremblay - has part - Berthiaume-Du-Tremblay Stadium, qualifier sport football/soccer.\n5. Parc Berthiaume-du-Tremblay - has part - baseball stadium, qualifier sport baseball.\n\nCheck naming: The park name appears as \"Parc Berthiaume-du-Tremblay\" and \"Parc Berthiaume-Du-Tremblay\". Use consistent capitalization: \"Parc Berthiaume-du-Tremblay\". The stadium: \"Berthiaume-Du-Tremblay Stadium\". Use that.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1659,
+      "total_tokens": 3071,
+      "completion_tokens": 1412,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"instance of\",\n            \"object\": \"park\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"park\"\n        },\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"location\",\n            \"object\": \"Chomedey\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"distance from\",\n            \"object\": \"Montreal Island\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"short\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"has part\",\n            \"object\": \"Berthiaume-Du-Tremblay Stadium\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"sport\",\n                    \"object\": \"football/soccer\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"stadium\"\n        },\n        {\n            \"subject\": \"Parc Berthiaume-du-Tremblay\",\n            \"relation\": \"has part\",\n            \"object\": \"baseball stadium\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"sport\",\n                    \"object\": \"baseball\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"stadium\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Parc Berthiaume-du-Tremblay",
+        "relation": "instance of",
+        "object": "park",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "park"
+      },
+      {
+        "subject": "Parc Berthiaume-du-Tremblay",
+        "relation": "location",
+        "object": "Chomedey",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "city"
+      },
+      {
+        "subject": "Parc Berthiaume-du-Tremblay",
+        "relation": "distance from",
+        "object": "Montreal Island",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "short"
+          }
+        ],
+        "subject_type": "park",
+        "object_type": "island"
+      },
+      {
+        "subject": "Parc Berthiaume-du-Tremblay",
+        "relation": "has part",
+        "object": "Berthiaume-Du-Tremblay Stadium",
+        "qualifiers": [
+          {
+            "relation": "sport",
+            "object": "football/soccer"
+          }
+        ],
+        "subject_type": "park",
+        "object_type": "stadium"
+      },
+      {
+        "subject": "Parc Berthiaume-du-Tremblay",
+        "relation": "has part",
+        "object": "baseball stadium",
+        "qualifiers": [
+          {
+            "relation": "sport",
+            "object": "baseball"
+          }
+        ],
+        "subject_type": "park",
+        "object_type": "stadium"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1659,
+    "total_tokens": 3071,
+    "completion_tokens": 1412,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 518,
+    "output_tokens_est": 426
+  },
+  "attempts": 1,
+  "latency_s": 17.56454866299464,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:14:45.683790+00:00",
+  "cache_key": "c11b302643c49491df126143d3e33ca1"
+}

@@ -1,0 +1,132 @@
+{
+  "task": {
+    "input_id": "c55d508492eca63f",
+    "input_hash": "f448a6fcca0d9bca6d39bd5de5235bfa08956edaa06cd0e8fd20a8ca1f283564",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-55e13ce562fc255b0e34a4c68be6368c",
+    "object": "chat.completion",
+    "created": 1791521250,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"embassy of\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"located in\",\n            \"object\": \"Republic of Equatorial Guinea\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"located in city\",\n            \"object\": \"Malabo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"charged with\",\n            \"object\": \"diplomacy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"field of activity\"\n        },\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"charged with\",\n            \"object\": \"Equatorial Guinea-United States relations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"international relations\"\n        },\n        {\n            \"subject\": \"United States Ambassador to Equatorial\",\n            \"relation\": \"head of\",\n            \"object\": \"diplomatic mission of the United States to Equatorial Guinea\",\n            \"qualifiers\": [],\n            \"subject_type\": \"diplomatic position\",\n            \"object_type\": \"diplomatic mission\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Embassy of the United States, Malabo\n\nThe United States Embassy in Malabo is the embassy of the United States in the Republic of Equatorial Guinea, in the capital city of Malabo. The embassy is charged with diplomacy and Equatorial Guinea-United States relations. The United States Ambassador to Equatorial is the head of the diplomatic mission of the United States to Equatorial Guinea\"\n\nFirst line maybe title, but we can extract: \"Embassy of the United States, Malabo\" maybe entity name.\n\nSentences:\n\n1. \"The United States Embassy in Malabo is the embassy of the United States in the Republic of Equatorial Guinea, in the capital city of Malabo.\"\n\nFacts:\n- Subject: United States Embassy in Malabo (type: embassy or diplomatic mission)\n- relation: location (or \"place of location\")? It says \"in Malabo\" (capital city). So we can have: \"United States Embassy in Malabo\" relation \"located in\" object \"Malabo\". Also \"Malabo\" is capital city of Equatorial Guinea. Could also have relation \"capital of\" but that's not about embassy.\n\n- It also says \"is the embassy of the United States in the Republic of Equatorial Guinea\". So relation: \"representative of\" maybe \"embassy of\". Could be \"embassy of\" relation: subject embassy, object United States (the sending state) and also \"in the Republic of Equatorial Guinea\" (receiving state). Could split: \"United States Embassy in Malabo\" relation \"representing country\" object \"United States\". Also relation \"located in country\" object \"Republic of Equatorial Guinea\". But we need explicit statements: \"is the embassy of the United States in the Republic of Equatorial Guinea\". That indicates that the embassy belongs to United States and is located in Equatorial Guinea. So we can produce two triplets:\n\n- subject: United States Embassy in Malabo, relation: \"embassy of\", object: United States (subject_type: embassy, object_type: country)\n- subject: United States Embassy in Malabo, relation: \"located in\", object: Republic of Equatorial Guinea (type: country)\n\nAlso \"in the capital city of Malabo\" qualifies location: maybe we add qualifier \"place\" or \"point in time\"? Not needed. Could add qualifier \"place\" to the \"located in\" relation: object \"Republic of Equatorial Guinea\" with qualifier \"capital city\" but not typical. Better separate: \"United States Embassy in Malabo\" relation \"located in city\" object \"Malabo\". So we have separate triplet.\n\n2. \"The embassy is charged with diplomacy and Equatorial Guinea-United States relations.\"\n\nFacts: The embassy (subject) relation \"charged with\" object \"diplomacy\". Also relation \"charged with\" object \"Equatorial Guinea-United States relations\". Could treat as two separate relations.\n\n3. \"The United States Ambassador to Equatorial is the head of the diplomatic mission of the United States to Equatorial Guinea\"\n\nThere is a typo: \"Ambassador to Equatorial\". Probably \"Ambassador to Equatorial Guinea\". We'll treat as given: \"United States Ambassador to Equatorial\". Subject: United States Ambassador to Equatorial (type: diplomatic position). Relation: \"head of\" object \"diplomatic mission of the United States to Equatorial Guinea\". So object is the mission (the embassy). Could also have relation \"position of\" but we keep as \"head of\". Also we could have relation \"position in\" but not needed.\n\nAlso we could have relation \"representative of\" but not explicit.\n\nNow need to assign subject_type and object_type.\n\nDefine types:\n- United States Embassy in Malabo: embassy (diplomatic mission)\n- United States: country\n- Republic of Equatorial Guinea: country\n- Malabo: city (capital city)\n- diplomacy: abstract concept (maybe \"field of activity\")\n- Equatorial Guinea-United States relations: \"international relations\"\n- United States Ambassador to Equatorial: diplomatic position (role)\n- diplomatic mission of the United States to Equatorial Guinea: embassy (same as earlier) maybe \"diplomatic mission\"\n\nNow qualifiers: none besides maybe \"capital city of Malabo\" but that's already location.\n\nWe need to ensure each triplet includes qualifiers list (empty if none).\n\nLet's craft JSON.\n\nTriplets list:\n\n1. {\"subject\":\"United States Embassy in Malabo\",\"relation\":\"embassy of\",\"object\":\"United States\",\"qualifiers\":[],\"subject_type\":\"embassy\",\"object_type\":\"country\"}\n\n2. {\"subject\":\"United States Embassy in Malabo\",\"relation\":\"located in\",\"object\":\"Republic of Equatorial Guinea\",\"qualifiers\":[],\"subject_type\":\"embassy\",\"object_type\":\"country\"}\n\n3. {\"subject\":\"United States Embassy in Malabo\",\"relation\":\"located in city\",\"object\":\"Malabo\",\"qualifiers\":[],\"subject_type\":\"embassy\",\"object_type\":\"city\"}\n\n4. {\"subject\":\"United States Embassy in Malabo\",\"relation\":\"charged with\",\"object\":\"diplomacy\",\"qualifiers\":[],\"subject_type\":\"embassy\",\"object_type\":\"field of activity\"}\n\n5. {\"subject\":\"United States Embassy in Malabo\",\"relation\":\"charged with\",\"object\":\"Equatorial Guinea-United States relations\",\"qualifiers\":[],\"subject_type\":\"embassy\",\"object_type\":\"international relations\"}\n\n6. {\"subject\":\"United States Ambassador to Equatorial\",\"relation\":\"head of\",\"object\":\"diplomatic mission of the United States to Equatorial Guinea\",\"qualifiers\":[],\"subject_type\":\"diplomatic position\",\"object_type\":\"diplomatic mission\"}\n\nPotential also: \"United States Ambassador to Equatorial\" relation \"representing country\" object \"United States\". Not explicit. So skip.\n\nAlso maybe \"United States Ambassador to Equatorial\" relation \"to country\" object \"Equatorial Guinea\". Not explicit.\n\nThus final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1669,
+      "total_tokens": 3265,
+      "completion_tokens": 1596,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"embassy of\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"located in\",\n            \"object\": \"Republic of Equatorial Guinea\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"located in city\",\n            \"object\": \"Malabo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"charged with\",\n            \"object\": \"diplomacy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"field of activity\"\n        },\n        {\n            \"subject\": \"United States Embassy in Malabo\",\n            \"relation\": \"charged with\",\n            \"object\": \"Equatorial Guinea-United States relations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"international relations\"\n        },\n        {\n            \"subject\": \"United States Ambassador to Equatorial\",\n            \"relation\": \"head of\",\n            \"object\": \"diplomatic mission of the United States to Equatorial Guinea\",\n            \"qualifiers\": [],\n            \"subject_type\": \"diplomatic position\",\n            \"object_type\": \"diplomatic mission\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "United States Embassy in Malabo",
+        "relation": "embassy of",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "country"
+      },
+      {
+        "subject": "United States Embassy in Malabo",
+        "relation": "located in",
+        "object": "Republic of Equatorial Guinea",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "country"
+      },
+      {
+        "subject": "United States Embassy in Malabo",
+        "relation": "located in city",
+        "object": "Malabo",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "city"
+      },
+      {
+        "subject": "United States Embassy in Malabo",
+        "relation": "charged with",
+        "object": "diplomacy",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "field of activity"
+      },
+      {
+        "subject": "United States Embassy in Malabo",
+        "relation": "charged with",
+        "object": "Equatorial Guinea-United States relations",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "international relations"
+      },
+      {
+        "subject": "United States Ambassador to Equatorial",
+        "relation": "head of",
+        "object": "diplomatic mission of the United States to Equatorial Guinea",
+        "qualifiers": [],
+        "subject_type": "diplomatic position",
+        "object_type": "diplomatic mission"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1669,
+    "total_tokens": 3265,
+    "completion_tokens": 1596,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 526,
+    "output_tokens_est": 434
+  },
+  "attempts": 1,
+  "latency_s": 19.806873533991165,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:47:50.522714+00:00",
+  "cache_key": "0079db3935606f0b0d95acf65a7fd245"
+}

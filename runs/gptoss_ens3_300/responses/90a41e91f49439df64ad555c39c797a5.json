@@ -1,0 +1,139 @@
+{
+  "task": {
+    "input_id": "0bad9267fd453b5d",
+    "input_hash": "e39cff3f6bb996cf3d18abf6cd604c3aee9d523df6ee6558e961ba1db18556d8",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-3104c81b35993b1e2746fd1874489625",
+    "object": "chat.completion",
+    "created": 1791547380,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"left\",\n            \"object\": \"the show\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"spring 2007\"\n                },\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"run for the Parliament of Finland\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"show\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Parliament of Finland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Social Democrat Party\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"spring 2007\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"received nomination\",\n            \"object\": \"nomination\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"votes\",\n                    \"object\": \"4,972 votes\"\n                },\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Social Democrat Party\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"spring 2007\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political nomination\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Tommy Tabermann\n\nHe left the show in the spring of 2007 in order to run for the Parliament of Finland. Running as a Social Democrat Party candidate, he secured a nomination with 4,972 votes.\"\n\nWe need to resolve pronoun \"He\" = Tommy Tabermann.\n\nWe have facts:\n\n1. Tommy Tabermann left the show in the spring of 2007.\n- relation could be \"departure from\" or \"left\". Use \"left\" maybe \"departure from\". Let's pick \"left\". Object: \"the show\". Need subject_type: human. Object_type: maybe \"television show\" or \"show\". Use \"show\". Qualifiers: point in time: spring 2007. Also maybe \"reason\": run for Parliament. But reason is expressed as \"in order to run for the Parliament of Finland\". Could add qualifier \"purpose\" with object \"run for the Parliament of Finland\". But not required. Use qualifier \"point in time\" = \"spring 2007\". Might also have qualifier \"cause\" = \"run for the Parliament of Finland\". Not sure if we have relation for cause. Could use \"purpose\". Might be okay.\n\n2. He ran for the Parliament of Finland. That's an event: \"run for\" could be \"candidate in election\". So relation: \"candidate in\" maybe? Actually \"run for the Parliament of Finland\" implies \"candidacy\". So we could have triplet: Tommy Tabermann - \"candidate for\" - \"Parliament of Finland\". Qualifiers: maybe \"political party\" = Social Democrat Party; \"point in time\": spring 2007? The text says he left show in spring 2007 to run. So running time is spring 2007. Could add qualifiers.\n\n3. Running as a Social Democrat Party candidate, he secured a nomination with 4,972 votes.\n\nInterpretation: He secured a nomination with 4,972 votes. So relation: \"nomination secured\" maybe \"received nomination\". So triplet: Tommy Tabermann - \"received nomination\" - \"nomination\". But object maybe \"nomination\" not specific. Could be \"Parliamentary nomination\". Could use \"nomination\" as object type \"political nomination\". Qualifiers: \"point in time\" = spring 2007 (implicitly), \"votes\" = 4,972 votes, \"political party\" = Social Democrat Party.\n\nWe also have \"Social Democrat Party\" as a party. So we need a triplet for his party affiliation? Not explicit beyond \"running as a Social Democrat Party candidate\". Could be \"political affiliation\" but maybe we capture as qualifier on the candidacy.\n\nWe must ensure each triplet includes subject_type and object_type.\n\nDefine types: \"human\", \"show\", \"parliament\", \"political party\", \"nomination\", \"vote count\" (maybe \"quantity\").\n\nFor votes, object could be \"4,972 votes\" with object_type \"quantity\". Or we could treat as qualifier with relation \"votes\" and object \"4,972\". Use qualifier relation \"votes\" maybe.\n\nLet's construct triplets:\n\nTriplet 1:\nsubject: Tommy Tabermann\nrelation: left\nobject: the show\nqualifiers: point in time: spring 2007; purpose: run for the Parliament of Finland (optional)\nsubject_type: human\nobject_type: show\n\nTriplet 2:\nsubject: Tommy Tabermann\nrelation: candidate for\nobject: Parliament of Finland\nqualifiers: political party: Social Democrat Party; point in time: spring 2007\nsubject_type: human\nobject_type: legislative body\n\nTriplet 3:\nsubject: Tommy Tabermann\nrelation: received nomination\nobject: nomination\nqualifiers: votes: 4,972; political party: Social Democrat Party; point in time: spring 2007\nsubject_type: human\nobject_type: political nomination\n\nAlso could add triplet for party affiliation: Tommy Tabermann - \"member of political party\" - Social Democrat Party, but not explicitly said he is member, only ran as candidate. Could be considered a fact. Might include as separate: relation \"political affiliation\" with qualifier \"candidate\". But we can keep as qualifier.\n\nMake sure qualifiers format: list of dicts each with \"relation\" and \"object\". For votes, relation \"votes\" maybe. For political party, relation \"political party\". For point in time, relation \"point in time\". For purpose, relation \"purpose\". Use lower case? The example uses \"point in time\". So we follow.\n\nNow produce JSON.\n\nCheck no extra text."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1630,
+      "total_tokens": 2937,
+      "completion_tokens": 1307,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"left\",\n            \"object\": \"the show\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"spring 2007\"\n                },\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"run for the Parliament of Finland\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"show\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Parliament of Finland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Social Democrat Party\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"spring 2007\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"received nomination\",\n            \"object\": \"nomination\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"votes\",\n                    \"object\": \"4,972 votes\"\n                },\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Social Democrat Party\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"spring 2007\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political nomination\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Tommy Tabermann",
+        "relation": "left",
+        "object": "the show",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "spring 2007"
+          },
+          {
+            "relation": "purpose",
+            "object": "run for the Parliament of Finland"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "show"
+      },
+      {
+        "subject": "Tommy Tabermann",
+        "relation": "candidate for",
+        "object": "Parliament of Finland",
+        "qualifiers": [
+          {
+            "relation": "political party",
+            "object": "Social Democrat Party"
+          },
+          {
+            "relation": "point in time",
+            "object": "spring 2007"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "legislative body"
+      },
+      {
+        "subject": "Tommy Tabermann",
+        "relation": "received nomination",
+        "object": "nomination",
+        "qualifiers": [
+          {
+            "relation": "votes",
+            "object": "4,972 votes"
+          },
+          {
+            "relation": "political party",
+            "object": "Social Democrat Party"
+          },
+          {
+            "relation": "point in time",
+            "object": "spring 2007"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political nomination"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1630,
+    "total_tokens": 2937,
+    "completion_tokens": 1307,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 532,
+    "output_tokens_est": 440
+  },
+  "attempts": 1,
+  "latency_s": 16.29081481100002,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:03:16.857641+00:00",
+  "cache_key": "90a41e91f49439df64ad555c39c797a5"
+}

@@ -1,0 +1,165 @@
+{
+  "task": {
+    "input_id": "2c9fe10d6408c9bc",
+    "input_hash": "3ddcb9c3f33f33bcca953b69c3736e151b11a2ea41535be3078bc4b53cd981cc",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d8592f372c8000e10999b2502a3e5148",
+    "object": "chat.completion",
+    "created": 1791516177,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"London Transport Museum\",\n            \"relation\": \"operates from\",\n            \"object\": \"two sites\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"London\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"site\"\n        },\n        {\n            \"subject\": \"London Transport Museum main site\",\n            \"relation\": \"located in\",\n            \"object\": \"Covent Garden\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"London\"\n                }\n            ],\n            \"subject_type\": \"site\",\n            \"object_type\": \"neighbourhood\"\n        },\n        {\n            \"subject\": \"London Transport Museum main site\",\n            \"relation\": \"open to public\",\n            \"object\": \"every day\",\n            \"qualifiers\": [],\n            \"subject_type\": \"site\",\n            \"object_type\": \"frequency\"\n        },\n        {\n            \"subject\": \"London Transport Museum main site\",\n            \"relation\": \"reopened\",\n            \"object\": \"2007\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"2 years\"\n                }\n            ],\n            \"subject_type\": \"site\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"London Transport Museum Depot\",\n            \"relation\": \"located in\",\n            \"object\": \"Acton\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"London\"\n                }\n            ],\n            \"subject_type\": \"site\",\n            \"object_type\": \"neighbourhood\"\n        },\n        {\n            \"subject\": \"London Transport Museum Depot\",\n            \"relation\": \"type\",\n            \"object\": \"storage site\",\n            \"qualifiers\": [],\n            \"subject_type\": \"site\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"London Transport Museum Depot\",\n            \"relation\": \"open to public\",\n            \"object\": \"regular visitor days\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"frequency\",\n                    \"object\": \"throughout the year\"\n                }\n            ],\n            \"subject_type\": \"site\",\n            \"object_type\": \"frequency\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText about London Transport Museum.\n\nFirst sentence: \"London Transport Museum\". That's just title, maybe entity.\n\nNext: \"The museum operates from two sites within London.\"\n\nTriplet: subject \"London Transport Museum\", relation \"operates from\", object \"two sites\". But object should be entity? Could be \"site\". Might split: \"London Transport Museum\" \"has number of sites\" \"2\". But we need explicit facts. It says \"operates from two sites within London.\" So we can create triplet: subject: London Transport Museum, relation: \"operates from\", object: \"two sites\". object_type maybe \"site\". qualifiers: place \"London\". So qualifier place.\n\nSecond: \"The main site in Covent Garden uses the name of its parent institution, sometimes suffixed by \"Covent Garden\", and is open to the public every day, having reopened in 2007 after a two-year refurbishment.\"\n\nWe have main site location Covent Garden. So entity: \"London Transport Museum main site\". Could name \"London Transport Museum main site\". Relation: \"located in\", object: \"Covent Garden\". qualifier: \"place\" maybe \"within London\". But we already have location.\n\nAlso: \"uses the name of its parent institution, sometimes suffixed by 'Covent Garden'\". That's about naming. Could be relation: \"name\", object: \"London Transport Museum\". But maybe not needed.\n\nAlso: \"is open to the public every day\". So relation: \"open to public\", object: \"every day\". Could be qualifier \"frequency\". We'll treat as relation \"open to public\" with qualifier \"frequency\" \"every day\". Also \"reopened in 2007 after a two-year refurbishment\". So relation: \"reopened\", object: \"2007\". qualifier: \"point in time\" 2007, maybe also \"duration of refurbishment\" 2 years? Could be qualifier \"duration\" \"two-year\". But we have \"after a two-year refurbishment\". Could add qualifier \"condition\" \"after refurbishment\". Might be better: relation \"reopened\", object \"2007\", qualifiers: {\"relation\":\"duration\",\"object\":\"2 years\"}? But the refurbishment lasted two years, not the reopening. We'll include qualifier \"duration\" \"two years\" with relation \"duration\". Also \"refurbishment\" as activity? Might be okay.\n\nThird: \"The other site, located in Acton, is known as the London Transport Museum Depot and is principally a storage site that is open on regular visitor days throughout the year.\"\n\nEntity: \"London Transport Museum Depot\". Relation: \"located in\", object: \"Acton\". qualifier place maybe \"within London\". Also: \"is principally a storage site\". Relation: \"type\", object: \"storage site\". Also: \"open on regular visitor days throughout the year\". Relation: \"open to public\", object: \"regular visitor days\". qualifier \"frequency\" \"throughout the year\".\n\nAlso need subject_type and object_type.\n\nDefine types: London Transport Museum - institution (museum). Site - location (site). Covent Garden - neighbourhood (place). Acton - neighbourhood/place. Storage site - facility. \"two sites\" maybe \"site\". \"public\" maybe \"public\". For simplicity.\n\nNow produce JSON list.\n\nTriplets:\n\n1. subject: \"London Transport Museum\", relation: \"operates from\", object: \"two sites\", qualifiers: [{\"relation\":\"place\",\"object\":\"London\"}], subject_type: \"museum\", object_type: \"site\".\n\n2. subject: \"London Transport Museum main site\", relation: \"located in\", object: \"Covent Garden\", qualifiers: [{\"relation\":\"place\",\"object\":\"London\"}], subject_type: \"site\", object_type: \"neighbourhood\".\n\n3. subject: \"London Transport Museum main site\", relation: \"open to public\", object: \"every day\", qualifiers: [], subject_type: \"site\", object_type: \"temporal frequency\". Could use object_type \"frequency\". We'll set \"frequency\".\n\n4. subject: \"London Transport Museum main site\", relation: \"reopened\", object: \"2007\", qualifiers: [{\"relation\":\"duration\",\"object\":\"2 years\"}], subject_type: \"site\", object_type: \"date\".\n\n5. subject: \"London Transport Museum Depot\", relation: \"located in\", object: \"Acton\", qualifiers: [{\"relation\":\"place\",\"object\":\"London\"}], subject_type: \"site\", object_type: \"neighbourhood\".\n\n6. subject: \"London Transport Museum Depot\", relation: \"type\", object: \"storage site\", qualifiers: [], subject_type: \"site\", object_type: \"facility\".\n\n7. subject: \"London Transport Museum Depot\", relation: \"open to public\", object: \"regular visitor days\", qualifiers: [{\"relation\":\"frequency\",\"object\":\"throughout the year\"}], subject_type: \"site\", object_type: \"temporal frequency\".\n\nAlso maybe include naming: \"London Transport Museum main site\" \"uses name of parent institution\". Could be relation \"name\", object \"London Transport Museum\". But maybe not needed.\n\nWe'll output JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1683,
+      "total_tokens": 3234,
+      "completion_tokens": 1551,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"London Transport Museum\",\n            \"relation\": \"operates from\",\n            \"object\": \"two sites\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"London\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"site\"\n        },\n        {\n            \"subject\": \"London Transport Museum main site\",\n            \"relation\": \"located in\",\n            \"object\": \"Covent Garden\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"London\"\n                }\n            ],\n            \"subject_type\": \"site\",\n            \"object_type\": \"neighbourhood\"\n        },\n        {\n            \"subject\": \"London Transport Museum main site\",\n            \"relation\": \"open to public\",\n            \"object\": \"every day\",\n            \"qualifiers\": [],\n            \"subject_type\": \"site\",\n            \"object_type\": \"frequency\"\n        },\n        {\n            \"subject\": \"London Transport Museum main site\",\n            \"relation\": \"reopened\",\n            \"object\": \"2007\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"2 years\"\n                }\n            ],\n            \"subject_type\": \"site\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"London Transport Museum Depot\",\n            \"relation\": \"located in\",\n            \"object\": \"Acton\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"London\"\n                }\n            ],\n            \"subject_type\": \"site\",\n            \"object_type\": \"neighbourhood\"\n        },\n        {\n            \"subject\": \"London Transport Museum Depot\",\n            \"relation\": \"type\",\n            \"object\": \"storage site\",\n            \"qualifiers\": [],\n            \"subject_type\": \"site\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"London Transport Museum Depot\",\n            \"relation\": \"open to public\",\n            \"object\": \"regular visitor days\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"frequency\",\n                    \"object\": \"throughout the year\"\n                }\n            ],\n            \"subject_type\": \"site\",\n            \"object_type\": \"frequency\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "London Transport Museum",
+        "relation": "operates from",
+        "object": "two sites",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "London"
+          }
+        ],
+        "subject_type": "museum",
+        "object_type": "site"
+      },
+      {
+        "subject": "London Transport Museum main site",
+        "relation": "located in",
+        "object": "Covent Garden",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "London"
+          }
+        ],
+        "subject_type": "site",
+        "object_type": "neighbourhood"
+      },
+      {
+        "subject": "London Transport Museum main site",
+        "relation": "open to public",
+        "object": "every day",
+        "qualifiers": [],
+        "subject_type": "site",
+        "object_type": "frequency"
+      },
+      {
+        "subject": "London Transport Museum main site",
+        "relation": "reopened",
+        "object": "2007",
+        "qualifiers": [
+          {
+            "relation": "duration",
+            "object": "2 years"
+          }
+        ],
+        "subject_type": "site",
+        "object_type": "date"
+      },
+      {
+        "subject": "London Transport Museum Depot",
+        "relation": "located in",
+        "object": "Acton",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "London"
+          }
+        ],
+        "subject_type": "site",
+        "object_type": "neighbourhood"
+      },
+      {
+        "subject": "London Transport Museum Depot",
+        "relation": "type",
+        "object": "storage site",
+        "qualifiers": [],
+        "subject_type": "site",
+        "object_type": "facility"
+      },
+      {
+        "subject": "London Transport Museum Depot",
+        "relation": "open to public",
+        "object": "regular visitor days",
+        "qualifiers": [
+          {
+            "relation": "frequency",
+            "object": "throughout the year"
+          }
+        ],
+        "subject_type": "site",
+        "object_type": "frequency"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1683,
+    "total_tokens": 3234,
+    "completion_tokens": 1551,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 715,
+    "output_tokens_est": 623
+  },
+  "attempts": 1,
+  "latency_s": 18.98226572299609,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:23:16.329893+00:00",
+  "cache_key": "3477c9e55f3be28e581730338573788d"
+}

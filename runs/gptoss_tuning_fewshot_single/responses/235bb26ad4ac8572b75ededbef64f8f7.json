@@ -1,0 +1,179 @@
+{
+  "task": {
+    "input_id": "77f6df2e93acb10b",
+    "input_hash": "8a5fd6f8d3839d99ca47e0b2aea020a081984535536e368ce5f4b02fc1765674",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-ae26d5d08ae3a4db87d56e29e94c6872",
+    "object": "chat.completion",
+    "created": 1791518689,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"vessel type\",\n            \"object\": \"ocean liner\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"vessel type\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"operator\",\n            \"object\": \"White Star Line\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"ordinal rank\",\n            \"object\": \"fourth\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"part of series\",\n                    \"object\": \"quartet of ships\"\n                }\n            ],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"ordinal number\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"tonnage\",\n            \"object\": \"20,000 tons\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"over\"\n                }\n            ],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"member of\",\n            \"object\": \"The Big Four\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"group of ships\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"title held\",\n            \"object\": \"world's largest ship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"fastest ship in\",\n            \"object\": \"The Big Four\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"group of ships\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"first to have\",\n            \"object\": \"indoor swimming pool\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"first to have\",\n            \"object\": \"Turkish bath\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"date of launch\",\n            \"object\": \"1906\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"RMS Adriatic (1906)\n\nRMS \"Adriatic\" was an ocean liner of the White Star Line. She was the fourth of a quartet of ships measuring over 20,000 tons, dubbed The Big Four. The ship was the only one of the four which was never the world's largest ship; however, she was the fastest of the Big Four. \"Adriatic\" was the first ocean liner to have an indoor swimming pool and a Turkish bath.\"\n\nWe need to produce triplets.\n\nIdentify entities: RMS Adriatic (ship). White Star Line (organisation). The Big Four (group of ships). \"world's largest ship\" maybe concept. \"fastest of the Big Four\". \"first ocean liner to have an indoor swimming pool\" and \"first ocean liner to have a Turkish bath\". Also \"fourth of a quartet of ships measuring over 20,000 tons\". So we can have relation \"class of ship\" maybe \"type\". But we need specific relations.\n\nLet's define:\n\n- subject: RMS Adriatic\n  relation: \"instance of\" maybe \"ship\". But not required? Could include \"type\" as \"ocean liner\". Use relation \"type\" or \"class\". In examples they used \"occupation\", \"award received\". For ships, maybe \"vessel type\". We'll use \"vessel type\" relation.\n\n- object: \"ocean liner\". subject_type: \"ship\". object_type: \"vessel type\".\n\n- relation: \"operator\" or \"owner\" maybe \"of\". Use \"operator\" relation: RMS Adriatic -> White Star Line. relation: \"operator\". object_type: \"organisation\".\n\n- relation: \"position in series\" maybe \"ordinal rank\". Use \"rank\" relation: RMS Adriatic -> fourth. Could also include qualifier \"of series\" with object \"quartet of ships\". But we can create triplet: subject RMS Adriatic, relation \"ordinal rank\", object \"fourth\". qualifiers: {\"relation\":\"of series\",\"object\":\"quartet of ships\"}.\n\nBut need to keep qualifiers as separate relation objects. Use qualifier relation \"part of series\" maybe \"series\". We'll follow pattern: qualifier relation \"part of series\" object \"quartet of ships\". Also qualifier \"measurement\" maybe \"tonnage\" >20,000 tons. Could be separate triplet: RMS Adriatic \"tonnage\" \"over 20,000 tons\". Use qualifier \"approximation\" maybe \"over\". But \"over 20,000 tons\" is a quantity with approximation. So object \"20,000 tons\". qualifier \"approximation\": \"over\". Also maybe \"unit\": \"tons\". But we can embed unit in object.\n\n- relation: \"member of\" maybe \"The Big Four\". So RMS Adriatic \"member of\" \"The Big Four\". subject_type ship, object_type group.\n\n- relation: \"never held title\" maybe \"world's largest ship\". Use relation \"title held\" with polarity negative. So RMS Adriatic \"title held\" \"world's largest ship\" with qualifier polarity negative. Or \"was never the world's largest ship\". Use relation \"world's largest ship\" maybe \"held title\". We'll create: relation \"title held\", object \"world's largest ship\", qualifier polarity negative.\n\n- relation: \"fastest of\" maybe \"fastest ship among\". Use relation \"fastest among\" object \"The Big Four\". Could also be \"fastest ship in group\". We'll create: RMS Adriatic \"fastest ship in\" \"The Big Four\". No qualifiers.\n\n- relation: \"first ocean liner to have\" object \"indoor swimming pool\". qualifier \"first\". Actually statement: \"Adriatic was the first ocean liner to have an indoor swimming pool\". So relation \"first to have\" maybe \"first to have\". We'll create: RMS Adriatic \"first to have\" \"indoor swimming pool\". qualifier \"object_type\": \"facility\". Also need \"indoor swimming pool\" as object type \"facility\". Also maybe \"type of facility\". We'll just set object_type \"facility\".\n\n- Similarly: RMS Adriatic \"first to have\" \"Turkish bath\". object_type \"facility\".\n\nAlso need to capture year 1906 maybe launch year? The title \"RMS Adriatic (1906)\" indicates year maybe built. Could be \"date of launch\" 1906. Since explicit? The text includes \"(1906)\" after name. That's likely year of launch. It's explicit as part of name. We'll treat as date of launch. So triplet: RMS Adriatic \"date of launch\" \"1906\". qualifier none.\n\nNow assign subject_type and object_type.\n\nDefine types:\n- RMS Adriatic: \"ship\"\n- ocean liner: \"vessel type\"\n- White Star Line: \"organisation\"\n- quartet of ships: \"group of ships\"\n- The Big Four: \"group of ships\"\n- world's largest ship: \"title\"\n- indoor swimming pool: \"facility\"\n- Turkish bath: \"facility\"\n- 1906: date\n\nNow qualifiers list.\n\nLet's craft each triplet with qualifiers list.\n\n1. {\"subject\":\"RMS Adriatic\",\"relation\":\"vessel type\",\"object\":\"ocean liner\",\"qualifiers\":[],\"subject_type\":\"ship\",\"object_type\":\"vessel type\"}\n\n2. {\"subject\":\"RMS Adriatic\",\"relation\":\"operator\",\"object\":\"White Star Line\",\"qualifiers\":[],\"subject_type\":\"ship\",\"object_type\":\"organisation\"}\n\n3. {\"subject\":\"RMS Adriatic\",\"relation\":\"ordinal rank\",\"object\":\"fourth\",\"qualifiers\":[{\"relation\":\"part of series\",\"object\":\"quartet of ships\"}],\"subject_type\":\"ship\",\"object_type\":\"ordinal number\"}\n\n4. {\"subject\":\"RMS Adriatic\",\"relation\":\"tonnage\",\"object\":\"20,000 tons\",\"qualifiers\":[{\"relation\":\"approximation\",\"object\":\"over\"}],\"subject_type\":\"ship\",\"object_type\":\"quantity\"}\n\n5. {\"subject\":\"RMS Adriatic\",\"relation\":\"member of\",\"object\":\"The Big Four\",\"qualifiers\":[],\"subject_type\":\"ship\",\"object_type\":\"group of ships\"}\n\n6. {\"subject\":\"RMS Adriatic\",\"relation\":\"title held\",\"object\":\"world's largest ship\",\"qualifiers\":[{\"relation\":\"polarity\",\"object\":\"negative\"}],\"subject_type\":\"ship\",\"object_type\":\"title\"}\n\n7. {\"subject\":\"RMS Adriatic\",\"relation\":\"fastest ship in\",\"object\":\"The Big Four\",\"qualifiers\":[],\"subject_type\":\"ship\",\"object_type\":\"group of ships\"}\n\n8. {\"subject\":\"RMS Adriatic\",\"relation\":\"first to have\",\"object\":\"indoor swimming pool\",\"qualifiers\":[],\"subject_type\":\"ship\",\"object_type\":\"facility\"}\n\n9. {\"subject\":\"RMS Adriatic\",\"relation\":\"first to have\",\"object\":\"Turkish bath\",\"qualifiers\":[],\"subject_type\":\"ship\",\"object_type\":\"facility\"}\n\n10. {\"subject\":\"RMS Adriatic\",\"relation\":\"date of launch\",\"object\":\"1906\",\"qualifiers\":[],\"subject_type\":\"ship\",\"object_type\":\"date\"}\n\nCheck for any other facts: \"The ship was the only one of the four which was never the world's largest ship; however, she was the fastest of the Big Four.\" Already captured.\n\nAlso \"dubbed The Big Four\" maybe relation \"nickname\". Could add: RMS Adriatic \"nickname\" \"The Big Four\"? Actually the quartet of ships collectively dubbed The Big Four, not the ship. So maybe \"group\" has nickname. Not needed.\n\nAlso \"RMS Adriatic was an ocean liner of the White Star Line.\" Already captured operator.\n\nNow ensure qualifiers attached correctly. For tonnage, we used object \"20,000 tons\". Could also include unit qualifier, but object includes unit. It's okay.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1688,
+      "total_tokens": 3918,
+      "completion_tokens": 2230,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"vessel type\",\n            \"object\": \"ocean liner\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"vessel type\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"operator\",\n            \"object\": \"White Star Line\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"ordinal rank\",\n            \"object\": \"fourth\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"part of series\",\n                    \"object\": \"quartet of ships\"\n                }\n            ],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"ordinal number\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"tonnage\",\n            \"object\": \"20,000 tons\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"over\"\n                }\n            ],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"member of\",\n            \"object\": \"The Big Four\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"group of ships\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"title held\",\n            \"object\": \"world's largest ship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"fastest ship in\",\n            \"object\": \"The Big Four\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"group of ships\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"first to have\",\n            \"object\": \"indoor swimming pool\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"first to have\",\n            \"object\": \"Turkish bath\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"RMS Adriatic\",\n            \"relation\": \"date of launch\",\n            \"object\": \"1906\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ship\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "RMS Adriatic",
+        "relation": "vessel type",
+        "object": "ocean liner",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "vessel type"
+      },
+      {
+        "subject": "RMS Adriatic",
+        "relation": "operator",
+        "object": "White Star Line",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "RMS Adriatic",
+        "relation": "ordinal rank",
+        "object": "fourth",
+        "qualifiers": [
+          {
+            "relation": "part of series",
+            "object": "quartet of ships"
+          }
+        ],
+        "subject_type": "ship",
+        "object_type": "ordinal number"
+      },
+      {
+        "subject": "RMS Adriatic",
+        "relation": "tonnage",
+        "object": "20,000 tons",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "over"
+          }
+        ],
+        "subject_type": "ship",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "RMS Adriatic",
+        "relation": "member of",
+        "object": "The Big Four",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "group of ships"
+      },
+      {
+        "subject": "RMS Adriatic",
+        "relation": "title held",
+        "object": "world's largest ship",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "ship",
+        "object_type": "title"
+      },
+      {
+        "subject": "RMS Adriatic",
+        "relation": "fastest ship in",
+        "object": "The Big Four",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "group of ships"
+      },
+      {
+        "subject": "RMS Adriatic",
+        "relation": "first to have",
+        "object": "indoor swimming pool",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "facility"
+      },
+      {
+        "subject": "RMS Adriatic",
+        "relation": "first to have",
+        "object": "Turkish bath",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "facility"
+      },
+      {
+        "subject": "RMS Adriatic",
+        "relation": "date of launch",
+        "object": "1906",
+        "qualifiers": [],
+        "subject_type": "ship",
+        "object_type": "date"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1688,
+    "total_tokens": 3918,
+    "completion_tokens": 2230,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 811,
+    "output_tokens_est": 719
+  },
+  "attempts": 1,
+  "latency_s": 26.388391747997957,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:05:16.584973+00:00",
+  "cache_key": "235bb26ad4ac8572b75ededbef64f8f7"
+}

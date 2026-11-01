@@ -1,0 +1,126 @@
+{
+  "task": {
+    "input_id": "7a3bb693bd206f88",
+    "input_hash": "95d050792e0eb4ba695158a87dfc9f389cbb70480b89f3bd15ab6db6b24518da",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-37d0867e02c768b1d15bcd3f7edd3fb4",
+    "object": "chat.completion",
+    "created": 1791518770,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Share a Coke\",\n            \"relation\": \"instance of\",\n            \"object\": \"marketing campaign\",\n            \"qualifiers\": [],\n            \"subject_type\": \"campaign\",\n            \"object_type\": \"campaign\"\n        },\n        {\n            \"subject\": \"Share a Coke\",\n            \"relation\": \"sponsor\",\n            \"object\": \"Coca-Cola\",\n            \"qualifiers\": [],\n            \"subject_type\": \"campaign\",\n            \"object_type\": \"company\"\n        },\n        {\n            \"subject\": \"Share a Coke\",\n            \"relation\": \"uses\",\n            \"object\": \"list of popular names\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"250\"\n                }\n            ],\n            \"subject_type\": \"campaign\",\n            \"object_type\": \"list\"\n        },\n        {\n            \"subject\": \"Share a Coke\",\n            \"relation\": \"inception\",\n            \"object\": \"2011\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"campaign\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Share a Coke\n\nShare a Coke is a multi-national marketing campaign in for Coca - Cola. It debrands the traditional Coke logo, replacing ``Coca - Cola ''from one side of a bottle with the phrase`` Share a Coke with'' followed by a person's name. The campaign, which uses a list containing 250 of the country's most popular names (generic nicknames and titles are also used in some cases), aims to have people go out and find a bottle with their name on it, then share it with their friends. The campaign began in Australia in 2011.\"\n\nWe need to parse.\n\nFirst sentence: \"Share a Coke is a multi-national marketing campaign in for Coca - Cola.\" Probably missing \"in [something]\" but we can capture: subject \"Share a Coke\", relation \"instance of\" maybe \"marketing campaign\". But we need specific relation: \"type\" maybe \"campaign type\". Use \"instance of\" or \"type\". In examples they used \"occupation\", \"award received\". For campaign, maybe \"campaign type\". But we need a relation that is standard: \"instance of\" is generic. Use \"instance of\" relation with object \"marketing campaign\". Also \"scope\" multi-national. Could add qualifier \"multinational\" but that's attribute. Could use qualifier \"qualifier\": {\"relation\":\"scope\",\"object\":\"multi-national\"}? Not sure. Simpler: just capture \"Share a Coke\" \"type\" \"marketing campaign\". Use relation \"type of\". But guidelines: use specific Wikidata-style relations; \"type of\" is okay.\n\nSecond: \"Share a Coke ... for Coca - Cola.\" So relation \"sponsor\" or \"organizer\". Could be \"campaign\" \"has sponsor\" \"Coca-Cola\". Use relation \"sponsor\". So triplet: subject \"Share a Coke\", relation \"sponsor\", object \"Coca-Cola\". Need subject_type \"campaign\", object_type \"company\". We'll set.\n\nThird: \"It debrands the traditional Coke logo, replacing ``Coca - Cola ''from one side of a bottle with the phrase`` Share a Coke with'' followed by a person's name.\" This is a description of action. Could capture relation \"modifies\" or \"replaces\". Could be \"replaces\" relation: subject \"Share a Coke campaign\", relation \"replaces\", object \"Coca-Cola logo on bottle\". Might be too detailed. Might skip as not a factual entity relation.\n\nFourth: \"The campaign, which uses a list containing 250 of the country's most popular names (generic nicknames and titles are also used in some cases), aims to have people go out and find a bottle with their name on it, then share it with their friends.\" Fact: campaign uses a list containing 250 names. So relation \"uses\" object \"list of names\". Could also capture \"list contains\" but that's internal. So triplet: subject \"Share a Coke\", relation \"uses\", object \"list of popular names\". Qualifier: quantity 250, maybe \"quantity\" qualifier. Also qualifier \"unit\": maybe \"items\". Also \"approximation\"? It's exact 250. So qualifier \"quantity\": \"250\". Also \"qualifier\": {\"relation\":\"description\",\"object\":\"country's most popular names\"} but not needed.\n\nAlso note \"generic nicknames and titles are also used in some cases\" - could be separate fact: \"list includes generic nicknames and titles\". Might be too detailed.\n\nFifth: \"The campaign began in Australia in 2011.\" So relation \"start time\" or \"inception\". Use relation \"start date\" with point in time 2011, and qualifier \"place\" Australia. Could have two qualifiers: point in time 2011, place Australia. Or separate triplet: subject \"Share a Coke\", relation \"inception\", object \"2011\". Add qualifier place Australia. Or \"start location\". We'll do: relation \"inception\", object \"2011\", qualifiers: place Australia.\n\nAlso need subject_type \"campaign\", object_type \"date\". For place qualifier, object type \"country\". Provide qualifiers list.\n\nNow define entity types:\n\n- \"Share a Coke\": campaign (maybe \"marketing campaign\").\n- \"marketing campaign\": maybe \"campaign\".\n- \"Coca-Cola\": company.\n- \"list of popular names\": maybe \"list\".\n- \"Australia\": country.\n- \"2011\": date.\n\nNow produce JSON.\n\nTriplets list:\n\n1. Share a Coke - relation \"instance of\" - object \"marketing campaign\". qualifiers none. subject_type \"campaign\", object_type \"campaign type\"? maybe \"campaign\". Use object_type \"campaign\". But better \"marketing campaign\". We'll set object_type \"campaign\".\n\n2. Share a Coke - relation \"sponsor\" - object \"Coca-Cola\". qualifiers none. subject_type \"campaign\", object_type \"company\".\n\n3. Share a Coke - relation \"uses\" - object \"list of popular names\". qualifiers: quantity 250. So qualifier relation \"quantity\", object \"250\". Also maybe qualifier \"description\" but not needed. subject_type \"campaign\", object_type \"list\".\n\n4. Share a Coke - relation \"inception\" - object \"2011\". qualifiers: place Australia. So qualifier relation \"place\", object \"Australia\". subject_type \"campaign\", object_type \"date\".\n\nPotential also capture \"campaign aims to have people find bottle with their name\". Could be relation \"goal\" with object \"people find bottle with their name\". But maybe too vague.\n\nWe'll output these four.\n\nCheck qualifiers format: list of {\"relation\": \"...\", \"object\": \"...\"}.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1708,
+      "total_tokens": 3133,
+      "completion_tokens": 1425,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Share a Coke\",\n            \"relation\": \"instance of\",\n            \"object\": \"marketing campaign\",\n            \"qualifiers\": [],\n            \"subject_type\": \"campaign\",\n            \"object_type\": \"campaign\"\n        },\n        {\n            \"subject\": \"Share a Coke\",\n            \"relation\": \"sponsor\",\n            \"object\": \"Coca-Cola\",\n            \"qualifiers\": [],\n            \"subject_type\": \"campaign\",\n            \"object_type\": \"company\"\n        },\n        {\n            \"subject\": \"Share a Coke\",\n            \"relation\": \"uses\",\n            \"object\": \"list of popular names\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"250\"\n                }\n            ],\n            \"subject_type\": \"campaign\",\n            \"object_type\": \"list\"\n        },\n        {\n            \"subject\": \"Share a Coke\",\n            \"relation\": \"inception\",\n            \"object\": \"2011\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Australia\"\n                }\n            ],\n            \"subject_type\": \"campaign\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Share a Coke",
+        "relation": "instance of",
+        "object": "marketing campaign",
+        "qualifiers": [],
+        "subject_type": "campaign",
+        "object_type": "campaign"
+      },
+      {
+        "subject": "Share a Coke",
+        "relation": "sponsor",
+        "object": "Coca-Cola",
+        "qualifiers": [],
+        "subject_type": "campaign",
+        "object_type": "company"
+      },
+      {
+        "subject": "Share a Coke",
+        "relation": "uses",
+        "object": "list of popular names",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "250"
+          }
+        ],
+        "subject_type": "campaign",
+        "object_type": "list"
+      },
+      {
+        "subject": "Share a Coke",
+        "relation": "inception",
+        "object": "2011",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "Australia"
+          }
+        ],
+        "subject_type": "campaign",
+        "object_type": "date"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1708,
+    "total_tokens": 3133,
+    "completion_tokens": 1425,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 404,
+    "output_tokens_est": 312
+  },
+  "attempts": 1,
+  "latency_s": 17.96002985999803,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:06:28.399701+00:00",
+  "cache_key": "89911aecb422a5864af162dd3c065258"
+}

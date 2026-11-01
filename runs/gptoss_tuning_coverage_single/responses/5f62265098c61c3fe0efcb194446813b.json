@@ -1,0 +1,165 @@
+{
+  "task": {
+    "input_id": "13e879a63d66e114",
+    "input_hash": "86cfb093d92ecf28ccf1106365baeb02863c7b2de725bf0b994861a649c1d555",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-e1488f6804fac1f7491af5099ddcf402",
+    "object": "chat.completion",
+    "created": 1791501196,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Saul Solomon\",\n            \"relation\": \"issued\",\n            \"object\": \"70,560 copper tokens\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1821\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"coin\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"monetary value\",\n            \"object\": \"half penny\",\n            \"qualifiers\": [],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"currency\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"payable at\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"payable by\",\n            \"object\": \"Solomon, Dickson and Taylor\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"presumably London partners\"\n                }\n            ],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"partnership\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"circulated alongside\",\n            \"object\": \"East India Company's local coinage\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"until\",\n                    \"object\": \"1836\"\n                }\n            ],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"currency\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"took over\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1836\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"available to\",\n            \"object\": \"collectors\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"status\",\n                    \"object\": \"readily available\"\n                }\n            ],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"human group\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Saint Helena\n\nIn 1821, Saul Solomon issued a 70,560 copper tokens worth a halfpenny each Payable at St Helena by Solomon, Dickson and Taylor – presumably London partners – that circulated alongside the East India Company's local coinage until the Crown took over the island in 1836. The coin remains readily available to collectors.\"\n\nWe need to parse facts.\n\nEntities: Saint Helena (place), Saul Solomon (person), 70,560 copper tokens (object), halfpenny (value), Solomon, Dickson and Taylor (likely partners), East India Company (organization), Crown (maybe British Crown), 1836 (date), 1821 (date), collectors (people).\n\nRelations:\n\n- Saul Solomon issued tokens in 1821. So (Saul Solomon, issued, 70,560 copper tokens) with qualifier point in time 1821. Also maybe quantity: 70,560 tokens. Could also have relation \"quantity\" but we can embed number in object name? The object is \"70,560 copper tokens\". That's fine.\n\n- Tokens worth a halfpenny each. Could be relation \"monetary value\" or \"value\". Use \"value\" maybe. (70,560 copper tokens, monetary value, halfpenny) with qualifier \"per unit\"? Not needed. Could also have relation \"currency denomination\". We'll use \"value\" with object \"half penny\". object_type \"currency\". Provide qualifier \"unit\" maybe not needed.\n\n- Tokens payable at St Helena by Solomon, Dickson and Taylor. So (70,560 copper tokens, payable at, Saint Helena) maybe relation \"place of use\". Also (70,560 copper tokens, issuer, Solomon, Dickson and Taylor) but they are partners. Actually \"Payable at St Helena by Solomon, Dickson and Taylor – presumably London partners –\". So we can have (70,560 copper tokens, payable by, Solomon, Dickson and Taylor). But we need separate entities: Solomon (maybe same as Saul Solomon?), Dickson, Taylor. Could treat as \"Solomon, Dickson and Taylor\" as a group. We'll create triplet: (70,560 copper tokens, payable by, Solomon, Dickson and Taylor). subject_type token, object_type organization? maybe \"business partnership\". We'll set object_type \"partnership\".\n\n- Tokens circulated alongside East India Company's local coinage until 1836. So (70,560 copper tokens, circulated alongside, East India Company's local coinage) with qualifier \"until\", \"1836\". Also maybe \"circulated\" relation.\n\n- Crown took over the island in 1836. So (Crown, took over, Saint Helena) with qualifier point in time 1836.\n\n- The coin remains readily available to collectors. So (70,560 copper tokens, availability, collectors) with qualifier \"status\", \"readily available\". Or relation \"available to\". We'll use (70,560 copper tokens, available to, collectors) with qualifier \"condition\", \"readily available\". Or maybe \"availability\" relation. We'll use \"available to\".\n\nNeed subject_type and object_type.\n\nDefine types:\n\n- Saul Solomon: human\n- 70,560 copper tokens: coin (or token)\n- Saint Helena: place (island)\n- Solomon, Dickson and Taylor: partnership (maybe organization)\n- East India Company's local coinage: coinage (maybe \"currency\")\n- Crown: organization (government)\n- collectors: human group (collectors)\n\nNow produce JSON list.\n\nTriplet 1:\nsubject: \"Saul Solomon\"\nrelation: \"issued\"\nobject: \"70,560 copper tokens\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1821\"}]\nsubject_type: \"human\"\nobject_type: \"coin\"\n\nTriplet 2:\nsubject: \"70,560 copper tokens\"\nrelation: \"monetary value\"\nobject: \"half penny\"\nqualifiers: [{\"relation\":\"per unit\",\"object\":\"true\"}] maybe not needed. We'll just no qualifiers.\nsubject_type: \"coin\"\nobject_type: \"currency\"\n\nTriplet 3:\nsubject: \"70,560 copper tokens\"\nrelation: \"payable at\"\nobject: \"Saint Helena\"\nqualifiers: []\nsubject_type: \"coin\"\nobject_type: \"place\"\n\nTriplet 4:\nsubject: \"70,560 copper tokens\"\nrelation: \"payable by\"\nobject: \"Solomon, Dickson and Taylor\"\nqualifiers: []\nsubject_type: \"coin\"\nobject_type: \"partnership\"\n\nTriplet 5:\nsubject: \"70,560 copper tokens\"\nrelation: \"circulated alongside\"\nobject: \"East India Company's local coinage\"\nqualifiers: [{\"relation\":\"until\",\"object\":\"1836\"}]\nsubject_type: \"coin\"\nobject_type: \"currency\"\n\nTriplet 6:\nsubject: \"Crown\"\nrelation: \"took over\"\nobject: \"Saint Helena\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1836\"}]\nsubject_type: \"organization\"\nobject_type: \"place\"\n\nTriplet 7:\nsubject: \"70,560 copper tokens\"\nrelation: \"available to\"\nobject: \"collectors\"\nqualifiers: [{\"relation\":\"status\",\"object\":\"readily available\"}]\nsubject_type: \"coin\"\nobject_type: \"human group\"\n\nCheck if any other facts: \"The coin remains readily available to collectors.\" Already captured.\n\nAlso \"presumably London partners\" is an attribution? It's a comment that they are presumably London partners. Could add qualifier \"attribution\" maybe not needed. It's a statement about Solomon, Dickson and Taylor. Could add qualifier to triplet 4: {\"relation\":\"attribution\",\"object\":\"presumably London partners\"} but guidelines: qualifiers for attribution. We'll include.\n\nTriplet 4 qualifiers: [{\"relation\":\"attribution\",\"object\":\"presumably London partners\"}]\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1656,
+      "total_tokens": 3396,
+      "completion_tokens": 1740,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Saul Solomon\",\n            \"relation\": \"issued\",\n            \"object\": \"70,560 copper tokens\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1821\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"coin\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"monetary value\",\n            \"object\": \"half penny\",\n            \"qualifiers\": [],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"currency\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"payable at\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"payable by\",\n            \"object\": \"Solomon, Dickson and Taylor\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"presumably London partners\"\n                }\n            ],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"partnership\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"circulated alongside\",\n            \"object\": \"East India Company's local coinage\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"until\",\n                    \"object\": \"1836\"\n                }\n            ],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"currency\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"took over\",\n            \"object\": \"Saint Helena\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1836\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"70,560 copper tokens\",\n            \"relation\": \"available to\",\n            \"object\": \"collectors\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"status\",\n                    \"object\": \"readily available\"\n                }\n            ],\n            \"subject_type\": \"coin\",\n            \"object_type\": \"human group\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Saul Solomon",
+        "relation": "issued",
+        "object": "70,560 copper tokens",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1821"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "coin"
+      },
+      {
+        "subject": "70,560 copper tokens",
+        "relation": "monetary value",
+        "object": "half penny",
+        "qualifiers": [],
+        "subject_type": "coin",
+        "object_type": "currency"
+      },
+      {
+        "subject": "70,560 copper tokens",
+        "relation": "payable at",
+        "object": "Saint Helena",
+        "qualifiers": [],
+        "subject_type": "coin",
+        "object_type": "place"
+      },
+      {
+        "subject": "70,560 copper tokens",
+        "relation": "payable by",
+        "object": "Solomon, Dickson and Taylor",
+        "qualifiers": [
+          {
+            "relation": "attribution",
+            "object": "presumably London partners"
+          }
+        ],
+        "subject_type": "coin",
+        "object_type": "partnership"
+      },
+      {
+        "subject": "70,560 copper tokens",
+        "relation": "circulated alongside",
+        "object": "East India Company's local coinage",
+        "qualifiers": [
+          {
+            "relation": "until",
+            "object": "1836"
+          }
+        ],
+        "subject_type": "coin",
+        "object_type": "currency"
+      },
+      {
+        "subject": "Crown",
+        "relation": "took over",
+        "object": "Saint Helena",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1836"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "place"
+      },
+      {
+        "subject": "70,560 copper tokens",
+        "relation": "available to",
+        "object": "collectors",
+        "qualifiers": [
+          {
+            "relation": "status",
+            "object": "readily available"
+          }
+        ],
+        "subject_type": "coin",
+        "object_type": "human group"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1656,
+    "total_tokens": 3396,
+    "completion_tokens": 1740,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 714,
+    "output_tokens_est": 622
+  },
+  "attempts": 1,
+  "latency_s": 20.89216850900266,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:13:38.169220+00:00",
+  "cache_key": "5f62265098c61c3fe0efcb194446813b"
+}

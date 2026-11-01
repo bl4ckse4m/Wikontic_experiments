@@ -1,0 +1,169 @@
+{
+  "task": {
+    "input_id": "7b3c799d2bd599bd",
+    "input_hash": "ee88b16f66a6fbad70991ef6162cf55efb124639da72b5c67ad9fd77e0f507e4",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-90901999754f7570773612c2e8c96ed1",
+    "object": "chat.completion",
+    "created": 1791518827,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"cover format\",\n            \"object\": \"Region 1 DVD\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"media format\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"starring\",\n            \"object\": \"List of Game of Thrones cast\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"list\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"number of episodes\",\n            \"object\": \"10\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"episodes\"\n                }\n            ],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"original network\",\n            \"object\": \"HBO\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"original release start date\",\n            \"object\": \"24 April 2016\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"original release end date\",\n            \"object\": \"26 June 2016\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"preceded by\",\n            \"object\": \"Season 5\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"television season\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"followed by\",\n            \"object\": \"Season 7\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"television season\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"episode list\",\n            \"object\": \"List of Game of Thrones episodes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"list\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts from the text. The text is a list of attributes for \"Game of Thrones (season 6)\". We need to produce triplets with subject \"Game of Thrones (season 6)\" and various relations.\n\nLet's parse:\n\n- \"Game of Thrones (season 6) Region 1 DVD cover\" => maybe relation \"cover image\" or \"cover\" but not explicit. Could be \"cover\" relation with object \"Region 1 DVD\". Might be ambiguous. Probably we can treat as \"cover type\" but not sure. Might skip if not clear.\n\n- \"Starring See List of Game of Thrones cast\" => relation \"starring\" object \"List of Game of Thrones cast\". Could be a reference to a list. We'll create triplet: subject \"Game of Thrones (season 6)\", relation \"starring\", object \"List of Game of Thrones cast\". object_type maybe \"list\". qualifiers none.\n\n- \"Country of origin United States\" => relation \"country of origin\", object \"United States\". subject_type \"television season\"? We'll set subject_type \"television season\". object_type \"country\".\n\n- \"No. of episodes 10\" => relation \"number of episodes\", object \"10\". Need qualifier \"unit\": maybe \"unit\" relation \"episodes\". But the object is a number; we can set object_type \"quantity\". Also add qualifier \"unit\": \"episodes\". So triplet: subject \"Game of Thrones (season 6)\", relation \"number of episodes\", object \"10\", qualifiers [{\"relation\":\"unit\",\"object\":\"episodes\"}].\n\n- \"Release Original network HBO\" => relation \"original network\", object \"HBO\". subject_type tv season, object_type \"organisation\" (TV network). No qualifiers.\n\n- \"Original release April 24 (2016 - 04 - 24) -- June 26, 2016 (2016 - 06 - 26)\" => This indicates start and end dates. Could be two separate facts: \"original release start date\" and \"original release end date\". Or relation \"original release\" with qualifiers start and end. Probably better to create two triplets: one for start date, one for end date. Use relation \"original release start date\" and \"original release end date\". Objects: \"24 April 2016\" and \"26 June 2016\". Need to format dates. The text shows \"April 24 (2016 - 04 - 24)\" which is 24 April 2016. And \"June 26, 2016\". We'll produce date strings.\n\n- \"Season chronology ← Previous Season 5 Next → Season 7\" => relation \"preceded by\" object \"Season 5\". relation \"followed by\" object \"Season 7\". Subject \"Game of Thrones (season 6)\". object_type \"television season\". qualifiers none.\n\n- \"List of Game of Thrones episodes\" appears at end maybe as a reference. Could be a separate fact: \"has episode list\" object \"List of Game of Thrones episodes\". relation \"episode list\". We'll include.\n\n- Also \"Region 1 DVD cover\" maybe relation \"cover format\" object \"Region 1 DVD\". We'll include.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- subject \"Game of Thrones (season 6)\" type \"television season\".\n- object types:\n   - \"List of Game of Thrones cast\": \"list\".\n   - \"United States\": \"country\".\n   - \"10\": \"quantity\".\n   - \"HBO\": \"organisation\".\n   - dates: \"date\".\n   - \"Season 5\": \"television season\".\n   - \"Season 7\": \"television season\".\n   - \"List of Game of Thrones episodes\": \"list\".\n   - \"Region 1 DVD\": maybe \"media format\".\n\nNow qualifiers: for number of episodes we added unit.\n\nFor dates maybe no qualifiers.\n\nNow produce JSON.\n\nCheck for any other explicit facts: \"Game of Thrones (season 6) Region 1 DVD cover\" maybe we can treat as \"cover format\" relation \"Region 1 DVD\". We'll include.\n\nNow produce list.\n\nOrder not important.\n\nLet's craft JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1689,
+      "total_tokens": 3194,
+      "completion_tokens": 1505,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"cover format\",\n            \"object\": \"Region 1 DVD\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"media format\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"starring\",\n            \"object\": \"List of Game of Thrones cast\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"list\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"number of episodes\",\n            \"object\": \"10\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"episodes\"\n                }\n            ],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"original network\",\n            \"object\": \"HBO\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"original release start date\",\n            \"object\": \"24 April 2016\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"original release end date\",\n            \"object\": \"26 June 2016\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"preceded by\",\n            \"object\": \"Season 5\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"television season\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"followed by\",\n            \"object\": \"Season 7\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"television season\"\n        },\n        {\n            \"subject\": \"Game of Thrones (season 6)\",\n            \"relation\": \"episode list\",\n            \"object\": \"List of Game of Thrones episodes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television season\",\n            \"object_type\": \"list\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "cover format",
+        "object": "Region 1 DVD",
+        "qualifiers": [],
+        "subject_type": "television season",
+        "object_type": "media format"
+      },
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "starring",
+        "object": "List of Game of Thrones cast",
+        "qualifiers": [],
+        "subject_type": "television season",
+        "object_type": "list"
+      },
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "country of origin",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "television season",
+        "object_type": "country"
+      },
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "number of episodes",
+        "object": "10",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "episodes"
+          }
+        ],
+        "subject_type": "television season",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "original network",
+        "object": "HBO",
+        "qualifiers": [],
+        "subject_type": "television season",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "original release start date",
+        "object": "24 April 2016",
+        "qualifiers": [],
+        "subject_type": "television season",
+        "object_type": "date"
+      },
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "original release end date",
+        "object": "26 June 2016",
+        "qualifiers": [],
+        "subject_type": "television season",
+        "object_type": "date"
+      },
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "preceded by",
+        "object": "Season 5",
+        "qualifiers": [],
+        "subject_type": "television season",
+        "object_type": "television season"
+      },
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "followed by",
+        "object": "Season 7",
+        "qualifiers": [],
+        "subject_type": "television season",
+        "object_type": "television season"
+      },
+      {
+        "subject": "Game of Thrones (season 6)",
+        "relation": "episode list",
+        "object": "List of Game of Thrones episodes",
+        "qualifiers": [],
+        "subject_type": "television season",
+        "object_type": "list"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1689,
+    "total_tokens": 3194,
+    "completion_tokens": 1505,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 818,
+    "output_tokens_est": 725
+  },
+  "attempts": 1,
+  "latency_s": 18.763971124993986,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:07:26.083283+00:00",
+  "cache_key": "283da06cba6ef7324362fe561496de7b"
+}

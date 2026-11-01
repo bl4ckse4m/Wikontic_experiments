@@ -1,0 +1,172 @@
+{
+  "task": {
+    "input_id": "20a075f5ac5f0706",
+    "input_hash": "b034af835c93cd1a459f9ba27d878be9054c2cd607f7ae07bf251784df382202",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-ca827136f87972a5d4433d26dcbdcf47",
+    "object": "chat.completion",
+    "created": 1791501577,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"instance of\",\n            \"object\": \"city\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"St. Charles County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"county seat of\",\n            \"object\": \"St. Charles County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"population\",\n            \"object\": \"65,794\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"ranking\",\n            \"object\": \"9\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ranking context\",\n                    \"object\": \"Missouri\"\n                },\n                {\n                    \"relation\": \"ranking type\",\n                    \"object\": \"largest city\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"suburb of\",\n            \"object\": \"St. Louis\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in administrative territorial entity\",\n                    \"object\": \"Missouri\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"direction from\",\n            \"object\": \"St. Louis\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"northwest\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"located on\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"river\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText:\n\n\"St. Charles, Missouri\n\nSt. Charles is a city in, and the county seat of, St. Charles County, Missouri, United States. The population was 65,794 at the 2010 census, making St. Charles the ninth - largest city in Missouri. It lies to the northwest, and is a suburb of St. Louis, Missouri on the Missouri River.\"\n\nWe need to produce triplets with subject_type and object_type.\n\nIdentify entities: St. Charles (city), St. Charles County, Missouri, United States, population number, 2010 census, ninth-largest city in Missouri, St. Louis, Missouri, Missouri River.\n\nRelations: instance of? \"city in\" maybe \"located in administrative territorial entity\". \"county seat of\". \"population\". \"point in time\" qualifier for population. \"ranking\" maybe \"rank\". \"suburb of\". \"lies to the northwest of\". \"located on\". Let's map to Wikidata-like relations.\n\nWe need to be specific but not too generic. Use relations like \"instance of\" (city), \"located in the administrative territorial entity\", \"county seat of\", \"population\", \"point in time\", \"ranking\", \"suburb of\", \"direction\", \"located on water body\". Might be okay.\n\nLet's extract:\n\n1. (St. Charles, relation: instance of, object: city) subject_type: human? No, city is \"settlement\". object_type: \"city\". So subject_type: \"city\". object_type: \"settlement type\"? Use \"city\". We'll set subject_type \"city\", object_type \"city type\"? Might be \"settlement\". Let's use \"city\" for both? Probably subject_type \"city\", object_type \"city\". But object is \"city\". Actually relation \"instance of\" object is \"city\". So object_type \"city\". Good.\n\n2. (St. Charles, relation: located in administrative territorial entity, object: St. Charles County, Missouri, United States). Might need to split: located in St. Charles County (which is in Missouri, United States). So object: \"St. Charles County\". object_type: \"county\". Also maybe add qualifier \"country\": United States? Not needed.\n\n3. (St. Charles, relation: county seat of, object: St. Charles County). object_type: \"county\". subject_type: \"city\".\n\n4. (St. Charles, relation: population, object: 65,794). qualifiers: point in time 2010 census. So object_type \"quantity\". qualifier point in time: \"2010 census\". Also maybe qualifier \"point in time\" object type \"date\"? But \"2010 census\" is an event. We'll treat as \"2010\". Use date \"2010\". But text says \"at the 2010 census\". So qualifier point in time \"2010\". object_type for qualifier: \"date\". Good.\n\n5. (St. Charles, relation: rank, object: 9). qualifiers: \"ranking system\": \"largest city in Missouri\". But we can use qualifier \"ranking type\": \"largest city in Missouri\". Or \"ranking\" with qualifier \"ranking context\": \"Missouri\". Might be \"ranking\" relation with qualifier \"ranking in\" object \"Missouri\". But we need to capture \"ninth-largest city in Missouri\". So maybe relation \"ranking\" object \"9\". qualifiers: {\"relation\":\"ranking type\",\"object\":\"largest city\"} and {\"relation\":\"located in administrative territorial entity\",\"object\":\"Missouri\"}? Might be too complex. Simpler: relation \"ranking\" object \"9\". qualifiers: {\"relation\":\"ranking context\",\"object\":\"Missouri\"} and maybe \"ranking type\":\"largest city\". We'll include two qualifiers.\n\n6. (St. Charles, relation: suburb of, object: St. Louis). object_type \"city\". qualifier: \"located in administrative territorial entity\": \"Missouri\". Also maybe \"direction\": \"northwest\". Actually \"It lies to the northwest, and is a suburb of St. Louis, Missouri on the Missouri River.\" So we have two facts: lies to the northwest (of St. Louis?) The phrase \"It lies to the northwest, and is a suburb of St. Louis, Missouri on the Missouri River.\" Likely means St. Charles lies to the northwest of St. Louis, and is a suburb of St. Louis, on the Missouri River. So we can have:\n\n- (St. Charles, relation: direction from, object: St. Louis) with qualifier \"direction\": \"northwest\". But relation maybe \"located north-west of\". Use \"direction\" relation.\n\n- (St. Charles, relation: suburb of, object: St. Louis). object_type city.\n\n- (St. Charles, relation: located on, object: Missouri River). object_type \"river\".\n\nNow subject_type for St. Charles: \"city\". object_type accordingly.\n\nAlso need \"St. Charles County\" type: county.\n\nNow produce JSON.\n\nNeed each triplet dict with keys: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nDefine qualifiers as list of dicts with relation and object.\n\nLet's craft.\n\nTriplet 1:\nsubject: \"St. Charles\"\nrelation: \"instance of\"\nobject: \"city\"\nqualifiers: []\nsubject_type: \"city\"\nobject_type: \"city\"\n\nTriplet 2:\nsubject: \"St. Charles\"\nrelation: \"located in administrative territorial entity\"\nobject: \"St. Charles County\"\nqualifiers: []\nsubject_type: \"city\"\nobject_type: \"county\"\n\nTriplet 3:\nsubject: \"St. Charles\"\nrelation: \"county seat of\"\nobject: \"St. Charles County\"\nqualifiers: []\nsubject_type: \"city\"\nobject_type: \"county\"\n\nTriplet 4:\nsubject: \"St. Charles\"\nrelation: \"population\"\nobject: \"65,794\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2010\"}]\nsubject_type: \"city\"\nobject_type: \"quantity\"\n\nTriplet 5:\nsubject: \"St. Charles\"\nrelation: \"ranking\"\nobject: \"9\"\nqualifiers: [{\"relation\":\"ranking context\",\"object\":\"Missouri\"},{\"relation\":\"ranking type\",\"object\":\"largest city\"}]\nsubject_type: \"city\"\nobject_type: \"integer\"\n\nTriplet 6:\nsubject: \"St. Charles\"\nrelation: \"suburb of\"\nobject: \"St. Louis\"\nqualifiers: [{\"relation\":\"located in administrative territorial entity\",\"object\":\"Missouri\"}]\nsubject_type: \"city\"\nobject_type: \"city\"\n\nTriplet 7:\nsubject: \"St. Charles\"\nrelation: \"direction from\"\nobject: \"St. Louis\"\nqualifiers: [{\"relation\":\"direction\",\"object\":\"northwest\"}]\nsubject_type: \"city\"\nobject_type: \"city\"\n\nTriplet 8:\nsubject: \"St. Charles\"\nrelation: \"located on\"\nobject: \"Missouri River\"\nqualifiers: []\nsubject_type: \"city\"\nobject_type: \"river\"\n\nPotentially also \"St. Charles County\" located in Missouri, United States, but not required.\n\nAlso \"St. Charles\" is in United States. Could add but not necessary.\n\nMake sure qualifiers list is list of dicts.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1662,
+      "total_tokens": 3720,
+      "completion_tokens": 2058,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"instance of\",\n            \"object\": \"city\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"St. Charles County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"county seat of\",\n            \"object\": \"St. Charles County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"population\",\n            \"object\": \"65,794\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"ranking\",\n            \"object\": \"9\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ranking context\",\n                    \"object\": \"Missouri\"\n                },\n                {\n                    \"relation\": \"ranking type\",\n                    \"object\": \"largest city\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"suburb of\",\n            \"object\": \"St. Louis\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in administrative territorial entity\",\n                    \"object\": \"Missouri\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"direction from\",\n            \"object\": \"St. Louis\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"northwest\"\n                }\n            ],\n            \"subject_type\": \"city\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"St. Charles\",\n            \"relation\": \"located on\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"river\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "St. Charles",
+        "relation": "instance of",
+        "object": "city",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "city"
+      },
+      {
+        "subject": "St. Charles",
+        "relation": "located in administrative territorial entity",
+        "object": "St. Charles County",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "county"
+      },
+      {
+        "subject": "St. Charles",
+        "relation": "county seat of",
+        "object": "St. Charles County",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "county"
+      },
+      {
+        "subject": "St. Charles",
+        "relation": "population",
+        "object": "65,794",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          }
+        ],
+        "subject_type": "city",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "St. Charles",
+        "relation": "ranking",
+        "object": "9",
+        "qualifiers": [
+          {
+            "relation": "ranking context",
+            "object": "Missouri"
+          },
+          {
+            "relation": "ranking type",
+            "object": "largest city"
+          }
+        ],
+        "subject_type": "city",
+        "object_type": "integer"
+      },
+      {
+        "subject": "St. Charles",
+        "relation": "suburb of",
+        "object": "St. Louis",
+        "qualifiers": [
+          {
+            "relation": "located in administrative territorial entity",
+            "object": "Missouri"
+          }
+        ],
+        "subject_type": "city",
+        "object_type": "city"
+      },
+      {
+        "subject": "St. Charles",
+        "relation": "direction from",
+        "object": "St. Louis",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "northwest"
+          }
+        ],
+        "subject_type": "city",
+        "object_type": "city"
+      },
+      {
+        "subject": "St. Charles",
+        "relation": "located on",
+        "object": "Missouri River",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "river"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1662,
+    "total_tokens": 3720,
+    "completion_tokens": 2058,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 755,
+    "output_tokens_est": 663
+  },
+  "attempts": 1,
+  "latency_s": 24.999878548995184,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:20:02.319748+00:00",
+  "cache_key": "96795e916212f236d4a1b06cc8ab971b"
+}

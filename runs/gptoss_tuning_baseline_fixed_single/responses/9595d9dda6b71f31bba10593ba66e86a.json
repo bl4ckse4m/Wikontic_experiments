@@ -1,0 +1,166 @@
+{
+  "task": {
+    "input_id": "69cbbfd03e0ef7d4",
+    "input_hash": "c21472c04e64ae5f4af28801506935ee42d3eff8d52558c8f2aac32fa31adc63",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c6ff5d1221c6f2f3ca67f3b473ee6749",
+    "object": "chat.completion",
+    "created": 1791511003,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"instance of\",\n            \"object\": \"census-designated place\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"Placer County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"located in state\",\n            \"object\": \"California\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"located in country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"located along\",\n            \"object\": \"State Route 65\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"relative location\",\n            \"object\": \"Lincoln\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"northwest\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"postal code\",\n            \"object\": \"95681\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"postal code\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"telephone area code\",\n            \"object\": \"530\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"area code\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"population\",\n            \"object\": \"1,238\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text. Identify entities: Sheridan, California (place), Placer County, California, United States, State Route 65, Lincoln (city), ZIP code 95681, area code 530, elevation (value missing), population 1,238 at 2010 census.\n\nWe need subject_type and object_type. Provide appropriate classes: human? No. Use \"settlement\", \"county\", \"state\", \"country\", \"road\", \"city\", \"postal code\", \"telephone area code\", \"elevation\", \"population\". For population we may treat object as number with qualifier point in time.\n\nTriplets:\n\n1. Sheridan (subject) - instance of - census-designated place (type). But maybe relation \"instance of\". Provide object_type \"settlement type\". Could include.\n\n2. Sheridan - located in administrative territorial entity - Placer County, California. object_type \"county\". Provide qualifier maybe \"country\" United States? Not needed.\n\n3. Sheridan - located in - United States (country). Could be derived.\n\n4. Sheridan - located at - western edge of Placer County (maybe location qualifier). Might be too detailed.\n\n5. Sheridan - located along - State Route 65. relation \"located on road\". object_type \"road\".\n\n6. Sheridan - direction relative to - Lincoln (northwest). relation \"direction from\". object_type \"city\". qualifier maybe \"direction\" but we already have.\n\n7. Sheridan - postal code - 95681. relation \"postal code\". object_type \"postal code\".\n\n8. Sheridan - area code - 530. relation \"telephone area code\". object_type \"area code\".\n\n9. Sheridan - elevation - (value missing). The text says \"The elevation is .\". No value, maybe skip.\n\n10. Sheridan - population - 1,238 with qualifier point in time 2010 census. relation \"population\". object_type \"quantity\". qualifier point in time \"2010\".\n\nAlso maybe \"Sheridan - located in state - California\". Could include.\n\nLet's craft JSON.\n\nNeed each triplet dict with qualifiers list.\n\nSubject_type for Sheridan: \"settlement\". object_type accordingly.\n\nDefine relations: \"instance of\", \"located in administrative territorial entity\", \"located in country\", \"located along\", \"direction from\", \"postal code\", \"area code\", \"population\". Provide qualifiers for population.\n\nAlso include \"located in state\" maybe.\n\nLet's produce list.\n\nTriplet 1:\nsubject: \"Sheridan\"\nrelation: \"instance of\"\nobject: \"census-designated place\"\nqualifiers: []\nsubject_type: \"settlement\"\nobject_type: \"settlement type\"\n\nTriplet 2:\nsubject: \"Sheridan\"\nrelation: \"located in administrative territorial entity\"\nobject: \"Placer County\"\nqualifiers: [{\"relation\":\"located in country\",\"object\":\"United States\"}]? Actually qualifiers must be attached to triplet, but we can add qualifier \"located in country\". However qualifiers are for the triplet, not separate. Might be okay. But maybe better separate triplet for country.\n\nTriplet 2: just Placer County.\n\nsubject_type: \"settlement\"\nobject_type: \"county\"\n\nTriplet 3:\nsubject: \"Sheridan\"\nrelation: \"located in state\"\nobject: \"California\"\nqualifiers: []\nsubject_type: \"settlement\"\nobject_type: \"state\"\n\nTriplet 4:\nsubject: \"Sheridan\"\nrelation: \"located in country\"\nobject: \"United States\"\nqualifiers: []\nsubject_type: \"settlement\"\nobject_type: \"country\"\n\nTriplet 5:\nsubject: \"Sheridan\"\nrelation: \"located along\"\nobject: \"State Route 65\"\nqualifiers: []\nsubject_type: \"settlement\"\nobject_type: \"road\"\n\nTriplet 6:\nsubject: \"Sheridan\"\nrelation: \"direction from\"\nobject: \"Lincoln\"\nqualifiers: [{\"relation\":\"direction\",\"object\":\"northwest\"}] maybe direction is qualifier. But relation \"direction from\" already includes direction? Could use relation \"relative location\" with qualifier direction. Simpler: relation \"relative location\" object \"Lincoln\" qualifier direction \"northwest\". We'll do:\n\nrelation: \"relative location\"\nobject: \"Lincoln\"\nqualifiers: [{\"relation\":\"direction\",\"object\":\"northwest\"}]\n\nsubject_type: \"settlement\"\nobject_type: \"city\"\n\nTriplet 7:\nsubject: \"Sheridan\"\nrelation: \"postal code\"\nobject: \"95681\"\nqualifiers: []\nsubject_type: \"settlement\"\nobject_type: \"postal code\"\n\nTriplet 8:\nsubject: \"Sheridan\"\nrelation: \"telephone area code\"\nobject: \"530\"\nqualifiers: []\nsubject_type: \"settlement\"\nobject_type: \"area code\"\n\nTriplet 9:\nsubject: \"Sheridan\"\nrelation: \"population\"\nobject: \"1,238\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2010\"}]\nsubject_type: \"settlement\"\nobject_type: \"quantity\"\n\nWe might also include \"elevation\" but missing value, skip.\n\nReturn JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1010,
+      "total_tokens": 2594,
+      "completion_tokens": 1584,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"instance of\",\n            \"object\": \"census-designated place\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"located in administrative territorial entity\",\n            \"object\": \"Placer County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"located in state\",\n            \"object\": \"California\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"located in country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"located along\",\n            \"object\": \"State Route 65\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"relative location\",\n            \"object\": \"Lincoln\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"northwest\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"postal code\",\n            \"object\": \"95681\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"postal code\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"telephone area code\",\n            \"object\": \"530\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"area code\"\n        },\n        {\n            \"subject\": \"Sheridan\",\n            \"relation\": \"population\",\n            \"object\": \"1,238\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Sheridan",
+        "relation": "instance of",
+        "object": "census-designated place",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Sheridan",
+        "relation": "located in administrative territorial entity",
+        "object": "Placer County",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Sheridan",
+        "relation": "located in state",
+        "object": "California",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "state"
+      },
+      {
+        "subject": "Sheridan",
+        "relation": "located in country",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "country"
+      },
+      {
+        "subject": "Sheridan",
+        "relation": "located along",
+        "object": "State Route 65",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "road"
+      },
+      {
+        "subject": "Sheridan",
+        "relation": "relative location",
+        "object": "Lincoln",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "northwest"
+          }
+        ],
+        "subject_type": "settlement",
+        "object_type": "city"
+      },
+      {
+        "subject": "Sheridan",
+        "relation": "postal code",
+        "object": "95681",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "postal code"
+      },
+      {
+        "subject": "Sheridan",
+        "relation": "telephone area code",
+        "object": "530",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "area code"
+      },
+      {
+        "subject": "Sheridan",
+        "relation": "population",
+        "object": "1,238",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          }
+        ],
+        "subject_type": "settlement",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1010,
+    "total_tokens": 2594,
+    "completion_tokens": 1584,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 730,
+    "output_tokens_est": 631
+  },
+  "attempts": 1,
+  "latency_s": 18.084271885003545,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:57:01.654385+00:00",
+  "cache_key": "9595d9dda6b71f31bba10593ba66e86a"
+}

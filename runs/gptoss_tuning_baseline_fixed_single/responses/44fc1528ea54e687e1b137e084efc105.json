@@ -1,0 +1,132 @@
+{
+  "task": {
+    "input_id": "a50b92ebad4ce4fa",
+    "input_hash": "b9a402a736e72ee553919630f17211904b35a648f96cefd16a61a8c147bd9dc7",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-0d4dc27ad6908429e29890db79397504",
+    "object": "chat.completion",
+    "created": 1791512515,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"instance of\",\n            \"object\": \"coeducational day and boarding secondary school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"school type\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"located in\",\n            \"object\": \"Walla Walla, New South Wales, Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"geographic location\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"member of\",\n            \"object\": \"Lutheran Education Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"educational network\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"part of\",\n            \"object\": \"Riverina group of Lutheran schools\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"educational group\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"offers education level\",\n            \"object\": \"secondary education\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"education level\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"gender composition\",\n            \"object\": \"coeducational\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"gender composition\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: St Paul's College, Walla Walla (the school). It is a coeducational day and boarding school providing secondary schooling in Walla Walla, New South Wales, Australia.\n\nRelations: instance of school, type: secondary school? Provide location: Walla Walla, New South Wales, Australia.\n\nMember school of Lutheran Education Australia (network). So relation: member of (or part of) Lutheran Education Australia.\n\nIt forms part of the Riverina group of Lutheran schools together with other schools: Lutheran Primary School Wagga Wagga, St Paul's Lutheran Primary School Henty, St John's Primary School Jindera, Victory Lutheran College Wodonga (Victoria). So relation: part of group Riverina group of Lutheran schools. Also \"together with\" indicates other members.\n\nAlso \"coeducational\" as attribute: gender composition: coeducational.\n\n\"day and boarding school\" as type: day school, boarding school.\n\nProvide \"provides secondary schooling\" maybe relation: offers education level secondary education.\n\nWe need subject_type: probably \"educational institution\". object_type: location, organization, etc.\n\nLet's craft triplets:\n\n1. Subject: St Paul's College, Walla Walla; relation: instance of; object: secondary school (or coeducational day and boarding school). Might split.\n\nBetter: relation: \"type of school\" -> \"coeducational day and boarding secondary school\". object_type: \"school type\".\n\n2. location: Walla Walla, New South Wales, Australia. Could have qualifiers for city, state, country. Use relation \"located in\". object: Walla Walla. qualifiers: state New South Wales, country Australia.\n\n3. relation: \"member of\" object: Lutheran Education Australia (organization). object_type: \"educational network\". subject_type: \"educational institution\".\n\n4. relation: \"part of\" object: Riverina group of Lutheran schools (group). object_type: \"educational group\".\n\n5. relation: \"has member\" maybe for the group, but we only need from subject perspective.\n\n6. relation: \"offers education level\" object: secondary education. object_type: \"education level\".\n\n7. relation: \"gender composition\" object: coeducational. object_type: \"gender composition\".\n\n8. relation: \"provides boarding\" maybe \"boarding school\". object: boarding. but maybe not needed.\n\nWe also could include that Lutheran Education Australia is a network of 85 schools and 42 kindergarten/early childhood centres educating approx 38,000 students Australia wide. But that's about the network, not directly about the college. Could include qualifiers: number of schools etc. But maybe not needed.\n\nWe need qualifiers list for each triplet if any.\n\nLet's design JSON.\n\nTriplet list:\n\n- subject: \"St Paul's College, Walla Walla\"\n  relation: \"instance of\"\n  object: \"coeducational day and boarding secondary school\"\n  qualifiers: []\n  subject_type: \"educational institution\"\n  object_type: \"school type\"\n\n- subject: \"St Paul's College, Walla Walla\"\n  relation: \"located in\"\n  object: \"Walla Walla\"\n  qualifiers: [{\"relation\":\"located in\",\"object\":\"New South Wales\"},{\"relation\":\"located in\",\"object\":\"Australia\"}] but qualifiers should be relation-object pairs attached to the triplet. However qualifiers are usually like point in time, location qualifiers. Here we already have location; maybe we can set object as \"Walla Walla, New South Wales, Australia\". Simpler: object: \"Walla Walla, New South Wales, Australia\". No qualifiers.\n\n- subject: \"St Paul's College, Walla Walla\"\n  relation: \"member of\"\n  object: \"Lutheran Education Australia\"\n  qualifiers: []\n  subject_type: \"educational institution\"\n  object_type: \"educational network\"\n\n- subject: \"St Paul's College, Walla Walla\"\n  relation: \"part of\"\n  object: \"Riverina group of Lutheran schools\"\n  qualifiers: []\n  subject_type: \"educational institution\"\n  object_type: \"educational group\"\n\n- subject: \"St Paul's College, Walla Walla\"\n  relation: \"offers education level\"\n  object: \"secondary education\"\n  qualifiers: []\n  subject_type: \"educational institution\"\n  object_type: \"education level\"\n\n- subject: \"St Paul's College, Walla Walla\"\n  relation: \"gender composition\"\n  object: \"coeducational\"\n  qualifiers: []\n  subject_type: \"educational institution\"\n  object_type: \"gender composition\"\n\nMaybe also \"provides boarding\" relation: \"boarding school\". But we can skip.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1051,
+      "total_tokens": 2425,
+      "completion_tokens": 1374,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"instance of\",\n            \"object\": \"coeducational day and boarding secondary school\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"school type\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"located in\",\n            \"object\": \"Walla Walla, New South Wales, Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"geographic location\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"member of\",\n            \"object\": \"Lutheran Education Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"educational network\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"part of\",\n            \"object\": \"Riverina group of Lutheran schools\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"educational group\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"offers education level\",\n            \"object\": \"secondary education\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"education level\"\n        },\n        {\n            \"subject\": \"St Paul's College, Walla Walla\",\n            \"relation\": \"gender composition\",\n            \"object\": \"coeducational\",\n            \"qualifiers\": [],\n            \"subject_type\": \"educational institution\",\n            \"object_type\": \"gender composition\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "St Paul's College, Walla Walla",
+        "relation": "instance of",
+        "object": "coeducational day and boarding secondary school",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "school type"
+      },
+      {
+        "subject": "St Paul's College, Walla Walla",
+        "relation": "located in",
+        "object": "Walla Walla, New South Wales, Australia",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "geographic location"
+      },
+      {
+        "subject": "St Paul's College, Walla Walla",
+        "relation": "member of",
+        "object": "Lutheran Education Australia",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "educational network"
+      },
+      {
+        "subject": "St Paul's College, Walla Walla",
+        "relation": "part of",
+        "object": "Riverina group of Lutheran schools",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "educational group"
+      },
+      {
+        "subject": "St Paul's College, Walla Walla",
+        "relation": "offers education level",
+        "object": "secondary education",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "education level"
+      },
+      {
+        "subject": "St Paul's College, Walla Walla",
+        "relation": "gender composition",
+        "object": "coeducational",
+        "qualifiers": [],
+        "subject_type": "educational institution",
+        "object_type": "gender composition"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1051,
+    "total_tokens": 2425,
+    "completion_tokens": 1374,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 564,
+    "output_tokens_est": 466
+  },
+  "attempts": 1,
+  "latency_s": 16.77176010599942,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:22:12.446119+00:00",
+  "cache_key": "44fc1528ea54e687e1b137e084efc105"
+}

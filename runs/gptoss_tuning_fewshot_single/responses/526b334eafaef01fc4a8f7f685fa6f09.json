@@ -1,0 +1,173 @@
+{
+  "task": {
+    "input_id": "519e1742a6ef54e1",
+    "input_hash": "65db40f80eb57301e1fb987860d7424053dc4dfc3d085c05733f990796fba82d",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-3b37e8fc71e01ae018d01eeeb160aa70",
+    "object": "chat.completion",
+    "created": 1791517512,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"genre\",\n            \"object\": \"war film\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"film genre\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"date of release\",\n            \"object\": \"2009\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"director\",\n            \"object\": \"Samuel Maoz\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"title\",\n            \"object\": \"Lebanon: The Soldier's Journey\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"United Kingdom\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"award received\",\n            \"object\": \"Leone d'Oro\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"66th Venice International Film Festival\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"award\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"controversy caused\",\n            \"object\": \"controversy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Israel\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"nominated for\",\n            \"object\": \"Ophir Awards\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"10\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"award\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"award received\",\n            \"object\": \"Satyajit Ray Award\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"edition\",\n                    \"object\": \"14th\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"award\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText mentions:\n\n- \"Lebanon (2009 film)\" title.\n\n- \"Lebanon (; Lebanon: The Soldier's Journey in the UK) is a 2009 internationally co-produced war film directed by Samuel Maoz.\"\n\nSo facts:\n\n1. Subject: Lebanon (film) (maybe \"Lebanon (film)\" as entity). Relation: instance of? Not required? Could include \"film\" as type but we need explicit statements. It says \"is a 2009 internationally co-produced war film\". So we can extract:\n\n- \"Lebanon (film)\" relation \"country of origin\"? Not explicit. It says \"internationally co-produced\". Not a specific country.\n\n- Relation \"genre\": war film.\n\n- Relation \"publication date\" or \"release year\": 2009.\n\n- Relation \"director\": Samuel Maoz.\n\n- Also alternative title in UK: \"Lebanon: The Soldier's Journey\". So relation \"title in UK\" maybe \"title used in United Kingdom\". Could be \"title\" with qualifier \"place\" UK. We'll capture.\n\n- It won the Leone d'Oro at the 66th Venice International Film Festival. So relation \"award received\": Leone d'Oro, qualifiers: point in time? Not given year but 66th Venice International Film Festival corresponds to 2009? Actually 66th edition was 2009. Not explicit in text, but we shouldn't infer year. We can include qualifier \"event\": 66th Venice International Film Festival. Could also include \"point in time\" not given. We'll just include qualifier \"event\" maybe not allowed? Qualifier relations list includes \"point in time\", \"place\", \"condition\", etc. \"event\" not listed but we can use \"point in time\" if we have date. Not given. Could use \"award received\" with object \"Leone d'Oro\" and qualifier \"point in time\" maybe \"66th Venice International Film Festival\". But that's not a date. Might treat as \"event\". Not in allowed qualifiers list but we can still use generic qualifier relation? The spec says qualifiers can be any relation like \"point in time\", \"place\", \"condition\", etc. It didn't restrict to only those. So we can use \"event\" as qualifier relation.\n\n- It became the first Israeli-produced film to have won that honour. That's a statement about being first Israeli-produced film to win Leone d'Oro. Could be captured as relation \"first of its kind\" but maybe not needed.\n\n- In Israel itself the film has caused some controversy. So relation \"caused controversy\" with qualifier \"place\" Israel. So subject: Lebanon (film), relation: \"controversy caused\", object maybe \"controversy\". Could be \"has caused controversy\". We'll capture as relation \"controversy caused\" object \"controversy\" with qualifier place Israel.\n\n- The film was nominated for ten Ophir Awards, including Best Film. So relation \"nominated for\" object \"Ophir Awards\" with qualifier \"quantity\" 10 and maybe \"including\" Best Film as a specific nomination. Could split: one triplet: subject Lebanon (film) relation \"nominated for\" object \"Ophir Award\" qualifiers: quantity 10. But \"Ophir Awards\" plural. We'll treat object \"Ophir Awards\". qualifier \"quantity\" 10. Also maybe separate triplet for \"Best Film\" nomination: relation \"nominated for\" object \"Best Film\" with qualifier \"award series\" Ophir Awards? Might be too complex. We'll include one triplet with quantity.\n\n- The film also won the 14th Annual Satyajit Ray Award. So relation \"award received\": \"Satyajit Ray Award\" with qualifier \"point in time\" maybe \"14th Annual\". Could also include qualifier \"edition\" 14th. We'll include qualifier \"edition\" 14th.\n\nNow need subject_type and object_type.\n\n- Subject: Lebanon (film) type: film (or \"movie\").\n\n- Director: Samuel Maoz type: human.\n\n- Genre: war film type: genre (maybe \"film genre\").\n\n- Release year: 2009 type: date (year). Relation maybe \"publication date\" or \"release year\". Use \"date of release\". object type date.\n\n- Alternative title: \"Lebanon: The Soldier's Journey\" type: title (string). qualifier place UK.\n\n- Award: Leone d'Oro type: award.\n\n- Event: 66th Venice International Film Festival type: event.\n\n- Controversy: maybe \"controversy\" type: concept.\n\n- Ophir Awards: award (award series). object_type \"award\".\n\n- Quantity qualifier: 10 type: quantity (number). Use qualifier relation \"quantity\".\n\n- Satyajit Ray Award: award.\n\n- Edition qualifier: \"14th\" type: ordinal? Use qualifier relation \"edition\".\n\nNow produce JSON.\n\nNeed each triplet dict with qualifiers list.\n\nLet's craft.\n\nTriplets list:\n\n1. subject \"Lebanon (film)\", relation \"instance of\", object \"film\"? Not explicit but \"is a ... film\". Could be \"type\". But maybe we can use relation \"genre\" for war film. We'll include \"genre\" war film.\n\nTriplet: subject \"Lebanon (film)\", relation \"genre\", object \"war film\", qualifiers [].\n\nsubject_type film, object_type \"film genre\".\n\n2. subject \"Lebanon (film)\", relation \"date of release\", object \"2009\", qualifiers [].\n\nsubject_type film, object_type date.\n\n3. subject \"Lebanon (film)\", relation \"director\", object \"Samuel Maoz\", qualifiers [].\n\nsubject_type film, object_type human.\n\n4. subject \"Lebanon (film)\", relation \"title\", object \"Lebanon: The Soldier's Journey\", qualifiers [{\"relation\":\"place\",\"object\":\"United Kingdom\"}].\n\nsubject_type film, object_type \"title\".\n\n5. subject \"Lebanon (film)\", relation \"award received\", object \"Leone d'Oro\", qualifiers [{\"relation\":\"event\",\"object\":\"66th Venice International Film Festival\"}].\n\nsubject_type film, object_type award.\n\n6. subject \"Lebanon (film)\", relation \"controversy caused\", object \"controversy\", qualifiers [{\"relation\":\"place\",\"object\":\"Israel\"}].\n\nsubject_type film, object_type \"concept\" maybe \"controversy\".\n\n7. subject \"Lebanon (film)\", relation \"nominated for\", object \"Ophir Awards\", qualifiers [{\"relation\":\"quantity\",\"object\":\"10\"}].\n\nsubject_type film, object_type \"award\".\n\n8. subject \"Lebanon (film)\", relation \"award received\", object \"Satyajit Ray Award\", qualifiers [{\"relation\":\"edition\",\"object\":\"14th\"}].\n\nsubject_type film, object_type award.\n\nPotential also \"first Israeli-produced film to have won that honour\". Could be relation \"first of its kind\" but maybe skip.\n\nNow ensure qualifiers objects are strings.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1697,
+      "total_tokens": 3693,
+      "completion_tokens": 1996,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"genre\",\n            \"object\": \"war film\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"film genre\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"date of release\",\n            \"object\": \"2009\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"director\",\n            \"object\": \"Samuel Maoz\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"title\",\n            \"object\": \"Lebanon: The Soldier's Journey\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"United Kingdom\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"award received\",\n            \"object\": \"Leone d'Oro\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"66th Venice International Film Festival\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"award\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"controversy caused\",\n            \"object\": \"controversy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Israel\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"nominated for\",\n            \"object\": \"Ophir Awards\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"10\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"award\"\n        },\n        {\n            \"subject\": \"Lebanon (film)\",\n            \"relation\": \"award received\",\n            \"object\": \"Satyajit Ray Award\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"edition\",\n                    \"object\": \"14th\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"award\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Lebanon (film)",
+        "relation": "genre",
+        "object": "war film",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "film genre"
+      },
+      {
+        "subject": "Lebanon (film)",
+        "relation": "date of release",
+        "object": "2009",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "date"
+      },
+      {
+        "subject": "Lebanon (film)",
+        "relation": "director",
+        "object": "Samuel Maoz",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "human"
+      },
+      {
+        "subject": "Lebanon (film)",
+        "relation": "title",
+        "object": "Lebanon: The Soldier's Journey",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "United Kingdom"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "title"
+      },
+      {
+        "subject": "Lebanon (film)",
+        "relation": "award received",
+        "object": "Leone d'Oro",
+        "qualifiers": [
+          {
+            "relation": "event",
+            "object": "66th Venice International Film Festival"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "award"
+      },
+      {
+        "subject": "Lebanon (film)",
+        "relation": "controversy caused",
+        "object": "controversy",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "Israel"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "concept"
+      },
+      {
+        "subject": "Lebanon (film)",
+        "relation": "nominated for",
+        "object": "Ophir Awards",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "10"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "award"
+      },
+      {
+        "subject": "Lebanon (film)",
+        "relation": "award received",
+        "object": "Satyajit Ray Award",
+        "qualifiers": [
+          {
+            "relation": "edition",
+            "object": "14th"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "award"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1697,
+    "total_tokens": 3693,
+    "completion_tokens": 1996,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 754,
+    "output_tokens_est": 662
+  },
+  "attempts": 1,
+  "latency_s": 24.45744129200466,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:45:37.362668+00:00",
+  "cache_key": "526b334eafaef01fc4a8f7f685fa6f09"
+}

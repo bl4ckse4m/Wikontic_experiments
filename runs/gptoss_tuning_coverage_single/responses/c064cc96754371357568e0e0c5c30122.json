@@ -1,0 +1,134 @@
+{
+  "task": {
+    "input_id": "b2fcbe27b76db1e7",
+    "input_hash": "1f3fcec7c4c9136d0c7533531e22357175cd973f73f12c6a584df965d786d396",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-62bf97095c3235385a2420a9e4b99903",
+    "object": "chat.completion",
+    "created": 1791506111,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Municipio XIX\",\n            \"relation\": \"subdivision of\",\n            \"object\": \"Rome\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Municipio XIX\",\n            \"relation\": \"date of dissolution\",\n            \"object\": \"11 March 2013\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Municipio XIX\",\n            \"relation\": \"merged into\",\n            \"object\": \"Municipio XIV\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"11 March 2013\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Municipio XIV\",\n            \"relation\": \"coextensive with\",\n            \"object\": \"Municipio XIX\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Municipio XIX\",\n            \"relation\": \"located in\",\n            \"object\": \"municipality of Rome\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"north-west\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"municipality\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText:\n\n\"Municipio XIX\n\nThe Municipio XIX was an administrative subdivision of the city of Rome. Following the administrative reform of 11 March 2013, it was suppressed and merged into the new, and coextensive, Municipio XIV. Its territory is situated to the north-west part of the municipality of Rome.\"\n\nWe need to identify entities: Municipio XIX, city of Rome, administrative reform of 11 March 2013 (maybe event), Municipio XIV, territory (maybe part of), municipality of Rome (same as city of Rome? but treat as entity). Provide subject_type and object_type.\n\nTriplets:\n\n1. (Municipio XIX, instance of, administrative subdivision) maybe relation \"subdivision of\". The text: \"was an administrative subdivision of the city of Rome.\" So relation: \"subdivision of\" or \"administrative subdivision of\". Use \"subdivision of\". Subject_type: administrative division? Let's use \"administrative division\". Object_type: \"city\". So:\n\nsubject: Municipio XIX\nrelation: \"subdivision of\"\nobject: \"Rome\"\nqualifiers: [].\n\nsubject_type: \"administrative division\"\nobject_type: \"city\"\n\n2. Administrative reform event: \"Following the administrative reform of 11 March 2013, it was suppressed and merged into the new, and coextensive, Municipio XIV.\"\n\nWe have two actions: suppressed and merged into Municipio XIV. Could be separate triplets.\n\nFirst: (Municipio XIX, status, suppressed) maybe relation \"dissolved\". Use \"dissolved\". Qualifier point in time 11 March 2013? Actually the reform date is 11 March 2013. So we can attach qualifier \"point in time\" = \"11 March 2013\". Also \"administrative reform of 11 March 2013\" is the event causing it. Could also have relation \"dissolved by\" event. Simpler: (Municipio XIX, dissolved, true) but object maybe \"administrative reform of 11 March 2013\". Let's create triplet: (Municipio XIX, dissolved by, administrative reform of 11 March 2013). Relation \"dissolved by\". object_type: \"event\". subject_type: \"administrative division\". Qualifier maybe none.\n\nAlternatively separate: (Municipio XIX, dissolution date, 11 March 2013). Use \"date of dissolution\". That seems straightforward.\n\nLet's do: relation \"date of dissolution\", object \"11 March 2013\". subject_type \"administrative division\", object_type \"date\". That captures suppressed.\n\n3. (Municipio XIX, merged into, Municipio XIV). Qualifier point in time \"11 March 2013\". Also note \"new, and coextensive, Municipio XIV\". So object_type \"administrative division\". subject_type same.\n\n4. (Municipio XIV, coextensive with, Municipio XIX) maybe not needed. Not explicit claim that they are coextensive, but phrase \"new, and coextensive, Municipio XIV\". Could treat as attribute: (Municipio XIV, coextensive with, Municipio XIX). Use relation \"coextensive with\". Provide qualifiers none.\n\n5. (Municipio XIX, territory location, north-west part of the municipality of Rome). Relation \"located in\". Object \"north-west part of the municipality of Rome\". Could split: (Municipio XIX, located in, municipality of Rome) with qualifier \"direction\" = \"north-west\". But direction qualifier not defined. Could use qualifier \"spatial relation\" maybe \"direction\". Not defined but we can use generic \"qualifier relation\". The spec says qualifiers must use relation names like \"point in time\". Not limited. Could use \"direction\". We'll create qualifier: {\"relation\":\"direction\",\"object\":\"north-west\"}.\n\nThus triplet: subject Municipio XIX, relation \"located in\", object \"municipality of Rome\". qualifiers: direction north-west.\n\nsubject_type: administrative division, object_type: \"municipality\".\n\nAlso maybe \"territory\" is a concept, but we treat as location.\n\nNow also \"administrative reform of 11 March 2013\" is an event. Could have triplet: (administrative reform of 11 March 2013, date, 11 March 2013). But not needed.\n\nLet's compile list.\n\nTriplet list:\n\n1. Municipio XIX - subdivision of - Rome\n2. Municipio XIX - date of dissolution - 11 March 2013\n3. Municipio XIX - merged into - Municipio XIV (qualifier point in time 11 March 2013)\n4. Municipio XIV - coextensive with - Municipio XIX\n5. Municipio XIX - located in - municipality of Rome (qualifier direction north-west)\n\nCheck subject/object types:\n\n- Rome: city (or \"city\")\n- date: date\n- Municipio XIV: administrative division\n- municipality of Rome: municipality (maybe same as city). Use \"municipality\".\n- For coextensive: object_type \"administrative division\".\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1646,
+      "total_tokens": 3027,
+      "completion_tokens": 1381,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Municipio XIX\",\n            \"relation\": \"subdivision of\",\n            \"object\": \"Rome\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Municipio XIX\",\n            \"relation\": \"date of dissolution\",\n            \"object\": \"11 March 2013\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Municipio XIX\",\n            \"relation\": \"merged into\",\n            \"object\": \"Municipio XIV\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"11 March 2013\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Municipio XIV\",\n            \"relation\": \"coextensive with\",\n            \"object\": \"Municipio XIX\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Municipio XIX\",\n            \"relation\": \"located in\",\n            \"object\": \"municipality of Rome\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"north-west\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"municipality\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Municipio XIX",
+        "relation": "subdivision of",
+        "object": "Rome",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "city"
+      },
+      {
+        "subject": "Municipio XIX",
+        "relation": "date of dissolution",
+        "object": "11 March 2013",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "date"
+      },
+      {
+        "subject": "Municipio XIX",
+        "relation": "merged into",
+        "object": "Municipio XIV",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "11 March 2013"
+          }
+        ],
+        "subject_type": "administrative division",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Municipio XIV",
+        "relation": "coextensive with",
+        "object": "Municipio XIX",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Municipio XIX",
+        "relation": "located in",
+        "object": "municipality of Rome",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "north-west"
+          }
+        ],
+        "subject_type": "administrative division",
+        "object_type": "municipality"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1646,
+    "total_tokens": 3027,
+    "completion_tokens": 1381,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 506,
+    "output_tokens_est": 414
+  },
+  "attempts": 1,
+  "latency_s": 17.366372232994763,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:35:28.954902+00:00",
+  "cache_key": "c064cc96754371357568e0e0c5c30122"
+}

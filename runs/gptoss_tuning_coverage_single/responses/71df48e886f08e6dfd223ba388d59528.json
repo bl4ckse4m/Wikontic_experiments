@@ -1,0 +1,169 @@
+{
+  "task": {
+    "input_id": "426495bf3bd97d20",
+    "input_hash": "ec17d02aca47344f0909b496a0fe34b813a13972d12bc9caabfce5b7a6ee5511",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-2aef9fef2ab6e85c49adb61a73e9792a",
+    "object": "chat.completion",
+    "created": 1791502617,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"instance of\",\n            \"object\": \"office skyscraper\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building type\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located in\",\n            \"object\": \"Miami\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located in\",\n            \"object\": \"Florida\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located on\",\n            \"object\": \"eastern edge of Downtown Miami\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located on\",\n            \"object\": \"South Biscayne Boulevard\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"building class\",\n            \"object\": \"Class A office space\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building class\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"floor count\",\n            \"object\": \"39\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"floor area\",\n            \"object\": \"983,000 square feet\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"approximately\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"height\",\n            \"object\": \"492 ft (150 m)\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"length\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"One Biscayne Tower is an office skyscraper in Miami, Florida, United States. It is located on the eastern edge of Downtown Miami, on South Biscayne Boulevard. It comprises Class A office space completely. The approximately 983,000 square feet building contains 39 floors and is 492 ft (150 m) tall, to the roof.\"\n\nIdentify entities: One Biscayne Tower (subject). Relations:\n\n- instance of / type: office skyscraper (maybe \"building type\" or \"instance of\" building). Use relation \"instance of\" with object \"office skyscraper\". subject_type building? object_type building type.\n\n- location: in Miami, Florida, United States. Could be separate: \"located in\" relation with object \"Miami\". Also maybe \"located in\" with \"Florida\" and \"United States\". Usually hierarchical location: city, state, country. We'll create separate triplets: (One Biscayne Tower, location, Miami); (One Biscayne Tower, location, Florida); (One Biscayne Tower, location, United States). subject_type building, object_type city/state/country.\n\n- \"It is located on the eastern edge of Downtown Miami, on South Biscayne Boulevard.\" So location details: \"eastern edge of Downtown Miami\" maybe relation \"located on\" with object \"eastern edge of Downtown Miami\". Also \"on South Biscayne Boulevard\". Could have two location qualifiers. We'll produce separate triplets: (One Biscayne Tower, location qualifier, \"eastern edge of Downtown Miami\") maybe relation \"located on\". Use \"located on\" relation. object_type \"area\". Also (One Biscayne Tower, located on, \"South Biscayne Boulevard\") object_type \"street\".\n\n- \"It comprises Class A office space completely.\" So relation \"has building class\" or \"building class\" = \"Class A office space\". Use relation \"building class\" maybe \"building class\". object_type \"building class\". Also \"completely\" maybe qualifier \"extent\" but not needed.\n\n- \"The approximately 983,000 square feet building contains 39 floors\". So relation \"floor count\" = 39. object_type \"quantity\". Also \"area\" = approximately 983,000 square feet. Use qualifier \"approximation\". So triplet: (One Biscayne Tower, floor count, 39) qualifiers none. (One Biscayne Tower, floor area, \"983,000 square feet\") qualifiers: approximation.\n\n- \"is 492 ft (150 m) tall, to the roof.\" So height: 492 ft (150 m). Use relation \"height\". object \"492 ft\". qualifiers: maybe also metric conversion \"150 m\". Could include both as separate objects? Could have object \"492 ft\". qualifiers: {\"relation\":\"equivalent in meters\",\"object\":\"150 m\"} but not defined. Simpler: object \"492 ft (150 m)\". We'll keep as \"492 ft (150 m)\". subject_type building, object_type length.\n\nNeed subject_type and object_type for each.\n\nDefine types: building, city, state, country, area, street, building class, quantity, length, floor count maybe \"quantity\". Use generic.\n\nNow produce JSON list.\n\nLet's craft.\n\nTriplets list:\n\n1. subject One Biscayne Tower, relation \"instance of\", object \"office skyscraper\", qualifiers [], subject_type \"building\", object_type \"building type\".\n\n2. subject One Biscayne Tower, relation \"located in\", object \"Miami\", qualifiers [], subject_type \"building\", object_type \"city\".\n\n3. subject One Biscayne Tower, relation \"located in\", object \"Florida\", qualifiers [], subject_type \"building\", object_type \"state\".\n\n4. subject One Biscayne Tower, relation \"located in\", object \"United States\", qualifiers [], subject_type \"building\", object_type \"country\".\n\n5. subject One Biscayne Tower, relation \"located on\", object \"eastern edge of Downtown Miami\", qualifiers [], subject_type \"building\", object_type \"area\".\n\n6. subject One Biscayne Tower, relation \"located on\", object \"South Biscayne Boulevard\", qualifiers [], subject_type \"building\", object_type \"street\".\n\n7. subject One Biscayne Tower, relation \"building class\", object \"Class A office space\", qualifiers [], subject_type \"building\", object_type \"building class\".\n\n8. subject One Biscayne Tower, relation \"floor count\", object \"39\", qualifiers [], subject_type \"building\", object_type \"quantity\".\n\n9. subject One Biscayne Tower, relation \"floor area\", object \"983,000 square feet\", qualifiers [{\"relation\":\"approximation\",\"object\":\"approximately\"}], subject_type \"building\", object_type \"area\".\n\nBut the approximation qualifier should be attached to the claim. The text says \"approximately 983,000 square feet\". So object could be \"983,000 square feet\" and qualifier approximation. Good.\n\n10. subject One Biscayne Tower, relation \"height\", object \"492 ft\", qualifiers [{\"relation\":\"equivalent in meters\",\"object\":\"150 m\"}] maybe not defined. Use \"approximation\"? Not approximation. Could include both units as part of object. Simpler: object \"492 ft (150 m)\". No qualifiers.\n\nWe'll produce.\n\nCheck required fields: each dict must have \"qualifiers\": list (maybe empty). Provide subject_type and object_type.\n\nNow output JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1661,
+      "total_tokens": 3332,
+      "completion_tokens": 1671,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"instance of\",\n            \"object\": \"office skyscraper\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building type\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located in\",\n            \"object\": \"Miami\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located in\",\n            \"object\": \"Florida\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located on\",\n            \"object\": \"eastern edge of Downtown Miami\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"located on\",\n            \"object\": \"South Biscayne Boulevard\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"building class\",\n            \"object\": \"Class A office space\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building class\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"floor count\",\n            \"object\": \"39\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"floor area\",\n            \"object\": \"983,000 square feet\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"approximately\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"One Biscayne Tower\",\n            \"relation\": \"height\",\n            \"object\": \"492 ft (150 m)\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"length\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "instance of",
+        "object": "office skyscraper",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "building type"
+      },
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "located in",
+        "object": "Miami",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "city"
+      },
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "located in",
+        "object": "Florida",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "state"
+      },
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "country"
+      },
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "located on",
+        "object": "eastern edge of Downtown Miami",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "area"
+      },
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "located on",
+        "object": "South Biscayne Boulevard",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "street"
+      },
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "building class",
+        "object": "Class A office space",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "building class"
+      },
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "floor count",
+        "object": "39",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "floor area",
+        "object": "983,000 square feet",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "approximately"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "area"
+      },
+      {
+        "subject": "One Biscayne Tower",
+        "relation": "height",
+        "object": "492 ft (150 m)",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "length"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1661,
+    "total_tokens": 3332,
+    "completion_tokens": 1671,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 766,
+    "output_tokens_est": 673
+  },
+  "attempts": 1,
+  "latency_s": 20.723169799995958,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:37:18.124513+00:00",
+  "cache_key": "71df48e886f08e6dfd223ba388d59528"
+}

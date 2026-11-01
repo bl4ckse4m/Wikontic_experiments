@@ -1,6 +1,6 @@
 # Обзор литературы: гиперреляционное извлечение фактов LLM (Wikontic)
 
-Все утверждения ниже привязаны только к указанной статье и проверены по её аннотации/лендингу
+Исторические разделы 1–4 ниже привязаны только к указанной статье и проверены по её аннотации/лендингу
 (aclanthology.org, arxiv.org). Числа приводятся только если стоят на странице; иначе — «not verified».
 
 # 1. Обзор первоисточников
@@ -221,3 +221,218 @@ https://arxiv.org/abs/2305.11527
 few-shot — адаптация; coverage-instruction и ensemble-vote — адаптации с ослабленной (не
 гиперреляционной) поддержкой; baseline_fixed, claim-organized, ensemble-union — собственные гипотезы
 без прямых опубликованных доказательств прироста recall.
+
+---
+
+# 5. Целевой full-text проход исследовательского аудита, 31.10.2026
+
+Это дополнение, а не повторная верификация всех 15 исторических карточек. Первые
+разделы сохраняют прежний уровень доступа (abstract/landing); ссылки на них в
+старых отчётах не превращают их в full-text review. Ниже отобраны **6 работ**.
+Обзор целевой, одним AI-рецензентом, не систематический и не исчерпывающий.
+
+## 5.1 Граница поиска и журнал
+
+Вопрос: какие методы и способы оценки позволяют отличить новые подтверждённые
+уникальные факты от перефраз, дополнительных ошибок и эффектов matcher при
+повторных/межмодельных извлечениях? Включались первичные работы с доступными
+методами/оцениванием: LLM-KGC, повторное извлечение, ансамбли IE и fact-level evaluation.
+Блоги/обзоры использовались только как поисковые указатели; их выводы не включены.
+
+Инструменты: websearch (веб-индекс), затем первичные arXiv HTML и попытки ACL Anthology.
+Отдельного воспроизводимого поиска по API Semantic Scholar/ACL не было; ранжированный
+веб-поиск не задаёт полный корпус. Числа hits ниже означают видимые карточки ответа
+инструмента, не число публикаций в базе. Дата всех запросов и чтения — 31.10.2026.
+
+| № | Точная строка websearch | Видимые hits | Использование |
+|---|---|---:|---|
+| Q1 | `LLM knowledge graph extraction repeated extraction gleaning union GraphRAG Extract Define Canonicalize` | 10 | EDC, GraphRAG; первоисточники открыты отдельно |
+| Q2 | `site.aclanthology.org BenchIE fact synsets FActScore atomic facts SelfCheckGPT sampling factuality` | 3 | FActScore (две карточки одной работы); не три исследования |
+| Q3 | `LLM relation extraction ensemble multiple models union semantic deduplication triple extraction` | 10 | LLM-Ensemble как смежный первоисточник; прочие результаты не оценивались full-text |
+| Q4 | `BenchIE fact based open information extraction evaluation benchmark 2022 arxiv Gashteovski` | 5 | arXiv-версия BenchIE |
+| Q5 | `SelfCheckGPT Zero Resource Black Box Hallucination Detection 2023 arxiv` | 10 | arXiv-версия SelfCheckGPT |
+
+Статус доступа:
+
+| Работа | Идентификатор и прочитанный полный текст | Что прочитано |
+|---|---|---|
+| EDC | [ACL 2024.emnlp-main.548](https://aclanthology.org/2024.emnlp-main.548/); [arXiv:2404.03868v2 HTML](https://arxiv.org/html/2404.03868v2) | HTML доступен; §§3–4, §6, приложения A/B/C по релевантным вопросам |
+| GraphRAG | [arXiv:2404.16130v2 HTML](https://arxiv.org/html/2404.16130v2) | §§3–6, приложение A.1–A.2, подпись рис.3 |
+| LLM-Ensemble | [arXiv:2403.00863v1 HTML](https://arxiv.org/html/2403.00863v1) | §§3–4, алгоритм 1, таблицы 1–2 |
+| SelfCheckGPT | [arXiv:2303.08896v3 HTML](https://arxiv.org/html/2303.08896v3) | §§5–7, Limitations |
+| BenchIE | [ACL 2022.acl-long.307](https://aclanthology.org/2022.acl-long.307/); [arXiv:2109.06850v2 HTML](https://arxiv.org/html/2109.06850v2) | §§2–5, §6, релевантные guidelines приложения A |
+| FActScore | [ACL 2023.emnlp-main.741](https://aclanthology.org/2023.emnlp-main.741/); [arXiv:2305.14251v2 HTML](https://arxiv.org/html/2305.14251v2) | §§3–4, Limitations, приложение B.2 |
+
+Три обращения к ACL landing pages (EDC, BenchIE, FActScore) завершились timeout.
+Это ограничение маршрута доступа, не отсутствие полного текста: прочитаны указанные
+arXiv-версии. Для BenchIE также доступен [ar5iv mirror](https://ar5iv.labs.arxiv.org/html/2109.06850).
+Различия arXiv и окончательных proceedings построчно не проверялись. Чтение HTML
+включало методы и оценивание; ни одна из шести карточек ниже не основана только на abstract.
+Не проводились запуск авторского кода, проверка всех ссылок библиографии или
+систематический поиск исправлений/ретракций. Сетевые страницы изменяемы; версии
+arXiv зафиксированы выше, локального архива всех полных текстов здесь нет.
+
+## 5.2 Извлечение и канонизация: EDC
+
+**Bowen Zhang, Harold Soh (2024). Extract, Define, Canonicalize: An LLM-based
+Framework for Knowledge Graph Construction.** EMNLP; arXiv:2404.03868v2.
+
+- **Метод (§§3.1–3.2):** few-shot open extraction → определения отношений →
+  поиск кандидатов по embedding определений → LLM-проверка канонизации. В
+  self-canonicalization неэквивалентный relation добавляется в схему, а не обязательно
+  отбрасывается. EDC+R повторяет extraction с hints предыдущей итерации и retriever.
+- **Условия (§4.1):** WebNLG test 1165 текстов; по 1000 sampled text-triplet pairs
+  REBEL и Wiki-NRE. Для OIE — GPT-4/GPT-3.5/Mistral-7b; остальные prompt-модули
+  используют GPT-3.5-turbo. Retriever обучается отдельно.
+- **Оценка:** target alignment — token-based exact/partial/strict P/R/F1;
+  self-canonicalization — ручная precision двумя аннотаторами, число типов отношений,
+  embedding-based redundancy (§§4.1.1,4.2.2, табл.2). Авторы отдельно обсуждают
+  неполноту и extraneous reference triples REBEL/Wiki-NRE (§4.2.1).
+- **Результат авторов, не Wikontic:** в WebNLG self-canonicalization precision
+  Open KG 0.982 → EDC 0.956 при числе отношений 529 → 200 (табл.2). Компактность
+  действительно может покупаться потерей корректности; один счётчик этого не выявит.
+- **Ограничение (§6):** это преимущественно канонизация схемы, не полная дедупликация
+  сущностей/гиперреляционных утверждений; много вызовов. Цифры не переносим на MuSiQue.
+- **Решение для Wikontic:** оценивать canonicalization отдельно от extraction;
+  embedding/string similarity — retrieval/proxy, не доказательство эквивалентности.
+  Слияние qualifiers требует собственного аудита. EDC не обосновывает порог 0.9
+  SequenceMatcher и не является воспроизведённым методом проекта.
+
+## 5.3 Повторное извлечение: GraphRAG
+
+**Darren Edge et al. From Local to Global: A GraphRAG Approach to Query-Focused
+Summarization.** arXiv:2404.16130, прочитана v2 (19.02.2025; первая версия 2024).
+
+- **Метод (§3.1, A.1–A.2):** LLM извлекает entities/relations и описания; предыдущий
+  extraction возвращается модели с запросом найти пропущенные entities (gleaning),
+  с yes/no-проверкой продолжения и ограничением итераций. Это **условные продолжения**,
+  а не независимые генерации C2. Агрегированные описания затем суммаризуются.
+- **Данные/оценка (§4):** podcast/news корпуса порядка 1–1.7M токенов; GPT-4-turbo;
+  основная оценка — downstream global sensemaking, 125 вопросов на корпус,
+  сравнительный LLM-judge по comprehensiveness/diversity и др. В A.2/рис.3 на HotPotQA
+  варьируются chunk size и число self-reflection steps; величина — entity references detected.
+- **Что показано и что нет:** авторы сообщают рост числа найденных entity references
+  при gleaning; это не независимая human-проверка recall полных уникальных фактов.
+  Downstream preference и число claims не заменяют такой проверки (§6.1).
+- **Решение для Wikontic:** повторные вызовы — релевантный рычаг покрытия, но нельзя
+  переносить заявления GraphRAG о качестве на C2. Сначала измерить верный уникальный
+  прирост C2 из уже сохранённых ответов; conditional gleaning оставить отдельной
+  будущей абляцией с учётом истории и дополнительных токенов, не вводить сейчас.
+
+## 5.4 Межмодельный ансамбль: LLM-Ensemble
+
+**Chenhao Fang, Xiaohan Li, Zezhong Fan, Jianpeng Xu, Kaushiki Nag, Evren Korpeoglu,
+Sushant Kumar, Kannan Achan (2024). LLM-Ensemble: Optimal Large Language Model
+Ensemble Method for E-commerce Product Attribute Value Extraction.** arXiv:2403.00863v1.
+
+- **Метод (§3, алгоритм 1):** Dawid–Skene-inspired iterative weighted majority vote;
+  оценки согласия с текущей агрегированной меткой обновляют веса LLM. Есть заранее
+  конечное множество значений атрибута, а не открытый набор произвольных триплетов.
+- **Условия (§4):** Llama2-13B/70B, PaLM-2, GPT-3.5/4; закрытые Walmart-Age/Gender,
+  заявлено по 20M items, reference от human experts; также online A/B recommendation.
+- **Оценка/результат авторов (табл.1):** accuracy 0.956/0.979 ансамбля против
+  0.934/0.952 GPT-4. Это classification accuracy, не coverage/recall открытого IE.
+- **Ограничения:** внутренние данные недоступны для независимого воспроизведения;
+  бюджет вызовов в таблице не уравнен с одной LLM; «optimal» относится к модельным
+  предпосылкам bounds, не к любому набору зависимых LLM. У arXiv HTML есть template
+  DOI `XXXXXXX.XXXXXXX`: он **не** используется как действительный DOI.
+- **Решение для Wikontic:** межмодельная дополнительность правдоподобна, но её ещё
+  нет в наших runs. Не выдавать xprompt одной gpt-oss за multi-model. Взвешенное
+  голосование можно рассматривать только после text-grounded validation, не учить
+  «надёжность» исключительно из согласия без проверки коррелированных ошибок.
+
+## 5.5 Фильтрация по устойчивости: SelfCheckGPT
+
+**Potsawee Manakul, Adian Liusie, Mark J. F. Gales (2023). SelfCheckGPT:
+Zero-Resource Black-Box Hallucination Detection for Generative Large Language Models.**
+EMNLP; arXiv:2303.08896v3.
+
+- **Метод (§5):** сравнить каждое предложение исходного ответа с N stochastic samples
+  того же запроса через BERTScore, QA, n-gram, NLI или LLM-prompt; получить score
+  несогласованности. Это фильтрационный сигнал, не union новых фактов.
+- **Условия (§§6–7):** 238 WikiBio concepts из верхних 20% по длине, 1908 предложений
+  GPT-3 text-davinci-003; основной ответ temperature=0, samples=20 при temperature=1.
+  Ручные labels accurate/minor/major inaccurate; два аннотатора на 201 предложении.
+- **Оценка (§7, табл.2–4):** sentence AUC-PR и passage Pearson/Spearman; Prompt/NLI
+  лучше рассмотренных grey-box baselines в этих условиях. При доступе к исходной
+  WikiBio-информации Prompt/NLI улучшаются (табл.3).
+- **Ограничения:** биографии и sentence-level, смесь верного/неверного в предложении,
+  значительная стоимость дополнительных samples и проверок. Устойчивый ошибочный факт
+  может повторяться; оценка — эмпирическая ассоциация, не логическое доказательство истины.
+- **Решение для Wikontic:** сохранять support как диагностический признак и проверять
+  singleton additions непосредственно по абзацу. При наличии текста предпочтительна
+  source-grounded проверка. Нет основания объявлять vote≥2 оптимальным фильтром или
+  переносить 20 samples на наш бюджет; C2 уже позволяет первую проверку без генерации.
+
+## 5.6 Покрытие и эквивалентность: BenchIE
+
+**Kiril Gashteovski, Mingying Yu, Bhushan Kotnis, Carolin Lawrence, Mathias Niepert,
+Goran Glavaš (2022). BenchIE: A Framework for Multi-Faceted Fact-Based Open
+Information Extraction Evaluation.** ACL; arXiv:2109.06850v2.
+
+- **Метод (§2):** fact synset объединяет допустимые поверхностные формы одного факта;
+  повтор одного факта засчитывается один раз. Exact matching допустим только с
+  предположением полного sound reference, а не с единственной формулировкой silver.
+- **Разметка (§2.2):** 300 случайных CaRB sentences; два эксперта независимо
+  перечисляют факты/варианты, затем проверяют CaRB и system outputs, согласуют
+  расхождения. 1350 synsets и 136357 допустимых extractions; 80 часов на аннотатора.
+- **Оценка (§§2.3–5):** сравнение шести OIE-систем и naive baseline; отдельные
+  entity-boundaries, concatenation, minimality facets. Табл.1/5 показывают, что
+  token overlap может не только штрафовать перефразы, но и награждать неверные факты.
+- **Ограничение (§6):** дорогостоящая разметка и 300 предложений; VP-mediated OIE,
+  не свободные qualifiers на абзацах. Мы не воспроизводим исчерпывающее перечисление
+  всех строк — переносим fact-level принцип, с ручным смысловым matching.
+- **Решение для Wikontic:** не считать прежние P/R/F1 нижними границами; создать
+  маленький source-first inventory с evidence и аудитом пропусков, не извлекать
+  эталон только из union. Одинаковая единица факта для обоих условий; дубли не
+  повышают покрытие. Показатели компактности и scope — отдельные оси.
+
+## 5.7 Подтверждённость: FActScore
+
+**Sewon Min, Kalpesh Krishna, Xinxi Lyu, Mike Lewis, Wen-tau Yih, Pang Wei Koh,
+Mohit Iyyer, Luke Zettlemoyer, Hannaneh Hajishirzi (2023). FActScore: Fine-grained
+Atomic Evaluation of Factual Precision in Long Form Text Generation.** EMNLP;
+arXiv:2305.14251v2.
+
+- **Метод (§3):** разложить ответ на atomic facts; доля supported by designated
+  source. Ручная atomization может опираться на LLM draft с human-revision.
+  Automatic estimator (§4) — retrieved evidence + LM verdict, иногда NP filter.
+- **Условия (§3.3):** 183 people entities, биографии InstructGPT/ChatGPT/PerplexityAI,
+  Wikipedia reference; проверку фактов выполняют люди, часть размечается дважды.
+- **Оценка (§4.2, B.2):** сравнение estimator с human-reference, system-level
+  error rate и ranking, отдельно segment-level метрики. Важное ограничение:
+  «<2% error» не означает <2% ошибок individual verdicts, и не гарантирует такую
+  ошибку нового Claude-судьи на qualifiers Wikontic.
+- **Ограничения (§3.1, Limitations):** precision, не recall; меньше фактов/abstention
+  может улучшать score. Разногласия источников и неатомарность усложняют оценку.
+- **Решение для Wikontic:** binary text-grounded labels уместны как отдельная
+  precision-ось. Наш reference — только title+paragraph, не внешний поиск по
+  Википедии. Проверить rubric и human agreement до автоматического рейтинга;
+  подтверждённость, полноту, атомарность и потерю условий не смешивать.
+
+## 5.8 Синтез и следствие для протокола
+
+1. **Извлечение ≠ канонизация ≠ фильтрация.** EDC и BenchIE мотивируют смысловую
+   проверку и разные метрики. Более короткий вывод merger не является сам по себе
+   ни лучшей дедупликацией, ни сохранением информации.
+2. **Повторы могут давать дополнительные кандидаты; их ценность не известна.**
+   GraphRAG — conditional gleaning; SelfCheck — consistency detection;
+   LLM-Ensemble — закрытая классификация. Ни одна из этих работ не валидирует наш
+   union-dedup/vote на полных MuSiQue-гиперфактах. Это граница выбранных работ,
+   а не утверждение «подобных исследований не существует».
+3. **Самое дешёвое различающее измерение — на сохранённых C2.** В E09 предложены
+   human validation рубрики и one-vs-three одного промпта/temperature с общей
+   ручной эквивалентностью. Это устраняет одновременную замену extractor/merger,
+   не требует нового API и проверяет, из чего состоит наблюдавшийся прирост.
+4. **E08 сохраняется отдельно.** Его ограниченная silver-precision может быть
+   описательной, но не измеряет recall, не валидирует судью и не заменяет E09.
+
+Методологическая помощь: использованы локальные skills `literature-review`,
+`hypothesis-generation`, `scientific-critical-thinking`, `peer-review`. Их источник указан как
+инструментальная атрибуция, **не** как седьмое исследование IE: Timothy Kassis,
+Vinayak Agarwal, Yuhuan He, Darshil Patel, Aubrey M. Brueckner (2026),
+*Scientific Agent Skills: A Library of Procedural Knowledge for Research Agents*,
+[arXiv:2609.00065](https://arxiv.org/abs/2609.00065),
+[DOI](https://doi.org/10.48550/arXiv.2609.00065).
+Metadata/abstract проверены по arXiv 31.10.2026 (актуальная запись v2);
+полный текст этой вспомогательной работы не оценивался.

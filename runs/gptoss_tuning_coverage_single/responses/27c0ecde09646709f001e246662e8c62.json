@@ -1,0 +1,129 @@
+{
+  "task": {
+    "input_id": "9b7a645fba947cc1",
+    "input_hash": "55ddd5efcbaae3ffc3e2d84a32d7d4cebd45ffd363e80a3e25cc13627d978a76",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-05a4cb00afd52081e5f83f6ee7c68b8f",
+    "object": "chat.completion",
+    "created": 1791505407,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2011 Canadian Figure Skating Championships\",\n            \"relation\": \"instance of\",\n            \"object\": \"figure skating competition\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010–11 season\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"competition\"\n        },\n        {\n            \"subject\": \"2011 Canadian Figure Skating Championships\",\n            \"relation\": \"determines\",\n            \"object\": \"national champions of Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"2011 Canadian Figure Skating Championships\",\n            \"relation\": \"organizer\",\n            \"object\": \"Skate Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Skate Canada\",\n            \"relation\": \"governing body of\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Skate Canada\",\n            \"relation\": \"sport\",\n            \"object\": \"figure skating\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"sport\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"2011 Canadian Figure Skating Championships\n\nThe 2011 Canadian Figure Skating Championships were a figure skating competition during the 2010–11 season. The event determines the national champions of Canada and is organized by Skate Canada, the nation's figure skating governing body.\"\n\nWe need to identify entities: \"2011 Canadian Figure Skating Championships\" (event), \"figure skating competition\" (type), \"2010–11 season\" (time period), \"national champions of Canada\" (maybe result), \"Canada\" (country), \"Skate Canada\" (organization), \"nation's figure skating governing body\" (description).\n\nTriplets:\n\n1. Subject: 2011 Canadian Figure Skating Championships, relation: instance of (or type) maybe \"figure skating competition\". Use relation \"instance of\" or \"type\". In example they used occupation, award etc. For events, we can use \"instance of\" with object \"figure skating competition\". subject_type: event, object_type: competition.\n\n2. Subject: 2011 Canadian Figure Skating Championships, relation: \"point in time\" maybe? Actually it's a competition held during 2010–11 season. Could have qualifier: point in time = \"2010–11 season\". But maybe better: relation \"season\" with object \"2010–11 season\". Use qualifier? The fact: \"were a figure skating competition during the 2010–11 season.\" So we can have triplet: (2011 Canadian Figure Skating Championships, instance of, figure skating competition) with qualifier {\"relation\":\"point in time\",\"object\":\"2010–11 season\"}.\n\nBut also could have separate triplet: (2011 Canadian Figure Skating Championships, point in time, 2010–11 season). However guidelines: date can be object of standalone relation or qualifier of an event. Since it's an event, we can treat as qualifier. Let's do qualifier.\n\n3. Subject: 2011 Canadian Figure Skating Championships, relation: \"determines\", object: \"national champions of Canada\". This is a bit tricky: The event determines the national champions of Canada. So relation maybe \"determines\" (or \"has result\" etc). Use \"determines\". object_type: \"title\" or \"position\". We'll set object_type \"title\". Could also have qualifier: none.\n\n4. Subject: 2011 Canadian Figure Skating Championships, relation: \"organizer\", object: \"Skate Canada\". Use \"organizer\". object_type: \"organization\". Also maybe qualifier: \"governing body\" but that's description.\n\n5. Subject: Skate Canada, relation: \"instance of\" or \"type of organization\", object: \"figure skating governing body\". Could be \"type of organization\". But text says \"the nation's figure skating governing body\". So we can have (Skate Canada, role, \"figure skating governing body of Canada\") but maybe better: (Skate Canada, governing body of, Canada) with relation \"governing body of\". object_type: \"country\". Also (Skate Canada, sport, \"figure skating\")? Not needed.\n\n6. Subject: Skate Canada, relation: \"country\", object: \"Canada\". Could be \"based in\". But we have \"nation's figure skating governing body\". So we can capture (Skate Canada, governing body of, Canada). Use relation \"governing body of\". object_type \"country\".\n\n7. Subject: 2011 Canadian Figure Skating Championships, relation: \"sport\", object: \"figure skating\". Could be \"sport\". But we already have instance of competition. Might be redundant.\n\nWe need to include subject_type and object_type for each.\n\nDefine types: event, competition, organization, country, season (time period), title.\n\nLet's craft JSON.\n\nTriplet list:\n\n1.\nsubject: \"2011 Canadian Figure Skating Championships\"\nrelation: \"instance of\"\nobject: \"figure skating competition\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"2010–11 season\"}]\nsubject_type: \"event\"\nobject_type: \"competition\"\n\n2.\nsubject: \"2011 Canadian Figure Skating Championships\"\nrelation: \"determines\"\nobject: \"national champions of Canada\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"title\"\n\n3.\nsubject: \"2011 Canadian Figure Skating Championships\"\nrelation: \"organizer\"\nobject: \"Skate Canada\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"organization\"\n\n4.\nsubject: \"Skate Canada\"\nrelation: \"governing body of\"\nobject: \"Canada\"\nqualifiers: []\nsubject_type: \"organization\"\nobject_type: \"country\"\n\n5.\nsubject: \"Skate Canada\"\nrelation: \"sport\"\nobject: \"figure skating\"\nqualifiers: []\nsubject_type: \"organization\"\nobject_type: \"sport\"\n\nPotential also: \"2010–11 season\" as object_type \"season\". Already used as qualifier.\n\nMake sure qualifiers list is list of dicts.\n\nReturn JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1638,
+      "total_tokens": 2999,
+      "completion_tokens": 1361,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2011 Canadian Figure Skating Championships\",\n            \"relation\": \"instance of\",\n            \"object\": \"figure skating competition\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010–11 season\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"competition\"\n        },\n        {\n            \"subject\": \"2011 Canadian Figure Skating Championships\",\n            \"relation\": \"determines\",\n            \"object\": \"national champions of Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"2011 Canadian Figure Skating Championships\",\n            \"relation\": \"organizer\",\n            \"object\": \"Skate Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Skate Canada\",\n            \"relation\": \"governing body of\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Skate Canada\",\n            \"relation\": \"sport\",\n            \"object\": \"figure skating\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"sport\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "2011 Canadian Figure Skating Championships",
+        "relation": "instance of",
+        "object": "figure skating competition",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010–11 season"
+          }
+        ],
+        "subject_type": "event",
+        "object_type": "competition"
+      },
+      {
+        "subject": "2011 Canadian Figure Skating Championships",
+        "relation": "determines",
+        "object": "national champions of Canada",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "title"
+      },
+      {
+        "subject": "2011 Canadian Figure Skating Championships",
+        "relation": "organizer",
+        "object": "Skate Canada",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Skate Canada",
+        "relation": "governing body of",
+        "object": "Canada",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "country"
+      },
+      {
+        "subject": "Skate Canada",
+        "relation": "sport",
+        "object": "figure skating",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "sport"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1638,
+    "total_tokens": 2999,
+    "completion_tokens": 1361,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 469,
+    "output_tokens_est": 377
+  },
+  "attempts": 1,
+  "latency_s": 17.177496058000543,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:23:44.998375+00:00",
+  "cache_key": "27c0ecde09646709f001e246662e8c62"
+}

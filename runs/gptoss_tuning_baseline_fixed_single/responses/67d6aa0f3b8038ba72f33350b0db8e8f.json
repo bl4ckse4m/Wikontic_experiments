@@ -1,0 +1,162 @@
+{
+  "task": {
+    "input_id": "aaeaca11724e9302",
+    "input_hash": "9fc2ab0e00378ce8ee895d481c284293fb228bf7437a2cbb6d2e7aee568423f5",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-cb2c1d3494cf521ddfbd9f98ce3dddba",
+    "object": "chat.completion",
+    "created": 1791512657,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"instance of\",\n            \"object\": \"vodka\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"beverage\"\n        },\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"has ingredient\",\n            \"object\": \"winter grain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"ingredient\"\n        },\n        {\n            \"subject\": \"winter grain\",\n            \"relation\": \"originates from\",\n            \"object\": \"Russian steppes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ingredient\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"has variant\",\n            \"object\": \"Original\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"product variant\"\n        },\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"has variant\",\n            \"object\": \"Platinum\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"product variant\"\n        },\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"has variant\",\n            \"object\": \"Imperia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"product variant\"\n        },\n        {\n            \"subject\": \"raw spirit\",\n            \"relation\": \"distilled times\",\n            \"object\": \"four times\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"variant\",\n                    \"object\": \"Original\"\n                },\n                {\n                    \"relation\": \"variant\",\n                    \"object\": \"Platinum\"\n                }\n            ],\n            \"subject_type\": \"spirit\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Imperia spirit\",\n            \"relation\": \"distilled times\",\n            \"object\": \"eight times\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"variant\",\n                    \"object\": \"Imperia\"\n                }\n            ],\n            \"subject_type\": \"spirit\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Russian Standard (vodka)\n\nWinter grain from Russian steppes are milled and fermented. The raw spirit is distilled four times for the Original and Platinum variants while the Impera spirit is distilled eight times.\"\n\nWe have entities: Russian Standard (vodka) - a brand of vodka. Also \"Winter grain\" maybe ingredient. \"Russian steppes\" location. \"Original and Platinum variants\" are product variants. \"Imperia spirit\" maybe a variant.\n\nRelations: \"product of\" maybe? \"ingredient\" etc.\n\nWe need to produce triplets with subject_type and object_type.\n\nPotential triplets:\n\n- Russian Standard (vodka) – instance of – vodka (subject_type: brand? maybe \"brand\" or \"product\". object_type: \"beverage\". Use \"instance of\" relation.\n\n- Russian Standard – has ingredient – winter grain (subject_type: brand, object_type: ingredient).\n\n- Winter grain – originates from – Russian steppes (subject_type: ingredient, object_type: region).\n\n- Raw spirit – distilled – four times (subject_type: spirit, object_type: number of distillations). But we need relation \"distillation count\" maybe \"distilled times\". Use \"distillation count\" relation.\n\n- Raw spirit – used for – Original variant (subject_type: spirit, object_type: product variant). Also for Platinum variant.\n\n- Imperia spirit – distilled – eight times.\n\n- Imperia spirit – used for – Imperia variant? Actually text: \"while the Impera spirit is distilled eight times.\" Might be \"Imperia spirit\" used for Imperia variant.\n\nWe need qualifiers: for distillation count, qualifier point in time? Not needed. Could include qualifier \"variant\" maybe.\n\nBetter to create separate triplets:\n\n1. Russian Standard – product type – vodka.\n\n2. Russian Standard – ingredient – winter grain.\n\n3. Winter grain – sourced from – Russian steppes.\n\n4. Raw spirit – distillation count – 4 (qualifier: variant \"Original\", \"Platinum\").\n\nBut qualifiers need relation and object. So we can have triplet: Raw spirit – distilled – four times, qualifiers: variant Original, variant Platinum. But relation \"distilled\" maybe object \"four times\". Qualifier relation \"applies to variant\" object \"Original\". We'll need to decide.\n\nSimplify: create two triplets:\n\n- Raw spirit – distilled – four times, qualifiers: {\"relation\":\"variant\",\"object\":\"Original\"} and another with variant \"Platinum\". Could also combine both qualifiers.\n\n- Imperia spirit – distilled – eight times, qualifiers: {\"relation\":\"variant\",\"object\":\"Imperia\"}.\n\nAlso maybe \"Original variant\" is a product of Russian Standard. So:\n\n- Russian Standard – has variant – Original.\n\n- Russian Standard – has variant – Platinum.\n\n- Russian Standard – has variant – Imperia.\n\nBut text says \"Original and Platinum variants\" and \"Imperia spirit\". So we can include.\n\nLet's craft final JSON.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- Russian Standard: \"brand\" (or \"company\"?). Use \"brand\".\n\n- vodka: \"beverage\".\n\n- winter grain: \"ingredient\".\n\n- Russian steppes: \"region\".\n\n- raw spirit: \"spirit\".\n\n- four times: \"quantity\" (or \"number\").\n\n- Original: \"product variant\".\n\n- Platinum: \"product variant\".\n\n- Imperia spirit: \"spirit\".\n\n- eight times: \"quantity\".\n\n- Imperia: \"product variant\".\n\nOk.\n\nNow produce list.\n\nTriplet 1:\nsubject: \"Russian Standard\"\nrelation: \"instance of\"\nobject: \"vodka\"\nqualifiers: []\nsubject_type: \"brand\"\nobject_type: \"beverage\"\n\nTriplet 2:\nsubject: \"Russian Standard\"\nrelation: \"has ingredient\"\nobject: \"winter grain\"\nqualifiers: []\nsubject_type: \"brand\"\nobject_type: \"ingredient\"\n\nTriplet 3:\nsubject: \"winter grain\"\nrelation: \"originates from\"\nobject: \"Russian steppes\"\nqualifiers: []\nsubject_type: \"ingredient\"\nobject_type: \"region\"\n\nTriplet 4:\nsubject: \"Russian Standard\"\nrelation: \"has variant\"\nobject: \"Original\"\nqualifiers: []\nsubject_type: \"brand\"\nobject_type: \"product variant\"\n\nTriplet 5:\nsubject: \"Russian Standard\"\nrelation: \"has variant\"\nobject: \"Platinum\"\nqualifiers: []\nsubject_type: \"brand\"\nobject_type: \"product variant\"\n\nTriplet 6:\nsubject: \"Russian Standard\"\nrelation: \"has variant\"\nobject: \"Imperia\"\nqualifiers: []\nsubject_type: \"brand\"\nobject_type: \"product variant\"\n\nTriplet 7:\nsubject: \"raw spirit\"\nrelation: \"distilled times\"\nobject: \"four times\"\nqualifiers: [{\"relation\":\"variant\",\"object\":\"Original\"},{\"relation\":\"variant\",\"object\":\"Platinum\"}]\nsubject_type: \"spirit\"\nobject_type: \"quantity\"\n\nTriplet 8:\nsubject: \"Imperia spirit\"\nrelation: \"distilled times\"\nobject: \"eight times\"\nqualifiers: [{\"relation\":\"variant\",\"object\":\"Imperia\"}]\nsubject_type: \"spirit\"\nobject_type: \"quantity\"\n\nCheck if \"raw spirit\" and \"Imperia spirit\" are distinct. Could also treat \"raw spirit\" as \"spirit used for Original and Platinum\". Good.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 975,
+      "total_tokens": 2581,
+      "completion_tokens": 1606,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"instance of\",\n            \"object\": \"vodka\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"beverage\"\n        },\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"has ingredient\",\n            \"object\": \"winter grain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"ingredient\"\n        },\n        {\n            \"subject\": \"winter grain\",\n            \"relation\": \"originates from\",\n            \"object\": \"Russian steppes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ingredient\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"has variant\",\n            \"object\": \"Original\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"product variant\"\n        },\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"has variant\",\n            \"object\": \"Platinum\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"product variant\"\n        },\n        {\n            \"subject\": \"Russian Standard\",\n            \"relation\": \"has variant\",\n            \"object\": \"Imperia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"brand\",\n            \"object_type\": \"product variant\"\n        },\n        {\n            \"subject\": \"raw spirit\",\n            \"relation\": \"distilled times\",\n            \"object\": \"four times\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"variant\",\n                    \"object\": \"Original\"\n                },\n                {\n                    \"relation\": \"variant\",\n                    \"object\": \"Platinum\"\n                }\n            ],\n            \"subject_type\": \"spirit\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Imperia spirit\",\n            \"relation\": \"distilled times\",\n            \"object\": \"eight times\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"variant\",\n                    \"object\": \"Imperia\"\n                }\n            ],\n            \"subject_type\": \"spirit\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Russian Standard",
+        "relation": "instance of",
+        "object": "vodka",
+        "qualifiers": [],
+        "subject_type": "brand",
+        "object_type": "beverage"
+      },
+      {
+        "subject": "Russian Standard",
+        "relation": "has ingredient",
+        "object": "winter grain",
+        "qualifiers": [],
+        "subject_type": "brand",
+        "object_type": "ingredient"
+      },
+      {
+        "subject": "winter grain",
+        "relation": "originates from",
+        "object": "Russian steppes",
+        "qualifiers": [],
+        "subject_type": "ingredient",
+        "object_type": "region"
+      },
+      {
+        "subject": "Russian Standard",
+        "relation": "has variant",
+        "object": "Original",
+        "qualifiers": [],
+        "subject_type": "brand",
+        "object_type": "product variant"
+      },
+      {
+        "subject": "Russian Standard",
+        "relation": "has variant",
+        "object": "Platinum",
+        "qualifiers": [],
+        "subject_type": "brand",
+        "object_type": "product variant"
+      },
+      {
+        "subject": "Russian Standard",
+        "relation": "has variant",
+        "object": "Imperia",
+        "qualifiers": [],
+        "subject_type": "brand",
+        "object_type": "product variant"
+      },
+      {
+        "subject": "raw spirit",
+        "relation": "distilled times",
+        "object": "four times",
+        "qualifiers": [
+          {
+            "relation": "variant",
+            "object": "Original"
+          },
+          {
+            "relation": "variant",
+            "object": "Platinum"
+          }
+        ],
+        "subject_type": "spirit",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Imperia spirit",
+        "relation": "distilled times",
+        "object": "eight times",
+        "qualifiers": [
+          {
+            "relation": "variant",
+            "object": "Imperia"
+          }
+        ],
+        "subject_type": "spirit",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 975,
+    "total_tokens": 2581,
+    "completion_tokens": 1606,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 696,
+    "output_tokens_est": 597
+  },
+  "attempts": 1,
+  "latency_s": 19.1939579960017,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:24:36.501996+00:00",
+  "cache_key": "67d6aa0f3b8038ba72f33350b0db8e8f"
+}

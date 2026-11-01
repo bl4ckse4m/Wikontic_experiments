@@ -1,0 +1,177 @@
+{
+  "task": {
+    "input_id": "441ea453ce208aa0",
+    "input_hash": "bc530e1c264754b5c880a7f85035ffd7ab343fc6c1d2979440723fa4a88f5412",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793200500-fMuN051iMVg8maUwWzKX",
+    "object": "chat.completion",
+    "created": 1793200500,
+    "model": "openai/gpt-oss-120b",
+    "provider": "CoreWeave",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Government of Slovakia\",\n            \"relation\": \"leader\",\n            \"object\": \"Prime Minister of Slovakia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"government\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Prime Minister of Slovakia\",\n            \"relation\": \"nominated by\",\n            \"object\": \"President of Slovakia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Prime Minister of Slovakia\",\n            \"relation\": \"leader of\",\n            \"object\": \"majority party\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after election\",\n                    \"object\": \"election to the National Council of the Slovak Republic\",\n                    \"object_type\": \"election\"\n                }\n            ],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Prime Minister of Slovakia\",\n            \"relation\": \"leader of\",\n            \"object\": \"majority coalition\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after election\",\n                    \"object\": \"election to the National Council of the Slovak Republic\",\n                    \"object_type\": \"election\"\n                }\n            ],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"political coalition\"\n        },\n        {\n            \"subject\": \"Cabinet\",\n            \"relation\": \"appointed by\",\n            \"object\": \"President of Slovakia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"recommended by\",\n                    \"object\": \"Prime Minister of Slovakia\",\n                    \"object_type\": \"political office\"\n                }\n            ],\n            \"subject_type\": \"executive body\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Cabinet\",\n            \"relation\": \"vote of confidence in\",\n            \"object\": \"National Council of the Slovak Republic\",\n            \"qualifiers\": [],\n            \"subject_type\": \"executive body\",\n            \"object_type\": \"legislative body\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Government of Slovakia\n\nIt is led by the Prime Minister of Slovakia, who is nominated by the President of Slovakia, and is usually the leader of majority party or of majority coalition after an election to the National Council of the Slovak Republic. The Cabinet appointed by the president on recommendation of the prime minister must gain a vote of confidence in the National Council.\"\n\nWe need to identify entities: Government of Slovakia, Prime Minister of Slovakia, President of Slovakia, majority party, majority coalition, election, National Council of the Slovak Republic, Cabinet, vote of confidence.\n\nNow extract facts.\n\nSentence 1: \"Government of Slovakia is led by the Prime Minister of Slovakia\". So triplet: subject Government of Slovakia, relation leader, object Prime Minister of Slovakia? Actually \"is led by\" => leader is Prime Minister. So relation \"head\" or \"leader\". Use \"leader\". So:\n\nsubject: Government of Slovakia, relation: leader, object: Prime Minister of Slovakia. qualifiers none.\n\nsubject_type: government, object_type: political position? \"prime minister\" is a political office. So object_type: political office.\n\nSentence 2: \"Prime Minister of Slovakia, who is nominated by the President of Slovakia\". So triplet: subject Prime Minister of Slovakia, relation: nominated by, object President of Slovakia. Use relation \"nominator\" maybe \"nominated by\". So relation \"nominated by\". qualifiers none.\n\nsubject_type: political office, object_type: political office (president). Could be \"political office\". We'll set both as political office.\n\nSentence 3: \"Prime Minister ... is usually the leader of majority party or of majority coalition after an election to the National Council of the Slovak Republic.\"\n\nWe have two possible objects: majority party, majority coalition. So two triplets: subject Prime Minister of Slovakia, relation leader of, object majority party. Also leader of majority coalition. Also qualifiers: \"point in time\"? Not needed. But we have condition \"after an election to the National Council of the Slovak Republic\". So we can add qualifier: \"after election\" with object \"election to the National Council of the Slovak Republic\". So qualifier relation \"after event\", object \"election to the National Council of the Slovak Republic\", object_type \"election\". Or maybe \"after election\" qualifies the leadership relation. We'll add qualifier.\n\nThus for each of the two triplets, qualifiers list with that qualifier.\n\nNow define election entity: \"election to the National Council of the Slovak Republic\". So object_type: election.\n\nNow next sentence: \"The Cabinet appointed by the president on recommendation of the prime minister must gain a vote of confidence in the National Council.\"\n\nWe have: Cabinet appointed by the president. So triplet: subject Cabinet, relation appointed by, object President of Slovakia. (President). Also qualifier: \"on recommendation of the prime minister\". So qualifier relation \"recommended by\", object \"Prime Minister of Slovakia\". object_type: political office.\n\nSecond fact: Cabinet must gain a vote of confidence in the National Council. So relation: \"requires confidence vote from\" maybe \"needs confidence vote of\". We'll use relation \"requires confidence vote from\". Subject Cabinet, object National Council of the Slovak Republic. Also qualifier: \"must\" is not needed. So triplet.\n\nNow also \"National Council of the Slovak Republic\" is the parliament. So object_type: legislative body.\n\nAlso \"vote of confidence\" is a type of vote. But we treat as object \"vote of confidence\". Could be object_type: political procedure. But the relation is \"must gain\". We'll treat object as \"vote of confidence\". So object_type: political procedure.\n\nBut the phrase \"in the National Council\" indicates location. So maybe relation \"vote of confidence in\". So subject Cabinet, relation \"vote of confidence in\", object National Council of the Slovak Republic. That seems better: the cabinet must gain a vote of confidence in the National Council. So relation \"vote of confidence in\". object is National Council. So object_type legislative body.\n\nThus we have triplet: Cabinet, relation \"vote of confidence in\", object National Council of the Slovak Republic.\n\nNow also \"Cabinet appointed by the president on recommendation of the prime minister\". Already captured.\n\nNow also \"prime minister ... is usually the leader of majority party or of majority coalition after an election to the National Council\". So we have two leader relations.\n\nNow we need to include subject_type and object_type for each.\n\nDefine types:\n\n- Government of Slovakia: government\n- Prime Minister of Slovakia: political office (or \"position\")\n- President of Slovakia: political office\n- majority party: political party\n- majority coalition: political coalition\n- election to the National Council of the Slovak Republic: election\n- Cabinet: executive body (government cabinet)\n- National Council of the Slovak Republic: legislative body\n- vote of confidence: political procedure\n\nNow qualifiers: for leader of majority party/coalition, qualifier relation \"after event\" maybe \"after election\". Use relation \"after election\". object \"election to the National Council of the Slovak Republic\". object_type \"election\".\n\nFor Cabinet appointed by president, qualifier \"recommended by\". object \"Prime Minister of Slovakia\". object_type \"political office\".\n\nNow produce JSON with \"triplets\": list.\n\nMake sure each dict includes \"qualifiers\": list (maybe empty). Also include \"subject_type\" and \"object_type\".\n\nLet's construct.\n\nTriplet 1:\n{\n \"subject\": \"Government of Slovakia\",\n \"relation\": \"leader\",\n \"object\": \"Prime Minister of Slovakia\",\n \"qualifiers\": [],\n \"subject_type\": \"government\",\n \"object_type\": \"political office\"\n}\n\nTriplet 2:\n{\n \"subject\": \"Prime Minister of Slovakia\",\n \"relation\": \"nominated by\",\n \"object\": \"President of Slovakia\",\n \"qualifiers\": [],\n \"subject_type\": \"political office\",\n \"object_type\": \"political office\"\n}\n\nTriplet 3 (leader of majority party):\n{\n \"subject\": \"Prime Minister of Slovakia\",\n \"relation\": \"leader of\",\n \"object\": \"majority party\",\n \"qualifiers\": [\n   {\"relation\": \"after election\", \"object\": \"election to the National Council of the Slovak Republic\", \"object_type\": \"election\"}\n ],\n \"subject_type\": \"political office\",\n \"object_type\": \"political party\"\n}\n\nTriplet 4 (leader of majority coalition):\n{\n \"subject\": \"Prime Minister of Slovakia\",\n \"relation\": \"leader of\",\n \"object\": \"majority coalition\",\n \"qualifiers\": [\n   {\"relation\": \"after election\", \"object\": \"election to the National Council of the Slovak Republic\", \"object_type\": \"election\"}\n ],\n \"subject_type\": \"political office\",\n \"object_type\": \"political coalition\"\n}\n\nTriplet 5 (Cabinet appointed by president):\n{\n \"subject\": \"Cabinet\",\n \"relation\": \"appointed by\",\n \"object\": \"President of Slovakia\",\n \"qualifiers\": [\n   {\"relation\": \"recommended by\", \"object\": \"Prime Minister of Slovakia\", \"object_type\": \"political office\"}\n ],\n \"subject_type\": \"executive body\",\n \"object_type\": \"political office\"\n}\n\nTriplet 6 (Cabinet vote of confidence in National Council):\n{\n \"subject\": \"Cabinet\",\n \"relation\": \"vote of confidence in\",\n \"object\": \"National Council of the Slovak Republic\",\n \"qualifiers\": [],\n \"subject_type\": \"executive body\",\n \"object_type\": \"legislative body\"\n}\n\nCheck if any other facts: \"National Council of the Slovak Republic\" is also the body where election occurs. Already used.\n\nPotential also \"Cabinet must gain a vote of confidence in the National Council\". Could also have relation \"requires confidence vote from\". But we used \"vote of confidence in\". Acceptable.\n\nNow produce JSON with top-level key \"triplets\". Ensure proper formatting, no extra text.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"Government of Slovakia\n\nIt is led by the Prime Minister of Slovakia, who is nominated by the President of Slovakia, and is usually the leader of majority party or of majority coalition after an election to the National Council of the Slovak Republic. The Cabinet appointed by the president on recommendation of the prime minister must gain a vote of confidence in the National Council.\"\n\nWe need to identify entities: Government of Slovakia, Prime Minister of Slovakia, President of Slovakia, majority party, majority coalition, election, National Council of the Slovak Republic, Cabinet, vote of confidence.\n\nNow extract facts.\n\nSentence 1: \"Government of Slovakia is led by the Prime Minister of Slovakia\". So triplet: subject Government of Slovakia, relation leader, object Prime Minister of Slovakia? Actually \"is led by\" => leader is Prime Minister. So relation \"head\" or \"leader\". Use \"leader\". So:\n\nsubject: Government of Slovakia, relation: leader, object: Prime Minister of Slovakia. qualifiers none.\n\nsubject_type: government, object_type: political position? \"prime minister\" is a political office. So object_type: political office.\n\nSentence 2: \"Prime Minister of Slovakia, who is nominated by the President of Slovakia\". So triplet: subject Prime Minister of Slovakia, relation: nominated by, object President of Slovakia. Use relation \"nominator\" maybe \"nominated by\". So relation \"nominated by\". qualifiers none.\n\nsubject_type: political office, object_type: political office (president). Could be \"political office\". We'll set both as political office.\n\nSentence 3: \"Prime Minister ... is usually the leader of majority party or of majority coalition after an election to the National Council of the Slovak Republic.\"\n\nWe have two possible objects: majority party, majority coalition. So two triplets: subject Prime Minister of Slovakia, relation leader of, object majority party. Also leader of majority coalition. Also qualifiers: \"point in time\"? Not needed. But we have condition \"after an election to the National Council of the Slovak Republic\". So we can add qualifier: \"after election\" with object \"election to the National Council of the Slovak Republic\". So qualifier relation \"after event\", object \"election to the National Council of the Slovak Republic\", object_type \"election\". Or maybe \"after election\" qualifies the leadership relation. We'll add qualifier.\n\nThus for each of the two triplets, qualifiers list with that qualifier.\n\nNow define election entity: \"election to the National Council of the Slovak Republic\". So object_type: election.\n\nNow next sentence: \"The Cabinet appointed by the president on recommendation of the prime minister must gain a vote of confidence in the National Council.\"\n\nWe have: Cabinet appointed by the president. So triplet: subject Cabinet, relation appointed by, object President of Slovakia. (President). Also qualifier: \"on recommendation of the prime minister\". So qualifier relation \"recommended by\", object \"Prime Minister of Slovakia\". object_type: political office.\n\nSecond fact: Cabinet must gain a vote of confidence in the National Council. So relation: \"requires confidence vote from\" maybe \"needs confidence vote of\". We'll use relation \"requires confidence vote from\". Subject Cabinet, object National Council of the Slovak Republic. Also qualifier: \"must\" is not needed. So triplet.\n\nNow also \"National Council of the Slovak Republic\" is the parliament. So object_type: legislative body.\n\nAlso \"vote of confidence\" is a type of vote. But we treat as object \"vote of confidence\". Could be object_type: political procedure. But the relation is \"must gain\". We'll treat object as \"vote of confidence\". So object_type: political procedure.\n\nBut the phrase \"in the National Council\" indicates location. So maybe relation \"vote of confidence in\". So subject Cabinet, relation \"vote of confidence in\", object National Council of the Slovak Republic. That seems better: the cabinet must gain a vote of confidence in the National Council. So relation \"vote of confidence in\". object is National Council. So object_type legislative body.\n\nThus we have triplet: Cabinet, relation \"vote of confidence in\", object National Council of the Slovak Republic.\n\nNow also \"Cabinet appointed by the president on recommendation of the prime minister\". Already captured.\n\nNow also \"prime minister ... is usually the leader of majority party or of majority coalition after an election to the National Council\". So we have two leader relations.\n\nNow we need to include subject_type and object_type for each.\n\nDefine types:\n\n- Government of Slovakia: government\n- Prime Minister of Slovakia: political office (or \"position\")\n- President of Slovakia: political office\n- majority party: political party\n- majority coalition: political coalition\n- election to the National Council of the Slovak Republic: election\n- Cabinet: executive body (government cabinet)\n- National Council of the Slovak Republic: legislative body\n- vote of confidence: political procedure\n\nNow qualifiers: for leader of majority party/coalition, qualifier relation \"after event\" maybe \"after election\". Use relation \"after election\". object \"election to the National Council of the Slovak Republic\". object_type \"election\".\n\nFor Cabinet appointed by president, qualifier \"recommended by\". object \"Prime Minister of Slovakia\". object_type \"political office\".\n\nNow produce JSON with \"triplets\": list.\n\nMake sure each dict includes \"qualifiers\": list (maybe empty). Also include \"subject_type\" and \"object_type\".\n\nLet's construct.\n\nTriplet 1:\n{\n \"subject\": \"Government of Slovakia\",\n \"relation\": \"leader\",\n \"object\": \"Prime Minister of Slovakia\",\n \"qualifiers\": [],\n \"subject_type\": \"government\",\n \"object_type\": \"political office\"\n}\n\nTriplet 2:\n{\n \"subject\": \"Prime Minister of Slovakia\",\n \"relation\": \"nominated by\",\n \"object\": \"President of Slovakia\",\n \"qualifiers\": [],\n \"subject_type\": \"political office\",\n \"object_type\": \"political office\"\n}\n\nTriplet 3 (leader of majority party):\n{\n \"subject\": \"Prime Minister of Slovakia\",\n \"relation\": \"leader of\",\n \"object\": \"majority party\",\n \"qualifiers\": [\n   {\"relation\": \"after election\", \"object\": \"election to the National Council of the Slovak Republic\", \"object_type\": \"election\"}\n ],\n \"subject_type\": \"political office\",\n \"object_type\": \"political party\"\n}\n\nTriplet 4 (leader of majority coalition):\n{\n \"subject\": \"Prime Minister of Slovakia\",\n \"relation\": \"leader of\",\n \"object\": \"majority coalition\",\n \"qualifiers\": [\n   {\"relation\": \"after election\", \"object\": \"election to the National Council of the Slovak Republic\", \"object_type\": \"election\"}\n ],\n \"subject_type\": \"political office\",\n \"object_type\": \"political coalition\"\n}\n\nTriplet 5 (Cabinet appointed by president):\n{\n \"subject\": \"Cabinet\",\n \"relation\": \"appointed by\",\n \"object\": \"President of Slovakia\",\n \"qualifiers\": [\n   {\"relation\": \"recommended by\", \"object\": \"Prime Minister of Slovakia\", \"object_type\": \"political office\"}\n ],\n \"subject_type\": \"executive body\",\n \"object_type\": \"political office\"\n}\n\nTriplet 6 (Cabinet vote of confidence in National Council):\n{\n \"subject\": \"Cabinet\",\n \"relation\": \"vote of confidence in\",\n \"object\": \"National Council of the Slovak Republic\",\n \"qualifiers\": [],\n \"subject_type\": \"executive body\",\n \"object_type\": \"legislative body\"\n}\n\nCheck if any other facts: \"National Council of the Slovak Republic\" is also the body where election occurs. Already used.\n\nPotential also \"Cabinet must gain a vote of confidence in the National Council\". Could also have relation \"requires confidence vote from\". But we used \"vote of confidence in\". Acceptable.\n\nNow produce JSON with top-level key \"triplets\". Ensure proper formatting, no extra text.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1424,
+      "completion_tokens": 2130,
+      "total_tokens": 3554,
+      "cost": 0.00040482,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1344,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00040482,
+        "upstream_inference_prompt_cost": 4.272e-05,
+        "upstream_inference_completions_cost": 0.0003621
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1659,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Government of Slovakia\",\n            \"relation\": \"leader\",\n            \"object\": \"Prime Minister of Slovakia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"government\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Prime Minister of Slovakia\",\n            \"relation\": \"nominated by\",\n            \"object\": \"President of Slovakia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Prime Minister of Slovakia\",\n            \"relation\": \"leader of\",\n            \"object\": \"majority party\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after election\",\n                    \"object\": \"election to the National Council of the Slovak Republic\",\n                    \"object_type\": \"election\"\n                }\n            ],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Prime Minister of Slovakia\",\n            \"relation\": \"leader of\",\n            \"object\": \"majority coalition\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"after election\",\n                    \"object\": \"election to the National Council of the Slovak Republic\",\n                    \"object_type\": \"election\"\n                }\n            ],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"political coalition\"\n        },\n        {\n            \"subject\": \"Cabinet\",\n            \"relation\": \"appointed by\",\n            \"object\": \"President of Slovakia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"recommended by\",\n                    \"object\": \"Prime Minister of Slovakia\",\n                    \"object_type\": \"political office\"\n                }\n            ],\n            \"subject_type\": \"executive body\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Cabinet\",\n            \"relation\": \"vote of confidence in\",\n            \"object\": \"National Council of the Slovak Republic\",\n            \"qualifiers\": [],\n            \"subject_type\": \"executive body\",\n            \"object_type\": \"legislative body\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Government of Slovakia",
+        "relation": "leader",
+        "object": "Prime Minister of Slovakia",
+        "qualifiers": [],
+        "subject_type": "government",
+        "object_type": "political office"
+      },
+      {
+        "subject": "Prime Minister of Slovakia",
+        "relation": "nominated by",
+        "object": "President of Slovakia",
+        "qualifiers": [],
+        "subject_type": "political office",
+        "object_type": "political office"
+      },
+      {
+        "subject": "Prime Minister of Slovakia",
+        "relation": "leader of",
+        "object": "majority party",
+        "qualifiers": [
+          {
+            "relation": "after election",
+            "object": "election to the National Council of the Slovak Republic"
+          }
+        ],
+        "subject_type": "political office",
+        "object_type": "political party"
+      },
+      {
+        "subject": "Prime Minister of Slovakia",
+        "relation": "leader of",
+        "object": "majority coalition",
+        "qualifiers": [
+          {
+            "relation": "after election",
+            "object": "election to the National Council of the Slovak Republic"
+          }
+        ],
+        "subject_type": "political office",
+        "object_type": "political coalition"
+      },
+      {
+        "subject": "Cabinet",
+        "relation": "appointed by",
+        "object": "President of Slovakia",
+        "qualifiers": [
+          {
+            "relation": "recommended by",
+            "object": "Prime Minister of Slovakia"
+          }
+        ],
+        "subject_type": "executive body",
+        "object_type": "political office"
+      },
+      {
+        "subject": "Cabinet",
+        "relation": "vote of confidence in",
+        "object": "National Council of the Slovak Republic",
+        "qualifiers": [],
+        "subject_type": "executive body",
+        "object_type": "legislative body"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1424,
+    "completion_tokens": 2130,
+    "total_tokens": 3554,
+    "cost": 0.00040482,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1344,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00040482,
+      "upstream_inference_prompt_cost": 4.272e-05,
+      "upstream_inference_completions_cost": 0.0003621
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1659,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 721,
+    "output_tokens_est": 594
+  },
+  "attempts": 1,
+  "latency_s": 19.612917716000084,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T15:15:20.265468+00:00",
+  "cache_key": "8cc63add47e683f4c6143870e9c71efe"
+}

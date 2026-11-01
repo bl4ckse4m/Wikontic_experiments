@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "9edbf90e831657c6",
+    "input_hash": "da0c1deb2004790aaef843976bf22afafccdc6312474ecdb16adc6fe08199736",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c555d9c0d080dbb05fe625c03e1b6147",
+    "object": "chat.completion",
+    "created": 1791505528,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Bethel\",\n            \"relation\": \"instance of\",\n            \"object\": \"former community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Bethel\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Clay County, Illinois\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Bethel\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Songer Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Bethel\",\n            \"relation\": \"located on\",\n            \"object\": \"railroad line\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"relative location\",\n                    \"object\": \"north of Greendale\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"transportation route\"\n        },\n        {\n            \"subject\": \"Clay County, Illinois\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Illinois\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Illinois\",\n            \"relation\": \"country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Bethel, Illinois\n\nBethel is a former community in Clay County, Illinois, United States. Bethel was located in Songer Township, along a railroad line north of Greendale.\"\n\nWe have entities: Bethel (likely a place), Illinois (state), Clay County, Illinois, United States, Songer Township, railroad line, Greendale.\n\nWe need to produce triplets with subject, relation, object, qualifiers, subject_type, object_type.\n\nFirst sentence: \"Bethel is a former community in Clay County, Illinois, United States.\"\n\nTriplet: (Bethel, instance of, former community) maybe relation \"instance of\" or \"type\". But we need to follow Wikidata style: \"instance of\" (P31). So relation: \"instance of\". Object: \"former community\". Subject_type: \"human\"? No, it's a place. So subject_type: \"settlement\" or \"geographic location\". Use \"settlement\". object_type: \"settlement type\" maybe \"community\". We'll set object_type: \"settlement type\". Also we have location: \"in Clay County, Illinois, United States\". So relation: \"located in the administrative territorial entity\" (P131). Object: \"Clay County, Illinois\". Could also separate: \"Clay County\" is a county in Illinois. So object: \"Clay County, Illinois\". Subject_type: \"settlement\". object_type: \"administrative territorial entity\". Also we could have \"country\": United States. But location already includes that.\n\nSecond sentence: \"Bethel was located in Songer Township, along a railroad line north of Greendale.\"\n\nTriplet: (Bethel, located in the administrative territorial entity, Songer Township). Subject_type: settlement. object_type: administrative territorial entity.\n\nAlso \"along a railroad line north of Greendale.\" This indicates Bethel is along a railroad line, and that line is north of Greendale. Could produce two triplets: (Bethel, located along, railroad line) maybe relation \"located along\". Not sure standard. Could use \"located on transportation route\". Let's use relation \"located on\" with object \"railroad line\". Also qualifier: \"direction\" maybe \"north of Greendale\". Could attach qualifier to that triplet: {\"relation\":\"direction\", \"object\":\"north of Greendale\"} but direction is not a standard qualifier. Could use \"spatial relation\". However guidelines: qualifiers can be any relation. So we can add qualifier relation \"relative location\" object \"north of Greendale\". Or \"point in direction\". Let's use \"relative location\". Provide qualifier.\n\nAlternatively we could treat \"north of Greendale\" as location of the railroad line, not Bethel. But phrase: \"along a railroad line north of Greendale.\" Means the railroad line is north of Greendale, and Bethel is along that line. So we could have triplet: (Bethel, located on, railroad line) with qualifier: {\"relation\":\"position relative to\", \"object\":\"north of Greendale\"}.\n\nBut maybe simpler: (Bethel, located in, Songer Township) and (Bethel, located along, railroad line). Provide qualifier for the second: relative location north of Greendale.\n\nAlso we have \"Bethel, Illinois\" as title. Could produce (Bethel, located in the administrative territorial entity, Illinois). But we already have county. Could add.\n\nLet's produce triplets:\n\n1. Bethel – instance of – former community\n2. Bethel – located in the administrative territorial entity – Clay County, Illinois\n3. Bethel – located in the administrative territorial entity – Songer Township\n4. Bethel – located on – railroad line (qualifier: relative location north of Greendale)\n\nAlso maybe include (Bethel, country, United States). But location already includes county which is in US. Might be okay to add.\n\nBut guidelines: extract every explicitly stated fact. The text says \"Clay County, Illinois, United States\". So we could have separate facts: (Clay County, located in the administrative territorial entity, Illinois) and (Illinois, country, United States). But those are not about Bethel. The instruction is to extract meaningful triplets from the text, not limited to subject Bethel. So we can also extract facts about Clay County, Illinois being in United States, and Songer Township being in Clay County? Not explicitly said. Only \"Bethel was located in Songer Township\". So we can extract location of Clay County in Illinois? The phrase \"Clay County, Illinois, United States\" implies that Clay County is in Illinois, which is in United States. That's a factual statement. So we can extract (Clay County, located in the administrative territorial entity, Illinois) and (Illinois, country, United States) maybe relation \"country\". But \"Illinois\" is a state, so relation \"located in the country\" maybe \"country\". Use \"country\". object_type \"country\". subject_type \"state\". Also (Clay County, country, United States) could be derived but not explicit; it's implied by the phrase \"Clay County, Illinois, United States\". Usually that is hierarchical. We can include both.\n\nAlso \"Greendale\" is a place. The phrase \"north of Greendale\" indicates spatial relation. Could create (Bethel, north of, Greendale) but the phrase says the railroad line is north of Greendale, not Bethel. However \"Bethel was located ... north of Greendale\" could be interpreted that Bethel is north of Greendale. The phrase: \"Bethel was located in Songer Township, along a railroad line north of Greendale.\" The clause \"north of Greendale\" modifies \"railroad line\". So we might not assert Bethel north of Greendale. Safer to not create ambiguous.\n\nThus produce triplets as above.\n\nNow need to assign subject_type and object_type.\n\nDefine types:\n\n- Bethel: \"settlement\" (or \"former settlement\")\n- former community: \"settlement type\"\n- Clay County, Illinois: \"administrative territorial entity\" (or \"county\")\n- Songer Township: \"administrative territorial entity\" (or \"township\")\n- railroad line: \"transportation route\" (or \"railway line\")\n- Illinois: \"state\"\n- United States: \"country\"\n- Greendale: \"settlement\"\n\nNow qualifiers: For the railroad line triplet, qualifier relation \"relative location\" object \"north of Greendale\". object_type for qualifier object? Should be \"directional description\". We'll set object_type maybe \"location description\". But qualifiers only need relation and object; no type fields for qualifiers.\n\nNow produce JSON.\n\nCheck format: each triplet dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list of dicts, \"subject_type\", \"object_type\". qualifiers list may be empty.\n\nLet's craft.\n\nTriplet 1:\nsubject: \"Bethel\"\nrelation: \"instance of\"\nobject: \"former community\"\nqualifiers: []\nsubject_type: \"settlement\"\nobject_type: \"settlement type\"\n\nTriplet 2:\nsubject: \"Bethel\"\nrelation: \"located in the administrative territorial entity\"\nobject: \"Clay County, Illinois\"\nqualifiers: []\nsubject_type: \"settlement\"\nobject_type: \"administrative territorial entity\"\n\nTriplet 3:\nsubject: \"Bethel\"\nrelation: \"located in the administrative territorial entity\"\nobject: \"Songer Township\"\nqualifiers: []\nsubject_type: \"settlement\"\nobject_type: \"administrative territorial entity\"\n\nTriplet 4:\nsubject: \"Bethel\"\nrelation: \"located on\"\nobject: \"railroad line\"\nqualifiers: [{\"relation\":\"relative location\",\"object\":\"north of Greendale\"}]\nsubject_type: \"settlement\"\nobject_type: \"transportation route\"\n\nTriplet 5:\nsubject: \"Clay County, Illinois\"\nrelation: \"located in the administrative territorial entity\"\nobject: \"Illinois\"\nqualifiers: []\nsubject_type: \"administrative territorial entity\"\nobject_type: \"state\"\n\nTriplet 6:\nsubject: \"Illinois\"\nrelation: \"country\"\nobject: \"United States\"\nqualifiers: []\nsubject_type: \"state\"\nobject_type: \"country\"\n\nPotential also (Bethel, country, United States) but not explicit. Not needed.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1623,
+      "total_tokens": 3718,
+      "completion_tokens": 2095,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Bethel\",\n            \"relation\": \"instance of\",\n            \"object\": \"former community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Bethel\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Clay County, Illinois\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Bethel\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Songer Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Bethel\",\n            \"relation\": \"located on\",\n            \"object\": \"railroad line\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"relative location\",\n                    \"object\": \"north of Greendale\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"transportation route\"\n        },\n        {\n            \"subject\": \"Clay County, Illinois\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Illinois\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative territorial entity\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Illinois\",\n            \"relation\": \"country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Bethel",
+        "relation": "instance of",
+        "object": "former community",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Bethel",
+        "relation": "located in the administrative territorial entity",
+        "object": "Clay County, Illinois",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Bethel",
+        "relation": "located in the administrative territorial entity",
+        "object": "Songer Township",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Bethel",
+        "relation": "located on",
+        "object": "railroad line",
+        "qualifiers": [
+          {
+            "relation": "relative location",
+            "object": "north of Greendale"
+          }
+        ],
+        "subject_type": "settlement",
+        "object_type": "transportation route"
+      },
+      {
+        "subject": "Clay County, Illinois",
+        "relation": "located in the administrative territorial entity",
+        "object": "Illinois",
+        "qualifiers": [],
+        "subject_type": "administrative territorial entity",
+        "object_type": "state"
+      },
+      {
+        "subject": "Illinois",
+        "relation": "country",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1623,
+    "total_tokens": 3718,
+    "completion_tokens": 2095,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 553,
+    "output_tokens_est": 461
+  },
+  "attempts": 1,
+  "latency_s": 25.47753525099688,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:25:53.773488+00:00",
+  "cache_key": "d9ddfc4646ad2c2012eac0b6c4461aa0"
+}

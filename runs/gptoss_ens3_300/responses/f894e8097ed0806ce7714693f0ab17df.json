@@ -1,0 +1,130 @@
+{
+  "task": {
+    "input_id": "190f65524b944209",
+    "input_hash": "d3266a3ff75b87c8ae9ba3751a2220bf072beb32b86edf6b78ce5658afbcc7f9",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-b440317c273e32e2a9724afd97964513",
+    "object": "chat.completion",
+    "created": 1791548503,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Beyoncé\",\n            \"relation\": \"child\",\n            \"object\": \"Blue Ivy Carter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"7 January 2012\"\n                },\n                {\n                    \"relation\": \"place of birth\",\n                    \"object\": \"Lenox Hill Hospital\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"New York\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Blue Ivy Carter\",\n            \"relation\": \"sex\",\n            \"object\": \"female\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"gender\"\n        },\n        {\n            \"subject\": \"Beyoncé\",\n            \"relation\": \"performed at\",\n            \"object\": \"Ovation Hall\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"four nights\"\n                },\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"resort's opening\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"venue\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need extract facts.\n\nText: \"Beyoncé\n\nOn January 7, 2012, Beyoncé gave birth to her first child, a daughter, Blue Ivy Carter, at Lenox Hill Hospital in New York. Five months later, she performed for four nights at Revel Atlantic City's Ovation Hall to celebrate the resort's opening, her first performances since giving birth to Blue Ivy.\"\n\nExtract entities: Beyoncé (human), Blue Ivy Carter (human child), Lenox Hill Hospital (hospital), New York (city), Revel Atlantic City's Ovation Hall (venue), resort's opening (event).\n\nTriplets:\n\n1. (Beyoncé, date of birth? no). She gave birth: relation \"child\" or \"offspring\". Use \"child\" relation. So subject Beyoncé, relation \"child\", object \"Blue Ivy Carter\". Qualifiers: point in time \"7 January 2012\", \"place of birth\" maybe \"Lenox Hill Hospital\". Also \"location\" \"New York\". Also \"sex\" maybe \"female\", but not required.\n\nWe need proper relation names: maybe \"child\". Could also be \"has child\". Use \"child\". Provide qualifiers: \"point in time\", \"place of birth\". Add both.\n\n2. (Blue Ivy Carter, sex, female) maybe not explicit but \"a daughter\". That's gender. Could be relation \"sex\" with object \"female\". Qualifier? Not needed. It's explicit.\n\n3. (Blue Ivy Carter, place of birth, Lenox Hill Hospital) maybe separate. But we already have place qualifier. Might also create separate triplet.\n\nBut guidelines: each fact explicit. \"gave birth to ... at Lenox Hill Hospital in New York.\" So we can have a triplet: (Beyoncé, place of birth of child, Lenox Hill Hospital) but better as qualifier. Let's keep qualifier.\n\n4. (Beyoncé, performed at, Ovation Hall) with qualifiers: point in time \"Five months later\" relative to Jan 7 2012: that would be around June 2012. Could we convert to date? Not explicit. So we can have qualifier \"point in time\" with object \"June 2012\" maybe not. Better to use \"date\" qualifier \"approximately June 2012\". Might be ambiguous. Since text: \"Five months later\". Could express as condition? Not needed. Provide qualifier \"relative time\" maybe not defined. We can include qualifier \"point in time\" with object \"June 2012\". But not explicitly given. Might be considered derived, not explicit. Probably not allowed to infer date. So maybe omit date qualifier.\n\nBut we can include \"duration\" qualifier: \"duration\" \"four nights\". So (Beyoncé, performed at, Ovation Hall) qualifiers: {\"relation\":\"duration\",\"object\":\"four nights\"}; also maybe \"purpose\" \"to celebrate the resort's opening\". Use relation \"purpose\".\n\n5. (Beyoncé, performed at, Ovation Hall) also qualifies \"first performances since giving birth to Blue Ivy\". That's a condition? Not needed.\n\n6. (Resort, opening, date?) Not given.\n\n7. (Beyoncé, number of children, 1) maybe not.\n\nFocus on explicit facts: birth of child, child's gender, child's name, location of birth, performance event, duration, venue, purpose.\n\nWe also need subject_type and object_type.\n\nDefine types: Beyoncé - human; Blue Ivy Carter - human; Lenox Hill Hospital - hospital; New York - city; Ovation Hall - venue; \"four nights\" - duration (maybe time period); \"resort's opening\" - event.\n\nRelations: child, sex, place of birth, performed at, duration, purpose.\n\nCheck qualifiers: For child relation, qualifiers: point in time, place of birth (maybe as separate qualifier relation \"place of birth\").\n\nDefine qualifier relation names: \"point in time\", \"place of birth\". Provide object values.\n\nImplementation:\n\nTriplet1:\nsubject: \"Beyoncé\"\nrelation: \"child\"\nobject: \"Blue Ivy Carter\"\nqualifiers: [\n {\"relation\":\"point in time\",\"object\":\"7 January 2012\"},\n {\"relation\":\"place of birth\",\"object\":\"Lenox Hill Hospital\"},\n {\"relation\":\"location\",\"object\":\"New York\"}\n]\nsubject_type: \"human\"\nobject_type: \"human\"\n\nTriplet2:\nsubject: \"Blue Ivy Carter\"\nrelation: \"sex\"\nobject: \"female\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"sex or gender\" maybe \"gender\". Use \"gender\".\n\nTriplet3:\nsubject: \"Beyoncé\"\nrelation: \"performed at\"\nobject: \"Ovation Hall\"\nqualifiers: [\n {\"relation\":\"duration\",\"object\":\"four nights\"},\n {\"relation\":\"purpose\",\"object\":\"resort's opening\"},\n {\"relation\":\"location\",\"object\":\"Atlantic City\"}? Actually \"Revel Atlantic City's Ovation Hall\" indicates location Atlantic City. Could include location qualifier. But not explicit \"Atlantic City\". It is part of name. Could treat as location of venue. Might be redundant. Keep maybe not.\n\nsubject_type: \"human\"\nobject_type: \"venue\"\n\nTriplet4 maybe: (Ovation Hall, part of, Revel Atlantic City) but not needed.\n\nTriplet5: (Beyoncé, number of performances, \"four\")? Not needed.\n\nAlso could have triplet: (Beyoncé, performed for, \"four nights\") but that's not standard.\n\nBetter keep minimal.\n\nNow JSON format. Ensure qualifiers list even if empty.\n\nLet's craft JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1655,
+      "total_tokens": 3082,
+      "completion_tokens": 1427,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Beyoncé\",\n            \"relation\": \"child\",\n            \"object\": \"Blue Ivy Carter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"7 January 2012\"\n                },\n                {\n                    \"relation\": \"place of birth\",\n                    \"object\": \"Lenox Hill Hospital\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"New York\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Blue Ivy Carter\",\n            \"relation\": \"sex\",\n            \"object\": \"female\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"gender\"\n        },\n        {\n            \"subject\": \"Beyoncé\",\n            \"relation\": \"performed at\",\n            \"object\": \"Ovation Hall\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"four nights\"\n                },\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"resort's opening\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"venue\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Beyoncé",
+        "relation": "child",
+        "object": "Blue Ivy Carter",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "7 January 2012"
+          },
+          {
+            "relation": "place of birth",
+            "object": "Lenox Hill Hospital"
+          },
+          {
+            "relation": "location",
+            "object": "New York"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Blue Ivy Carter",
+        "relation": "sex",
+        "object": "female",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "gender"
+      },
+      {
+        "subject": "Beyoncé",
+        "relation": "performed at",
+        "object": "Ovation Hall",
+        "qualifiers": [
+          {
+            "relation": "duration",
+            "object": "four nights"
+          },
+          {
+            "relation": "purpose",
+            "object": "resort's opening"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "venue"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1655,
+    "total_tokens": 3082,
+    "completion_tokens": 1427,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 440,
+    "output_tokens_est": 348
+  },
+  "attempts": 1,
+  "latency_s": 17.427439484003116,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:22:01.514545+00:00",
+  "cache_key": "f894e8097ed0806ce7714693f0ab17df"
+}

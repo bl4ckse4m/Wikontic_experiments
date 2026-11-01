@@ -1,0 +1,142 @@
+{
+  "task": {
+    "input_id": "47fae27672ee6d91",
+    "input_hash": "a69a9d6050eb702ce4d3906cbe56de856d27f6529aa2977925e4d7dd3ef8dc2f",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-311d9ac1ed2e88d83d87a4708ae8e435",
+    "object": "chat.completion",
+    "created": 1791517084,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"instance of\",\n            \"object\": \"skyscraper\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building type\"\n        },\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"located at\",\n            \"object\": \"495 Adelaide Street, Brisbane, Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"address\"\n        },\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"construction began\",\n            \"object\": \"early 2009\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"opened\",\n            \"object\": \"2011\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"tallest building in\",\n            \"object\": \"Brisbane\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"until 2013\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Infinity Tower\",\n            \"relation\": \"overtook\",\n            \"object\": \"Soleil\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2013\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText:\n\n\"Soleil (Brisbane)\n\nSoleil is a skyscraper located at 495 Adelaide Street, Brisbane, Australia. Construction began in early 2009, with the building officially opened in 2011. At , it was Brisbane's tallest building until 2013 when Infinity Tower () overtook it.\"\n\nThere is a missing height value after \"At ,\". Probably omitted. We ignore missing.\n\nExtract entities: Soleil (Brisbane) - building name \"Soleil\". It's a skyscraper. Location: 495 Adelaide Street, Brisbane, Australia. Construction began early 2009. Building officially opened 2011. It was Brisbane's tallest building until 2013. Infinity Tower overtook it in 2013.\n\nWe need subject_type and object_type. Use typical: building, skyscraper, address, city, country, date, etc.\n\nTriplets:\n\n1. Subject: Soleil (Brisbane) (maybe just \"Soleil (Brisbane)\" or \"Soleil\") relation: instance of? but we need \"type\" maybe \"skyscraper\". Use relation \"instance of\" or \"type\". In examples they used \"occupation\" etc. For building, maybe \"instance of\" with object_type \"building\". Use \"instance of\". Provide subject_type \"building\". object_type \"building type\"? maybe \"building type\". Let's follow pattern: \"instance of\" relation, object \"skyscraper\". object_type \"building type\". subject_type \"building\". Good.\n\n2. Location: relation \"located at\" object \"495 Adelaide Street, Brisbane, Australia\". object_type \"address\". qualifiers none. subject_type \"building\".\n\n3. Construction began: relation \"start of construction\" maybe \"construction began\". Use relation \"construction began\". object \"early 2009\". object_type \"date\". qualifiers maybe \"point in time\" but object is date. Could also add qualifier \"point in time\" but not needed. Use object as date.\n\n4. Officially opened: relation \"inauguration date\" or \"opened\". Use \"opened\". object \"2011\". object_type \"date\". Could add qualifier \"point in time\". Use \"opened\" relation.\n\n5. Tallest building status: \"was tallest building in Brisbane\". relation \"tallest building in\" maybe \"tallest building of\". Use relation \"tallest building in\". object \"Brisbane\". qualifiers: \"point in time\" start? It says \"until 2013\". So we can have qualifier \"point in time\" maybe \"until 2013\". But qualifiers are for context. Could have qualifier \"point in time\" with object \"until 2013\". But \"point in time\" expects a date, not phrase. Could use qualifier \"end time\" but not defined. Use qualifier \"point in time\" with \"2013\". But that indicates the time of the fact? The fact holds until 2013. Could add qualifier \"point in time\" \"2013\". Might be okay.\n\nAlternatively split: \"Soleil was Brisbane's tallest building\" with qualifier \"point in time\" \"until 2013\". We'll do that.\n\n6. Infinity Tower overtook it: relation \"overtook\" object \"Infinity Tower\". qualifiers: \"point in time\" \"2013\". subject_type building, object_type building.\n\nAlso need subject_type for Infinity Tower maybe building.\n\nNow produce JSON.\n\nCheck pronoun resolution: \"it\" refers to Soleil. So we used that.\n\nNow produce list.\n\nMake sure each dict includes \"qualifiers\": list of dicts.\n\nTriplet 1:\n\nsubject: \"Soleil (Brisbane)\"? Use \"Soleil\". Provide subject_type \"building\". object: \"skyscraper\". object_type \"building type\". qualifiers [].\n\nTriplet 2:\n\nsubject: \"Soleil\". relation: \"located at\". object: \"495 Adelaide Street, Brisbane, Australia\". object_type \"address\". qualifiers [].\n\nTriplet 3:\n\nsubject: \"Soleil\". relation: \"construction began\". object: \"early 2009\". object_type \"date\". qualifiers [].\n\nTriplet 4:\n\nsubject: \"Soleil\". relation: \"opened\". object: \"2011\". object_type \"date\". qualifiers [].\n\nTriplet 5:\n\nsubject: \"Soleil\". relation: \"tallest building in\". object: \"Brisbane\". object_type \"city\". qualifiers [{\"relation\":\"point in time\",\"object\":\"until 2013\"}] maybe \"until 2013\". But qualifier object should be a string; okay.\n\nTriplet 6:\n\nsubject: \"Infinity Tower\". relation: \"overtook\". object: \"Soleil\". object_type \"building\". qualifiers [{\"relation\":\"point in time\",\"object\":\"2013\"}].\n\nBut we also need subject_type for Infinity Tower: building.\n\nNow produce JSON.\n\nCheck if any other facts: \"Construction began in early 2009\" includes \"early 2009\" maybe qualifier \"approximation\" \"early\". Could add qualifier \"approximation\" \"early\". But they used approximation qualifier for \"about\". Here \"early 2009\" is a qualifier of date. Could treat as date \"2009\" with qualifier \"approximation\" \"early\". But not required.\n\nWe'll keep simple.\n\nNow output JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1655,
+      "total_tokens": 3144,
+      "completion_tokens": 1489,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"instance of\",\n            \"object\": \"skyscraper\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building type\"\n        },\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"located at\",\n            \"object\": \"495 Adelaide Street, Brisbane, Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"address\"\n        },\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"construction began\",\n            \"object\": \"early 2009\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"opened\",\n            \"object\": \"2011\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Soleil\",\n            \"relation\": \"tallest building in\",\n            \"object\": \"Brisbane\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"until 2013\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Infinity Tower\",\n            \"relation\": \"overtook\",\n            \"object\": \"Soleil\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2013\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"building\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Soleil",
+        "relation": "instance of",
+        "object": "skyscraper",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "building type"
+      },
+      {
+        "subject": "Soleil",
+        "relation": "located at",
+        "object": "495 Adelaide Street, Brisbane, Australia",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "address"
+      },
+      {
+        "subject": "Soleil",
+        "relation": "construction began",
+        "object": "early 2009",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "date"
+      },
+      {
+        "subject": "Soleil",
+        "relation": "opened",
+        "object": "2011",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "date"
+      },
+      {
+        "subject": "Soleil",
+        "relation": "tallest building in",
+        "object": "Brisbane",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "until 2013"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "city"
+      },
+      {
+        "subject": "Infinity Tower",
+        "relation": "overtook",
+        "object": "Soleil",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2013"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "building"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1655,
+    "total_tokens": 3144,
+    "completion_tokens": 1489,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 529,
+    "output_tokens_est": 437
+  },
+  "attempts": 1,
+  "latency_s": 18.388315935997525,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:38:23.018096+00:00",
+  "cache_key": "537b258363f336c2b63b16d7b3b8f88c"
+}

@@ -1,0 +1,193 @@
+{
+  "task": {
+    "input_id": "e29d8801ef123727",
+    "input_hash": "58e887f1e95bad0009a4434857c8b2a27de946daeafb7145c56482dcf250efed",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793213103-rN9Kse8CiU9FxgJg9Qc1",
+    "object": "chat.completion",
+    "created": 1793213103,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Crusoe",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Alps\",\n            \"relation\": \"covers\",\n            \"object\": \"Switzerland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"percentage\",\n                    \"object\": \"65%\",\n                    \"object_type\": \"percentage\"\n                }\n            ],\n            \"subject_type\": \"mountain range\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Switzerland\",\n            \"relation\": \"area\",\n            \"object\": \"41,285 square kilometres\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Switzerland\",\n            \"relation\": \"area (sq mi)\",\n            \"object\": \"15,940 square miles\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Alps\",\n            \"relation\": \"area\",\n            \"object\": \"192,753 square kilometres\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain range\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Switzerland\",\n            \"relation\": \"covers\",\n            \"object\": \"Alps\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"percentage\",\n                    \"object\": \"14%\",\n                    \"object_type\": \"percentage\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"Alps\",\n            \"relation\": \"number of alpine four-thousanders\",\n            \"object\": \"82\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain range\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Swiss Alps\",\n            \"relation\": \"contains number of alpine four-thousanders\",\n            \"object\": \"48\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain range\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"34 alpine four-thousanders\",\n            \"relation\": \"located within distance of\",\n            \"object\": \"Switzerland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"distance\",\n                    \"object\": \"20 kilometres\",\n                    \"object_type\": \"distance\"\n                }\n            ],\n            \"subject_type\": \"mountain peak\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract facts from the text. The text mentions Swiss Alps, coverage percentages, area, number of four-thousanders.\n\nWe need to create entities: Swiss Alps (maybe \"Swiss Alps\" as a region), Switzerland (country), Alps (mountain range), area, percentages, four-thousanders (mountain peaks above 4000m). Need to produce triplets with subject_type and object_type.\n\nLet's parse sentences.\n\nFirst line: \"Swiss Alps\". Probably just a heading, but we can treat as entity.\n\nSecond paragraph: \"The Alps cover 65% of Switzerland's total 41,285 square kilometres (15,940 sq mi) surface area, making it one of the most alpine countries.\"\n\nFacts:\n- The Alps cover 65% of Switzerland's total surface area.\nSubject: Alps (mountain range) relation: \"covers\" object: Switzerland's total surface area (maybe \"Switzerland\" as entity with area). But we need object entity. Could be \"Switzerland\" with qualifier \"percentage\" 65%? Better: subject: Alps, relation: \"percentage of area covered in\", object: Switzerland, qualifier: \"percentage\", 65%. But we need object_type.\n\nAlternative: subject: Alps, relation: \"covers\", object: \"Switzerland\", qualifier: \"percentage\", \"65%\". Also need area value.\n\nAlso: Switzerland's total area is 41,285 square kilometres (15,940 sq mi). So we have a fact: Switzerland has area 41,285 km². Could be relation \"area\" object: \"41,285 square kilometres\". Also maybe \"area (sq mi)\" 15,940.\n\nAlso: The Alps cover 65% of that area. So we could have a triplet: Alps \"covers percentage of area of\" Switzerland with qualifier \"percentage\" 65%.\n\nThird: \"Despite the fact that Switzerland covers only 14% of the Alps total 192,753 square kilometres (74,422 sq mi) area\". So Switzerland covers 14% of the Alps total area. So similar: Switzerland \"covers percentage of area of\" Alps with qualifier 14%.\n\nAlso: Alps total area 192,753 km² (74,422 sq mi). So Alps \"area\" object: 192,753 km².\n\nNext: \"48 out of 82 alpine four-thousanders are located in the Swiss Alps and practically all of the remaining 34 are within 20 kilometres (12 mi) of the country's border.\"\n\nFacts:\n- There are 82 alpine four-thousanders (mountain peaks above 4000m) in the Alps (or alpine region). So maybe entity \"Alpine four-thousanders\" count 82. Could be relation \"count\" or \"total number\". But we need subject and object. Could be \"Alpine four-thousanders\" \"count\" \"82\". Or \"Alps\" \"has number of alpine four-thousanders\" \"82\". We'll choose subject: Alps, relation: \"number of alpine four-thousanders\", object: \"82\". object_type: \"quantity\".\n\n- 48 of those are located in the Swiss Alps. So subject: Swiss Alps, relation: \"number of alpine four-thousanders located\", object: \"48\". Or \"Swiss Alps\" \"contains\" \"48 alpine four-thousanders\". We'll make subject: Swiss Alps, relation: \"contains number of alpine four-thousanders\", object: \"48\". object_type: \"quantity\". Also maybe qualifier linking to total 82? Not needed.\n\n- Remaining 34 are within 20 km of the country's border. So subject: \"remaining alpine four-thousanders\" maybe \"34 alpine four-thousanders\" relation: \"located within distance of\" object: \"Switzerland border\". Provide qualifier distance 20 km. Could also be subject: \"34 alpine four-thousanders\" relation: \"located within distance of\", object: \"Switzerland border\", qualifier: \"distance\" 20 km.\n\nWe need to define entity names: \"Swiss Alps\", \"Alps\", \"Switzerland\", \"Switzerland border\" maybe \"Switzerland\". Use \"Switzerland\" as country.\n\nDefine types:\n- Alps: mountain range\n- Swiss Alps: mountain range (subrange)\n- Switzerland: country (human settlement? but type \"country\")\n- area: quantity with unit square kilometres (type \"area\")\n- percentage: maybe \"percentage\". object_type \"percentage\".\n- alpine four-thousanders: mountain peak (type \"mountain peak\") but we treat as concept.\n\nSimplify: Use object_type \"percentage\", \"area\", \"quantity\", \"distance\", \"mountain peak\", \"mountain range\", \"country\", \"award\"? Not needed.\n\nNow produce JSON list.\n\nTriplets:\n\n1. subject: Alps, relation: \"covers percentage of area of\", object: Switzerland, qualifiers: [{relation:\"percentage\", object:\"65%\", object_type:\"percentage\"}], subject_type:\"mountain range\", object_type:\"country\"\n\nBut maybe better to split: relation \"covers\" object \"Switzerland\", qualifier \"percentage\" 65%. We'll follow guidelines: relation short, like \"covers\". So:\n\n{\n \"subject\":\"Alps\",\n \"relation\":\"covers\",\n \"object\":\"Switzerland\",\n \"qualifiers\":[{\"relation\":\"percentage\",\"object\":\"65%\",\"object_type\":\"percentage\"}],\n \"subject_type\":\"mountain range\",\n \"object_type\":\"country\"\n}\n\n2. Switzerland area: relation \"area\", object \"41,285 square kilometres\". qualifier maybe also \"area in square miles\" 15,940. Could have two separate triplets.\n\nTriplet 2: subject Switzerland, relation \"area\", object \"41,285 square kilometres\", qualifiers [], subject_type \"country\", object_type \"area\".\n\nTriplet 3: subject Switzerland, relation \"area (sq mi)\", object \"15,940 square miles\", qualifiers [], object_type \"area\". But maybe we can include both units in qualifiers. Simpler: separate.\n\n3. Alps area: subject Alps, relation \"area\", object \"192,753 square kilometres\", qualifiers [], subject_type \"mountain range\", object_type \"area\".\n\n4. Switzerland covers 14% of Alps area: subject Switzerland, relation \"covers\", object \"Alps\", qualifiers [{relation:\"percentage\",\"object\":\"14%\",\"object_type\":\"percentage\"}], subject_type \"country\", object_type \"mountain range\".\n\n5. Alps has total number of alpine four-thousanders: subject Alps, relation \"number of alpine four-thousanders\", object \"82\", qualifiers [], subject_type \"mountain range\", object_type \"quantity\".\n\n6. Swiss Alps contains 48 alpine four-thousanders: subject \"Swiss Alps\", relation \"contains number of alpine four-thousanders\", object \"48\", qualifiers [], subject_type \"mountain range\", object_type \"quantity\".\n\n7. Remaining 34 alpine four-thousanders located within 20 km of Switzerland border: subject \"34 alpine four-thousanders\", relation \"located within distance of\", object \"Switzerland\", qualifiers [{relation:\"distance\",\"object\":\"20 kilometres\",\"object_type\":\"distance\"}], subject_type \"mountain peak\", object_type \"country\". Might need to define subject as \"remaining alpine four-thousanders\". Use \"remaining alpine four-thousanders\". But we need consistent naming. Could use \"remaining alpine four-thousanders\". We'll set subject_type \"mountain peak (group)\". Use \"mountain peak\".\n\nAlternatively, we could have subject \"34 alpine four-thousanders\". That's okay.\n\nAlso maybe need triplet for \"Swiss Alps\" is a subrange of \"Alps\". Could add: subject \"Swiss Alps\", relation \"part of\", object \"Alps\". Not explicitly in text but implied. Not required.\n\nNow produce JSON.\n\nCheck qualifiers format: each qualifier dict includes relation, object, object_type.\n\nMake sure each triplet includes qualifiers list (empty if none). Provide \"subject_type\" and \"object_type\".\n\nNow produce final JSON.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract facts from the text. The text mentions Swiss Alps, coverage percentages, area, number of four-thousanders.\n\nWe need to create entities: Swiss Alps (maybe \"Swiss Alps\" as a region), Switzerland (country), Alps (mountain range), area, percentages, four-thousanders (mountain peaks above 4000m). Need to produce triplets with subject_type and object_type.\n\nLet's parse sentences.\n\nFirst line: \"Swiss Alps\". Probably just a heading, but we can treat as entity.\n\nSecond paragraph: \"The Alps cover 65% of Switzerland's total 41,285 square kilometres (15,940 sq mi) surface area, making it one of the most alpine countries.\"\n\nFacts:\n- The Alps cover 65% of Switzerland's total surface area.\nSubject: Alps (mountain range) relation: \"covers\" object: Switzerland's total surface area (maybe \"Switzerland\" as entity with area). But we need object entity. Could be \"Switzerland\" with qualifier \"percentage\" 65%? Better: subject: Alps, relation: \"percentage of area covered in\", object: Switzerland, qualifier: \"percentage\", 65%. But we need object_type.\n\nAlternative: subject: Alps, relation: \"covers\", object: \"Switzerland\", qualifier: \"percentage\", \"65%\". Also need area value.\n\nAlso: Switzerland's total area is 41,285 square kilometres (15,940 sq mi). So we have a fact: Switzerland has area 41,285 km². Could be relation \"area\" object: \"41,285 square kilometres\". Also maybe \"area (sq mi)\" 15,940.\n\nAlso: The Alps cover 65% of that area. So we could have a triplet: Alps \"covers percentage of area of\" Switzerland with qualifier \"percentage\" 65%.\n\nThird: \"Despite the fact that Switzerland covers only 14% of the Alps total 192,753 square kilometres (74,422 sq mi) area\". So Switzerland covers 14% of the Alps total area. So similar: Switzerland \"covers percentage of area of\" Alps with qualifier 14%.\n\nAlso: Alps total area 192,753 km² (74,422 sq mi). So Alps \"area\" object: 192,753 km².\n\nNext: \"48 out of 82 alpine four-thousanders are located in the Swiss Alps and practically all of the remaining 34 are within 20 kilometres (12 mi) of the country's border.\"\n\nFacts:\n- There are 82 alpine four-thousanders (mountain peaks above 4000m) in the Alps (or alpine region). So maybe entity \"Alpine four-thousanders\" count 82. Could be relation \"count\" or \"total number\". But we need subject and object. Could be \"Alpine four-thousanders\" \"count\" \"82\". Or \"Alps\" \"has number of alpine four-thousanders\" \"82\". We'll choose subject: Alps, relation: \"number of alpine four-thousanders\", object: \"82\". object_type: \"quantity\".\n\n- 48 of those are located in the Swiss Alps. So subject: Swiss Alps, relation: \"number of alpine four-thousanders located\", object: \"48\". Or \"Swiss Alps\" \"contains\" \"48 alpine four-thousanders\". We'll make subject: Swiss Alps, relation: \"contains number of alpine four-thousanders\", object: \"48\". object_type: \"quantity\". Also maybe qualifier linking to total 82? Not needed.\n\n- Remaining 34 are within 20 km of the country's border. So subject: \"remaining alpine four-thousanders\" maybe \"34 alpine four-thousanders\" relation: \"located within distance of\" object: \"Switzerland border\". Provide qualifier distance 20 km. Could also be subject: \"34 alpine four-thousanders\" relation: \"located within distance of\", object: \"Switzerland border\", qualifier: \"distance\" 20 km.\n\nWe need to define entity names: \"Swiss Alps\", \"Alps\", \"Switzerland\", \"Switzerland border\" maybe \"Switzerland\". Use \"Switzerland\" as country.\n\nDefine types:\n- Alps: mountain range\n- Swiss Alps: mountain range (subrange)\n- Switzerland: country (human settlement? but type \"country\")\n- area: quantity with unit square kilometres (type \"area\")\n- percentage: maybe \"percentage\". object_type \"percentage\".\n- alpine four-thousanders: mountain peak (type \"mountain peak\") but we treat as concept.\n\nSimplify: Use object_type \"percentage\", \"area\", \"quantity\", \"distance\", \"mountain peak\", \"mountain range\", \"country\", \"award\"? Not needed.\n\nNow produce JSON list.\n\nTriplets:\n\n1. subject: Alps, relation: \"covers percentage of area of\", object: Switzerland, qualifiers: [{relation:\"percentage\", object:\"65%\", object_type:\"percentage\"}], subject_type:\"mountain range\", object_type:\"country\"\n\nBut maybe better to split: relation \"covers\" object \"Switzerland\", qualifier \"percentage\" 65%. We'll follow guidelines: relation short, like \"covers\". So:\n\n{\n \"subject\":\"Alps\",\n \"relation\":\"covers\",\n \"object\":\"Switzerland\",\n \"qualifiers\":[{\"relation\":\"percentage\",\"object\":\"65%\",\"object_type\":\"percentage\"}],\n \"subject_type\":\"mountain range\",\n \"object_type\":\"country\"\n}\n\n2. Switzerland area: relation \"area\", object \"41,285 square kilometres\". qualifier maybe also \"area in square miles\" 15,940. Could have two separate triplets.\n\nTriplet 2: subject Switzerland, relation \"area\", object \"41,285 square kilometres\", qualifiers [], subject_type \"country\", object_type \"area\".\n\nTriplet 3: subject Switzerland, relation \"area (sq mi)\", object \"15,940 square miles\", qualifiers [], object_type \"area\". But maybe we can include both units in qualifiers. Simpler: separate.\n\n3. Alps area: subject Alps, relation \"area\", object \"192,753 square kilometres\", qualifiers [], subject_type \"mountain range\", object_type \"area\".\n\n4. Switzerland covers 14% of Alps area: subject Switzerland, relation \"covers\", object \"Alps\", qualifiers [{relation:\"percentage\",\"object\":\"14%\",\"object_type\":\"percentage\"}], subject_type \"country\", object_type \"mountain range\".\n\n5. Alps has total number of alpine four-thousanders: subject Alps, relation \"number of alpine four-thousanders\", object \"82\", qualifiers [], subject_type \"mountain range\", object_type \"quantity\".\n\n6. Swiss Alps contains 48 alpine four-thousanders: subject \"Swiss Alps\", relation \"contains number of alpine four-thousanders\", object \"48\", qualifiers [], subject_type \"mountain range\", object_type \"quantity\".\n\n7. Remaining 34 alpine four-thousanders located within 20 km of Switzerland border: subject \"34 alpine four-thousanders\", relation \"located within distance of\", object \"Switzerland\", qualifiers [{relation:\"distance\",\"object\":\"20 kilometres\",\"object_type\":\"distance\"}], subject_type \"mountain peak\", object_type \"country\". Might need to define subject as \"remaining alpine four-thousanders\". Use \"remaining alpine four-thousanders\". But we need consistent naming. Could use \"remaining alpine four-thousanders\". We'll set subject_type \"mountain peak (group)\". Use \"mountain peak\".\n\nAlternatively, we could have subject \"34 alpine four-thousanders\". That's okay.\n\nAlso maybe need triplet for \"Swiss Alps\" is a subrange of \"Alps\". Could add: subject \"Swiss Alps\", relation \"part of\", object \"Alps\". Not explicitly in text but implied. Not required.\n\nNow produce JSON.\n\nCheck qualifiers format: each qualifier dict includes relation, object, object_type.\n\nMake sure each triplet includes qualifiers list (empty if none). Provide \"subject_type\" and \"object_type\".\n\nNow produce final JSON.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1459,
+      "completion_tokens": 2190,
+      "total_tokens": 3649,
+      "cost": 0.00062045,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1328,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00062045,
+        "upstream_inference_prompt_cost": 7.295e-05,
+        "upstream_inference_completions_cost": 0.0005475
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1651,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Alps\",\n            \"relation\": \"covers\",\n            \"object\": \"Switzerland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"percentage\",\n                    \"object\": \"65%\",\n                    \"object_type\": \"percentage\"\n                }\n            ],\n            \"subject_type\": \"mountain range\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Switzerland\",\n            \"relation\": \"area\",\n            \"object\": \"41,285 square kilometres\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Switzerland\",\n            \"relation\": \"area (sq mi)\",\n            \"object\": \"15,940 square miles\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Alps\",\n            \"relation\": \"area\",\n            \"object\": \"192,753 square kilometres\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain range\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Switzerland\",\n            \"relation\": \"covers\",\n            \"object\": \"Alps\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"percentage\",\n                    \"object\": \"14%\",\n                    \"object_type\": \"percentage\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"Alps\",\n            \"relation\": \"number of alpine four-thousanders\",\n            \"object\": \"82\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain range\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Swiss Alps\",\n            \"relation\": \"contains number of alpine four-thousanders\",\n            \"object\": \"48\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain range\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"34 alpine four-thousanders\",\n            \"relation\": \"located within distance of\",\n            \"object\": \"Switzerland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"distance\",\n                    \"object\": \"20 kilometres\",\n                    \"object_type\": \"distance\"\n                }\n            ],\n            \"subject_type\": \"mountain peak\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Alps",
+        "relation": "covers",
+        "object": "Switzerland",
+        "qualifiers": [
+          {
+            "relation": "percentage",
+            "object": "65%"
+          }
+        ],
+        "subject_type": "mountain range",
+        "object_type": "country"
+      },
+      {
+        "subject": "Switzerland",
+        "relation": "area",
+        "object": "41,285 square kilometres",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "area"
+      },
+      {
+        "subject": "Switzerland",
+        "relation": "area (sq mi)",
+        "object": "15,940 square miles",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "area"
+      },
+      {
+        "subject": "Alps",
+        "relation": "area",
+        "object": "192,753 square kilometres",
+        "qualifiers": [],
+        "subject_type": "mountain range",
+        "object_type": "area"
+      },
+      {
+        "subject": "Switzerland",
+        "relation": "covers",
+        "object": "Alps",
+        "qualifiers": [
+          {
+            "relation": "percentage",
+            "object": "14%"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "mountain range"
+      },
+      {
+        "subject": "Alps",
+        "relation": "number of alpine four-thousanders",
+        "object": "82",
+        "qualifiers": [],
+        "subject_type": "mountain range",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Swiss Alps",
+        "relation": "contains number of alpine four-thousanders",
+        "object": "48",
+        "qualifiers": [],
+        "subject_type": "mountain range",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "34 alpine four-thousanders",
+        "relation": "located within distance of",
+        "object": "Switzerland",
+        "qualifiers": [
+          {
+            "relation": "distance",
+            "object": "20 kilometres"
+          }
+        ],
+        "subject_type": "mountain peak",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1459,
+    "completion_tokens": 2190,
+    "total_tokens": 3649,
+    "cost": 0.00062045,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1328,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00062045,
+      "upstream_inference_prompt_cost": 7.295e-05,
+      "upstream_inference_completions_cost": 0.0005475
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1651,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 772,
+    "output_tokens_est": 645
+  },
+  "attempts": 1,
+  "latency_s": 9.004129217006266,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:45:12.386902+00:00",
+  "cache_key": "e06f6f7deec7a0e7c6519c4541860ca4"
+}

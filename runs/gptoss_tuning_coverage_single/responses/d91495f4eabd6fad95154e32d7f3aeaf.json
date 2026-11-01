@@ -1,0 +1,132 @@
+{
+  "task": {
+    "input_id": "142dd878c7d0fe0b",
+    "input_hash": "03d944853b3a946c9432b1f2b6686f9304b7db6775c27577b078193af2cab149",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-787d567afc6b39fc4f7e5df6fe5b12bc",
+    "object": "chat.completion",
+    "created": 1791501197,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Samanatham\",\n            \"relation\": \"instance of\",\n            \"object\": \"panchayat village\",\n            \"qualifiers\": [],\n            \"subject_type\": \"village\",\n            \"object_type\": \"village\"\n        },\n        {\n            \"subject\": \"Samanatham\",\n            \"relation\": \"located in\",\n            \"object\": \"Madurai district\",\n            \"qualifiers\": [],\n            \"subject_type\": \"village\",\n            \"object_type\": \"district\"\n        },\n        {\n            \"subject\": \"Madurai district\",\n            \"relation\": \"located in\",\n            \"object\": \"Tamil Nadu\",\n            \"qualifiers\": [],\n            \"subject_type\": \"district\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Tamil Nadu\",\n            \"relation\": \"located in\",\n            \"object\": \"India\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Samanatham\",\n            \"relation\": \"part of\",\n            \"object\": \"Thiruparankundram block\",\n            \"qualifiers\": [],\n            \"subject_type\": \"village\",\n            \"object_type\": \"block\"\n        },\n        {\n            \"subject\": \"Samanatham\",\n            \"relation\": \"definition\",\n            \"object\": \"the system or the practice of the Shamanas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"village\",\n            \"object_type\": \"concept\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Samanatham\n\nSamanatham is the name of a panchayat village in the Madurai district of Tamil Nadu, India. It comes under the Thiruparankundram block. The word Samanatham means \"the system or the practice of the Shamanas\".\"\n\nWe have entities: Samanatham (village), Madurai district, Tamil Nadu, India, Thiruparankundram block, Shamanas (maybe concept). Relations:\n\n- Samanatham is a panchayat village. So relation: \"instance of\" or \"type of settlement\"? Use \"instance of\" maybe. But we need specific Wikidata-style relation. Could be \"instance of\" with object \"panchayat village\". Subject_type: \"human\"? No, it's a place. So subject_type: \"settlement\". object_type: \"administrative division\"? Actually \"panchayat village\" is a type of settlement. So object_type: \"administrative division\" or \"village\". We'll set object_type \"village\".\n\n- Samanatham located in Madurai district. Relation: \"located in the administrative territorial entity\" or \"located in\". Use \"located in\". object_type: \"district\". subject_type: \"village\". So triplet: (Samanatham, located in, Madurai district). Qualifiers maybe none.\n\n- Madurai district is in Tamil Nadu, India. But text says \"Madurai district of Tamil Nadu, India\". So we can have (Madurai district, located in, Tamil Nadu). Also (Tamil Nadu, part of, India) maybe but not explicitly \"part of\". It says \"Tamil Nadu, India\". Could be interpreted as \"Tamil Nadu, India\" meaning Tamil Nadu is a state of India. That's explicit? It's a location phrase. Might be okay to extract (Tamil Nadu, located in, India). But the text doesn't explicitly say \"Tamil Nadu is in India\", but it's implied by \"Tamil Nadu, India\". Usually we treat that as location. I'd include.\n\n- Samanatham comes under the Thiruparankundram block. Relation: \"administrative territorial entity\" maybe \"part of\". Use \"part of\". So (Samanatham, part of, Thiruparankundram block). subject_type: village, object_type: block.\n\n- The word Samanatham means \"the system or the practice of the Shamanas\". So relation: \"meaning\" or \"definition\". Use \"means\". Could be \"definition\". We'll use \"definition\" relation. Object: \"the system or the practice of the Shamanas\". That's a phrase; maybe object_type: \"concept\". Also we could split: \"system of the Shamanas\" and \"practice of the Shamanas\". But we keep as phrase.\n\n- Also \"the system or the practice of the Shamanas\" refers to Shamanas. Could have (Shamanas, type, ???). Not needed.\n\nThus produce list of triplets.\n\nNeed subject_type and object_type.\n\nDefine types:\n\n- Samanatham: \"village\" (or \"settlement\").\n- Panchayat village: \"administrative division\" maybe \"village\".\n- Madurai district: \"district\".\n- Tamil Nadu: \"state\".\n- India: \"country\".\n- Thiruparankundram block: \"block\" (administrative block).\n- \"the system or the practice of the Shamanas\": \"concept\".\n- Shamanas: \"religious practice\" maybe \"concept\". But we treat as part of phrase.\n\nWe'll produce triplets:\n\n1. (Samanatham, instance of, panchayat village) qualifiers none.\n\n2. (Samanatham, located in, Madurai district)\n\n3. (Madurai district, located in, Tamil Nadu)\n\n4. (Tamil Nadu, located in, India)\n\n5. (Samanatham, part of, Thiruparankundram block)\n\n6. (Samanatham, definition, \"the system or the practice of the Shamanas\")\n\nPotentially also (Samanatham, name, Samanatham) but not needed.\n\nNow format JSON.\n\nEach triplet dict includes qualifiers list (empty). Provide subject_type and object_type.\n\nDefine subject_type for each:\n\n1. subject_type: \"village\". object_type: \"village\" (panchayat village). Could be \"administrative division\". We'll use \"village\".\n\n2. subject_type: \"village\". object_type: \"district\".\n\n3. subject_type: \"district\". object_type: \"state\".\n\n4. subject_type: \"state\". object_type: \"country\".\n\n5. subject_type: \"village\". object_type: \"block\".\n\n6. subject_type: \"village\". object_type: \"concept\".\n\nMake sure strings exactly.\n\nReturn JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1643,
+      "total_tokens": 2991,
+      "completion_tokens": 1348,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Samanatham\",\n            \"relation\": \"instance of\",\n            \"object\": \"panchayat village\",\n            \"qualifiers\": [],\n            \"subject_type\": \"village\",\n            \"object_type\": \"village\"\n        },\n        {\n            \"subject\": \"Samanatham\",\n            \"relation\": \"located in\",\n            \"object\": \"Madurai district\",\n            \"qualifiers\": [],\n            \"subject_type\": \"village\",\n            \"object_type\": \"district\"\n        },\n        {\n            \"subject\": \"Madurai district\",\n            \"relation\": \"located in\",\n            \"object\": \"Tamil Nadu\",\n            \"qualifiers\": [],\n            \"subject_type\": \"district\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Tamil Nadu\",\n            \"relation\": \"located in\",\n            \"object\": \"India\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Samanatham\",\n            \"relation\": \"part of\",\n            \"object\": \"Thiruparankundram block\",\n            \"qualifiers\": [],\n            \"subject_type\": \"village\",\n            \"object_type\": \"block\"\n        },\n        {\n            \"subject\": \"Samanatham\",\n            \"relation\": \"definition\",\n            \"object\": \"the system or the practice of the Shamanas\",\n            \"qualifiers\": [],\n            \"subject_type\": \"village\",\n            \"object_type\": \"concept\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Samanatham",
+        "relation": "instance of",
+        "object": "panchayat village",
+        "qualifiers": [],
+        "subject_type": "village",
+        "object_type": "village"
+      },
+      {
+        "subject": "Samanatham",
+        "relation": "located in",
+        "object": "Madurai district",
+        "qualifiers": [],
+        "subject_type": "village",
+        "object_type": "district"
+      },
+      {
+        "subject": "Madurai district",
+        "relation": "located in",
+        "object": "Tamil Nadu",
+        "qualifiers": [],
+        "subject_type": "district",
+        "object_type": "state"
+      },
+      {
+        "subject": "Tamil Nadu",
+        "relation": "located in",
+        "object": "India",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "Samanatham",
+        "relation": "part of",
+        "object": "Thiruparankundram block",
+        "qualifiers": [],
+        "subject_type": "village",
+        "object_type": "block"
+      },
+      {
+        "subject": "Samanatham",
+        "relation": "definition",
+        "object": "the system or the practice of the Shamanas",
+        "qualifiers": [],
+        "subject_type": "village",
+        "object_type": "concept"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1643,
+    "total_tokens": 2991,
+    "completion_tokens": 1348,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 469,
+    "output_tokens_est": 376
+  },
+  "attempts": 1,
+  "latency_s": 16.749331134000386,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:13:34.026840+00:00",
+  "cache_key": "d91495f4eabd6fad95154e32d7f3aeaf"
+}

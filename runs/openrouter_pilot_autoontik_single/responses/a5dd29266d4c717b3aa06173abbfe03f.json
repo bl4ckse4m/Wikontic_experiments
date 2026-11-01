@@ -1,0 +1,181 @@
+{
+  "task": {
+    "input_id": "ab91657bc3bc3df9",
+    "input_hash": "cf7797f35286bae91b165f990fbc70bd17e7464da34d0b78de5ebea3c1dc3cd7",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793209198-rvldIUhJu9WnWHqzkAN7",
+    "object": "chat.completion",
+    "created": 1793209198,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"performer\",\n            \"object\": \"Kasabian\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical group\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"release date\",\n            \"object\": \"18 September 2004\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"chart entry\",\n            \"object\": \"UK Singles Chart\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"#17\",\n                    \"object_type\": \"ordinal\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"release order\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"release type\",\n                    \"object\": \"fully released single\",\n                    \"object_type\": \"release type\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"original release format\",\n            \"object\": \"demo\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"release order\",\n                    \"object\": \"first single\",\n                    \"object_type\": \"ordinal\"\n                },\n                {\n                    \"relation\": \"release quantity\",\n                    \"object\": \"limited\",\n                    \"object_type\": \"edition\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"format\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \n\"Processed Beats\n\n\"Processed Beats\" is the third fully released single from Kasabian. It was released on 18 September 2004 and entered the UK Charts at #17. It was originally released as a demo, as Kasabian's first single, in limited numbers.\"\n\nWe need entities: Processed Beats (song), Kasabian (band), release date, chart position, order (third fully released single), demo release, first single, limited numbers (maybe release type). Let's extract.\n\nTriplets:\n\n1. Subject: Processed Beats, relation: instance of? maybe \"single\" (type). But we need relation \"instance of\" maybe \"type of work\". Use \"instance of\" or \"type\". In examples they used occupation etc. Could use \"instance of\" relation with object_type \"musical work\". Let's see guidelines: relation short, reusable. Use \"instance of\". So:\n\nsubject: Processed Beats, relation: \"instance of\", object: \"single\", subject_type: \"musical work\", object_type: \"musical work type\"? Might be \"song\". Use \"song\". So object_type: \"song\". Good.\n\n2. Processed Beats - \"position in discography\" maybe \"ordinal release\". relation: \"ordinal release number\" maybe \"position in discography\". Use \"position in discography\". object: \"3\". object_type: \"ordinal\". Also qualifier: \"qualifier\": \"release type\": \"fully released\". But maybe separate: relation: \"release type\", object: \"fully released single\". Could be separate.\n\nBetter: Triplet: Processed Beats - \"release sequence\" - \"third single\". Use relation \"release order\". object \"3\". qualifier \"release type\" \"fully released\". Let's keep simple: separate triplet: Processed Beats - \"release order\" - \"3\". qualifiers: {\"relation\":\"release type\",\"object\":\"fully released single\",\"object_type\":\"release type\"}.\n\n3. Processed Beats - \"performer\" - Kasabian. subject_type: musical work, object_type: musical group.\n\n4. Processed Beats - \"release date\" - 18 September 2004. object_type date.\n\n5. Processed Beats - \"chart entry\" - UK Singles Chart. qualifier: \"peak position\" \"#17\". object_type chart. Also qualifier \"point in time\"? Not given. Could just have qualifier \"position\" \"#17\". Use object_type \"ordinal\". So triplet: Processed Beats - \"chart\" - \"UK Singles Chart\". qualifiers: position.\n\n6. Processed Beats - \"original release type\" - \"demo\". qualifier: \"status\" \"first single\". Also \"limited numbers\". Could be separate: Processed Beats - \"original release format\" - \"demo\". object_type \"format\". qualifier: \"release order\" \"first single\". qualifier: \"release quantity\" \"limited\". Might be okay.\n\nLet's produce JSON list.\n\nMake sure each dict includes \"qualifiers\": list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Processed Beats: \"song\"\n- Kasabian: \"musical group\"\n- single: maybe \"song\" but we used instance of \"song\". For \"single\" we could treat as \"song\". Keep object_type \"song\".\n- release date: date\n- chart: \"music chart\"\n- position: \"ordinal\"\n- demo: \"format\"\n- limited numbers: maybe \"quantity\" or \"limited edition\". Use object_type \"edition\".\n\nLet's craft.\n\nTriplet list:\n\n1. subject Processed Beats, relation \"instance of\", object \"song\", qualifiers [], subject_type \"song\", object_type \"song\". Might be redundant but okay.\n\n2. subject Processed Beats, relation \"performer\", object \"Kasabian\", qualifiers [], subject_type \"song\", object_type \"musical group\".\n\n3. subject Processed Beats, relation \"release date\", object \"18 September 2004\", qualifiers [], subject_type \"song\", object_type \"date\".\n\n4. subject Processed Beats, relation \"chart entry\", object \"UK Singles Chart\", qualifiers [{\"relation\":\"position\",\"object\":\"#17\",\"object_type\":\"ordinal\"}], subject_type \"song\", object_type \"music chart\".\n\n5. subject Processed Beats, relation \"release order\", object \"3\", qualifiers [{\"relation\":\"release type\",\"object\":\"fully released single\",\"object_type\":\"release type\"}], subject_type \"song\", object_type \"ordinal\".\n\n6. subject Processed Beats, relation \"original release format\", object \"demo\", qualifiers [{\"relation\":\"release order\",\"object\":\"first single\",\"object_type\":\"ordinal\"},{\"relation\":\"release quantity\",\"object\":\"limited\",\"object_type\":\"edition\"}], subject_type \"song\", object_type \"format\".\n\nCheck if any duplicate. Good.\n\nReturn JSON with key \"triplets\". Ensure proper formatting.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \n\"Processed Beats\n\n\"Processed Beats\" is the third fully released single from Kasabian. It was released on 18 September 2004 and entered the UK Charts at #17. It was originally released as a demo, as Kasabian's first single, in limited numbers.\"\n\nWe need entities: Processed Beats (song), Kasabian (band), release date, chart position, order (third fully released single), demo release, first single, limited numbers (maybe release type). Let's extract.\n\nTriplets:\n\n1. Subject: Processed Beats, relation: instance of? maybe \"single\" (type). But we need relation \"instance of\" maybe \"type of work\". Use \"instance of\" or \"type\". In examples they used occupation etc. Could use \"instance of\" relation with object_type \"musical work\". Let's see guidelines: relation short, reusable. Use \"instance of\". So:\n\nsubject: Processed Beats, relation: \"instance of\", object: \"single\", subject_type: \"musical work\", object_type: \"musical work type\"? Might be \"song\". Use \"song\". So object_type: \"song\". Good.\n\n2. Processed Beats - \"position in discography\" maybe \"ordinal release\". relation: \"ordinal release number\" maybe \"position in discography\". Use \"position in discography\". object: \"3\". object_type: \"ordinal\". Also qualifier: \"qualifier\": \"release type\": \"fully released\". But maybe separate: relation: \"release type\", object: \"fully released single\". Could be separate.\n\nBetter: Triplet: Processed Beats - \"release sequence\" - \"third single\". Use relation \"release order\". object \"3\". qualifier \"release type\" \"fully released\". Let's keep simple: separate triplet: Processed Beats - \"release order\" - \"3\". qualifiers: {\"relation\":\"release type\",\"object\":\"fully released single\",\"object_type\":\"release type\"}.\n\n3. Processed Beats - \"performer\" - Kasabian. subject_type: musical work, object_type: musical group.\n\n4. Processed Beats - \"release date\" - 18 September 2004. object_type date.\n\n5. Processed Beats - \"chart entry\" - UK Singles Chart. qualifier: \"peak position\" \"#17\". object_type chart. Also qualifier \"point in time\"? Not given. Could just have qualifier \"position\" \"#17\". Use object_type \"ordinal\". So triplet: Processed Beats - \"chart\" - \"UK Singles Chart\". qualifiers: position.\n\n6. Processed Beats - \"original release type\" - \"demo\". qualifier: \"status\" \"first single\". Also \"limited numbers\". Could be separate: Processed Beats - \"original release format\" - \"demo\". object_type \"format\". qualifier: \"release order\" \"first single\". qualifier: \"release quantity\" \"limited\". Might be okay.\n\nLet's produce JSON list.\n\nMake sure each dict includes \"qualifiers\": list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Processed Beats: \"song\"\n- Kasabian: \"musical group\"\n- single: maybe \"song\" but we used instance of \"song\". For \"single\" we could treat as \"song\". Keep object_type \"song\".\n- release date: date\n- chart: \"music chart\"\n- position: \"ordinal\"\n- demo: \"format\"\n- limited numbers: maybe \"quantity\" or \"limited edition\". Use object_type \"edition\".\n\nLet's craft.\n\nTriplet list:\n\n1. subject Processed Beats, relation \"instance of\", object \"song\", qualifiers [], subject_type \"song\", object_type \"song\". Might be redundant but okay.\n\n2. subject Processed Beats, relation \"performer\", object \"Kasabian\", qualifiers [], subject_type \"song\", object_type \"musical group\".\n\n3. subject Processed Beats, relation \"release date\", object \"18 September 2004\", qualifiers [], subject_type \"song\", object_type \"date\".\n\n4. subject Processed Beats, relation \"chart entry\", object \"UK Singles Chart\", qualifiers [{\"relation\":\"position\",\"object\":\"#17\",\"object_type\":\"ordinal\"}], subject_type \"song\", object_type \"music chart\".\n\n5. subject Processed Beats, relation \"release order\", object \"3\", qualifiers [{\"relation\":\"release type\",\"object\":\"fully released single\",\"object_type\":\"release type\"}], subject_type \"song\", object_type \"ordinal\".\n\n6. subject Processed Beats, relation \"original release format\", object \"demo\", qualifiers [{\"relation\":\"release order\",\"object\":\"first single\",\"object_type\":\"ordinal\"},{\"relation\":\"release quantity\",\"object\":\"limited\",\"object_type\":\"edition\"}], subject_type \"song\", object_type \"format\".\n\nCheck if any duplicate. Good.\n\nReturn JSON with key \"triplets\". Ensure proper formatting.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1410,
+      "completion_tokens": 1455,
+      "total_tokens": 2865,
+      "cost": 0.000314385,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000314385,
+        "upstream_inference_prompt_cost": 4.23e-05,
+        "upstream_inference_completions_cost": 0.000272085
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"performer\",\n            \"object\": \"Kasabian\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical group\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"release date\",\n            \"object\": \"18 September 2004\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"chart entry\",\n            \"object\": \"UK Singles Chart\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"#17\",\n                    \"object_type\": \"ordinal\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"release order\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"release type\",\n                    \"object\": \"fully released single\",\n                    \"object_type\": \"release type\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"ordinal\"\n        },\n        {\n            \"subject\": \"Processed Beats\",\n            \"relation\": \"original release format\",\n            \"object\": \"demo\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"release order\",\n                    \"object\": \"first single\",\n                    \"object_type\": \"ordinal\"\n                },\n                {\n                    \"relation\": \"release quantity\",\n                    \"object\": \"limited\",\n                    \"object_type\": \"edition\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"format\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Processed Beats",
+        "relation": "instance of",
+        "object": "song",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "song"
+      },
+      {
+        "subject": "Processed Beats",
+        "relation": "performer",
+        "object": "Kasabian",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "musical group"
+      },
+      {
+        "subject": "Processed Beats",
+        "relation": "release date",
+        "object": "18 September 2004",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "date"
+      },
+      {
+        "subject": "Processed Beats",
+        "relation": "chart entry",
+        "object": "UK Singles Chart",
+        "qualifiers": [
+          {
+            "relation": "position",
+            "object": "#17"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "music chart"
+      },
+      {
+        "subject": "Processed Beats",
+        "relation": "release order",
+        "object": "3",
+        "qualifiers": [
+          {
+            "relation": "release type",
+            "object": "fully released single"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "ordinal"
+      },
+      {
+        "subject": "Processed Beats",
+        "relation": "original release format",
+        "object": "demo",
+        "qualifiers": [
+          {
+            "relation": "release order",
+            "object": "first single"
+          },
+          {
+            "relation": "release quantity",
+            "object": "limited"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "format"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1410,
+    "completion_tokens": 1455,
+    "total_tokens": 2865,
+    "cost": 0.000314385,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000314385,
+      "upstream_inference_prompt_cost": 4.23e-05,
+      "upstream_inference_completions_cost": 0.000272085
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 682,
+    "output_tokens_est": 554
+  },
+  "attempts": 1,
+  "latency_s": 27.094724314003543,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T17:40:24.881777+00:00",
+  "cache_key": "a5dd29266d4c717b3aa06173abbfe03f"
+}

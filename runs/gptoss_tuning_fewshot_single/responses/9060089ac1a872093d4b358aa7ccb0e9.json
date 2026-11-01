@@ -1,0 +1,144 @@
+{
+  "task": {
+    "input_id": "590bf852625e3850",
+    "input_hash": "c74e6d3c069d6ac2b6572349756f6c7beb025854d8d4d6dfc66c1e58535872a5",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-ddd44d3992148a85fc9ec2bae24348c1",
+    "object": "chat.completion",
+    "created": 1791517721,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"torch relay leg in Istanbul\",\n            \"relation\": \"start location\",\n            \"object\": \"Sultanahmet Square\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 3\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"torch relay leg in Istanbul\",\n            \"relation\": \"end location\",\n            \"object\": \"Taksim Square\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 3\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"torch relay leg in Istanbul\",\n            \"relation\": \"point in time\",\n            \"object\": \"April 3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Uyghurs\",\n            \"relation\": \"protested against\",\n            \"object\": \"Chinese treatment of Uyghurs in Xinjiang\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Turkey\"\n                }\n            ],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"policy\"\n        },\n        {\n            \"subject\": \"protesters\",\n            \"relation\": \"arrested by\",\n            \"object\": \"police\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"tried to disrupt the relay\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"law enforcement agency\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"2008 Summer Olympics torch relay\n\nTurkey: The torch relay leg in Istanbul, held on April 3, started on Sultanahmet Square and finished in Taksim Square. Uyghurs living in Turkey protested at Chinese treatment of their compatriots living in Xinjiang. Several protesters who tried to disrupt the relay were promptly arrested by the police.\"\n\nWe need to parse.\n\nEntities: 2008 Summer Olympics torch relay (maybe event). Turkey (country). Istanbul (city). April 3 (date). Sultanahmet Square (place). Taksim Square (place). Uyghurs (ethnic group). Chinese treatment (maybe policy). Xinjiang (region). Police (institution). Protesters (people). The relay (event). The police arrested protesters.\n\nWe need to produce triplets.\n\nFirst: The torch relay leg in Istanbul, held on April 3, started on Sultanahmet Square and finished in Taksim Square.\n\nWe can split into two facts: \"torch relay leg\" (subject?) maybe \"torch relay leg in Istanbul\" is a specific leg. Let's treat subject: \"torch relay leg in Istanbul\". Relation: \"point in time\" maybe for the leg? Actually \"held on April 3\" qualifies the leg. So we can have triplet: subject \"torch relay leg in Istanbul\", relation \"date of event\" or \"point in time\". But we need a relation like \"date of event\" maybe \"point in time\". In examples they used \"point in time\" qualifier for events. For a fact like \"started on Sultanahmet Square\", we have relation \"start location\". So we can have:\n\nTriplet 1: subject \"torch relay leg in Istanbul\", relation \"start location\", object \"Sultanahmet Square\", qualifiers: point in time \"April 3\". Also maybe \"part of\" relation to \"2008 Summer Olympics torch relay\". Could include but not required. Only explicit statements.\n\nTriplet 2: subject \"torch relay leg in Istanbul\", relation \"end location\", object \"Taksim Square\", qualifiers: point in time \"April 3\".\n\nTriplet 3: subject \"torch relay leg in Istanbul\", relation \"date\", object \"April 3\". But we might combine with qualifiers. The text says \"held on April 3\". So we can have a triplet: subject \"torch relay leg in Istanbul\", relation \"point in time\", object \"April 3\". But maybe better: relation \"date of event\". We'll use \"point in time\". The object type date.\n\nNow next sentence: \"Uyghurs living in Turkey protested at Chinese treatment of their compatriots living in Xinjiang.\"\n\nWe have subject \"Uyghurs\". Relation \"protest\". Object \"Chinese treatment of their compatriots\". Could be \"treatment\". We'll phrase object \"Chinese treatment of Uyghurs in Xinjiang\". But need explicit. Use \"Chinese treatment of their compatriots living in Xinjiang\". So object maybe \"Chinese treatment of Uyghurs in Xinjiang\". Provide qualifiers: location \"Turkey\". Also maybe \"place\" qualifier for protest location? It says \"protested at Chinese treatment\". Not a location. So we can add qualifier \"place\" = \"Turkey\". Also \"point in time\" not given. So:\n\nTriplet: subject \"Uyghurs\", relation \"protested against\", object \"Chinese treatment of Uyghurs in Xinjiang\", qualifiers: {\"relation\":\"place\",\"object\":\"Turkey\"}.\n\nSubject type: \"ethnic group\". Object type: maybe \"policy\" or \"treatment\". Use \"policy\". We'll set object_type \"policy\".\n\nThird sentence: \"Several protesters who tried to disrupt the relay were promptly arrested by the police.\"\n\nWe have subject \"protesters\". Relation \"arrested by\". Object \"police\". Qualifiers: maybe \"polarity\" positive (they were arrested) no negation. Also \"condition\" maybe \"who tried to disrupt the relay\". That's a qualifier describing which protesters. Could be \"condition\": \"tried to disrupt the relay\". We'll include.\n\nAlso \"point in time\" not given. So:\n\nTriplet: subject \"protesters\", relation \"arrested by\", object \"police\", qualifiers: [{\"relation\":\"condition\",\"object\":\"tried to disrupt the relay\"}].\n\nSubject_type: \"group of people\". Object_type: \"law enforcement agency\".\n\nAlso maybe we need to capture that the protesters are \"several protesters\". We'll just use \"protesters\".\n\nAlso maybe we need a triplet linking \"relay\" to \"2008 Summer Olympics torch relay\". Not explicit but \"relay\" refers to the torch relay leg. Could add \"part of\". But not required.\n\nNow also \"torch relay leg in Istanbul\" is part of \"2008 Summer Olympics torch relay\". Could be explicit? The heading \"2008 Summer Olympics torch relay\" and then \"Turkey: The torch relay leg in Istanbul...\" implies it's a leg of that relay. Not explicit \"part of\". Might be considered implicit. We should not add.\n\nNow we need subject_type and object_type for each.\n\nDefine types:\n\n- \"torch relay leg in Istanbul\": maybe \"event\". object_type for start location: \"place\". end location: \"place\". point in time: \"date\".\n\n- \"Uyghurs\": \"ethnic group\". object \"Chinese treatment of Uyghurs in Xinjiang\": maybe \"policy\" or \"treatment\". Use \"policy\". place qualifier \"Turkey\": type \"country\".\n\n- \"protesters\": \"group of people\". object \"police\": \"law enforcement agency\". condition qualifier \"tried to disrupt the relay\": maybe type \"activity\". We'll just set object_type \"law enforcement agency\". qualifiers have object types not required.\n\nNow format JSON.\n\nList of triplets:\n\n1. start location\n2. end location\n3. point in time (date) for the leg\n4. protest\n5. arrested by\n\nCheck qualifiers: For start and end location, include point in time qualifier \"April 3\". Also maybe include place qualifier \"Istanbul\". But not needed.\n\nAdd qualifiers list.\n\nTriplet 1:\nsubject: \"torch relay leg in Istanbul\"\nrelation: \"start location\"\nobject: \"Sultanahmet Square\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"April 3\"}]\nsubject_type: \"event\"\nobject_type: \"place\"\n\nTriplet 2:\nsubject: \"torch relay leg in Istanbul\"\nrelation: \"end location\"\nobject: \"Taksim Square\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"April 3\"}]\nsubject_type: \"event\"\nobject_type: \"place\"\n\nTriplet 3:\nsubject: \"torch relay leg in Istanbul\"\nrelation: \"point in time\"\nobject: \"April 3\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"date\"\n\nTriplet 4:\nsubject: \"Uyghurs\"\nrelation: \"protested against\"\nobject: \"Chinese treatment of Uyghurs in Xinjiang\"\nqualifiers: [{\"relation\":\"place\",\"object\":\"Turkey\"}]\nsubject_type: \"ethnic group\"\nobject_type: \"policy\"\n\nTriplet 5:\nsubject: \"protesters\"\nrelation: \"arrested by\"\nobject: \"police\"\nqualifiers: [{\"relation\":\"condition\",\"object\":\"tried to disrupt the relay\"}]\nsubject_type: \"group of people\"\nobject_type: \"law enforcement agency\"\n\nCheck if any other facts: \"Several protesters who tried to disrupt the relay were promptly arrested by the police.\" Could also have \"protesters\" relation \"attempted to disrupt\" object \"relay\". But that's condition. Not needed.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1661,
+      "total_tokens": 3655,
+      "completion_tokens": 1994,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"torch relay leg in Istanbul\",\n            \"relation\": \"start location\",\n            \"object\": \"Sultanahmet Square\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 3\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"torch relay leg in Istanbul\",\n            \"relation\": \"end location\",\n            \"object\": \"Taksim Square\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 3\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"torch relay leg in Istanbul\",\n            \"relation\": \"point in time\",\n            \"object\": \"April 3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Uyghurs\",\n            \"relation\": \"protested against\",\n            \"object\": \"Chinese treatment of Uyghurs in Xinjiang\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Turkey\"\n                }\n            ],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"policy\"\n        },\n        {\n            \"subject\": \"protesters\",\n            \"relation\": \"arrested by\",\n            \"object\": \"police\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"tried to disrupt the relay\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"law enforcement agency\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "torch relay leg in Istanbul",
+        "relation": "start location",
+        "object": "Sultanahmet Square",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "April 3"
+          }
+        ],
+        "subject_type": "event",
+        "object_type": "place"
+      },
+      {
+        "subject": "torch relay leg in Istanbul",
+        "relation": "end location",
+        "object": "Taksim Square",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "April 3"
+          }
+        ],
+        "subject_type": "event",
+        "object_type": "place"
+      },
+      {
+        "subject": "torch relay leg in Istanbul",
+        "relation": "point in time",
+        "object": "April 3",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "date"
+      },
+      {
+        "subject": "Uyghurs",
+        "relation": "protested against",
+        "object": "Chinese treatment of Uyghurs in Xinjiang",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "Turkey"
+          }
+        ],
+        "subject_type": "ethnic group",
+        "object_type": "policy"
+      },
+      {
+        "subject": "protesters",
+        "relation": "arrested by",
+        "object": "police",
+        "qualifiers": [
+          {
+            "relation": "condition",
+            "object": "tried to disrupt the relay"
+          }
+        ],
+        "subject_type": "group of people",
+        "object_type": "law enforcement agency"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1661,
+    "total_tokens": 3655,
+    "completion_tokens": 1994,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 564,
+    "output_tokens_est": 471
+  },
+  "attempts": 1,
+  "latency_s": 24.30842595199647,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:49:06.049525+00:00",
+  "cache_key": "9060089ac1a872093d4b358aa7ccb0e9"
+}

@@ -1,0 +1,161 @@
+{
+  "task": {
+    "input_id": "6fdde9698c325ac8",
+    "input_hash": "49bc4f0f049a67d86d3f0b126e9fe01bc940013db6087ace509b94e97a4b8019",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-9c234b935af27642139116d8bb26e95c",
+    "object": "chat.completion",
+    "created": 1791518394,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"position held\",\n            \"object\": \"Confederate artillerist\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"conflict\",\n                    \"object\": \"American Civil War\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"military occupation\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"associated with\",\n            \"object\": \"Stonewall Jackson\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"Jackson's death\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"lost body part\",\n            \"object\": \"leg\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"battle\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"body part\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"removed from\",\n            \"object\": \"service\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"field\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"service\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"returned to\",\n            \"object\": \"field\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"last campaign in Virginia\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Virginia\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"killed in\",\n            \"object\": \"Battle of Sailor's Creek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"battle\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText:\n\n\"Stapleton Crutchfield\n\nStapleton Crutchfield served as a Confederate artillerist in the American Civil War. He was closely associated with Stonewall Jackson until Jackson’s death. Crutchfield lost a leg in battle, removing him from service in the field. He returned to field in the last campaign in Virginia, losing his life in the Battle of Sailor's Creek.\"\n\nWe need to parse.\n\nEntities: Stapleton Crutchfield (human). Confederate artillerist (occupation/role). American Civil War (event). Stonewall Jackson (human). Jackson's death (event). Crutchfield lost a leg in battle (event). Removing him from service in the field (consequence). He returned to field in the last campaign in Virginia (event). Losing his life in the Battle of Sailor's Creek (event). Battle of Sailor's Creek (battle). Last campaign in Virginia (maybe \"campaign\" event). Need to produce triplets.\n\nWe must include qualifiers like point in time? Not given. No dates. Could include \"place\" for battle? Not given except Virginia.\n\nLet's list explicit statements:\n\n1. Stapleton Crutchfield served as a Confederate artillerist in the American Civil War.\n- subject: Stapleton Crutchfield\n- relation: position held / occupation? Could be \"military role\". Use \"military role\". object: \"Confederate artillerist\". qualifiers: point in time? Not given. place? \"American Civil War\" is conflict, could be qualifier \"conflict\". But we can treat as \"served in\" relation? Actually \"served as a Confederate artillerist in the American Civil War\". Could split: relation \"military role\" object \"Confederate artillerist\" with qualifier \"conflict\" \"American Civil War\". Or relation \"served in\" object \"American Civil War\" with qualifier \"role\" \"Confederate artillerist\". Choose one. Let's produce two triplets? Might be okay to capture both. But we must extract every explicitly stated fact. The sentence contains both role and conflict. Could produce one triplet: subject \"Stapleton Crutchfield\", relation \"served as\", object \"Confederate artillerist\", qualifier \"conflict\": \"American Civil War\". Use relation \"served as\". We'll need relation names typical: \"position held\". Use \"position held\". Qualifier \"conflict\". Good.\n\n2. He was closely associated with Stonewall Jackson until Jackson’s death.\n- subject: Stapleton Crutchfield\n- relation: \"closely associated with\" (maybe \"association\") object: Stonewall Jackson\n- qualifier: \"until point in time\": Jackson's death (event). Could treat as \"point in time\" qualifier with object \"Jackson's death\". Or \"condition\"? It's a temporal limit. Use qualifier \"point in time\" = \"Jackson's death\". Also maybe \"association type\": \"close\". But we have \"closely associated\". We'll just capture relation \"association\" maybe \"associated with\". Use \"associated with\". Qualifier \"strength\": \"close\"? Not required. We'll include qualifier \"point in time\" \"Jackson's death\". Also need object_type: human.\n\n3. Crutchfield lost a leg in battle, removing him from service in the field.\n- Two facts: (a) Crutchfield lost a leg in battle. (b) This removed him from service in the field (i.e., he was removed from service). Could capture as separate triplets.\n\na) subject: Stapleton Crutchfield, relation: \"lost body part\", object: \"leg\". qualifier: \"place\": \"battle\". Could also have \"event\": \"battle\". Use qualifier \"place\" = \"battle\". object_type: body part.\n\nb) subject: Stapleton Crutchfield, relation: \"removed from service\", object: \"service in the field\". Might be \"service\" as concept. Could use relation \"removed from\". object \"service\". qualifier maybe \"place\": \"field\". But maybe combine: \"removed from service\" object \"service\". Qualifier \"place\": \"field\". We'll produce.\n\n4. He returned to field in the last campaign in Virginia,\n- subject: Stapleton Crutchfield, relation: \"returned to\", object: \"field\". qualifier: \"point in time\": \"last campaign in Virginia\". Or \"campaign\" is event. Could treat as qualifier \"campaign\": \"last campaign in Virginia\". Also \"place\": \"Virginia\". We'll produce qualifier \"campaign\" and \"place\". Might be okay.\n\n5. losing his life in the Battle of Sailor's Creek.\n- This is part of previous sentence: He returned to field ... losing his life in the Battle of Sailor's Creek.\n- Fact: Stapleton Crutchfield died in Battle of Sailor's Creek.\n- relation: \"death in\" or \"killed in\". Use \"killed in\". object: \"Battle of Sailor's Creek\". qualifier maybe none. Also we could have \"place\": \"Virginia\"? Not needed.\n\nAlso we might need to capture that Battle of Sailor's Creek is a battle (object_type battle). Also \"American Civil War\" is conflict.\n\nNow need subject_type and object_type for each.\n\nDefine types:\n- Stapleton Crutchfield: human\n- Confederate artillerist: military occupation (profession) maybe \"military occupation\". Use \"military occupation\".\n- American Civil War: conflict (war)\n- Stonewall Jackson: human\n- leg: body part\n- battle: event (battle)\n- service: maybe \"military service\" (concept). Use \"service\".\n- field: location? \"field\" as place. Use \"place\".\n- last campaign in Virginia: campaign (military campaign). Use \"campaign\".\n- Virginia: place (state)\n- Battle of Sailor's Creek: battle (event)\n\nNow qualifiers: we need to use relation names like \"point in time\", \"place\", \"campaign\". The spec says qualifiers can be \"point in time\", \"place\", \"condition\", etc. \"campaign\" not listed but we could use \"event\". Better to use \"point in time\" for campaign? Actually campaign is an event, not a time. Could use qualifier \"event\" maybe not allowed. The spec only lists some qualifier types but not exhaustive; we can use any relation name as qualifier. Use \"campaign\" maybe okay. But safer: use \"point in time\" with object \"last campaign in Virginia\". That captures time. Also we can add \"place\" \"Virginia\". We'll include both.\n\nNow produce JSON.\n\nList triplets:\n\n1.\n{\n \"subject\": \"Stapleton Crutchfield\",\n \"relation\": \"position held\",\n \"object\": \"Confederate artillerist\",\n \"qualifiers\": [{\"relation\": \"conflict\", \"object\": \"American Civil War\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"military occupation\"\n}\n\n2.\n{\n \"subject\": \"Stapleton Crutchfield\",\n \"relation\": \"associated with\",\n \"object\": \"Stonewall Jackson\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"Jackson's death\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"human\"\n}\n\n3.\n{\n \"subject\": \"Stapleton Crutchfield\",\n \"relation\": \"lost body part\",\n \"object\": \"leg\",\n \"qualifiers\": [{\"relation\": \"place\", \"object\": \"battle\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"body part\"\n}\n\n4.\n{\n \"subject\": \"Stapleton Crutchfield\",\n \"relation\": \"removed from\",\n \"object\": \"service\",\n \"qualifiers\": [{\"relation\": \"place\", \"object\": \"field\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"service\"\n}\n\n5.\n{\n \"subject\": \"Stapleton Crutchfield\",\n \"relation\": \"returned to\",\n \"object\": \"field\",\n \"qualifiers\": [{\"relation\": \"point in time\", \"object\": \"last campaign in Virginia\"}, {\"relation\": \"place\", \"object\": \"Virginia\"}],\n \"subject_type\": \"human\",\n \"object_type\": \"place\"\n}\n\n6.\n{\n \"subject\": \"Stapleton Crutchfield\",\n \"relation\": \"killed in\",\n \"object\": \"Battle of Sailor's Creek\",\n \"qualifiers\": [],\n \"subject_type\": \"human\",\n \"object_type\": \"battle\"\n}\n\nPotential also capture that \"Battle of Sailor's Creek\" is part of \"American Civil War\". Not explicit. Not include.\n\nAlso maybe capture that \"last campaign in Virginia\" is a campaign. But we already used as point in time.\n\nNow ensure JSON format.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1668,
+      "total_tokens": 3948,
+      "completion_tokens": 2280,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"position held\",\n            \"object\": \"Confederate artillerist\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"conflict\",\n                    \"object\": \"American Civil War\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"military occupation\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"associated with\",\n            \"object\": \"Stonewall Jackson\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"Jackson's death\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"lost body part\",\n            \"object\": \"leg\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"battle\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"body part\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"removed from\",\n            \"object\": \"service\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"field\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"service\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"returned to\",\n            \"object\": \"field\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"last campaign in Virginia\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Virginia\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Stapleton Crutchfield\",\n            \"relation\": \"killed in\",\n            \"object\": \"Battle of Sailor's Creek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"battle\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Stapleton Crutchfield",
+        "relation": "position held",
+        "object": "Confederate artillerist",
+        "qualifiers": [
+          {
+            "relation": "conflict",
+            "object": "American Civil War"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "military occupation"
+      },
+      {
+        "subject": "Stapleton Crutchfield",
+        "relation": "associated with",
+        "object": "Stonewall Jackson",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "Jackson's death"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Stapleton Crutchfield",
+        "relation": "lost body part",
+        "object": "leg",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "battle"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "body part"
+      },
+      {
+        "subject": "Stapleton Crutchfield",
+        "relation": "removed from",
+        "object": "service",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "field"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "service"
+      },
+      {
+        "subject": "Stapleton Crutchfield",
+        "relation": "returned to",
+        "object": "field",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "last campaign in Virginia"
+          },
+          {
+            "relation": "place",
+            "object": "Virginia"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "place"
+      },
+      {
+        "subject": "Stapleton Crutchfield",
+        "relation": "killed in",
+        "object": "Battle of Sailor's Creek",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "battle"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1668,
+    "total_tokens": 3948,
+    "completion_tokens": 2280,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 685,
+    "output_tokens_est": 593
+  },
+  "attempts": 1,
+  "latency_s": 27.13744730599865,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:00:21.825026+00:00",
+  "cache_key": "5322944835f22926055b9af75432d06a"
+}

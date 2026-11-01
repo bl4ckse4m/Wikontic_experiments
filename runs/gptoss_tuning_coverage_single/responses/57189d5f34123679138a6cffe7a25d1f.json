@@ -1,0 +1,154 @@
+{
+  "task": {
+    "input_id": "d73a4a086cc2db83",
+    "input_hash": "4e07ec05cf2afd01937540b5f382342c36ccbe82c9b58def20fd668f18205051",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-01a7e7b4a7f6baba9954cb209e694311",
+    "object": "chat.completion",
+    "created": 1791507247,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Trouble with Love\",\n            \"relation\": \"recorded by\",\n            \"object\": \"Duane Steele\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Duane Steele\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Duane Steele\",\n            \"relation\": \"occupation\",\n            \"object\": \"country music artist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"The Trouble with Love\",\n            \"relation\": \"date of release\",\n            \"object\": \"1996\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"The Trouble with Love\",\n            \"relation\": \"album\",\n            \"object\": \"P.O. Box 423\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"3\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Duane Steele\",\n            \"relation\": \"debut album\",\n            \"object\": \"P.O. Box 423\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"The Trouble with Love\",\n            \"relation\": \"peak chart position\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"chart\",\n                    \"object\": \"RPM Country Tracks\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"October 1996\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"The Trouble with Love\n\n\"The Trouble with Love\" is a song recorded [by] Canadian country music artist Duane Steele. It was released in 1996 as the third single from his debut album, \"P.O. Box 423\". It peaked at number 3 on the \"RPM\" Country Tracks chart in October 1996.\"\n\nWe need to produce triplets:\n\n- \"The Trouble with Love\" (song) - instance of song? relation maybe \"instance of\" but not required. We can capture: subject \"The Trouble with Love\", relation \"recorded by\", object \"Duane Steele\". subject_type \"song\", object_type \"human\" (artist). Also \"Duane Steele\" is a Canadian country music artist, but that's not directly a fact about the song; we could have a separate triplet: Duane Steele - occupation - country music artist; nationality - Canadian. But the text says \"Canadian country music artist Duane Steele\". So we can capture: Duane Steele - country of citizenship - Canada; Duane Steele - occupation - country music artist. However we must extract facts explicitly stated. The phrase \"Canadian country music artist Duane Steele\" implies that Duane Steele is Canadian and a country music artist. So we can extract both.\n\n- Release: The Trouble with Love - release date - 1996 (maybe point in time qualifier). Could be relation \"publication date\" or \"release date\". Use \"date of release\". object type date.\n\n- Also \"released as the third single from his debut album, 'P.O. Box 423'\". So we can have: The Trouble with Love - part of album - P.O. Box 423 (or \"single from album\"). Relation maybe \"album\" or \"part of\". Use \"album\" relation: object \"P.O. Box 423\". Also qualifier: \"position in album release sequence\" maybe \"ordinal\" but not needed. Could add qualifier \"sequence\" with object \"third single\". But we have to keep qualifiers for \"as the third single\". Could be qualifier relation \"ordinal\" object \"3\". Or \"position\" object \"third single\". We'll include qualifier: {\"relation\":\"ordinal\",\"object\":\"3\"} maybe.\n\n- Also \"It peaked at number 3 on the RPM Country Tracks chart in October 1996.\" So we have a chart performance: The Trouble with Love - chart position - 3 (or \"peak position\") with qualifiers: chart name \"RPM Country Tracks\", point in time \"October 1996\". So relation maybe \"peak chart position\". object \"3\". qualifiers: chart name, point in time.\n\n- Also \"RPM Country Tracks chart\" is a chart. So object_type \"chart\". The number is a quantity; object_type \"quantity\" maybe.\n\n- Also \"P.O. Box 423\" is an album (debut album). So we can have: P.O. Box 423 - instance of - album; but not needed.\n\n- Also \"Duane Steele\" - debut album \"P.O. Box 423\". Could capture: Duane Steele - debut album - P.O. Box 423.\n\n- Also \"The Trouble with Love\" - genre? Not given.\n\n- Also \"The Trouble with Love\" - country? Not needed.\n\nNow we need to produce JSON with list of triplets, each with subject, relation, object, qualifiers list, subject_type, object_type.\n\nDefine types:\n\n- \"The Trouble with Love\": song (type \"song\").\n- \"Duane Steele\": human (type \"human\").\n- \"Canada\": country (type \"country\").\n- \"country music artist\": occupation (type \"occupation\" maybe \"profession\").\n- \"1996\": date (type \"date\").\n- \"P.O. Box 423\": album (type \"album\").\n- \"3\": quantity (type \"quantity\").\n- \"RPM Country Tracks\": chart (type \"chart\").\n\nNow define relations:\n\n- recorded by -> relation \"recorded by\".\n- nationality -> maybe \"country of citizenship\". Use \"country of citizenship\".\n- occupation -> \"occupation\".\n- date of release -> \"date of release\".\n- part of album -> maybe \"album\". Use \"album\".\n- ordinal -> qualifier \"ordinal\".\n- peak chart position -> relation \"peak chart position\".\n- chart name -> qualifier \"chart\".\n- point in time -> qualifier \"point in time\".\n\nAlso \"debut album\" relation: \"debut album\". Use \"debut album\".\n\nNow produce triplets list.\n\nTriplet 1:\nsubject: The Trouble with Love\nrelation: recorded by\nobject: Duane Steele\nqualifiers: []\nsubject_type: song\nobject_type: human\n\nTriplet 2:\nsubject: Duane Steele\nrelation: country of citizenship\nobject: Canada\nqualifiers: []\nsubject_type: human\nobject_type: country\n\nTriplet 3:\nsubject: Duane Steele\nrelation: occupation\nobject: country music artist\nqualifiers: []\nsubject_type: human\nobject_type: profession\n\nTriplet 4:\nsubject: The Trouble with Love\nrelation: date of release\nobject: 1996\nqualifiers: []\nsubject_type: song\nobject_type: date\n\nTriplet 5:\nsubject: The Trouble with Love\nrelation: album\nobject: P.O. Box 423\nqualifiers: [{\"relation\":\"ordinal\",\"object\":\"3\"}] maybe \"third single\". Actually ordinal 3 indicates third single. Use ordinal qualifier.\n\nsubject_type: song\nobject_type: album\n\nTriplet 6:\nsubject: Duane Steele\nrelation: debut album\nobject: P.O. Box 423\nqualifiers: []\nsubject_type: human\nobject_type: album\n\nTriplet 7:\nsubject: The Trouble with Love\nrelation: peak chart position\nobject: 3\nqualifiers: [{\"relation\":\"chart\",\"object\":\"RPM Country Tracks\"},{\"relation\":\"point in time\",\"object\":\"October 1996\"}]\nsubject_type: song\nobject_type: quantity\n\nCheck if any other facts: \"third single from his debut album\" maybe also relation \"single from album\". But we already captured album with ordinal.\n\nNow produce JSON.\n\nMake sure qualifiers list is list of dicts.\n\nNow output."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1652,
+      "total_tokens": 3400,
+      "completion_tokens": 1748,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Trouble with Love\",\n            \"relation\": \"recorded by\",\n            \"object\": \"Duane Steele\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Duane Steele\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"Canada\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Duane Steele\",\n            \"relation\": \"occupation\",\n            \"object\": \"country music artist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"The Trouble with Love\",\n            \"relation\": \"date of release\",\n            \"object\": \"1996\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"The Trouble with Love\",\n            \"relation\": \"album\",\n            \"object\": \"P.O. Box 423\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"3\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Duane Steele\",\n            \"relation\": \"debut album\",\n            \"object\": \"P.O. Box 423\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"The Trouble with Love\",\n            \"relation\": \"peak chart position\",\n            \"object\": \"3\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"chart\",\n                    \"object\": \"RPM Country Tracks\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"October 1996\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "The Trouble with Love",
+        "relation": "recorded by",
+        "object": "Duane Steele",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Duane Steele",
+        "relation": "country of citizenship",
+        "object": "Canada",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Duane Steele",
+        "relation": "occupation",
+        "object": "country music artist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "The Trouble with Love",
+        "relation": "date of release",
+        "object": "1996",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "date"
+      },
+      {
+        "subject": "The Trouble with Love",
+        "relation": "album",
+        "object": "P.O. Box 423",
+        "qualifiers": [
+          {
+            "relation": "ordinal",
+            "object": "3"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "album"
+      },
+      {
+        "subject": "Duane Steele",
+        "relation": "debut album",
+        "object": "P.O. Box 423",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "album"
+      },
+      {
+        "subject": "The Trouble with Love",
+        "relation": "peak chart position",
+        "object": "3",
+        "qualifiers": [
+          {
+            "relation": "chart",
+            "object": "RPM Country Tracks"
+          },
+          {
+            "relation": "point in time",
+            "object": "October 1996"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1652,
+    "total_tokens": 3400,
+    "completion_tokens": 1748,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 626,
+    "output_tokens_est": 534
+  },
+  "attempts": 1,
+  "latency_s": 21.038530776000698,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:54:28.645081+00:00",
+  "cache_key": "57189d5f34123679138a6cffe7a25d1f"
+}

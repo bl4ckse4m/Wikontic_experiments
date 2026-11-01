@@ -1,0 +1,130 @@
+{
+  "task": {
+    "input_id": "b6b9c552d49724f9",
+    "input_hash": "6deeb43f9486230fcc4fecf54426ff9c4e0fa63622f3718d51d1ef97ddae0cb6",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-ac38dee6edc6b6cb453c6e6a99ca39cf",
+    "object": "chat.completion",
+    "created": 1791506192,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2007 Freetown explosion\",\n            \"relation\": \"instance of\",\n            \"object\": \"explosion\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"event type\"\n        },\n        {\n            \"subject\": \"2007 Freetown explosion\",\n            \"relation\": \"location\",\n            \"object\": \"Free Street\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"downtown Freetown\"\n                },\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Sierra Leone\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"2007 Freetown explosion\",\n            \"relation\": \"point in time\",\n            \"object\": \"20 December 2007\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"2007 Freetown explosion\",\n            \"relation\": \"fatalities\",\n            \"object\": \"18\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"at least\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"2007 Freetown explosion\n\nThe 2007 Freetown explosion was an explosion that occurred on Free Street in downtown Freetown, Sierra Leone which killed at least 18 people on 20 December 2007.\"\n\nWe have an event: \"2007 Freetown explosion\". It's an explosion. It occurred on Free Street in downtown Freetown, Sierra Leone. It killed at least 18 people on 20 December 2007.\n\nWe need to produce triplets:\n\n- Subject: \"2007 Freetown explosion\"\n- relation: \"instance of\" maybe? But we need specific relation like \"type of event\" maybe \"explosion\". Use \"instance of\" or \"type of\". In examples they used \"occupation\", \"award received\". For events, maybe \"event type\". Let's use \"instance of\" with object \"explosion\". subject_type: \"event\". object_type: \"event type\" or \"explosion\". We'll pick \"explosion\" as object_type \"event type\".\n\n- Relation: \"location\" (or \"place of occurrence\") maybe \"location\". object: \"Free Street\". qualifiers: \"located in\" maybe \"downtown Freetown\". But we can attach qualifiers: point in time? Actually location qualifiers: \"located in\" is separate triplet. Let's produce separate triplet: (2007 Freetown explosion, location, Free Street). subject_type event, object_type street.\n\n- Also we can have (Free Street, located in, Freetown). But not required.\n\n- Also (2007 Freetown explosion, point in time, 20 December 2007). Use qualifier? In example they used qualifier for award. For event, we can have relation \"date\" or \"point in time\". Let's make a triplet: (2007 Freetown explosion, point in time, 20 December 2007). subject_type event, object_type date.\n\n- Also (2007 Freetown explosion, casualties, 18 people). Use relation \"number of casualties\" maybe \"fatalities\". Use \"fatalities\" with object \"18\". object_type \"quantity\". Also qualifier \"approximation\" maybe \"at least\". So we need to represent \"at least 18 people\". Use qualifier \"approximation\" with object \"at least\". Or maybe \"polarity\"? Not. Use qualifier \"approximation\" with object \"at least\". So triplet: subject 2007 Freetown explosion, relation \"fatalities\", object \"18\". qualifiers: [{\"relation\":\"approximation\",\"object\":\"at least\"}].\n\n- Also maybe \"killed\" relation: (2007 Freetown explosion, killed, 18 people). But we already have fatalities. Use \"killed\" as relation, object \"people\". But we need object entity. Could be \"people\". But better to use \"victim count\". We'll stick with fatalities.\n\n- Also (2007 Freetown explosion, country, Sierra Leone). Could be location country. But we have location Free Street; we can also have (2007 Freetown explosion, country, Sierra Leone). Might be redundant but okay.\n\n- Also (2007 Freetown explosion, city, Freetown). Could be.\n\nBut we must not add facts not explicitly stated. Text says \"on Free Street in downtown Freetown, Sierra Leone\". So we can derive that Free Street is in downtown Freetown, which is in Sierra Leone. That's explicit location chain. So we can produce location triplet with object \"Free Street\". Also we could add qualifier \"located in\" for Free Street? But qualifiers are attached to triplet, not separate. Could attach qualifier \"located in\" to location triplet: (2007 Freetown explosion, location, Free Street) with qualifier {\"relation\":\"located in\",\"object\":\"downtown Freetown\"} and maybe another qualifier \"located in\",\"object\":\"Sierra Leone\". But qualifiers are for the main claim. That seems okay.\n\nThus produce one triplet for location with qualifiers for broader location.\n\nLet's construct:\n\nTriplet 1:\nsubject: \"2007 Freetown explosion\"\nrelation: \"instance of\"\nobject: \"explosion\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"event type\"\n\nTriplet 2:\nsubject: \"2007 Freetown explosion\"\nrelation: \"location\"\nobject: \"Free Street\"\nqualifiers: [\n {\"relation\":\"located in\",\"object\":\"downtown Freetown\"},\n {\"relation\":\"located in\",\"object\":\"Sierra Leone\"}\n]\nsubject_type: \"event\"\nobject_type: \"street\"\n\nTriplet 3:\nsubject: \"2007 Freetown explosion\"\nrelation: \"point in time\"\nobject: \"20 December 2007\"\nqualifiers: []\nsubject_type: \"event\"\nobject_type: \"date\"\n\nTriplet 4:\nsubject: \"2007 Freetown explosion\"\nrelation: \"fatalities\"\nobject: \"18\"\nqualifiers: [{\"relation\":\"approximation\",\"object\":\"at least\"}]\nsubject_type: \"event\"\nobject_type: \"quantity\"\n\nPotentially also \"killed\" relation but we have fatalities.\n\nMake sure object_type for \"18\" is \"quantity\". Good.\n\nReturn JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1631,
+      "total_tokens": 3025,
+      "completion_tokens": 1394,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2007 Freetown explosion\",\n            \"relation\": \"instance of\",\n            \"object\": \"explosion\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"event type\"\n        },\n        {\n            \"subject\": \"2007 Freetown explosion\",\n            \"relation\": \"location\",\n            \"object\": \"Free Street\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"downtown Freetown\"\n                },\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Sierra Leone\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"2007 Freetown explosion\",\n            \"relation\": \"point in time\",\n            \"object\": \"20 December 2007\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"2007 Freetown explosion\",\n            \"relation\": \"fatalities\",\n            \"object\": \"18\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"at least\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "2007 Freetown explosion",
+        "relation": "instance of",
+        "object": "explosion",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "event type"
+      },
+      {
+        "subject": "2007 Freetown explosion",
+        "relation": "location",
+        "object": "Free Street",
+        "qualifiers": [
+          {
+            "relation": "located in",
+            "object": "downtown Freetown"
+          },
+          {
+            "relation": "located in",
+            "object": "Sierra Leone"
+          }
+        ],
+        "subject_type": "event",
+        "object_type": "street"
+      },
+      {
+        "subject": "2007 Freetown explosion",
+        "relation": "point in time",
+        "object": "20 December 2007",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "date"
+      },
+      {
+        "subject": "2007 Freetown explosion",
+        "relation": "fatalities",
+        "object": "18",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "at least"
+          }
+        ],
+        "subject_type": "event",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1631,
+    "total_tokens": 3025,
+    "completion_tokens": 1394,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 451,
+    "output_tokens_est": 358
+  },
+  "attempts": 1,
+  "latency_s": 17.266845739002747,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:36:49.550352+00:00",
+  "cache_key": "f4fd4c6c6a516267588551d09978ad98"
+}

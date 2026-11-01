@@ -1,0 +1,200 @@
+{
+  "task": {
+    "input_id": "ee7da97efc2d30f2",
+    "input_hash": "ead83264ff2b296d559597ed18ee60ae3133ae6d7589b00d201111dce9410a52",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793213935-hnN2bhx2NxtuLP5LW2l9",
+    "object": "chat.completion",
+    "created": 1793213935,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DekaLLM",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"date of birth\",\n            \"object\": \"23 December 1920\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Marseille\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"date of death\",\n            \"object\": \"10 September 1984\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"place of death\",\n            \"object\": \"Paris\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"nationality\",\n            \"object\": \"France\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"occupation\",\n            \"object\": \"film producer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"produced works by\",\n            \"object\": \"French New Wave directors\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"member of jury\",\n            \"object\": \"Berlin International Film Festival\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1968\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"edition\",\n                    \"object\": \"18th\",\n                    \"object_type\": \"ordinal\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"award received\",\n            \"object\": \"Special César Award\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1983\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"award\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract facts.\n\nFirst, identify entities:\n\n- Georges de Beauregard (human)\n- Marseille (city)\n- 23 December 1920 (date)\n- Paris (city)\n- 10 September 1984 (date)\n- French (nationality) maybe as \"France\" country? But \"French film producer\" indicates occupation and nationality.\n- film producer (occupation)\n- French New Wave (movement) maybe as \"French New Wave directors\" but we can capture that he produced works by many of the French New Wave directors. So relation: \"produced works by\" object: \"French New Wave directors\". Could also be \"produced works by\" object: \"French New Wave director\". We'll treat object as \"French New Wave directors\" (class: group of people). Might also capture \"member of jury\" at \"18th Berlin International Film Festival\" (event). So relation: \"member of jury\" object: \"18th Berlin International Film Festival\". Qualifier: point in time 1968.\n\n- Award: \"Special César Award\" (award) with qualifier point in time 1983. Also note \"the French national film prize\" is description of the award, maybe we can add qualifier \"description\" but not needed.\n\n- Also \"Berlin International Film Festival\" is event; \"18th\" is edition. Could treat object as \"Berlin International Film Festival\" with qualifier \"edition\" 18th. But we have relation \"member of jury\" at that festival, with qualifier \"point in time\" 1968. Could also include qualifier \"edition\" 18th. But spec says qualifiers are attached to triplet. So we can have two qualifiers: point in time 1968, edition 18th. Need object_type for qualifiers: year for point in time, ordinal? maybe \"ordinal number\". We'll use \"ordinal\". For edition maybe \"ordinal\". Could also use \"edition\" relation.\n\nWe also need date of birth and death.\n\nBirth: 23 December 1920, place Marseille. Could include qualifier place of birth? Actually we can have separate triplet for date of birth and place of birth. The example includes date of birth only. We can also include place of birth as separate triplet: relation \"place of birth\" object \"Marseille\". Provide qualifiers none.\n\nSimilarly death: date of death 10 September 1984, place of death Paris.\n\nNationality: French (human nationality). Relation \"country of citizenship\" maybe. Use \"nationality\". object \"France\". object_type \"country\". Subject_type \"human\". Provide qualifier none.\n\nOccupation: film producer.\n\nNow produce JSON list.\n\nDefine types:\n\n- subject_type for Georges de Beauregard: \"human\"\n- object_type for dates: \"date\"\n- object_type for Marseille, Paris: \"city\"\n- object_type for France: \"country\"\n- object_type for film producer: \"occupation\" or \"profession\". Use \"profession\".\n- object_type for French New Wave directors: \"group of people\" maybe \"film director\". But we can set \"group of people\". Use \"group of people\".\n- object_type for Berlin International Film Festival: \"event\"\n- object_type for Special César Award: \"award\"\n\nQualifiers:\n\n- point in time: object_type \"year\"\n- edition: object_type \"ordinal\"\n\nNow construct list.\n\nTriplets:\n\n1. Georges de Beauregard - date of birth - 23 December 1920\n2. Georges de Beauregard - place of birth - Marseille\n3. Georges de Beauregard - date of death - 10 September 1984\n4. Georges de Beauregard - place of death - Paris\n5. Georges de Beauregard - nationality - France\n6. Georges de Beauregard - occupation - film producer\n7. Georges de Beauregard - produced works by - French New Wave directors\n8. Georges de Beauregard - member of jury - Berlin International Film Festival (qualifiers: point in time 1968, edition 18th)\n9. Georges de Beauregard - award received - Special César Award (qualifier point in time 1983)\n\nCheck if any other facts: \"was a member of the jury at the 18th Berlin International Film Festival.\" Already captured.\n\nNow produce JSON format:\n\n{\n \"triplets\": [\n   {...}\n ]\n}\n\nEach dict includes qualifiers list (empty if none). Provide object_type.\n\nLet's craft.\n\nNote: For \"member of jury\" relation maybe \"jury member\". Use \"member of jury\". Good.\n\nNow produce final answer.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract facts.\n\nFirst, identify entities:\n\n- Georges de Beauregard (human)\n- Marseille (city)\n- 23 December 1920 (date)\n- Paris (city)\n- 10 September 1984 (date)\n- French (nationality) maybe as \"France\" country? But \"French film producer\" indicates occupation and nationality.\n- film producer (occupation)\n- French New Wave (movement) maybe as \"French New Wave directors\" but we can capture that he produced works by many of the French New Wave directors. So relation: \"produced works by\" object: \"French New Wave directors\". Could also be \"produced works by\" object: \"French New Wave director\". We'll treat object as \"French New Wave directors\" (class: group of people). Might also capture \"member of jury\" at \"18th Berlin International Film Festival\" (event). So relation: \"member of jury\" object: \"18th Berlin International Film Festival\". Qualifier: point in time 1968.\n\n- Award: \"Special César Award\" (award) with qualifier point in time 1983. Also note \"the French national film prize\" is description of the award, maybe we can add qualifier \"description\" but not needed.\n\n- Also \"Berlin International Film Festival\" is event; \"18th\" is edition. Could treat object as \"Berlin International Film Festival\" with qualifier \"edition\" 18th. But we have relation \"member of jury\" at that festival, with qualifier \"point in time\" 1968. Could also include qualifier \"edition\" 18th. But spec says qualifiers are attached to triplet. So we can have two qualifiers: point in time 1968, edition 18th. Need object_type for qualifiers: year for point in time, ordinal? maybe \"ordinal number\". We'll use \"ordinal\". For edition maybe \"ordinal\". Could also use \"edition\" relation.\n\nWe also need date of birth and death.\n\nBirth: 23 December 1920, place Marseille. Could include qualifier place of birth? Actually we can have separate triplet for date of birth and place of birth. The example includes date of birth only. We can also include place of birth as separate triplet: relation \"place of birth\" object \"Marseille\". Provide qualifiers none.\n\nSimilarly death: date of death 10 September 1984, place of death Paris.\n\nNationality: French (human nationality). Relation \"country of citizenship\" maybe. Use \"nationality\". object \"France\". object_type \"country\". Subject_type \"human\". Provide qualifier none.\n\nOccupation: film producer.\n\nNow produce JSON list.\n\nDefine types:\n\n- subject_type for Georges de Beauregard: \"human\"\n- object_type for dates: \"date\"\n- object_type for Marseille, Paris: \"city\"\n- object_type for France: \"country\"\n- object_type for film producer: \"occupation\" or \"profession\". Use \"profession\".\n- object_type for French New Wave directors: \"group of people\" maybe \"film director\". But we can set \"group of people\". Use \"group of people\".\n- object_type for Berlin International Film Festival: \"event\"\n- object_type for Special César Award: \"award\"\n\nQualifiers:\n\n- point in time: object_type \"year\"\n- edition: object_type \"ordinal\"\n\nNow construct list.\n\nTriplets:\n\n1. Georges de Beauregard - date of birth - 23 December 1920\n2. Georges de Beauregard - place of birth - Marseille\n3. Georges de Beauregard - date of death - 10 September 1984\n4. Georges de Beauregard - place of death - Paris\n5. Georges de Beauregard - nationality - France\n6. Georges de Beauregard - occupation - film producer\n7. Georges de Beauregard - produced works by - French New Wave directors\n8. Georges de Beauregard - member of jury - Berlin International Film Festival (qualifiers: point in time 1968, edition 18th)\n9. Georges de Beauregard - award received - Special César Award (qualifier point in time 1983)\n\nCheck if any other facts: \"was a member of the jury at the 18th Berlin International Film Festival.\" Already captured.\n\nNow produce JSON format:\n\n{\n \"triplets\": [\n   {...}\n ]\n}\n\nEach dict includes qualifiers list (empty if none). Provide object_type.\n\nLet's craft.\n\nNote: For \"member of jury\" relation maybe \"jury member\". Use \"member of jury\". Good.\n\nNow produce final answer.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1440,
+      "completion_tokens": 1552,
+      "total_tokens": 2992,
+      "cost": 0.00032256,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00032256,
+        "upstream_inference_prompt_cost": 4.32e-05,
+        "upstream_inference_completions_cost": 0.00027936
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 948,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"date of birth\",\n            \"object\": \"23 December 1920\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Marseille\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"date of death\",\n            \"object\": \"10 September 1984\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"place of death\",\n            \"object\": \"Paris\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"nationality\",\n            \"object\": \"France\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"occupation\",\n            \"object\": \"film producer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"produced works by\",\n            \"object\": \"French New Wave directors\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"member of jury\",\n            \"object\": \"Berlin International Film Festival\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1968\",\n                    \"object_type\": \"year\"\n                },\n                {\n                    \"relation\": \"edition\",\n                    \"object\": \"18th\",\n                    \"object_type\": \"ordinal\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Georges de Beauregard\",\n            \"relation\": \"award received\",\n            \"object\": \"Special César Award\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1983\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"award\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Georges de Beauregard",
+        "relation": "date of birth",
+        "object": "23 December 1920",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Georges de Beauregard",
+        "relation": "place of birth",
+        "object": "Marseille",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Georges de Beauregard",
+        "relation": "date of death",
+        "object": "10 September 1984",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Georges de Beauregard",
+        "relation": "place of death",
+        "object": "Paris",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "city"
+      },
+      {
+        "subject": "Georges de Beauregard",
+        "relation": "nationality",
+        "object": "France",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Georges de Beauregard",
+        "relation": "occupation",
+        "object": "film producer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Georges de Beauregard",
+        "relation": "produced works by",
+        "object": "French New Wave directors",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "group of people"
+      },
+      {
+        "subject": "Georges de Beauregard",
+        "relation": "member of jury",
+        "object": "Berlin International Film Festival",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1968"
+          },
+          {
+            "relation": "edition",
+            "object": "18th"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "Georges de Beauregard",
+        "relation": "award received",
+        "object": "Special César Award",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1983"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "award"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1440,
+    "completion_tokens": 1552,
+    "total_tokens": 2992,
+    "cost": 0.00032256,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00032256,
+      "upstream_inference_prompt_cost": 4.32e-05,
+      "upstream_inference_completions_cost": 0.00027936
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 948,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 839,
+    "output_tokens_est": 711
+  },
+  "attempts": 1,
+  "latency_s": 24.269690250002895,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:59:19.377047+00:00",
+  "cache_key": "0b51084bf04812fe27bfdbcda4338177"
+}

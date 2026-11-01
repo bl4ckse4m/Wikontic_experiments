@@ -1,0 +1,157 @@
+{
+  "task": {
+    "input_id": "19c25d1fff71db34",
+    "input_hash": "cc4c42c5b4698c0ec204a1a67c3e6236efb22830103e927044e1d3a12464e977",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-67ab23df7478526dcf02c0ff12839ef9",
+    "object": "chat.completion",
+    "created": 1791501347,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"has predecessor\",\n            \"object\": \"First Day Society\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1790\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"inception\",\n            \"object\": \"1817\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"original name\",\n            \"object\": \"Sunday and Adult School Union\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1817\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"American Sunday School Union\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1824\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"American Missionary Fellowship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1974\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"InFaith\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1 September 2011\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"InFaith\\n\\nInFaith has its roots ...\"\n\nWe have entities: InFaith (organization), First Day Society (organization), Sunday and Adult School Union (organization), American Sunday School Union (ASSU) (organization), American Missionary Fellowship (organization). Dates: founded 1790, officially formed 1817, name changed 1824, name changed 1974, became \"InFaith\" on September 1, 2011.\n\nWe need relations: \"has part\" maybe? \"has its roots in\" could be relation \"originated from\" or \"has predecessor\". Use \"has predecessor\" maybe. But need specific Wikidata-style predicate. Could use \"has predecessor\" (P1365) or \"has part\". Let's choose \"has predecessor\". Also \"officially formed\" -> relation \"inception\" or \"date of formation\". Could be \"inception\" with date. Also \"changed its name to\" -> relation \"renamed to\" maybe \"official name\" change. Use \"renamed as\". Could be \"name change\" with qualifier date. But we can create separate triplets: (InFaith, inception, 1817) with qualifier maybe \"original name\" = \"Sunday and Adult School Union\". Or we can have (InFaith, original name, \"Sunday and Adult School Union\") with qualifier point in time 1817. Also (InFaith, renamed to, \"American Sunday School Union\") with qualifier point in time 1824. Then (InFaith, renamed to, \"American Missionary Fellowship\") with qualifier point in time 1974. Then (InFaith, renamed to, \"InFaith\") with qualifier point in time \"1 September 2011\". Also (InFaith, has predecessor, \"First Day Society\") with qualifier point in time 1790 maybe.\n\nWe need subject_type and object_type. For organizations: subject_type \"organization\". object_type also \"organization\". For dates: object_type \"date\". For name strings maybe \"string\" or \"name\". Use \"name\" maybe \"string\". But example used award type etc. We'll use \"date\" for date objects, \"organization\" for orgs, \"string\" for name? Could treat name as \"organization\" if it's an organization entity. The renamed to objects are organization names, which are also organizations. So object_type \"organization\". For predecessor also organization.\n\nNow qualifiers: need list of dicts with relation and object. Use \"point in time\" for dates.\n\nLet's construct triplets:\n\n1. (InFaith, has predecessor, First Day Society) qualifiers: point in time 1790 (date). subject_type organization, object_type organization.\n\n2. (InFaith, inception, 1817) qualifiers maybe original name? Could also add qualifier \"original name\" = \"Sunday and Adult School Union\". Use relation \"original name\". So qualifiers: {\"relation\":\"original name\",\"object\":\"Sunday and Adult School Union\"} and maybe point in time? Actually inception date is 1817, so object is date. So we have separate triplet: (InFaith, inception, 1817). subject_type organization, object_type date.\n\n3. (InFaith, renamed to, American Sunday School Union) qualifiers: point in time 1824.\n\n4. (InFaith, renamed to, American Missionary Fellowship) qualifiers: point in time 1974.\n\n5. (InFaith, renamed to, InFaith) qualifiers: point in time 1 September 2011.\n\nBut note that \"InFaith\" is same as subject; rename to same name maybe considered \"rebranded\". We'll still include.\n\nAlso maybe include (InFaith, original name, Sunday and Adult School Union) with qualifier point in time 1817. Could add.\n\nLet's produce list.\n\nMake sure each dict includes \"qualifiers\": [] if none.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1678,
+      "total_tokens": 2934,
+      "completion_tokens": 1256,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"has predecessor\",\n            \"object\": \"First Day Society\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1790\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"inception\",\n            \"object\": \"1817\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"original name\",\n            \"object\": \"Sunday and Adult School Union\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1817\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"American Sunday School Union\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1824\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"American Missionary Fellowship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1974\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"InFaith\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1 September 2011\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "InFaith",
+        "relation": "has predecessor",
+        "object": "First Day Society",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1790"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "inception",
+        "object": "1817",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "date"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "original name",
+        "object": "Sunday and Adult School Union",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1817"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "renamed to",
+        "object": "American Sunday School Union",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1824"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "renamed to",
+        "object": "American Missionary Fellowship",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1974"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "renamed to",
+        "object": "InFaith",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1 September 2011"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1678,
+    "total_tokens": 2934,
+    "completion_tokens": 1256,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 651,
+    "output_tokens_est": 559
+  },
+  "attempts": 1,
+  "latency_s": 15.643722945998888,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:16:03.602845+00:00",
+  "cache_key": "d29a1d0f805b35e206962181fe4eaa14"
+}

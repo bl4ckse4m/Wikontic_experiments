@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "8e3db65699c0531c",
+    "input_hash": "a36baefb7c43d1ebe0e1d6d8b466492c8af8b6941156fea2755da5a2721a699c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-214bdee63150a064455bd3517d57731e",
+    "object": "chat.completion",
+    "created": 1791519474,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"MUSC Health Stadium\",\n            \"relation\": \"instance of\",\n            \"object\": \"soccer-specific stadium\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"stadium\"\n        },\n        {\n            \"subject\": \"MUSC Health Stadium\",\n            \"relation\": \"located in\",\n            \"object\": \"Daniel Island area\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Daniel Island area\",\n            \"relation\": \"located in\",\n            \"object\": \"Charleston\",\n            \"qualifiers\": [],\n            \"subject_type\": \"area\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Charleston\",\n            \"relation\": \"located in\",\n            \"object\": \"South Carolina\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"MUSC Health Stadium\",\n            \"relation\": \"home venue of\",\n            \"object\": \"Charleston Battery\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"league\",\n                    \"object\": \"United Soccer League\"\n                }\n            ],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"Charleston Battery\",\n            \"relation\": \"member of\",\n            \"object\": \"United Soccer League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"league\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"MUSC Health Stadium\n\nMUSC Health Stadium is a soccer-specific stadium located in the Daniel Island area of Charleston, South Carolina that serves as the home of the Charleston Battery of the United Soccer League.\"\n\nEntities: MUSC Health Stadium (stadium), Daniel Island area (place), Charleston (city), South Carolina (state), Charleston Battery (soccer team), United Soccer League (league).\n\nTriplets:\n\n1. MUSC Health Stadium - instance of? relation \"instance of\" maybe \"stadium\". But we need specific relation like \"type\" maybe \"subclass of\"? In examples they used \"occupation\", \"award received\". For location they used \"located in\". So we can have:\n\n- subject: MUSC Health Stadium, relation: \"instance of\", object: \"soccer-specific stadium\". object_type: \"stadium\". subject_type: \"stadium\". Might be okay.\n\n- location: MUSC Health Stadium - relation \"located in\", object: \"Daniel Island area\". qualifiers: place? Also \"place\" maybe \"point in time\"? Not needed.\n\n- Daniel Island area - relation \"part of\", object: \"Charleston\". Could be \"located in\". But we only have explicit: \"located in the Daniel Island area of Charleston, South Carolina\". So we can treat as location chain: stadium located in Daniel Island area, which is part of Charleston, which is in South Carolina. But we only have explicit \"located in the Daniel Island area of Charleston, South Carolina\". Could capture as location with qualifiers? Simpler: create two location relations:\n\na) MUSC Health Stadium located in Daniel Island area.\n\nb) Daniel Island area located in Charleston.\n\nc) Charleston located in South Carolina.\n\nBut only explicit: \"Daniel Island area of Charleston, South Carolina\". That phrase indicates Daniel Island area is within Charleston, which is within South Carolina. So we can extract both.\n\n- Also \"serves as the home of the Charleston Battery of the United Soccer League.\" So relation: \"home venue of\" maybe \"home stadium of\". Use \"home venue of\". So:\n\nMUSC Health Stadium - relation \"home venue of\" - object \"Charleston Battery\". qualifiers maybe \"league\" = United Soccer League. Could add qualifier relation \"league\" with object \"United Soccer League\". Or we could have separate triplet: \"Charleston Battery\" - relation \"member of league\" - object \"United Soccer League\". But not explicit; phrase \"of the United Soccer League\" modifies Battery. So we can add qualifier to the home venue relation: qualifier \"league\" = United Soccer League.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- MUSC Health Stadium: stadium (type \"stadium\").\n\n- soccer-specific stadium: maybe \"stadium\". object_type \"stadium\".\n\n- Daniel Island area: \"neighbourhood\" or \"area\". Use \"area\". object_type \"geographic area\".\n\n- Charleston: \"city\". object_type \"city\".\n\n- South Carolina: \"state\". object_type \"state\".\n\n- Charleston Battery: \"soccer club\". object_type \"sports team\".\n\n- United Soccer League: \"sports league\". object_type \"league\".\n\nNow qualifiers: For home venue relation, qualifier \"league\" maybe not standard but allowed as qualifier relation. Use \"league\". Provide object \"United Soccer League\".\n\nAlso maybe include qualifier \"point in time\"? Not given.\n\nNow produce JSON.\n\nTriplets list:\n\n1. {\"subject\":\"MUSC Health Stadium\",\"relation\":\"instance of\",\"object\":\"soccer-specific stadium\",\"qualifiers\":[],\"subject_type\":\"stadium\",\"object_type\":\"stadium\"}\n\n2. {\"subject\":\"MUSC Health Stadium\",\"relation\":\"located in\",\"object\":\"Daniel Island area\",\"qualifiers\":[],\"subject_type\":\"stadium\",\"object_type\":\"area\"}\n\n3. {\"subject\":\"Daniel Island area\",\"relation\":\"located in\",\"object\":\"Charleston\",\"qualifiers\":[],\"subject_type\":\"area\",\"object_type\":\"city\"}\n\n4. {\"subject\":\"Charleston\",\"relation\":\"located in\",\"object\":\"South Carolina\",\"qualifiers\":[],\"subject_type\":\"city\",\"object_type\":\"state\"}\n\n5. {\"subject\":\"MUSC Health Stadium\",\"relation\":\"home venue of\",\"object\":\"Charleston Battery\",\"qualifiers\":[{\"relation\":\"league\",\"object\":\"United Soccer League\"}],\"subject_type\":\"stadium\",\"object_type\":\"sports team\"}\n\nOptionally also add relation \"member of league\" for Charleston Battery:\n\n6. {\"subject\":\"Charleston Battery\",\"relation\":\"member of\",\"object\":\"United Soccer League\",\"qualifiers\":[],\"subject_type\":\"sports team\",\"object_type\":\"league\"}\n\nBut is that explicit? The phrase \"Charleston Battery of the United Soccer League\" indicates Battery is of that league. So yes.\n\nAdd that.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1633,
+      "total_tokens": 2980,
+      "completion_tokens": 1347,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"MUSC Health Stadium\",\n            \"relation\": \"instance of\",\n            \"object\": \"soccer-specific stadium\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"stadium\"\n        },\n        {\n            \"subject\": \"MUSC Health Stadium\",\n            \"relation\": \"located in\",\n            \"object\": \"Daniel Island area\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Daniel Island area\",\n            \"relation\": \"located in\",\n            \"object\": \"Charleston\",\n            \"qualifiers\": [],\n            \"subject_type\": \"area\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Charleston\",\n            \"relation\": \"located in\",\n            \"object\": \"South Carolina\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"MUSC Health Stadium\",\n            \"relation\": \"home venue of\",\n            \"object\": \"Charleston Battery\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"league\",\n                    \"object\": \"United Soccer League\"\n                }\n            ],\n            \"subject_type\": \"stadium\",\n            \"object_type\": \"sports team\"\n        },\n        {\n            \"subject\": \"Charleston Battery\",\n            \"relation\": \"member of\",\n            \"object\": \"United Soccer League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"league\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "MUSC Health Stadium",
+        "relation": "instance of",
+        "object": "soccer-specific stadium",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "stadium"
+      },
+      {
+        "subject": "MUSC Health Stadium",
+        "relation": "located in",
+        "object": "Daniel Island area",
+        "qualifiers": [],
+        "subject_type": "stadium",
+        "object_type": "area"
+      },
+      {
+        "subject": "Daniel Island area",
+        "relation": "located in",
+        "object": "Charleston",
+        "qualifiers": [],
+        "subject_type": "area",
+        "object_type": "city"
+      },
+      {
+        "subject": "Charleston",
+        "relation": "located in",
+        "object": "South Carolina",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "state"
+      },
+      {
+        "subject": "MUSC Health Stadium",
+        "relation": "home venue of",
+        "object": "Charleston Battery",
+        "qualifiers": [
+          {
+            "relation": "league",
+            "object": "United Soccer League"
+          }
+        ],
+        "subject_type": "stadium",
+        "object_type": "sports team"
+      },
+      {
+        "subject": "Charleston Battery",
+        "relation": "member of",
+        "object": "United Soccer League",
+        "qualifiers": [],
+        "subject_type": "sports team",
+        "object_type": "league"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1633,
+    "total_tokens": 2980,
+    "completion_tokens": 1347,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 512,
+    "output_tokens_est": 420
+  },
+  "attempts": 1,
+  "latency_s": 16.554899310998735,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:18:11.238751+00:00",
+  "cache_key": "877d4e173dacfcda71bdc6bc10ce11bd"
+}

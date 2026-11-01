@@ -1,0 +1,177 @@
+{
+  "task": {
+    "input_id": "529375fc56971e90",
+    "input_hash": "0325d46be419a7f74ced50f6e51e02662a8e01ad1e86a38702d5f14d7c97d002",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-07b0673bfceded932971999d6e57942b",
+    "object": "chat.completion",
+    "created": 1791517541,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"China\",\n            \"relation\": \"number of international borders with sovereign states\",\n            \"object\": \"14\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"China\",\n            \"relation\": \"border length with\",\n            \"object\": \"Hong Kong\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"30\"},\n                {\"relation\": \"unit\", \"object\": \"km\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Hong Kong\",\n            \"relation\": \"status\",\n            \"object\": \"British dependency\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"before 1997\"}\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"political status\"\n        },\n        {\n            \"subject\": \"China\",\n            \"relation\": \"border length with\",\n            \"object\": \"Macau\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"3\"},\n                {\"relation\": \"unit\", \"object\": \"km\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Macau\",\n            \"relation\": \"status\",\n            \"object\": \"Portuguese territory\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"until 1999\"}\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"political status\"\n        },\n        {\n            \"subject\": \"China\",\n            \"relation\": \"land border length\",\n            \"object\": \"land border\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"22,117\"},\n                {\"relation\": \"unit\", \"object\": \"kilometres\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"China\",\n            \"relation\": \"has longest land border\",\n            \"object\": \"land border\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"geographic feature\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Borders of China\n\nChina shares international borders with 14 sovereign states. In addition, there is a 30 - km border with the special administrative region of Hong Kong, which was a British dependency before 1997, and a 3 km border with Macau, a Portuguese territory until 1999. With a land border of 22, 117 kilometres (13,743 mi) in total it also has the longest land border of any country.\"\n\nWe need to produce triplets.\n\nEntities: China (country), sovereign states (maybe not enumerated), Hong Kong (special administrative region), Macau (special administrative region), British dependency (status), Portuguese territory (status), land border length, longest land border.\n\nTriplets:\n\n1. China – shares border with – sovereign state (but 14). Could be \"China\" \"shares international border with\" \"sovereign state\". But we need object as entity. Since not enumerated, maybe we can capture quantity: \"China\" \"has number of international borders with sovereign states\" \"14\". Relation maybe \"number of international borders with sovereign states\". Use relation \"number of international borders with sovereign states\". object \"14\". subject_type country, object_type quantity? Could be \"quantity\". Use object_type \"quantity\". Qualifiers none.\n\n2. China – has border length with – Hong Kong: \"30 km border\". Relation \"border length with\". Object \"Hong Kong\". Qualifier unit \"km\" and quantity \"30\". Also note \"special administrative region\". Could add qualifier \"administrative status\" maybe but not required. We'll include qualifier \"unit\": \"km\". Also maybe \"point in time\"? Not given. So qualifiers list with unit and quantity? The spec says qualifiers include unit, approximation, etc. For length we can have qualifier \"quantity\": \"30\". and \"unit\": \"km\". Use separate qualifiers.\n\n3. Hong Kong – was – British dependency. Relation \"status\". Object \"British dependency\". Qualifier \"point in time\": \"before 1997\". Also maybe \"political status\". We'll use relation \"status\". Qualifiers: point in time \"before 1997\". Subject_type \"region\", object_type \"political entity\". Might be \"dependency\". We'll set object_type \"political status\".\n\n4. China – has border length with – Macau: 3 km. Similar qualifiers.\n\n5. Macau – was – Portuguese territory. Relation \"status\". Object \"Portuguese territory\". Qualifier \"point in time\": \"until 1999\". (or \"until 1999\").\n\n6. China – land border length – 22,117 kilometres (13,743 mi). Relation \"land border length\". Object maybe \"22,117 kilometres\". Use qualifiers: unit \"kilometres\", quantity \"22,117\". Also maybe \"equivalent in miles\" but we can ignore.\n\n7. China – has longest land border – (any country). Relation \"has longest land border\". Object \"any country\"? Actually claim: \"it also has the longest land border of any country.\" So subject China, relation \"has longest land border\", object \"any country\". Could be \"longest land border\". Maybe object \"land border\". But we need entity. Could use object \"land border\". We'll set object \"land border\". Qualifier maybe \"superlative\": none. Could also include qualifier \"comparison\": \"any country\". Not needed.\n\nWe also have \"China shares international borders with 14 sovereign states.\" Could also produce triplet: China – shares international border with – sovereign state (multiple). But we already have number. Might also produce \"China – shares international border with – sovereign state\" without quantity, but that would be generic. Better to capture number.\n\nMake sure subject_type and object_type.\n\nDefine types:\n\n- China: country\n- sovereign state: maybe \"country\"\n- Hong Kong: region (special administrative region)\n- Macau: region\n- British dependency: political status\n- Portuguese territory: political status\n- land border: geographic feature\n- border length: maybe \"distance\"\n\nBut object_type for length maybe \"distance\". Use \"distance\".\n\nNow format JSON.\n\nTriplet list order.\n\nLet's craft.\n\nTriplet 1:\nsubject: \"China\"\nrelation: \"number of international borders with sovereign states\"\nobject: \"14\"\nqualifiers: []\nsubject_type: \"country\"\nobject_type: \"quantity\"\n\nTriplet 2:\nsubject: \"China\"\nrelation: \"border length with\"\nobject: \"Hong Kong\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"30\"},{\"relation\":\"unit\",\"object\":\"km\"}]\nsubject_type: \"country\"\nobject_type: \"region\"\n\nTriplet 3:\nsubject: \"Hong Kong\"\nrelation: \"status\"\nobject: \"British dependency\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"before 1997\"}]\nsubject_type: \"region\"\nobject_type: \"political status\"\n\nTriplet 4:\nsubject: \"China\"\nrelation: \"border length with\"\nobject: \"Macau\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"3\"},{\"relation\":\"unit\",\"object\":\"km\"}]\nsubject_type: \"country\"\nobject_type: \"region\"\n\nTriplet 5:\nsubject: \"Macau\"\nrelation: \"status\"\nobject: \"Portuguese territory\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"until 1999\"}]\nsubject_type: \"region\"\nobject_type: \"political status\"\n\nTriplet 6:\nsubject: \"China\"\nrelation: \"land border length\"\nobject: \"22,117 kilometres\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"22,117\"},{\"relation\":\"unit\",\"object\":\"kilometres\"}]\nsubject_type: \"country\"\nobject_type: \"distance\"\n\nTriplet 7:\nsubject: \"China\"\nrelation: \"has longest land border\"\nobject: \"land border\"\nqualifiers: []\nsubject_type: \"country\"\nobject_type: \"geographic feature\"\n\nCheck qualifiers: For triplet 6, object includes number and unit; but we also have qualifiers. Might be redundant. Could set object \"land border\" and qualifiers quantity+unit. Better: relation \"land border length\", object \"land border\". Then qualifiers quantity and unit. Let's adjust.\n\nTriplet 6:\nsubject: \"China\"\nrelation: \"land border length\"\nobject: \"land border\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"22,117\"},{\"relation\":\"unit\",\"object\":\"kilometres\"}]\n\nobject_type: \"geographic feature\"\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1681,
+      "total_tokens": 3542,
+      "completion_tokens": 1861,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"China\",\n            \"relation\": \"number of international borders with sovereign states\",\n            \"object\": \"14\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"China\",\n            \"relation\": \"border length with\",\n            \"object\": \"Hong Kong\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"30\"},\n                {\"relation\": \"unit\", \"object\": \"km\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Hong Kong\",\n            \"relation\": \"status\",\n            \"object\": \"British dependency\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"before 1997\"}\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"political status\"\n        },\n        {\n            \"subject\": \"China\",\n            \"relation\": \"border length with\",\n            \"object\": \"Macau\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"3\"},\n                {\"relation\": \"unit\", \"object\": \"km\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Macau\",\n            \"relation\": \"status\",\n            \"object\": \"Portuguese territory\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"until 1999\"}\n            ],\n            \"subject_type\": \"region\",\n            \"object_type\": \"political status\"\n        },\n        {\n            \"subject\": \"China\",\n            \"relation\": \"land border length\",\n            \"object\": \"land border\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"22,117\"},\n                {\"relation\": \"unit\", \"object\": \"kilometres\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"China\",\n            \"relation\": \"has longest land border\",\n            \"object\": \"land border\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"geographic feature\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "China",
+        "relation": "number of international borders with sovereign states",
+        "object": "14",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "China",
+        "relation": "border length with",
+        "object": "Hong Kong",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "30"
+          },
+          {
+            "relation": "unit",
+            "object": "km"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "region"
+      },
+      {
+        "subject": "Hong Kong",
+        "relation": "status",
+        "object": "British dependency",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "before 1997"
+          }
+        ],
+        "subject_type": "region",
+        "object_type": "political status"
+      },
+      {
+        "subject": "China",
+        "relation": "border length with",
+        "object": "Macau",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "3"
+          },
+          {
+            "relation": "unit",
+            "object": "km"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "region"
+      },
+      {
+        "subject": "Macau",
+        "relation": "status",
+        "object": "Portuguese territory",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "until 1999"
+          }
+        ],
+        "subject_type": "region",
+        "object_type": "political status"
+      },
+      {
+        "subject": "China",
+        "relation": "land border length",
+        "object": "land border",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "22,117"
+          },
+          {
+            "relation": "unit",
+            "object": "kilometres"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "geographic feature"
+      },
+      {
+        "subject": "China",
+        "relation": "has longest land border",
+        "object": "land border",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "geographic feature"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1681,
+    "total_tokens": 3542,
+    "completion_tokens": 1861,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 673,
+    "output_tokens_est": 581
+  },
+  "attempts": 1,
+  "latency_s": 21.826455635993625,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:46:03.600411+00:00",
+  "cache_key": "a258b1b5fa1b083ec573342f1fb63e1c"
+}

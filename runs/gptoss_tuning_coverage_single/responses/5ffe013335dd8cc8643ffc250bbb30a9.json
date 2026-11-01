@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "2b66b525751267cf",
+    "input_hash": "ef180e866779304282a78c250548641dd5f8e23af62f2b10bf1a55e4e27a0fb0",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-3f9d3803bd8c7224963a5fdd68753acd",
+    "object": "chat.completion",
+    "created": 1791501913,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"New York (state)\",\n            \"relation\": \"area\",\n            \"object\": \"54,555 square miles\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"area in km\",\n                    \"object\": \"141,300 km\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"New York (state)\",\n            \"relation\": \"rank by area\",\n            \"object\": \"27\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ranking context\",\n                    \"object\": \"largest state by size\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"rank\"\n        },\n        {\n            \"subject\": \"New York (state)\",\n            \"relation\": \"highest point\",\n            \"object\": \"Mount Marcy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"elevation\",\n                    \"object\": \"5,344 feet\"\n                },\n                {\n                    \"relation\": \"elevation\",\n                    \"object\": \"1,629 meters\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"mountain\"\n        },\n        {\n            \"subject\": \"Mount Marcy\",\n            \"relation\": \"located in\",\n            \"object\": \"Adirondacks\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"New York (state)\",\n            \"relation\": \"lowest point\",\n            \"object\": \"Atlantic Ocean\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"elevation\",\n                    \"object\": \"sea level\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"ocean\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"New York (state)\n\nNew York covers 54,555 square miles (141,300 km) and ranks as the 27th largest state by size. The highest elevation in New York is Mount Marcy in the Adirondacks, at 5,344 feet (1,629 meters) above sea level; while the state's lowest point is at sea level, on the Atlantic Ocean.\"\n\nWe need triplets.\n\nSubject: New York (state) – entity type: state (subclass of administrative territorial entity). We'll call subject \"New York (state)\" maybe just \"New York (state)\". object types: area, rank, highest elevation, lowest point.\n\nTriplet 1: subject New York (state), relation \"area\", object \"54,555 square miles\". qualifiers maybe also include conversion km: could add qualifier \"area in km2\"? but we can have separate triplet for km. The text says \"covers 54,555 square miles (141,300 km)\". So we could have two area triplets: one with square miles, one with km. Or one with both qualifiers. Probably separate: area = 54,555 square miles, qualifier point in time? Not needed. Could add qualifier \"approximation\"? Not approximate. So just area.\n\nTriplet 2: subject New York (state), relation \"rank by area\", object \"27\". maybe relation \"rank\" with qualifier \"ranking system\" = \"largest state by size\". But simpler: relation \"rank by size\" object \"27\". We'll use \"rank\" and qualifier \"ranking criteria\" maybe. But we need specific Wikidata style: \"rank\" is generic. Could use \"rank by area\". Let's use relation \"rank by area\" object \"27\". qualifiers maybe \"unit\" none.\n\nTriplet 3: highest elevation: subject New York (state), relation \"highest point\", object \"Mount Marcy\". qualifiers: elevation value \"5,344 feet (1,629 meters)\". So we need qualifier \"elevation\" maybe \"elevation above sea level\". Use qualifier relation \"elevation\" object \"5,344 feet\". Also maybe include metric as separate qualifier. We'll include both as separate qualifiers: one with feet, one with meters.\n\nTriplet 4: subject \"Mount Marcy\", relation \"located in\", object \"Adirondacks\". Could be derived but not explicitly a fact? The phrase \"Mount Marcy in the Adirondacks\". That's a location relation. So we can add.\n\nTriplet 5: lowest point: subject New York (state), relation \"lowest point\", object \"Atlantic Ocean\". qualifiers: elevation \"sea level\". So qualifier \"elevation\" object \"sea level\". Also maybe \"location\" but object is Atlantic Ocean.\n\nTriplet 6: maybe \"lowest point elevation\" is sea level, but we already have qualifier.\n\nNow assign subject_type and object_type.\n\n- New York (state): subject_type \"state\" (or \"administrative territorial entity\").\n- area: object_type \"area\". Could be \"area\" with unit. We'll set \"area\".\n- rank: object_type \"rank\".\n- Mount Marcy: object_type \"mountain\".\n- Adirondacks: object_type \"mountain range\".\n- Atlantic Ocean: object_type \"ocean\".\n- Elevation values: object_type \"length\" or \"distance\". Use \"length\".\n\nNow format JSON.\n\nEach triplet includes qualifiers list.\n\nTriplet 1:\n\n{\n \"subject\": \"New York (state)\",\n \"relation\": \"area\",\n \"object\": \"54,555 square miles\",\n \"qualifiers\": [{\"relation\": \"area in km2\", \"object\": \"141,300 km\"}],\n \"subject_type\": \"state\",\n \"object_type\": \"area\"\n}\n\nBut qualifier relation maybe \"area in km\". We'll use \"area in km\". object \"141,300 km\". Good.\n\nTriplet 2:\n\n{\n \"subject\": \"New York (state)\",\n \"relation\": \"rank by area\",\n \"object\": \"27\",\n \"qualifiers\": [{\"relation\": \"ranking context\", \"object\": \"largest state by size\"}],\n \"subject_type\": \"state\",\n \"object_type\": \"rank\"\n}\n\nTriplet 3:\n\n{\n \"subject\": \"New York (state)\",\n \"relation\": \"highest point\",\n \"object\": \"Mount Marcy\",\n \"qualifiers\": [\n   {\"relation\": \"elevation\", \"object\": \"5,344 feet\"},\n   {\"relation\": \"elevation\", \"object\": \"1,629 meters\"}\n ],\n \"subject_type\": \"state\",\n \"object_type\": \"mountain\"\n}\n\nTriplet 4:\n\n{\n \"subject\": \"Mount Marcy\",\n \"relation\": \"located in\",\n \"object\": \"Adirondacks\",\n \"qualifiers\": [],\n \"subject_type\": \"mountain\",\n \"object_type\": \"mountain range\"\n}\n\nTriplet 5:\n\n{\n \"subject\": \"New York (state)\",\n \"relation\": \"lowest point\",\n \"object\": \"Atlantic Ocean\",\n \"qualifiers\": [{\"relation\": \"elevation\", \"object\": \"sea level\"}],\n \"subject_type\": \"state\",\n \"object_type\": \"ocean\"\n}\n\nPotential also \"lowest point elevation\" but covered.\n\nNow produce JSON array.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1664,
+      "total_tokens": 3155,
+      "completion_tokens": 1491,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"New York (state)\",\n            \"relation\": \"area\",\n            \"object\": \"54,555 square miles\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"area in km\",\n                    \"object\": \"141,300 km\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"New York (state)\",\n            \"relation\": \"rank by area\",\n            \"object\": \"27\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ranking context\",\n                    \"object\": \"largest state by size\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"rank\"\n        },\n        {\n            \"subject\": \"New York (state)\",\n            \"relation\": \"highest point\",\n            \"object\": \"Mount Marcy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"elevation\",\n                    \"object\": \"5,344 feet\"\n                },\n                {\n                    \"relation\": \"elevation\",\n                    \"object\": \"1,629 meters\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"mountain\"\n        },\n        {\n            \"subject\": \"Mount Marcy\",\n            \"relation\": \"located in\",\n            \"object\": \"Adirondacks\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"New York (state)\",\n            \"relation\": \"lowest point\",\n            \"object\": \"Atlantic Ocean\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"elevation\",\n                    \"object\": \"sea level\"\n                }\n            ],\n            \"subject_type\": \"state\",\n            \"object_type\": \"ocean\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "New York (state)",
+        "relation": "area",
+        "object": "54,555 square miles",
+        "qualifiers": [
+          {
+            "relation": "area in km",
+            "object": "141,300 km"
+          }
+        ],
+        "subject_type": "state",
+        "object_type": "area"
+      },
+      {
+        "subject": "New York (state)",
+        "relation": "rank by area",
+        "object": "27",
+        "qualifiers": [
+          {
+            "relation": "ranking context",
+            "object": "largest state by size"
+          }
+        ],
+        "subject_type": "state",
+        "object_type": "rank"
+      },
+      {
+        "subject": "New York (state)",
+        "relation": "highest point",
+        "object": "Mount Marcy",
+        "qualifiers": [
+          {
+            "relation": "elevation",
+            "object": "5,344 feet"
+          },
+          {
+            "relation": "elevation",
+            "object": "1,629 meters"
+          }
+        ],
+        "subject_type": "state",
+        "object_type": "mountain"
+      },
+      {
+        "subject": "Mount Marcy",
+        "relation": "located in",
+        "object": "Adirondacks",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "mountain range"
+      },
+      {
+        "subject": "New York (state)",
+        "relation": "lowest point",
+        "object": "Atlantic Ocean",
+        "qualifiers": [
+          {
+            "relation": "elevation",
+            "object": "sea level"
+          }
+        ],
+        "subject_type": "state",
+        "object_type": "ocean"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1664,
+    "total_tokens": 3155,
+    "completion_tokens": 1491,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 576,
+    "output_tokens_est": 483
+  },
+  "attempts": 1,
+  "latency_s": 18.475926477003668,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:25:32.302032+00:00",
+  "cache_key": "5ffe013335dd8cc8643ffc250bbb30a9"
+}

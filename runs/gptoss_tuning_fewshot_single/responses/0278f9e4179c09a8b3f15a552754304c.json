@@ -1,0 +1,166 @@
+{
+  "task": {
+    "input_id": "c55b35747dc62140",
+    "input_hash": "58e5ff673dc727a21e7f971b004f5b84d11c6f45da795c5e1971ff580fb391c4",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-520a047f003077dc7cb3fc9fabb381ea",
+    "object": "chat.completion",
+    "created": 1791521250,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Egyptian art collection\",\n            \"relation\": \"held by\",\n            \"object\": \"Mabee-Gerrer Museum of Art\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Shawnee\"\n                }\n            ],\n            \"subject_type\": \"art collection\",\n            \"object_type\": \"museum\"\n        },\n        {\n            \"subject\": \"Mabee-Gerrer Museum of Art\",\n            \"relation\": \"located in\",\n            \"object\": \"Shawnee\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Oklahoma City Museum of Art\",\n            \"relation\": \"contains\",\n            \"object\": \"collection of glass sculptures by Dale Chihuly\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"art collection\"\n        },\n        {\n            \"subject\": \"collection of glass sculptures by Dale Chihuly\",\n            \"relation\": \"creator\",\n            \"object\": \"Dale Chihuly\",\n            \"qualifiers\": [],\n            \"subject_type\": \"art collection\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"National Cowboy and Western Heritage Museum\",\n            \"relation\": \"documents\",\n            \"object\": \"heritage of the American Western frontier\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"cultural heritage\"\n        },\n        {\n            \"subject\": \"Sherwin Miller Museum of Jewish Art\",\n            \"relation\": \"preserves\",\n            \"object\": \"largest collection of Jewish art\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Southwest United States\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"art collection\"\n        },\n        {\n            \"subject\": \"Sherwin Miller Museum of Jewish Art\",\n            \"relation\": \"has\",\n            \"object\": \"remnants of the Holocaust\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"artifact\"\n        },\n        {\n            \"subject\": \"Sherwin Miller Museum of Jewish Art\",\n            \"relation\": \"has\",\n            \"object\": \"artifacts relevant to Judaism\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"artifact\"\n        },\n        {\n            \"subject\": \"Sherwin Miller Museum of Jewish Art\",\n            \"relation\": \"located in\",\n            \"object\": \"Tulsa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText mentions several museums and collections.\n\nSentences:\n\n1. \"The Egyptian art collection at the Mabee-Gerrer Museum of Art in Shawnee is considered to be the finest Egyptian collection between Chicago and Los Angeles.\"\n\nSubject: Egyptian art collection (maybe we treat as collection). Relation: \"located at\" or \"collection held by\". But we need explicit: \"at the Mabee-Gerrer Museum of Art in Shawnee\". So we can have triplet: subject \"Egyptian art collection (Mabee-Gerrer Museum of Art)\"? Better: subject \"Egyptian art collection\" relation \"location\" object \"Mabee-Gerrer Museum of Art\". Also qualifier place: \"Shawnee\". Could also have \"city\" qualifier. Let's produce: subject \"Egyptian art collection\" relation \"held by\" object \"Mabee-Gerrer Museum of Art\". qualifiers: place \"Shawnee\". Also relation \"considered to be\" maybe \"assessment\" but we can capture \"finest Egyptian collection between Chicago and Los Angeles\". That's a claim with qualifier \"point in time\"? Not given. Could be relation \"ranking\" but maybe we just capture \"finest Egyptian collection between Chicago and Los Angeles\". Could be relation \"superlative status\" but not standard. Might use \"assessment\" relation \"finest\". But guidelines: use specific Wikidata-style relations. Could use \"has quality\" but not typical. Maybe we skip subjective claim.\n\n2. \"The Oklahoma City Museum of Art contains the most comprehensive collection of glass sculptures by artist Dale Chihuly in the world\"\n\nSubject: Oklahoma City Museum of Art. Relation: \"contains collection\" object: \"collection of glass sculptures by Dale Chihuly\". Could break: object \"glass sculptures by Dale Chihuly\". Relation \"contains\". Qualifier: \"most comprehensive\" (assessment) and \"in the world\". Might ignore assessment.\n\n3. \"Oklahoma City's National Cowboy and Western Heritage Museum documents the heritage of the American Western frontier.\"\n\nSubject: National Cowboy and Western Heritage Museum. Relation: \"documents\" object: \"heritage of the American Western frontier\". Could treat as \"subject documents object\". object_type \"heritage\". We'll set.\n\n4. \"With remnants of the Holocaust and artifacts relevant to Judaism, the Sherwin Miller Museum of Jewish Art of Tulsa preserves the largest collection of Jewish art in the Southwest United States.\"\n\nSubject: Sherwin Miller Museum of Jewish Art. Relation: \"preserves\" object: \"largest collection of Jewish art\". qualifier: \"in the Southwest United States\". Also mention \"remnants of the Holocaust\" and \"artifacts relevant to Judaism\" as part of collection. Could create separate triplets: museum \"has\" \"remnants of the Holocaust\". museum \"has\" \"artifacts relevant to Judaism\". Also \"preserves\" \"largest collection of Jewish art\". qualifier location \"Southwest United States\".\n\nAlso need subject_type and object_type.\n\nDefine types:\n\n- Egyptian art collection: collection (type \"art collection\")\n- Mabee-Gerrer Museum of Art: museum (type \"museum\")\n- Shawnee: city (type \"city\")\n- Oklahoma City Museum of Art: museum\n- glass sculptures by Dale Chihuly: artwork collection? maybe \"artwork\" type \"sculpture collection\". We'll use \"art collection\".\n- Dale Chihuly: artist (human)\n- National Cowboy and Western Heritage Museum: museum\n- heritage of the American Western frontier: heritage (type \"cultural heritage\")\n- Sherwin Miller Museum of Jewish Art: museum\n- remnants of the Holocaust: artifact (type \"artifact\")\n- artifacts relevant to Judaism: artifact\n- largest collection of Jewish art: art collection\n- Southwest United States: region\n\nNow produce triplets list.\n\nTriplet 1:\nsubject: \"Egyptian art collection\"\nrelation: \"held by\"\nobject: \"Mabee-Gerrer Museum of Art\"\nqualifiers: [{\"relation\":\"place\",\"object\":\"Shawnee\"}] maybe \"place\" qualifier. Use \"place\". object_type museum.\n\nTriplet 2:\nsubject: \"Oklahoma City Museum of Art\"\nrelation: \"contains\"\nobject: \"collection of glass sculptures by Dale Chihuly\"\nqualifiers: [] maybe include \"assessment\" but skip.\n\nTriplet 3:\nsubject: \"collection of glass sculptures by Dale Chihuly\"\nrelation: \"creator\"\nobject: \"Dale Chihuly\"\nqualifiers: [].\n\nTriplet 4:\nsubject: \"National Cowboy and Western Heritage Museum\"\nrelation: \"documents\"\nobject: \"heritage of the American Western frontier\"\nqualifiers: [].\n\nTriplet 5:\nsubject: \"Sherwin Miller Museum of Jewish Art\"\nrelation: \"preserves\"\nobject: \"largest collection of Jewish art\"\nqualifiers: [{\"relation\":\"place\",\"object\":\"Southwest United States\"}].\n\nTriplet 6:\nsubject: \"Sherwin Miller Museum of Jewish Art\"\nrelation: \"has\"\nobject: \"remnants of the Holocaust\"\nqualifiers: [].\n\nTriplet 7:\nsubject: \"Sherwin Miller Museum of Jewish Art\"\nrelation: \"has\"\nobject: \"artifacts relevant to Judaism\"\nqualifiers: [].\n\nPotential also include location of museums: \"Mabee-Gerrer Museum of Art\" location \"Shawnee\". Could add but not explicit \"in Shawnee\" refers to museum location. Already used as qualifier for collection. Might add separate: subject \"Mabee-Gerrer Museum of Art\" relation \"located in\" object \"Shawnee\". Similarly \"Sherwin Miller Museum of Jewish Art\" located in \"Tulsa\". Text says \"of Tulsa\". So add.\n\nTriplet 8:\nsubject: \"Mabee-Gerrer Museum of Art\"\nrelation: \"located in\"\nobject: \"Shawnee\"\n\nTriplet 9:\nsubject: \"Sherwin Miller Museum of Jewish Art\"\nrelation: \"located in\"\nobject: \"Tulsa\"\n\nAlso \"Oklahoma City Museum of Art\" location maybe \"Oklahoma City\". Not explicit but name includes city. Not explicit location statement. Could skip.\n\nNow assign types:\n\n- Egyptian art collection: \"art collection\"\n- Mabee-Gerrer Museum of Art: \"museum\"\n- Shawnee: \"city\"\n- Oklahoma City Museum of Art: \"museum\"\n- collection of glass sculptures by Dale Chihuly: \"art collection\"\n- Dale Chihuly: \"human\"\n- National Cowboy and Western Heritage Museum: \"museum\"\n- heritage of the American Western frontier: \"cultural heritage\"\n- Sherwin Miller Museum of Jewish Art: \"museum\"\n- largest collection of Jewish art: \"art collection\"\n- Southwest United States: \"region\"\n- remnants of the Holocaust: \"artifact\"\n- artifacts relevant to Judaism: \"artifact\"\n- Tulsa: \"city\"\n\nNow format JSON.\n\nQualifiers: use relation \"place\". Could also use \"point in time\" none.\n\nLet's produce."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1700,
+      "total_tokens": 3706,
+      "completion_tokens": 2006,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Egyptian art collection\",\n            \"relation\": \"held by\",\n            \"object\": \"Mabee-Gerrer Museum of Art\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Shawnee\"\n                }\n            ],\n            \"subject_type\": \"art collection\",\n            \"object_type\": \"museum\"\n        },\n        {\n            \"subject\": \"Mabee-Gerrer Museum of Art\",\n            \"relation\": \"located in\",\n            \"object\": \"Shawnee\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Oklahoma City Museum of Art\",\n            \"relation\": \"contains\",\n            \"object\": \"collection of glass sculptures by Dale Chihuly\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"art collection\"\n        },\n        {\n            \"subject\": \"collection of glass sculptures by Dale Chihuly\",\n            \"relation\": \"creator\",\n            \"object\": \"Dale Chihuly\",\n            \"qualifiers\": [],\n            \"subject_type\": \"art collection\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"National Cowboy and Western Heritage Museum\",\n            \"relation\": \"documents\",\n            \"object\": \"heritage of the American Western frontier\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"cultural heritage\"\n        },\n        {\n            \"subject\": \"Sherwin Miller Museum of Jewish Art\",\n            \"relation\": \"preserves\",\n            \"object\": \"largest collection of Jewish art\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Southwest United States\"\n                }\n            ],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"art collection\"\n        },\n        {\n            \"subject\": \"Sherwin Miller Museum of Jewish Art\",\n            \"relation\": \"has\",\n            \"object\": \"remnants of the Holocaust\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"artifact\"\n        },\n        {\n            \"subject\": \"Sherwin Miller Museum of Jewish Art\",\n            \"relation\": \"has\",\n            \"object\": \"artifacts relevant to Judaism\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"artifact\"\n        },\n        {\n            \"subject\": \"Sherwin Miller Museum of Jewish Art\",\n            \"relation\": \"located in\",\n            \"object\": \"Tulsa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"museum\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Egyptian art collection",
+        "relation": "held by",
+        "object": "Mabee-Gerrer Museum of Art",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "Shawnee"
+          }
+        ],
+        "subject_type": "art collection",
+        "object_type": "museum"
+      },
+      {
+        "subject": "Mabee-Gerrer Museum of Art",
+        "relation": "located in",
+        "object": "Shawnee",
+        "qualifiers": [],
+        "subject_type": "museum",
+        "object_type": "city"
+      },
+      {
+        "subject": "Oklahoma City Museum of Art",
+        "relation": "contains",
+        "object": "collection of glass sculptures by Dale Chihuly",
+        "qualifiers": [],
+        "subject_type": "museum",
+        "object_type": "art collection"
+      },
+      {
+        "subject": "collection of glass sculptures by Dale Chihuly",
+        "relation": "creator",
+        "object": "Dale Chihuly",
+        "qualifiers": [],
+        "subject_type": "art collection",
+        "object_type": "human"
+      },
+      {
+        "subject": "National Cowboy and Western Heritage Museum",
+        "relation": "documents",
+        "object": "heritage of the American Western frontier",
+        "qualifiers": [],
+        "subject_type": "museum",
+        "object_type": "cultural heritage"
+      },
+      {
+        "subject": "Sherwin Miller Museum of Jewish Art",
+        "relation": "preserves",
+        "object": "largest collection of Jewish art",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "Southwest United States"
+          }
+        ],
+        "subject_type": "museum",
+        "object_type": "art collection"
+      },
+      {
+        "subject": "Sherwin Miller Museum of Jewish Art",
+        "relation": "has",
+        "object": "remnants of the Holocaust",
+        "qualifiers": [],
+        "subject_type": "museum",
+        "object_type": "artifact"
+      },
+      {
+        "subject": "Sherwin Miller Museum of Jewish Art",
+        "relation": "has",
+        "object": "artifacts relevant to Judaism",
+        "qualifiers": [],
+        "subject_type": "museum",
+        "object_type": "artifact"
+      },
+      {
+        "subject": "Sherwin Miller Museum of Jewish Art",
+        "relation": "located in",
+        "object": "Tulsa",
+        "qualifiers": [],
+        "subject_type": "museum",
+        "object_type": "city"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1700,
+    "total_tokens": 3706,
+    "completion_tokens": 2006,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 790,
+    "output_tokens_est": 698
+  },
+  "attempts": 1,
+  "latency_s": 24.13062613699003,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:47:54.846211+00:00",
+  "cache_key": "0278f9e4179c09a8b3f15a552754304c"
+}

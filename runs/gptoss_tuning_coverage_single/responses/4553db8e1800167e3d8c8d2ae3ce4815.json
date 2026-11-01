@@ -1,0 +1,147 @@
+{
+  "task": {
+    "input_id": "b3480d89980452f6",
+    "input_hash": "8b0a5c7784d9fd5942b64b68ff69989ac522ea08d833559d83aeb6249fe55140",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-524f63e069e8653b31f125f93f5d4515",
+    "object": "chat.completion",
+    "created": 1791506111,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Age Pension\",\n            \"relation\": \"first payment made by\",\n            \"object\": \"Commonwealth Government\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1909\"\n                }\n            ],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"government\"\n        },\n        {\n            \"subject\": \"Age Pension\",\n            \"relation\": \"date of establishment\",\n            \"object\": \"1909\",\n            \"qualifiers\": [],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Age Pension\",\n            \"relation\": \"available to\",\n            \"object\": \"persons\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"minimum age\",\n                    \"object\": \"65 years\"\n                }\n            ],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"human group\"\n        },\n        {\n            \"subject\": \"Age Pension\",\n            \"relation\": \"eligibility age\",\n            \"object\": \"67 years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"workers\",\n            \"relation\": \"contribute to\",\n            \"object\": \"pension or insurance scheme in Australia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"social security scheme\"\n        },\n        {\n            \"subject\": \"Taxpayer-funded pensions\",\n            \"relation\": \"means tested\",\n            \"object\": \"true\",\n            \"qualifiers\": [],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"boolean\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText:\n\n\"Social security in Australia\n\nThe Age Pension was the first payment made by the Commonwealth Government, dating back to 1909. It is available to persons aged 65 years and over. The eligibility age is currently being progressively increased to a cap of 67 years old. Except for the mandatory superannuation scheme, workers do not contribute to a pension or insurance scheme in Australia, unlike pension schemes in many other countries. Taxpayer - funded pensions are means tested.\"\n\nWe need to parse facts.\n\nEntities: \"Age Pension\", \"Commonwealth Government\", \"Australia\", \"persons\", maybe \"mandatory superannuation scheme\", \"workers\", \"pension or insurance scheme\", \"taxpayer-funded pensions\".\n\nRelations: \"first payment made by\", \"date of inception\" maybe \"dating back to 1909\". Could be relation \"inception\" or \"point in time\". Use \"point in time\" qualifier for \"first payment made by\". But we need a relation: \"first payment made by\" not standard. Could use \"first payment made by\" as relation? Probably \"first payment made by\" is a custom relation. But we should use Wikidata style: \"first payment made by\" maybe \"first payment made by\" is not typical. Could use \"first payment made by\" as relation. Or \"first payment made by\" -> subject Age Pension, relation \"first payment made by\", object \"Commonwealth Government\". Also qualifier \"point in time\" 1909.\n\nSecond sentence: \"It is available to persons aged 65 years and over.\" So Age Pension, relation \"available to\", object \"persons aged 65 years and over\". Could split: object \"persons\" with qualifier \"minimum age 65 years\". Or we can have object \"persons\" and qualifier \"minimum age\" 65 years. Also \"over\" indicates age >=65. Use qualifier \"minimum age\" 65 years. Also maybe \"age limit\" 65 years and over.\n\nThird: \"The eligibility age is currently being progressively increased to a cap of 67 years old.\" This is about Age Pension eligibility age. So subject Age Pension, relation \"eligibility age\", object \"67 years\". Qualifier \"status\" \"currently being progressively increased\". Could use qualifier \"point in time\" maybe not. Use qualifier \"status\" \"progressively increased\". But we need to follow allowed qualifiers: \"modality\", \"condition\", \"approximation\", \"polarity\", \"attribution\". \"currently being progressively increased\" is a statement of ongoing change, not a qualifier type defined. Could treat as qualifier \"point in time\" maybe \"2026\"? Not given. Might ignore.\n\nBetter: create triplet: (Age Pension, eligibility age, 67 years). Qualifier: {\"relation\":\"status\",\"object\":\"progressively increased\"} but not allowed. Probably we can just have object \"67 years\" and no qualifiers.\n\nFourth: \"Except for the mandatory superannuation scheme, workers do not contribute to a pension or insurance scheme in Australia, unlike pension schemes in many other countries.\" Fact: workers do not contribute to a pension or insurance scheme in Australia. So subject \"workers\", relation \"contribute to\", object \"pension or insurance scheme in Australia\". Qualifier polarity negative. Also \"except for the mandatory superannuation scheme\" indicates exception, but we can ignore.\n\nSo triplet: (workers, contribute to, pension or insurance scheme in Australia) with qualifier polarity negative.\n\nSubject type: human group? \"workers\" -> \"human group\". Object type: \"pension or insurance scheme\" -> maybe \"social security scheme\". We'll label as \"social security scheme\".\n\nFifth: \"Taxpayer-funded pensions are means tested.\" So subject \"Taxpayer-funded pensions\", relation \"means tested\". That's a property, object maybe \"true\". Could use relation \"means tested\" with object \"true\". Or object \"means testing\". Use object \"true\". Qualifier none.\n\nSubject type: \"pension scheme\". Object type: \"boolean\".\n\nAlso first sentence: \"The Age Pension was the first payment made by the Commonwealth Government, dating back to 1909.\" Could also have triplet: (Age Pension, inception date, 1909). Use relation \"inception\" maybe \"date of establishment\". Use \"date of establishment\". We'll use relation \"inception\" maybe \"date of establishment\". Let's use \"date of establishment\". object \"1909\". Qualifier maybe none.\n\nAlso \"first payment made by the Commonwealth Government\". Could be (Age Pension, first payment made by, Commonwealth Government). Use relation \"first payment made by\". object \"Commonwealth Government\". Qualifier point in time 1909.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- Age Pension: \"social security program\" or \"pension scheme\". Use \"pension scheme\".\n- Commonwealth Government: \"government\".\n- persons: \"human group\".\n- workers: \"human group\".\n- pension or insurance scheme in Australia: \"social security scheme\".\n- Taxpayer-funded pensions: \"pension scheme\".\n- \"true\": maybe \"boolean\".\n\nNow produce JSON.\n\nList of triplets:\n\n1. Age Pension - first payment made by - Commonwealth Government, qualifiers: point in time 1909.\n\n2. Age Pension - date of establishment - 1909 (maybe duplicate but okay). Could include both.\n\nBut maybe we should not duplicate; but it's okay.\n\n3. Age Pension - available to - persons, qualifiers: minimum age 65 years. Use qualifier relation \"minimum age\" object \"65 years\". Also maybe \"age limit\" \"over\". We'll just include minimum age.\n\n4. Age Pension - eligibility age - 67 years.\n\n5. workers - contribute to - pension or insurance scheme in Australia, qualifiers: polarity negative.\n\n6. Taxpayer-funded pensions - means tested - true.\n\nNow ensure each entry includes subject_type and object_type.\n\nDefine types:\n\n- Age Pension: \"pension scheme\".\n- Commonwealth Government: \"government\".\n- 1909: \"date\".\n- persons: \"human group\".\n- workers: \"human group\".\n- pension or insurance scheme in Australia: \"social security scheme\".\n- 65 years: \"duration\".\n- 67 years: \"duration\".\n- true: \"boolean\".\n\nNow qualifiers: need list of dicts.\n\nQualifier for triplet 1: point in time 1909 (object type date). So qualifier dict: {\"relation\":\"point in time\",\"object\":\"1909\"}.\n\nQualifier for triplet 3: minimum age 65 years. Use relation \"minimum age\". object \"65 years\". Also maybe \"unit\": years but fine.\n\nQualifier for triplet 5: polarity negative. {\"relation\":\"polarity\",\"object\":\"negative\"}.\n\nNow produce JSON.\n\nCheck no extra text.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1678,
+      "total_tokens": 3489,
+      "completion_tokens": 1811,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Age Pension\",\n            \"relation\": \"first payment made by\",\n            \"object\": \"Commonwealth Government\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1909\"\n                }\n            ],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"government\"\n        },\n        {\n            \"subject\": \"Age Pension\",\n            \"relation\": \"date of establishment\",\n            \"object\": \"1909\",\n            \"qualifiers\": [],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Age Pension\",\n            \"relation\": \"available to\",\n            \"object\": \"persons\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"minimum age\",\n                    \"object\": \"65 years\"\n                }\n            ],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"human group\"\n        },\n        {\n            \"subject\": \"Age Pension\",\n            \"relation\": \"eligibility age\",\n            \"object\": \"67 years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"workers\",\n            \"relation\": \"contribute to\",\n            \"object\": \"pension or insurance scheme in Australia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"social security scheme\"\n        },\n        {\n            \"subject\": \"Taxpayer-funded pensions\",\n            \"relation\": \"means tested\",\n            \"object\": \"true\",\n            \"qualifiers\": [],\n            \"subject_type\": \"pension scheme\",\n            \"object_type\": \"boolean\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Age Pension",
+        "relation": "first payment made by",
+        "object": "Commonwealth Government",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1909"
+          }
+        ],
+        "subject_type": "pension scheme",
+        "object_type": "government"
+      },
+      {
+        "subject": "Age Pension",
+        "relation": "date of establishment",
+        "object": "1909",
+        "qualifiers": [],
+        "subject_type": "pension scheme",
+        "object_type": "date"
+      },
+      {
+        "subject": "Age Pension",
+        "relation": "available to",
+        "object": "persons",
+        "qualifiers": [
+          {
+            "relation": "minimum age",
+            "object": "65 years"
+          }
+        ],
+        "subject_type": "pension scheme",
+        "object_type": "human group"
+      },
+      {
+        "subject": "Age Pension",
+        "relation": "eligibility age",
+        "object": "67 years",
+        "qualifiers": [],
+        "subject_type": "pension scheme",
+        "object_type": "duration"
+      },
+      {
+        "subject": "workers",
+        "relation": "contribute to",
+        "object": "pension or insurance scheme in Australia",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "human group",
+        "object_type": "social security scheme"
+      },
+      {
+        "subject": "Taxpayer-funded pensions",
+        "relation": "means tested",
+        "object": "true",
+        "qualifiers": [],
+        "subject_type": "pension scheme",
+        "object_type": "boolean"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1678,
+    "total_tokens": 3489,
+    "completion_tokens": 1811,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 591,
+    "output_tokens_est": 498
+  },
+  "attempts": 1,
+  "latency_s": 22.21456878200115,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:35:33.803509+00:00",
+  "cache_key": "4553db8e1800167e3d8c8d2ae3ce4815"
+}

@@ -1,0 +1,161 @@
+{
+  "task": {
+    "input_id": "58172806f6459e03",
+    "input_hash": "21cd37965cdb46cec91dc871eaf5ff7d29da3e473c6a727d340ef52c8ae102fa",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-e12feb2a383d05be52cb352b796e6209",
+    "object": "chat.completion",
+    "created": 1791503284,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Britain\",\n            \"relation\": \"troops stationed\",\n            \"object\": \"Iceland\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"25,000\"},\n                {\"relation\": \"approximation\", \"object\": \"approximately\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Althingi\",\n            \"relation\": \"adopted\",\n            \"object\": \"American–Icelandic defence agreement\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"July 1941\"}\n            ],\n            \"subject_type\": \"government body\",\n            \"object_type\": \"treaty\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"defence responsibility for\",\n            \"object\": \"Iceland\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"July 1941\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"soldiers stationed\",\n            \"object\": \"Iceland\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"40,000\"},\n                {\"relation\": \"approximation\", \"object\": \"as many as\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Iceland\",\n            \"relation\": \"population\",\n            \"object\": \"120,000\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"World War II\"},\n                {\"relation\": \"approximation\", \"object\": \"approximately\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText mentions \"Kingdom of Iceland\" as title but not a fact. Then: \"At its peak, Britain had approximately 25,000 troops stationed in Iceland, all but eliminating unemployment in Reykjavík and other strategically important places.\"\n\nSo fact: Britain had approximately 25,000 troops stationed in Iceland. Relation maybe \"military personnel stationed\" or \"troops stationed\". Use \"troops stationed\" relation. Subject: Britain, object: Iceland, qualifiers: point in time? Not given. Approximation qualifier: \"approximation\" with \"approximately 25,000\". Also maybe \"quantity\" relation? Could treat object as \"troops\" with quantity. But typical pattern: (Britain, troops stationed, Iceland) with qualifier quantity. We'll include qualifier \"quantity\" maybe but spec says qualifiers are relation-object pairs; we can use \"quantity\" relation. However not defined but we can still use. Use \"quantity\" relation with object \"25,000\". Also \"approximation\" qualifier with object \"approximately\". But maybe combine: qualifier relation \"approximation\" object \"approximately\". Also \"point in time\" not given.\n\nSecond part: \"all but eliminating unemployment in Reykjavík and other strategically important places.\" That's a claim about effect: Britain troops eliminated unemployment. Could be (Britain, effect on unemployment, Reykjavík) but not explicit. Might be too interpretive. Probably skip.\n\nNext: \"In July 1941, the Althingi adopted the American–Icelandic defence agreement, passing responsibility for Iceland's defence to the United States.\"\n\nTriplet: Althingi adopted American–Icelandic defence agreement. Subject: Althingi, relation: \"adopted\", object: \"American–Icelandic defence agreement\". Qualifier: point in time July 1941.\n\nAlso: passing responsibility for Iceland's defence to the United States. So (United States, responsibility for defence of Iceland, Althingi?) Actually \"passing responsibility ... to the United States\" means United States assumed responsibility for Iceland's defence. So triplet: United States, \"defence responsibility for\", Iceland. Or \"has responsibility for defence of\". Use relation \"defence responsibility\". Subject: United States, object: Iceland. Qualifier: point in time July 1941 (same event). Could also include \"defence agreement\" but separate.\n\nNext: \"As many as 40,000 American soldiers were then stationed on the island, outnumbering the native population of adult men.\"\n\nTriplet: United States had approximately 40,000 soldiers stationed in Iceland. Subject: United States, relation: \"soldiers stationed\", object: Iceland. Qualifier: quantity 40,000, approximation \"as many as\". Also point in time? \"then\" refers to after July 1941, but not explicit date. Could maybe use same July 1941 as approximate.\n\nAlso: \"native population of adult men\" approx 120,000 total native population during war. Actually text: \"(Iceland's total native population during the war was approximately 120,000.)\" So triplet: Iceland, \"total native population during the war\", 120,000. Relation maybe \"population\". Use \"population\". Qualifier: point in time \"during the war\". Could also include approximation.\n\nAlso \"native population of adult men\" but not numeric.\n\nLet's construct triplets list.\n\nDefine subject_type and object_type.\n\n- Britain: human? Actually country. Use \"country\".\n- Iceland: country.\n- Troops: \"military personnel\".\n- Quantity: number (integer). object_type \"quantity\" maybe \"number\". Use \"quantity\".\n\n- Althingi: \"legislative body\" (maybe \"government body\").\n- American–Icelandic defence agreement: \"treaty\".\n- United States: country.\n- Defence responsibility: maybe \"military responsibility\". object_type \"concept\".\n\n- United States: country.\n- Soldiers: \"military personnel\".\n- Iceland: country.\n\n- Iceland: country.\n- population: \"population\".\n- 120,000: number.\n\nNow qualifiers: For each, include point in time where appropriate.\n\nFirst triplet: Britain troops stationed Iceland. qualifiers: {\"relation\":\"quantity\",\"object\":\"25,000\"}, {\"relation\":\"approximation\",\"object\":\"approximately\"}.\n\nSecond: Althingi adopted agreement. qualifiers: {\"relation\":\"point in time\",\"object\":\"July 1941\"}.\n\nThird: United States has defence responsibility for Iceland. qualifiers: {\"relation\":\"point in time\",\"object\":\"July 1941\"}.\n\nFourth: United States soldiers stationed Iceland. qualifiers: {\"relation\":\"quantity\",\"object\":\"40,000\"}, {\"relation\":\"approximation\",\"object\":\"as many as\"}.\n\nFifth: Iceland population during war approx 120,000. qualifiers: {\"relation\":\"point in time\",\"object\":\"World War II\"}? Actually \"during the war\". Could set object \"World War II\". Also approximation qualifier.\n\nWe'll use \"approximation\":\"approximately\". Also \"point in time\":\"World War II\". Might be okay.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1693,
+      "total_tokens": 3158,
+      "completion_tokens": 1465,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Britain\",\n            \"relation\": \"troops stationed\",\n            \"object\": \"Iceland\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"25,000\"},\n                {\"relation\": \"approximation\", \"object\": \"approximately\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Althingi\",\n            \"relation\": \"adopted\",\n            \"object\": \"American–Icelandic defence agreement\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"July 1941\"}\n            ],\n            \"subject_type\": \"government body\",\n            \"object_type\": \"treaty\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"defence responsibility for\",\n            \"object\": \"Iceland\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"July 1941\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"soldiers stationed\",\n            \"object\": \"Iceland\",\n            \"qualifiers\": [\n                {\"relation\": \"quantity\", \"object\": \"40,000\"},\n                {\"relation\": \"approximation\", \"object\": \"as many as\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Iceland\",\n            \"relation\": \"population\",\n            \"object\": \"120,000\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"World War II\"},\n                {\"relation\": \"approximation\", \"object\": \"approximately\"}\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Britain",
+        "relation": "troops stationed",
+        "object": "Iceland",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "25,000"
+          },
+          {
+            "relation": "approximation",
+            "object": "approximately"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Althingi",
+        "relation": "adopted",
+        "object": "American–Icelandic defence agreement",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "July 1941"
+          }
+        ],
+        "subject_type": "government body",
+        "object_type": "treaty"
+      },
+      {
+        "subject": "United States",
+        "relation": "defence responsibility for",
+        "object": "Iceland",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "July 1941"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "concept"
+      },
+      {
+        "subject": "United States",
+        "relation": "soldiers stationed",
+        "object": "Iceland",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "40,000"
+          },
+          {
+            "relation": "approximation",
+            "object": "as many as"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Iceland",
+        "relation": "population",
+        "object": "120,000",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "World War II"
+          },
+          {
+            "relation": "approximation",
+            "object": "approximately"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1693,
+    "total_tokens": 3158,
+    "completion_tokens": 1465,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 562,
+    "output_tokens_est": 469
+  },
+  "attempts": 1,
+  "latency_s": 18.440580266003963,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:48:22.939682+00:00",
+  "cache_key": "bc659b40641cb3dbc6366ae7fa230844"
+}

@@ -1,0 +1,167 @@
+{
+  "task": {
+    "input_id": "6bd0903fd02869b6",
+    "input_hash": "db4ed95cdc4314faf467eb491c9f803b8d3fb5d3d025f59a62b3a3a176e77b6d",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793203612-DmWLCgEAccuaL3GM5Vjy",
+    "object": "chat.completion",
+    "created": 1793203612,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Near AI",
+    "system_fingerprint": "vllm-0.31.0-5e5536ce",
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Glade Farms\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Glade Farms\",\n            \"relation\": \"located in\",\n            \"object\": \"Preston County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Preston County\",\n            \"relation\": \"located in\",\n            \"object\": \"West Virginia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"West Virginia\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Glade Farms\",\n            \"relation\": \"located on\",\n            \"object\": \"West Virginia Route 26\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Glade Farms\",\n            \"relation\": \"located relative to\",\n            \"object\": \"Brandonville\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"north-northeast\",\n                    \"object_type\": \"direction\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nEntities: Glade Farms (unincorporated community). West Virginia (state). Preston County (county). United States (country). West Virginia Route 26 (road). Brandonville (town? community). Also location relations.\n\nFirst sentence: \"Glade Farms is an unincorporated community in Preston County, West Virginia, United States.\"\n\nTriplets:\n- subject: Glade Farms, relation: instance of (or type) maybe \"unincorporated community\". But they want relation like \"instance of\" or \"type\". In examples they used occupation, field of work, etc. For location: relation \"located in administrative territorial entity\" (Wikidata). Use \"located in\". So:\n\nTriplet 1:\nsubject: Glade Farms\nrelation: instance of\nobject: unincorporated community\nqualifiers: none\nsubject_type: human? No, it's a place. So \"settlement\" maybe. Use \"unincorporated community\" as object_type \"settlement type\". But they want object_type: class of object. So object_type: \"settlement type\". subject_type: \"settlement\". Let's define.\n\nTriplet 2:\nsubject: Glade Farms\nrelation: located in\nobject: Preston County\nqualifiers: none\nsubject_type: \"settlement\"\nobject_type: \"county\"\n\nTriplet 3:\nsubject: Preston County\nrelation: located in\nobject: West Virginia\nsubject_type: \"county\"\nobject_type: \"state\"\n\nTriplet 4:\nsubject: West Virginia\nrelation: located in\nobject: United States\nsubject_type: \"state\"\nobject_type: \"country\"\n\nSecond sentence: \"Glade Farms is located on West Virginia Route 26 north-northeast of Brandon...\". So:\n\nTriplet 5:\nsubject: Glade Farms\nrelation: located on\nobject: West Virginia Route 26\nqualifiers: none\nsubject_type: \"settlement\"\nobject_type: \"road\"\n\nTriplet 6:\nsubject: Glade Farms\nrelation: direction from\nobject: Brandonville\nqualifiers: maybe \"direction\" north-northeast. Could encode as qualifier: relation \"direction\" object \"north-northeast\". But they said qualifiers are attached to a triplet. So we could have a triplet \"Glade Farms\" \"located relative to\" \"Brandonville\" with qualifier \"direction\" \"north-northeast\". Or we could have relation \"located north-northeast of\". But better to separate: relation \"located relative to\" object \"Brandonville\", qualifier direction.\n\nLet's do:\n\nTriplet 6:\nsubject: Glade Farms\nrelation: located relative to\nobject: Brandonville\nqualifiers: [{\"relation\":\"direction\",\"object\":\"north-northeast\",\"object_type\":\"direction\"}]\nsubject_type: \"settlement\"\nobject_type: \"settlement\"\n\nAlternatively, could use \"distance direction\". We'll follow.\n\nAlso maybe include \"West Virginia Route 26\" is a road in West Virginia. Could add location of road: \"West Virginia Route 26\" located in West Virginia. But not required.\n\nNow produce JSON list under \"triplets\". Ensure each dict includes qualifiers list (empty if none). Provide subject_type and object_type.\n\nDefine types:\n- Glade Farms: settlement\n- unincorporated community: settlement type\n- Preston County: county\n- West Virginia: state\n- United States: country\n- West Virginia Route 26: road\n- Brandonville: settlement\n- direction: direction (maybe \"compass direction\").\n\nNow produce JSON.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nEntities: Glade Farms (unincorporated community). West Virginia (state). Preston County (county). United States (country). West Virginia Route 26 (road). Brandonville (town? community). Also location relations.\n\nFirst sentence: \"Glade Farms is an unincorporated community in Preston County, West Virginia, United States.\"\n\nTriplets:\n- subject: Glade Farms, relation: instance of (or type) maybe \"unincorporated community\". But they want relation like \"instance of\" or \"type\". In examples they used occupation, field of work, etc. For location: relation \"located in administrative territorial entity\" (Wikidata). Use \"located in\". So:\n\nTriplet 1:\nsubject: Glade Farms\nrelation: instance of\nobject: unincorporated community\nqualifiers: none\nsubject_type: human? No, it's a place. So \"settlement\" maybe. Use \"unincorporated community\" as object_type \"settlement type\". But they want object_type: class of object. So object_type: \"settlement type\". subject_type: \"settlement\". Let's define.\n\nTriplet 2:\nsubject: Glade Farms\nrelation: located in\nobject: Preston County\nqualifiers: none\nsubject_type: \"settlement\"\nobject_type: \"county\"\n\nTriplet 3:\nsubject: Preston County\nrelation: located in\nobject: West Virginia\nsubject_type: \"county\"\nobject_type: \"state\"\n\nTriplet 4:\nsubject: West Virginia\nrelation: located in\nobject: United States\nsubject_type: \"state\"\nobject_type: \"country\"\n\nSecond sentence: \"Glade Farms is located on West Virginia Route 26 north-northeast of Brandon...\". So:\n\nTriplet 5:\nsubject: Glade Farms\nrelation: located on\nobject: West Virginia Route 26\nqualifiers: none\nsubject_type: \"settlement\"\nobject_type: \"road\"\n\nTriplet 6:\nsubject: Glade Farms\nrelation: direction from\nobject: Brandonville\nqualifiers: maybe \"direction\" north-northeast. Could encode as qualifier: relation \"direction\" object \"north-northeast\". But they said qualifiers are attached to a triplet. So we could have a triplet \"Glade Farms\" \"located relative to\" \"Brandonville\" with qualifier \"direction\" \"north-northeast\". Or we could have relation \"located north-northeast of\". But better to separate: relation \"located relative to\" object \"Brandonville\", qualifier direction.\n\nLet's do:\n\nTriplet 6:\nsubject: Glade Farms\nrelation: located relative to\nobject: Brandonville\nqualifiers: [{\"relation\":\"direction\",\"object\":\"north-northeast\",\"object_type\":\"direction\"}]\nsubject_type: \"settlement\"\nobject_type: \"settlement\"\n\nAlternatively, could use \"distance direction\". We'll follow.\n\nAlso maybe include \"West Virginia Route 26\" is a road in West Virginia. Could add location of road: \"West Virginia Route 26\" located in West Virginia. But not required.\n\nNow produce JSON list under \"triplets\". Ensure each dict includes qualifiers list (empty if none). Provide subject_type and object_type.\n\nDefine types:\n- Glade Farms: settlement\n- unincorporated community: settlement type\n- Preston County: county\n- West Virginia: state\n- United States: country\n- West Virginia Route 26: road\n- Brandonville: settlement\n- direction: direction (maybe \"compass direction\").\n\nNow produce JSON.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1399,
+      "completion_tokens": 1116,
+      "total_tokens": 2515,
+      "cost": 0.00020865,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 48,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00020865,
+        "upstream_inference_prompt_cost": 4.125e-05,
+        "upstream_inference_completions_cost": 0.0001674
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 744,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Glade Farms\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Glade Farms\",\n            \"relation\": \"located in\",\n            \"object\": \"Preston County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Preston County\",\n            \"relation\": \"located in\",\n            \"object\": \"West Virginia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"West Virginia\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Glade Farms\",\n            \"relation\": \"located on\",\n            \"object\": \"West Virginia Route 26\",\n            \"qualifiers\": [],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Glade Farms\",\n            \"relation\": \"located relative to\",\n            \"object\": \"Brandonville\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"north-northeast\",\n                    \"object_type\": \"direction\"\n                }\n            ],\n            \"subject_type\": \"settlement\",\n            \"object_type\": \"settlement\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Glade Farms",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Glade Farms",
+        "relation": "located in",
+        "object": "Preston County",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Preston County",
+        "relation": "located in",
+        "object": "West Virginia",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "state"
+      },
+      {
+        "subject": "West Virginia",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "Glade Farms",
+        "relation": "located on",
+        "object": "West Virginia Route 26",
+        "qualifiers": [],
+        "subject_type": "settlement",
+        "object_type": "road"
+      },
+      {
+        "subject": "Glade Farms",
+        "relation": "located relative to",
+        "object": "Brandonville",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "north-northeast"
+          }
+        ],
+        "subject_type": "settlement",
+        "object_type": "settlement"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1399,
+    "completion_tokens": 1116,
+    "total_tokens": 2515,
+    "cost": 0.00020865,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 48,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00020865,
+      "upstream_inference_prompt_cost": 4.125e-05,
+      "upstream_inference_completions_cost": 0.0001674
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 744,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 556,
+    "output_tokens_est": 429
+  },
+  "attempts": 1,
+  "latency_s": 24.17655788000411,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T16:07:16.025645+00:00",
+  "cache_key": "bc722687ebb72cc1da1ab8c3d6d8607e"
+}

@@ -1,0 +1,167 @@
+{
+  "task": {
+    "input_id": "62e830ed8b1bfa94",
+    "input_hash": "a4b5484266a4fa96d01dd4062003fd79b8fe4ee4026fd8c589e27460a081a6f4",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793202990-2SrHRK2osMdkSu0zc0Oz",
+    "object": "chat.completion",
+    "created": 1793202990,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"date of birth\",\n            \"object\": \"21 December 1953\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"England\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"occupation\",\n            \"object\": \"footballer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"league appearances\",\n            \"object\": \"148\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"competition\",\n                    \"object\": \"Football League\",\n                    \"object_type\": \"league\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"career length\",\n            \"object\": \"6 years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"league participated in\",\n            \"object\": \"Football League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"league\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Garry Dulson\\n\\nGarry Dulson (born 21 December 1953) is an English former footballer. He played 148 league games in a six-year career in the Football League.\"\n\nEntities: Garry Dulson (human). Date of birth: 21 December 1953. Nationality: English (could be \"country of citizenship\" or \"nationality\"). Occupation: footballer (former). Could also have \"occupation\" = footballer, with qualifier \"position\" maybe? Not given. Also \"former\" indicates past occupation. Could have \"career end\" etc. Also \"played 148 league games\" - relation: number of games played? Could be \"games played\" with object \"148\". But object should be entity; numbers can be objects of type \"quantity\". So relation: \"games played\" or \"number of league appearances\". Use \"league appearances\". Also \"six-year career\" - relation: \"career length\" with object \"6 years\". Also \"in the Football League\" - relation: \"league\" maybe \"league participated in\". So we can produce multiple triplets.\n\nLet's list:\n\n1. subject: Garry Dulson, relation: date of birth, object: 21 December 1953, subject_type: human, object_type: date.\n\n2. subject: Garry Dulson, relation: nationality, object: England (or \"England\" as country), subject_type: human, object_type: country.\n\nBut text says \"English former footballer\". Could be \"country of citizenship\" = England. We'll use \"country of citizenship\".\n\n3. subject: Garry Dulson, relation: occupation, object: footballer, subject_type: human, object_type: profession. Also qualifier: \"status\" maybe \"former\". Could add qualifier relation \"end time\" unknown. Could add qualifier \"qualifier\": {\"relation\":\"status\",\"object\":\"former\",\"object_type\":\"string\"} but maybe not needed. The spec says qualifiers should be relations and objects that are entities. \"former\" is an adjective, not an entity. Might skip.\n\n4. subject: Garry Dulson, relation: league appearances, object: 148, object_type: quantity. Qualifier: \"competition\" = Football League, object_type: league. Also qualifier: \"type\" = league games. Could do qualifier \"competition\" with object \"Football League\". So main object is 148 (quantity). Qualifier relation \"competition\" object \"Football League\". object_type \"league\". Also qualifier \"point in time\" maybe \"career period\"? Not needed.\n\n5. subject: Garry Dulson, relation: career length, object: 6, object_type: quantity (years). Qualifier: \"unit\" maybe \"year\". But we can set object as \"6 years\" as string? Better: object \"6 years\" with type \"duration\". Use object_type \"duration\". Also qualifier: \"career type\" maybe \"football\". Not needed.\n\nAlternatively, we could have separate triplet: \"career\" as entity? Might be okay.\n\nAlso \"played ... in a six-year career in the Football League.\" Could have relation \"employer\" = Football League? Not exactly employer. Could be \"league\" participated in. So:\n\n6. subject: Garry Dulson, relation: league participated in, object: Football League, object_type: league.\n\nBut we already used Football League as qualifier for appearances. Could still include.\n\nNow produce JSON list under \"triplets\". Ensure each dict includes qualifiers list (empty if none). Provide subject_type and object_type.\n\nDefine types: human, date, country, profession, quantity, league, duration.\n\nFor quantity, object_type \"quantity\". For duration, \"duration\". For league, \"league\". For country, \"country\". For profession, \"profession\". For date, \"date\". For human, \"human\".\n\nNow construct JSON.\n\nCheck qualifiers format: each qualifier dict has \"relation\", \"object\", \"object_type\". For appearances triplet, qualifiers list with one qualifier: competition = Football League.\n\nFor career length maybe qualifier \"career type\" not needed.\n\nLet's produce.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text.\n\nText: \"Garry Dulson\\n\\nGarry Dulson (born 21 December 1953) is an English former footballer. He played 148 league games in a six-year career in the Football League.\"\n\nEntities: Garry Dulson (human). Date of birth: 21 December 1953. Nationality: English (could be \"country of citizenship\" or \"nationality\"). Occupation: footballer (former). Could also have \"occupation\" = footballer, with qualifier \"position\" maybe? Not given. Also \"former\" indicates past occupation. Could have \"career end\" etc. Also \"played 148 league games\" - relation: number of games played? Could be \"games played\" with object \"148\". But object should be entity; numbers can be objects of type \"quantity\". So relation: \"games played\" or \"number of league appearances\". Use \"league appearances\". Also \"six-year career\" - relation: \"career length\" with object \"6 years\". Also \"in the Football League\" - relation: \"league\" maybe \"league participated in\". So we can produce multiple triplets.\n\nLet's list:\n\n1. subject: Garry Dulson, relation: date of birth, object: 21 December 1953, subject_type: human, object_type: date.\n\n2. subject: Garry Dulson, relation: nationality, object: England (or \"England\" as country), subject_type: human, object_type: country.\n\nBut text says \"English former footballer\". Could be \"country of citizenship\" = England. We'll use \"country of citizenship\".\n\n3. subject: Garry Dulson, relation: occupation, object: footballer, subject_type: human, object_type: profession. Also qualifier: \"status\" maybe \"former\". Could add qualifier relation \"end time\" unknown. Could add qualifier \"qualifier\": {\"relation\":\"status\",\"object\":\"former\",\"object_type\":\"string\"} but maybe not needed. The spec says qualifiers should be relations and objects that are entities. \"former\" is an adjective, not an entity. Might skip.\n\n4. subject: Garry Dulson, relation: league appearances, object: 148, object_type: quantity. Qualifier: \"competition\" = Football League, object_type: league. Also qualifier: \"type\" = league games. Could do qualifier \"competition\" with object \"Football League\". So main object is 148 (quantity). Qualifier relation \"competition\" object \"Football League\". object_type \"league\". Also qualifier \"point in time\" maybe \"career period\"? Not needed.\n\n5. subject: Garry Dulson, relation: career length, object: 6, object_type: quantity (years). Qualifier: \"unit\" maybe \"year\". But we can set object as \"6 years\" as string? Better: object \"6 years\" with type \"duration\". Use object_type \"duration\". Also qualifier: \"career type\" maybe \"football\". Not needed.\n\nAlternatively, we could have separate triplet: \"career\" as entity? Might be okay.\n\nAlso \"played ... in a six-year career in the Football League.\" Could have relation \"employer\" = Football League? Not exactly employer. Could be \"league\" participated in. So:\n\n6. subject: Garry Dulson, relation: league participated in, object: Football League, object_type: league.\n\nBut we already used Football League as qualifier for appearances. Could still include.\n\nNow produce JSON list under \"triplets\". Ensure each dict includes qualifiers list (empty if none). Provide subject_type and object_type.\n\nDefine types: human, date, country, profession, quantity, league, duration.\n\nFor quantity, object_type \"quantity\". For duration, \"duration\". For league, \"league\". For country, \"country\". For profession, \"profession\". For date, \"date\". For human, \"human\".\n\nNow construct JSON.\n\nCheck qualifiers format: each qualifier dict has \"relation\", \"object\", \"object_type\". For appearances triplet, qualifiers list with one qualifier: competition = Football League.\n\nFor career length maybe qualifier \"career type\" not needed.\n\nLet's produce.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1394,
+      "completion_tokens": 1226,
+      "total_tokens": 2620,
+      "cost": 0.000271082,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000271082,
+        "upstream_inference_prompt_cost": 4.182e-05,
+        "upstream_inference_completions_cost": 0.000229262
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 942,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"date of birth\",\n            \"object\": \"21 December 1953\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"England\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"occupation\",\n            \"object\": \"footballer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"league appearances\",\n            \"object\": \"148\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"competition\",\n                    \"object\": \"Football League\",\n                    \"object_type\": \"league\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"career length\",\n            \"object\": \"6 years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"Garry Dulson\",\n            \"relation\": \"league participated in\",\n            \"object\": \"Football League\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"league\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Garry Dulson",
+        "relation": "date of birth",
+        "object": "21 December 1953",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Garry Dulson",
+        "relation": "country of citizenship",
+        "object": "England",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Garry Dulson",
+        "relation": "occupation",
+        "object": "footballer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Garry Dulson",
+        "relation": "league appearances",
+        "object": "148",
+        "qualifiers": [
+          {
+            "relation": "competition",
+            "object": "Football League"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Garry Dulson",
+        "relation": "career length",
+        "object": "6 years",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "duration"
+      },
+      {
+        "subject": "Garry Dulson",
+        "relation": "league participated in",
+        "object": "Football League",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "league"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1394,
+    "completion_tokens": 1226,
+    "total_tokens": 2620,
+    "cost": 0.000271082,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000271082,
+      "upstream_inference_prompt_cost": 4.182e-05,
+      "upstream_inference_completions_cost": 0.000229262
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 942,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 547,
+    "output_tokens_est": 420
+  },
+  "attempts": 1,
+  "latency_s": 9.149851892994775,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T15:56:39.214652+00:00",
+  "cache_key": "508cece1f45f45f31011d3ebffe0a026"
+}

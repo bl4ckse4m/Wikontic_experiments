@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "8b1ee1e50733e1c9",
+    "input_hash": "240843b438aafd6022b81f5da48980f67999705aa8183d8061446498770ee1da",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c52e47be5a76f1dcdcd6f07bb0fba15e",
+    "object": "chat.completion",
+    "created": 1791519345,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"H&SJ\",\n            \"relation\": \"bridge completed\",\n            \"object\": \"Hannibal Bridge\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"July 1869\"},\n                {\"relation\": \"place\", \"object\": \"Kansas City\"}\n            ],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"bridge\"\n        },\n        {\n            \"subject\": \"Hannibal Bridge\",\n            \"relation\": \"connected to\",\n            \"object\": \"Kansas Pacific trains\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"train service\"\n        },\n        {\n            \"subject\": \"Kansas Pacific\",\n            \"relation\": \"built\",\n            \"object\": \"Denver Pacific Railway\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"railway\"\n        },\n        {\n            \"subject\": \"Denver Pacific Railway\",\n            \"relation\": \"connected to\",\n            \"object\": \"Union Pacific\",\n            \"qualifiers\": [],\n            \"subject_type\": \"railway\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Kansas Pacific\",\n            \"relation\": \"drove last spike\",\n            \"object\": \"Denver Pacific line\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"August 1870\"},\n                {\"relation\": \"place\", \"object\": \"Strasburg, Colorado\"}\n            ],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"railway line\"\n        },\n        {\n            \"subject\": \"first true Atlantic to Pacific United States railroad\",\n            \"relation\": \"date of completion\",\n            \"object\": \"August 1870\",\n            \"qualifiers\": [],\n            \"subject_type\": \"railway\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText mentions:\n\n- \"First Transcontinental Railroad\" is title, maybe not a fact.\n\n- \"Several years after the end of the Civil War, the competing railroads coming from Missouri finally realized their initial strategic advantage and a building boom ensued.\" This is narrative, not explicit fact about entities? Could extract: \"Civil War\" end date? Not given. Probably ignore.\n\n- \"In July 1869, the H&SJ finished the Hannibal Bridge in Kansas City which was the first bridge to cross the Missouri River.\"\n\nEntities: H&SJ (likely stands for something, but we keep as string). Relation: \"finished\" (or \"construction completed\") of \"Hannibal Bridge\". Qualifier: point in time July 1869. Also location: Kansas City (place). Also \"first bridge to cross the Missouri River\" maybe a qualifier \"first\" but that's a property. Could be relation \"first bridge to cross\" but we can capture as \"first bridge to cross\" maybe not needed. We'll create triplet: subject \"H&SJ\", relation \"bridge completed\", object \"Hannibal Bridge\". Qualifiers: point in time July 1869, place Kansas City. Also maybe \"first bridge to cross the Missouri River\" as qualifier \"first\" but we have no relation for that. Could add qualifier relation \"first of type\" but not defined. We'll skip.\n\n- \"This in turn connected to Kansas Pacific trains going from Kansas City to Denver, which in turn had built the Denver Pacific Railway connecting to the Union Pacific.\"\n\nFacts:\n\n1. \"Hannibal Bridge\" (or the bridge) \"connected to\" Kansas Pacific trains. Relation maybe \"connected to\". Subject \"Hannibal Bridge\", object \"Kansas Pacific trains\". Qualifier maybe place Kansas City? Not explicit.\n\n2. Kansas Pacific \"built\" the Denver Pacific Railway. Relation \"built\". Subject \"Kansas Pacific\", object \"Denver Pacific Railway\". No date given.\n\n3. Denver Pacific Railway \"connected to\" the Union Pacific. Relation \"connected to\". Subject \"Denver Pacific Railway\", object \"Union Pacific\". No date.\n\n- \"In August 1870, the Kansas Pacific drove the last spike connecting to the Denver Pacific line at Strasburg, Colorado and the first true Atlantic to Pacific United States railroad was completed.\"\n\nFacts:\n\n1. Kansas Pacific \"drove the last spike\" connecting to the Denver Pacific line at Strasburg, Colorado. Relation maybe \"event: last spike driven\". Could be \"last spike driven\" as object. We'll phrase: subject \"Kansas Pacific\", relation \"drove last spike\", object \"Denver Pacific line\". Qualifier: point in time August 1870, place \"Strasburg, Colorado\".\n\n2. \"the first true Atlantic to Pacific United States railroad was completed.\" Subject maybe \"Atlantic to Pacific United States railroad\" (or \"first true Atlantic to Pacific United States railroad\") completed. Relation \"completed\". No explicit subject who completed, but we can treat the railroad as subject and relation \"status\" maybe \"completed\". We'll create: subject \"first true Atlantic to Pacific United States railroad\", relation \"completion date\", object \"August 1870\"? Actually the sentence says \"and the first true Atlantic to Pacific United States railroad was completed.\" The timing is same clause as previous, so likely August 1870. So we can have triplet: subject \"first true Atlantic to Pacific United States railroad\", relation \"date of completion\", object \"August 1870\". Or relation \"completed\" with qualifier point in time August 1870. We'll use \"completed\" relation.\n\nNeed entity types:\n\n- H&SJ: likely a railroad company. type \"organisation\" or \"railroad\". We'll use \"organisation\".\n\n- Hannibal Bridge: type \"bridge\".\n\n- Kansas City: place \"city\".\n\n- Missouri River: \"river\".\n\n- Kansas Pacific: railroad company, type \"organisation\".\n\n- Denver: city, but used as destination, not needed.\n\n- Denver Pacific Railway: type \"railway\".\n\n- Union Pacific: organisation (railroad).\n\n- Denver Pacific line: same as Denver Pacific Railway? We'll treat as \"railway line\".\n\n- Strasburg, Colorado: place (town).\n\n- Atlantic to Pacific United States railroad: type \"railway\".\n\nNow qualifiers: point in time, place.\n\nLet's construct list.\n\nTriplet 1:\nsubject: \"H&SJ\"\nrelation: \"bridge completed\"\nobject: \"Hannibal Bridge\"\nqualifiers: point in time July 1869, place Kansas City\nsubject_type: \"organisation\"\nobject_type: \"bridge\"\n\nTriplet 2:\nsubject: \"Hannibal Bridge\"\nrelation: \"connected to\"\nobject: \"Kansas Pacific trains\"\nqualifiers: [] maybe place Kansas City? Not explicit. We'll omit.\n\nsubject_type: \"bridge\"\nobject_type: \"train service\" maybe \"organisation\"? We'll use \"train service\".\n\nTriplet 3:\nsubject: \"Kansas Pacific\"\nrelation: \"built\"\nobject: \"Denver Pacific Railway\"\nqualifiers: [] (no date)\nsubject_type: \"organisation\"\nobject_type: \"railway\"\n\nTriplet 4:\nsubject: \"Denver Pacific Railway\"\nrelation: \"connected to\"\nobject: \"Union Pacific\"\nqualifiers: [] \nsubject_type: \"railway\"\nobject_type: \"organisation\"\n\nTriplet 5:\nsubject: \"Kansas Pacific\"\nrelation: \"drove last spike\"\nobject: \"Denver Pacific line\"\nqualifiers: point in time August 1870, place \"Strasburg, Colorado\"\nsubject_type: \"organisation\"\nobject_type: \"railway line\"\n\nTriplet 6:\nsubject: \"first true Atlantic to Pacific United States railroad\"\nrelation: \"completed\"\nobject: \"\"? maybe we can set object \"true Atlantic to Pacific United States railroad\" as subject, relation \"completion date\". Better: relation \"date of completion\", object \"August 1870\". That is a date fact. Let's do that.\n\nsubject: \"first true Atlantic to Pacific United States railroad\"\nrelation: \"date of completion\"\nobject: \"August 1870\"\nqualifiers: [] \nsubject_type: \"railway\"\nobject_type: \"date\"\n\nAlternatively we could have relation \"completed\" with qualifier point in time August 1870. Both okay. Choose \"completed\" with qualifier.\n\nsubject: \"first true Atlantic to Pacific United States railroad\"\nrelation: \"completed\"\nobject: \"\"? Need object maybe \"status\". In examples they used \"completed\" as relation with no object? Not typical. Better to use \"date of completion\". We'll go with that.\n\nNow also \"first bridge to cross the Missouri River\" could be captured as qualifier \"first of type\". But not required.\n\nAlso \"Several years after the end of the Civil War\" not a fact about date.\n\nOk produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1722,
+      "total_tokens": 3538,
+      "completion_tokens": 1816,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"H&SJ\",\n            \"relation\": \"bridge completed\",\n            \"object\": \"Hannibal Bridge\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"July 1869\"},\n                {\"relation\": \"place\", \"object\": \"Kansas City\"}\n            ],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"bridge\"\n        },\n        {\n            \"subject\": \"Hannibal Bridge\",\n            \"relation\": \"connected to\",\n            \"object\": \"Kansas Pacific trains\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"train service\"\n        },\n        {\n            \"subject\": \"Kansas Pacific\",\n            \"relation\": \"built\",\n            \"object\": \"Denver Pacific Railway\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"railway\"\n        },\n        {\n            \"subject\": \"Denver Pacific Railway\",\n            \"relation\": \"connected to\",\n            \"object\": \"Union Pacific\",\n            \"qualifiers\": [],\n            \"subject_type\": \"railway\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"Kansas Pacific\",\n            \"relation\": \"drove last spike\",\n            \"object\": \"Denver Pacific line\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"August 1870\"},\n                {\"relation\": \"place\", \"object\": \"Strasburg, Colorado\"}\n            ],\n            \"subject_type\": \"organisation\",\n            \"object_type\": \"railway line\"\n        },\n        {\n            \"subject\": \"first true Atlantic to Pacific United States railroad\",\n            \"relation\": \"date of completion\",\n            \"object\": \"August 1870\",\n            \"qualifiers\": [],\n            \"subject_type\": \"railway\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "H&SJ",
+        "relation": "bridge completed",
+        "object": "Hannibal Bridge",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "July 1869"
+          },
+          {
+            "relation": "place",
+            "object": "Kansas City"
+          }
+        ],
+        "subject_type": "organisation",
+        "object_type": "bridge"
+      },
+      {
+        "subject": "Hannibal Bridge",
+        "relation": "connected to",
+        "object": "Kansas Pacific trains",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "train service"
+      },
+      {
+        "subject": "Kansas Pacific",
+        "relation": "built",
+        "object": "Denver Pacific Railway",
+        "qualifiers": [],
+        "subject_type": "organisation",
+        "object_type": "railway"
+      },
+      {
+        "subject": "Denver Pacific Railway",
+        "relation": "connected to",
+        "object": "Union Pacific",
+        "qualifiers": [],
+        "subject_type": "railway",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "Kansas Pacific",
+        "relation": "drove last spike",
+        "object": "Denver Pacific line",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "August 1870"
+          },
+          {
+            "relation": "place",
+            "object": "Strasburg, Colorado"
+          }
+        ],
+        "subject_type": "organisation",
+        "object_type": "railway line"
+      },
+      {
+        "subject": "first true Atlantic to Pacific United States railroad",
+        "relation": "date of completion",
+        "object": "August 1870",
+        "qualifiers": [],
+        "subject_type": "railway",
+        "object_type": "date"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1722,
+    "total_tokens": 3538,
+    "completion_tokens": 1816,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 568,
+    "output_tokens_est": 476
+  },
+  "attempts": 1,
+  "latency_s": 22.176862952997908,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:16:07.473234+00:00",
+  "cache_key": "589774265cb754f630bdc90d8956ecb6"
+}

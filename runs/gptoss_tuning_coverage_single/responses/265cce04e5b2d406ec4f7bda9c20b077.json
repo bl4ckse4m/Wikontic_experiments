@@ -1,0 +1,152 @@
+{
+  "task": {
+    "input_id": "2ebd971e222f4e54",
+    "input_hash": "de7211ec7eca322b8d2e0ca991f4d2022f67b6d7f1506dfe35a35113a7207027",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-4d7634fa128f2c5aeeaa8acea5c47271",
+    "object": "chat.completion",
+    "created": 1791502088,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"inception\",\n            \"object\": \"1984\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"subdivision of\",\n            \"object\": \"CIPFA\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"type\",\n            \"object\": \"independent company\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1987\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"company type\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"number of employees\",\n            \"object\": \"33\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1987\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"led by\",\n            \"object\": \"Rod Aldridge\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1987\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"stock exchange listing\",\n            \"object\": \"London Stock Exchange\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1991\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Capita\n\nCapita was formed 1984 as a division of the non-profit CIPFA (Chartered Institute of Public Finance and Accountancy). In 1987 it [Capita] became an independent company with 33 staff as a result of a management buy - out, led by Rod Aldridge, and was first listed on the London Stock Exchange in 1991.\"\n\nWe need to produce triplets:\n\n1. Capita - date of formation? relation \"inception\" or \"date of formation\". Use \"inception\" maybe. The example used date of birth for person. For organization, could use \"inception\". We'll use \"inception\". object \"1984\". qualifiers none.\n\nsubject_type: organization (company). object_type: date.\n\n2. Capita - \"subclass of\" maybe? It was formed as a division of CIPFA. So relation \"parent organization\" or \"subdivision of\". Use \"subdivision of\". object \"CIPFA\". qualifiers none. subject_type organization, object_type organization.\n\n3. CIPFA full name: \"Chartered Institute of Public Finance and Accountancy\". Could treat as same entity CIPFA. So object \"Chartered Institute of Public Finance and Accountancy\". Might need to include both? Use CIPFA as entity, but object_type organization.\n\n4. Capita - \"independent company\" status in 1987. Could be \"status\" with object \"independent company\". But maybe relation \"instance of\" not. Could capture \"became independent\" as \"ownership\" change. Might be \"ownership\" but not explicit. Could create triplet: Capita - \"independent from\" CIPFA? Not explicit. We'll maybe capture \"independent company\" as \"type\" with qualifier point in time 1987. Use relation \"type\" object \"independent company\". qualifiers point in time 1987.\n\n5. Capita - \"staff count\" 33 staff in 1987. relation \"number of employees\". object \"33\". qualifiers point in time 1987. object_type quantity.\n\n6. Management buy-out led by Rod Aldridge. So relation \"management buyout\" maybe \"ownership change\" but we can capture \"management buyout led by\" as \"led by\" relation: object \"Rod Aldridge\". qualifiers maybe \"point in time\" 1987. subject_type organization, object_type human.\n\n7. Capita - \"stock exchange listing\" first listed on London Stock Exchange in 1991. relation \"stock exchange listing\". object \"London Stock Exchange\". qualifiers point in time 1991.\n\nsubject_type organization, object_type organization (stock exchange).\n\nAlso maybe \"London Stock Exchange\" is organization.\n\nNow format.\n\nNeed each triplet dict with qualifiers list.\n\nLet's craft.\n\nTriplet 1:\nsubject \"Capita\"\nrelation \"inception\"\nobject \"1984\"\nqualifiers []\nsubject_type \"organization\"\nobject_type \"date\"\n\nTriplet 2:\nsubject \"Capita\"\nrelation \"subdivision of\"\nobject \"CIPFA\"\nqualifiers []\nsubject_type \"organization\"\nobject_type \"organization\"\n\nTriplet 3: maybe we can include CIPFA full name as alias, but not needed.\n\nTriplet 4:\nsubject \"Capita\"\nrelation \"type\"\nobject \"independent company\"\nqualifiers [{\"relation\":\"point in time\",\"object\":\"1987\"}]\nsubject_type \"organization\"\nobject_type \"organization\" maybe \"company type\". Could set object_type \"company type\". We'll use \"company type\".\n\nTriplet 5:\nsubject \"Capita\"\nrelation \"number of employees\"\nobject \"33\"\nqualifiers [{\"relation\":\"point in time\",\"object\":\"1987\"}]\nsubject_type \"organization\"\nobject_type \"quantity\"\n\nTriplet 6:\nsubject \"Capita\"\nrelation \"led by\"\nobject \"Rod Aldridge\"\nqualifiers [{\"relation\":\"point in time\",\"object\":\"1987\"}]\nsubject_type \"organization\"\nobject_type \"human\"\n\nTriplet 7:\nsubject \"Capita\"\nrelation \"stock exchange listing\"\nobject \"London Stock Exchange\"\nqualifiers [{\"relation\":\"point in time\",\"object\":\"1991\"}]\nsubject_type \"organization\"\nobject_type \"organization\"\n\nCheck if any other facts: \"non-profit CIPFA\". Could capture \"CIPFA - instance of - non-profit organization\". But subject is CIPFA not in text as main subject. Might be okay but not required.\n\nWe must ensure qualifiers list is list of dicts.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1658,
+      "total_tokens": 3004,
+      "completion_tokens": 1346,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"inception\",\n            \"object\": \"1984\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"subdivision of\",\n            \"object\": \"CIPFA\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"type\",\n            \"object\": \"independent company\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1987\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"company type\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"number of employees\",\n            \"object\": \"33\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1987\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"led by\",\n            \"object\": \"Rod Aldridge\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1987\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Capita\",\n            \"relation\": \"stock exchange listing\",\n            \"object\": \"London Stock Exchange\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1991\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Capita",
+        "relation": "inception",
+        "object": "1984",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "date"
+      },
+      {
+        "subject": "Capita",
+        "relation": "subdivision of",
+        "object": "CIPFA",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Capita",
+        "relation": "type",
+        "object": "independent company",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1987"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "company type"
+      },
+      {
+        "subject": "Capita",
+        "relation": "number of employees",
+        "object": "33",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1987"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Capita",
+        "relation": "led by",
+        "object": "Rod Aldridge",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1987"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "human"
+      },
+      {
+        "subject": "Capita",
+        "relation": "stock exchange listing",
+        "object": "London Stock Exchange",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1991"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1658,
+    "total_tokens": 3004,
+    "completion_tokens": 1346,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 599,
+    "output_tokens_est": 507
+  },
+  "attempts": 1,
+  "latency_s": 16.725884687999496,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:28:25.343313+00:00",
+  "cache_key": "265cce04e5b2d406ec4f7bda9c20b077"
+}

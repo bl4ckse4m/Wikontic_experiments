@@ -1,0 +1,158 @@
+{
+  "task": {
+    "input_id": "efe2c1f369993ad5",
+    "input_hash": "2f3058f54a061921167525dcbf934e25a70def1b2c9c367ab5550c3f63045ed4",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d75fff31065c5d4ad5eef03d5dcc40ec",
+    "object": "chat.completion",
+    "created": 1791507950,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1940\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"occupation\",\n            \"object\": \"philosopher\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"France\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"position held\",\n            \"object\": \"Professor of Philosophy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"employer\",\n                    \"object\": \"European Graduate School\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Saas-Fee\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"position\"\n        },\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"author of\",\n            \"object\": \"Reading Capital\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1968\"\n                },\n                {\n                    \"relation\": \"with\",\n                    \"object\": \"Louis Althusser\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"written work\"\n        },\n        {\n            \"subject\": \"Louis Althusser\",\n            \"relation\": \"occupation\",\n            \"object\": \"philosopher\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Louis Althusser\",\n            \"relation\": \"philosophical school\",\n            \"object\": \"structuralist Marxist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"ideology\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Jacques Rancière\n\nJacques Rancière (; born 1940) is a French philosopher, Professor of Philosophy at European Graduate School in Saas-Fee and former Professor of Philosophy at the who came to prominence when he co-authored \"Reading Capital\" (1968), with the structuralist Marxist philosopher Louis Althusser.\"\n\nThere are some errors: \"former Professor of Philosophy at the who came to prominence...\" incomplete institution. But we can still extract facts.\n\nFacts:\n\n- Jacques Rancière, date of birth 1940.\n- Jacques Rancière, nationality French (or is a French philosopher). Relation: \"country of citizenship\" maybe, but \"French philosopher\" indicates occupation and nationality. Use relation \"occupation\" = philosopher. Also maybe \"ethnic group\" but we can use \"country of citizenship\" = France. However \"French philosopher\" is a phrase; we can extract occupation philosopher and nationality French.\n\n- Jacques Rancière, position: Professor of Philosophy at European Graduate School in Saas-Fee. So relation \"position held\" or \"academic position\". Use \"position held\" = Professor of Philosophy. Qualifiers: \"employer\" = European Graduate School; \"location\" = Saas-Fee. Could also use \"academic affiliation\". We'll create triplet: subject Jacques Rancière, relation \"position held\", object \"Professor of Philosophy\". Qualifiers: {\"relation\":\"employer\",\"object\":\"European Graduate School\"}, {\"relation\":\"location\",\"object\":\"Saas-Fee\"}.\n\n- Also \"former Professor of Philosophy at the ...\" incomplete. We might ignore because missing institution.\n\n- He came to prominence when he co-authored \"Reading Capital\" (1968), with Louis Althusser. So event: co-authored \"Reading Capital\". Could be relation \"author of\" but co-author. Use relation \"author of\" with object \"Reading Capital\". Qualifiers: point in time 1968, \"co-author\" maybe \"with\" qualifier linking to Louis Althusser. Could also have separate triplet: Jacques Rancière, \"co-author\", \"Reading Capital\". We'll include qualifier \"with\" = Louis Althusser, and point in time 1968.\n\n- Also Louis Althusser is a structuralist Marxist philosopher. Could extract that as a fact about Louis Althusser: occupation philosopher, ideology structuralist Marxist. But the sentence says \"with the structuralist Marxist philosopher Louis Althusser.\" So we can extract: Louis Althusser, occupation philosopher; Louis Althusser, ideology \"structuralist Marxist\". Also maybe \"field of work\" = Marxism. We'll include occupation philosopher and \"ideology\" = structuralist Marxist (maybe relation \"political ideology\" or \"philosophical school\". Use \"philosophical school\" = structuralist Marxist.\n\n- Also \"Jacques Rancière\" is a French philosopher. So occupation philosopher, nationality French.\n\n- Also \"Jacques Rancière\" is a \"philosopher\". So occupation philosopher.\n\n- Also \"Jacques Rancière\" is a \"professor of philosophy\". That's also occupation but we already have position.\n\n- Also \"Jacques Rancière\" is \"born 1940\". Use relation \"date of birth\".\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- Jacques Rancière: human.\n- date of birth object: date.\n- occupation object: profession.\n- nationality object: country.\n- position held object: position (or academic position). Use \"position\".\n- employer object: organization (European Graduate School).\n- location object: location (city).\n- author of object: work (book).\n- point in time qualifier: date.\n- with qualifier: human (Louis Althusser).\n- Louis Althusser: human.\n- philosophical school: maybe \"philosophical school\" type.\n\nNow produce JSON.\n\nList triplets:\n\n1. (Jacques Rancière, date of birth, 1940) qualifiers none. subject_type human, object_type date.\n\n2. (Jacques Rancière, occupation, philosopher) qualifiers none. object_type profession.\n\n3. (Jacques Rancière, nationality, France) maybe relation \"country of citizenship\". Use \"country of citizenship\". object_type country.\n\n4. (Jacques Rancière, position held, Professor of Philosophy) qualifiers employer European Graduate School, location Saas-Fee. subject_type human, object_type position.\n\n5. (Jacques Rancière, author of, Reading Capital) qualifiers point in time 1968, with Louis Althusser. object_type book (or written work). Use \"written work\". qualifiers list.\n\n6. (Louis Althusser, occupation, philosopher) object_type profession.\n\n7. (Louis Althusser, philosophical school, structuralist Marxist) object_type ideology (or philosophical school). Use \"philosophical school\".\n\nPotential also \"Jacques Rancière, notable work, Reading Capital\"? but we have author.\n\nNow ensure qualifiers format: list of dicts with relation and object.\n\nFor triplet 4 qualifiers: employer, location.\n\nFor triplet 5 qualifiers: point in time, with.\n\nNow produce JSON.\n\nCheck for any other facts: \"European Graduate School in Saas-Fee\". Could also have location of institution. But we already have location qualifier.\n\nNow produce final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1655,
+      "total_tokens": 3266,
+      "completion_tokens": 1611,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1940\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"occupation\",\n            \"object\": \"philosopher\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"France\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"position held\",\n            \"object\": \"Professor of Philosophy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"employer\",\n                    \"object\": \"European Graduate School\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Saas-Fee\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"position\"\n        },\n        {\n            \"subject\": \"Jacques Rancière\",\n            \"relation\": \"author of\",\n            \"object\": \"Reading Capital\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1968\"\n                },\n                {\n                    \"relation\": \"with\",\n                    \"object\": \"Louis Althusser\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"written work\"\n        },\n        {\n            \"subject\": \"Louis Althusser\",\n            \"relation\": \"occupation\",\n            \"object\": \"philosopher\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Louis Althusser\",\n            \"relation\": \"philosophical school\",\n            \"object\": \"structuralist Marxist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"ideology\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Jacques Rancière",
+        "relation": "date of birth",
+        "object": "1940",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Jacques Rancière",
+        "relation": "occupation",
+        "object": "philosopher",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Jacques Rancière",
+        "relation": "country of citizenship",
+        "object": "France",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Jacques Rancière",
+        "relation": "position held",
+        "object": "Professor of Philosophy",
+        "qualifiers": [
+          {
+            "relation": "employer",
+            "object": "European Graduate School"
+          },
+          {
+            "relation": "location",
+            "object": "Saas-Fee"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "position"
+      },
+      {
+        "subject": "Jacques Rancière",
+        "relation": "author of",
+        "object": "Reading Capital",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1968"
+          },
+          {
+            "relation": "with",
+            "object": "Louis Althusser"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "written work"
+      },
+      {
+        "subject": "Louis Althusser",
+        "relation": "occupation",
+        "object": "philosopher",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Louis Althusser",
+        "relation": "philosophical school",
+        "object": "structuralist Marxist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "ideology"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1655,
+    "total_tokens": 3266,
+    "completion_tokens": 1611,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 669,
+    "output_tokens_est": 577
+  },
+  "attempts": 1,
+  "latency_s": 20.195393787013018,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:06:11.238826+00:00",
+  "cache_key": "4262ce420e488a7c913680c6d0a71e76"
+}

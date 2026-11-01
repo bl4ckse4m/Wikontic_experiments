@@ -1,0 +1,201 @@
+{
+  "task": {
+    "input_id": "3cc0b862f17d04b2",
+    "input_hash": "60aead8db0810436a14545014d3848568f81b4b553f2c5dc7ced9f03fda1deed",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-94e007a525240cbc811d27bfeb2944f5",
+    "object": "chat.completion",
+    "created": 1791509986,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Haiti\",\n            \"relation\": \"borders\",\n            \"object\": \"Dominican Republic\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"divided island\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Dominican Republic\",\n            \"relation\": \"borders\",\n            \"object\": \"Haiti\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"divided island\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Ireland\",\n            \"relation\": \"borders\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"divided island\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"United Kingdom\",\n            \"relation\": \"borders\",\n            \"object\": \"Ireland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"divided island\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Portugal\",\n            \"relation\": \"borders\",\n            \"object\": \"Spain\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"peninsular\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Denmark\",\n            \"relation\": \"borders\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"peninsular\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"borders\",\n            \"object\": \"United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"peninsular\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Vatican City\",\n            \"relation\": \"borders\",\n            \"object\": \"Italy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"enclave\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Lesotho\",\n            \"relation\": \"borders\",\n            \"object\": \"South Africa\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"enclave\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text. The text describes list of countries that border only one other country, and gives examples of three arrangements.\n\nWe need to produce triplets like (Haiti, borders, Dominican Republic) maybe? But the relation is that they share a border and each borders only one other country? Actually Haiti and Dominican Republic share the island of Hispaniola, each borders only each other. So we can have triplet: \"Haiti\" \"borders only\" \"Dominican Republic\". But we need to follow Wikidata style: relation \"shares land border with\" maybe. Use \"shares border with\". Also need subject_type and object_type: both \"country\". Also qualifiers maybe \"arrangement type\": \"divided island\". Could add qualifier relation \"border arrangement\" object \"divided island\". Similarly for Ireland and United Kingdom (Northern Ireland part). For peninsular relationship: Portugal borders Spain (Portugal borders only Spain). Spain borders other countries, but the relation is that Portugal borders only Spain. So triplet: Portugal borders only Spain, qualifier arrangement \"peninsular\". Also Denmark borders Germany (Denmark borders only Germany? Actually Denmark also borders Sweden via bridge? Land border only Germany). So include Denmark borders only Germany, qualifier peninsular. Canada borders United States (only one land border). So Canada borders only United States, qualifier peninsular.\n\nThird arrangement: Vatican borders Italy (Vatican is landlocked within Italy). Lesotho borders South Africa. So triplet: Vatican borders only Italy, qualifier \"enclave\". Also Lesotho borders only South Africa, qualifier \"enclave\".\n\nWe need to include subject_type \"country\", object_type \"country\". Relation maybe \"borders only\". Use \"borders\". But to capture \"only one other country\", we could use relation \"borders\" and qualifier \"point in time\"? No. Use qualifier \"border count\" maybe. But spec says qualifiers can be any relation. So we can add qualifier relation \"border count\" object \"1\". Or \"border arrangement\" as described.\n\nLet's produce triplets for each pair.\n\nList:\n\n- Haiti borders Dominican Republic (arrangement: divided island)\n- Dominican Republic borders Haiti (maybe duplicate? Could include both directions but maybe not needed. We'll include both for completeness.)\n- Ireland borders United Kingdom (arrangement: divided island) but careful: Ireland (the Republic) borders United Kingdom (Northern Ireland). So include.\n- United Kingdom borders Ireland (arrangement: divided island)\n- Portugal borders Spain (peninsular)\n- Spain borders Portugal (peninsular) but Spain also borders other countries, but still they share border. However the concept is that Portugal borders only Spain. So maybe we only need triplet where subject is the country that borders only one other. So include Portugal borders Spain, Denmark borders Germany, Canada borders United States, Vatican borders Italy, Lesotho borders South Africa. Also maybe include Haiti, Dominican Republic, Ireland, United Kingdom as subjects that border only one other. So include all.\n\nThus triplets:\n\n1. Haiti borders Dominican Republic; qualifiers: arrangement \"divided island\".\n2. Dominican Republic borders Haiti; qualifiers: arrangement \"divided island\".\n3. Ireland borders United Kingdom; qualifiers: arrangement \"divided island\".\n4. United Kingdom borders Ireland; qualifiers: arrangement \"divided island\".\n5. Portugal borders Spain; qualifiers: arrangement \"peninsular\".\n6. Denmark borders Germany; qualifiers: arrangement \"peninsular\".\n7. Canada borders United States; qualifiers: arrangement \"peninsular\".\n8. Vatican City borders Italy; qualifiers: arrangement \"enclave\".\n9. Lesotho borders South Africa; qualifiers: arrangement \"enclave\".\n\nAlso maybe include \"Vatican City\" as proper name.\n\nNow produce JSON.\n\nEach entry includes subject_type \"country\", object_type \"country\". For Vatican City maybe \"city-state\" but we can still \"country\". Use \"Vatican City\". Provide qualifiers list with one dict: relation \"border arrangement\", object appropriate.\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1070,
+      "total_tokens": 2567,
+      "completion_tokens": 1497,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Haiti\",\n            \"relation\": \"borders\",\n            \"object\": \"Dominican Republic\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"divided island\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Dominican Republic\",\n            \"relation\": \"borders\",\n            \"object\": \"Haiti\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"divided island\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Ireland\",\n            \"relation\": \"borders\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"divided island\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"United Kingdom\",\n            \"relation\": \"borders\",\n            \"object\": \"Ireland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"divided island\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Portugal\",\n            \"relation\": \"borders\",\n            \"object\": \"Spain\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"peninsular\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Denmark\",\n            \"relation\": \"borders\",\n            \"object\": \"Germany\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"peninsular\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"borders\",\n            \"object\": \"United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"peninsular\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Vatican City\",\n            \"relation\": \"borders\",\n            \"object\": \"Italy\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"enclave\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Lesotho\",\n            \"relation\": \"borders\",\n            \"object\": \"South Africa\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"border arrangement\",\n                    \"object\": \"enclave\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Haiti",
+        "relation": "borders",
+        "object": "Dominican Republic",
+        "qualifiers": [
+          {
+            "relation": "border arrangement",
+            "object": "divided island"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Dominican Republic",
+        "relation": "borders",
+        "object": "Haiti",
+        "qualifiers": [
+          {
+            "relation": "border arrangement",
+            "object": "divided island"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Ireland",
+        "relation": "borders",
+        "object": "United Kingdom",
+        "qualifiers": [
+          {
+            "relation": "border arrangement",
+            "object": "divided island"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "United Kingdom",
+        "relation": "borders",
+        "object": "Ireland",
+        "qualifiers": [
+          {
+            "relation": "border arrangement",
+            "object": "divided island"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Portugal",
+        "relation": "borders",
+        "object": "Spain",
+        "qualifiers": [
+          {
+            "relation": "border arrangement",
+            "object": "peninsular"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Denmark",
+        "relation": "borders",
+        "object": "Germany",
+        "qualifiers": [
+          {
+            "relation": "border arrangement",
+            "object": "peninsular"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Canada",
+        "relation": "borders",
+        "object": "United States",
+        "qualifiers": [
+          {
+            "relation": "border arrangement",
+            "object": "peninsular"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Vatican City",
+        "relation": "borders",
+        "object": "Italy",
+        "qualifiers": [
+          {
+            "relation": "border arrangement",
+            "object": "enclave"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Lesotho",
+        "relation": "borders",
+        "object": "South Africa",
+        "qualifiers": [
+          {
+            "relation": "border arrangement",
+            "object": "enclave"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1070,
+    "total_tokens": 2567,
+    "completion_tokens": 1497,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 962,
+    "output_tokens_est": 863
+  },
+  "attempts": 1,
+  "latency_s": 16.723004814994056,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:40:03.719568+00:00",
+  "cache_key": "40164eeb3a8d72e34628a27ff35f76f5"
+}

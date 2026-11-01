@@ -1,0 +1,161 @@
+{
+  "task": {
+    "input_id": "0bad9267fd453b5d",
+    "input_hash": "e39cff3f6bb996cf3d18abf6cd604c3aee9d523df6ee6558e961ba1db18556d8",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793195499-tWB3Dycv5f3JbCUMmEx3",
+    "object": "chat.completion",
+    "created": 1793195499,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DeepInfra",
+    "system_fingerprint": null,
+    "service_tier": "default",
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"left\",\n            \"object\": \"show\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"spring 2007\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television show\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Parliament of Finland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2007\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"political party\",\n            \"object\": \"Social Democratic Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"secured\",\n            \"object\": \"nomination\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"votes\",\n                    \"object\": \"4,972\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political nomination\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Tommy Tabermann\n\nHe left the show in the spring of 2007 in order to run for the Parliament of Finland. Running as a Social Democrat Party candidate, he secured a nomination with 4,972 votes.\"\n\nWe need to identify entities: Tommy Tabermann (human). \"the show\" - unspecified, maybe a TV show. Could be \"the show\" as a thing, but not named. Might not need to create a triplet for that. The main facts:\n\n- Tommy Tabermann left the show in spring 2007.\n- He left the show in order to run for the Parliament of Finland.\n- He ran as a Social Democrat Party candidate.\n- He secured a nomination with 4,972 votes.\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine entities:\n\nSubject: Tommy Tabermann (human)\n\nRelation: \"departure date\" or \"left\" maybe \"departure date\" with object \"spring 2007\". object_type: \"date\" or \"season\". Use \"date\". Qualifier maybe \"point in time\". But we can just have relation \"left\" with object \"the show\". But \"the show\" is not named; maybe we can use generic \"show\". Could also use relation \"left\" with object \"show\". object_type \"television show\". But we don't have name. Might be okay.\n\nBetter: Triplet: subject Tommy Tabermann, relation \"left\", object \"show\", qualifier \"point in time\" = \"spring 2007\". object_type \"television show\". subject_type \"human\".\n\nSecond: Tommy Tabermann, relation \"candidate for\", object \"Parliament of Finland\". qualifier \"point in time\" maybe \"2007\". But the sentence says \"run for the Parliament of Finland\". So relation \"candidate for\" or \"ran for\". Use \"candidate for\". object_type \"legislative body\". subject_type \"human\". Qualifier \"start time\" maybe \"spring 2007\". But we already have departure date. Could include \"point in time\" \"2007\". Might be optional.\n\nThird: Tommy Tabermann, relation \"political party\", object \"Social Democratic Party\". Actually \"Social Democrat Party\" maybe \"Social Democratic Party of Finland\". Use \"Social Democratic Party\". object_type \"political party\". subject_type \"human\". Could also have qualifier \"candidate\" but we already have candidate for.\n\nBetter: relation \"member of political party\" or \"party affiliation\". Use \"political party\". Or \"candidate of\". We'll use \"political party\".\n\nFourth: Tommy Tabermann, relation \"nomination secured with votes\", object \"4,972 votes\". But we need object entity maybe \"nomination\". Could have relation \"secured nomination\" with qualifier \"votes\" = \"4,972\". Or relation \"nomination votes\" with object \"4,972\". Simpler: relation \"nomination votes\" object \"4,972\". subject_type human, object_type \"quantity\". Or \"number of votes\". Use \"number of votes\". We'll create triplet: subject Tommy Tabermann, relation \"number of votes\", object \"4,972\", qualifiers maybe none. object_type \"quantity\". Also need relation \"secured nomination\". Could have separate triplet: subject Tommy Tabermann, relation \"secured nomination\", object \"nomination\". object_type \"political nomination\". But maybe combine.\n\nLet's produce multiple triplets:\n\n1. Tommy Tabermann left show (spring 2007)\n2. Tommy Tabermann candidate for Parliament of Finland (point in time 2007)\n3. Tommy Tabermann political party Social Democratic Party\n4. Tommy Tabermann secured nomination (maybe object \"nomination\")\n5. Tommy Tabermann number of votes 4,972 (qualifier maybe \"for nomination\").\n\nWe need qualifiers attached to triplet, not separate.\n\nTriplet 4: subject Tommy Tabermann, relation \"secured\", object \"nomination\". qualifier: \"votes\" = \"4,972\". object_type \"political nomination\". qualifier object_type \"quantity\".\n\nTriplet 1: include qualifier \"point in time\" = \"spring 2007\". object \"show\". object_type \"television show\". qualifier object_type \"date\"? Actually qualifier object_type \"date\". So qualifiers list with relation \"point in time\", object \"spring 2007\", object_type \"date\". Good.\n\nTriplet 2: relation \"candidate for\", object \"Parliament of Finland\". qualifier \"point in time\" = \"2007\". object_type \"legislative body\". qualifier object_type \"year\". Or \"date\". Use \"year\". Good.\n\nTriplet 3: relation \"political party\", object \"Social Democratic Party\". object_type \"political party\". No qualifiers.\n\nNow produce JSON.\n\nStructure: {\"triplets\": [ {...}, ... ] }\n\nEach dict includes subject, relation, object, qualifiers (list), subject_type, object_type.\n\nDefine subject_type \"human\". object_type for show: \"television show\". For Parliament: \"legislative body\". For party: \"political party\". For nomination: \"political nomination\". For votes: not needed because we embed as qualifier.\n\nTriplet 4: object \"nomination\". object_type \"political nomination\". qualifiers: votes.\n\nNow produce final JSON.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text.\n\nText: \"Tommy Tabermann\n\nHe left the show in the spring of 2007 in order to run for the Parliament of Finland. Running as a Social Democrat Party candidate, he secured a nomination with 4,972 votes.\"\n\nWe need to identify entities: Tommy Tabermann (human). \"the show\" - unspecified, maybe a TV show. Could be \"the show\" as a thing, but not named. Might not need to create a triplet for that. The main facts:\n\n- Tommy Tabermann left the show in spring 2007.\n- He left the show in order to run for the Parliament of Finland.\n- He ran as a Social Democrat Party candidate.\n- He secured a nomination with 4,972 votes.\n\nWe need to produce triplets with subject_type and object_type.\n\nDefine entities:\n\nSubject: Tommy Tabermann (human)\n\nRelation: \"departure date\" or \"left\" maybe \"departure date\" with object \"spring 2007\". object_type: \"date\" or \"season\". Use \"date\". Qualifier maybe \"point in time\". But we can just have relation \"left\" with object \"the show\". But \"the show\" is not named; maybe we can use generic \"show\". Could also use relation \"left\" with object \"show\". object_type \"television show\". But we don't have name. Might be okay.\n\nBetter: Triplet: subject Tommy Tabermann, relation \"left\", object \"show\", qualifier \"point in time\" = \"spring 2007\". object_type \"television show\". subject_type \"human\".\n\nSecond: Tommy Tabermann, relation \"candidate for\", object \"Parliament of Finland\". qualifier \"point in time\" maybe \"2007\". But the sentence says \"run for the Parliament of Finland\". So relation \"candidate for\" or \"ran for\". Use \"candidate for\". object_type \"legislative body\". subject_type \"human\". Qualifier \"start time\" maybe \"spring 2007\". But we already have departure date. Could include \"point in time\" \"2007\". Might be optional.\n\nThird: Tommy Tabermann, relation \"political party\", object \"Social Democratic Party\". Actually \"Social Democrat Party\" maybe \"Social Democratic Party of Finland\". Use \"Social Democratic Party\". object_type \"political party\". subject_type \"human\". Could also have qualifier \"candidate\" but we already have candidate for.\n\nBetter: relation \"member of political party\" or \"party affiliation\". Use \"political party\". Or \"candidate of\". We'll use \"political party\".\n\nFourth: Tommy Tabermann, relation \"nomination secured with votes\", object \"4,972 votes\". But we need object entity maybe \"nomination\". Could have relation \"secured nomination\" with qualifier \"votes\" = \"4,972\". Or relation \"nomination votes\" with object \"4,972\". Simpler: relation \"nomination votes\" object \"4,972\". subject_type human, object_type \"quantity\". Or \"number of votes\". Use \"number of votes\". We'll create triplet: subject Tommy Tabermann, relation \"number of votes\", object \"4,972\", qualifiers maybe none. object_type \"quantity\". Also need relation \"secured nomination\". Could have separate triplet: subject Tommy Tabermann, relation \"secured nomination\", object \"nomination\". object_type \"political nomination\". But maybe combine.\n\nLet's produce multiple triplets:\n\n1. Tommy Tabermann left show (spring 2007)\n2. Tommy Tabermann candidate for Parliament of Finland (point in time 2007)\n3. Tommy Tabermann political party Social Democratic Party\n4. Tommy Tabermann secured nomination (maybe object \"nomination\")\n5. Tommy Tabermann number of votes 4,972 (qualifier maybe \"for nomination\").\n\nWe need qualifiers attached to triplet, not separate.\n\nTriplet 4: subject Tommy Tabermann, relation \"secured\", object \"nomination\". qualifier: \"votes\" = \"4,972\". object_type \"political nomination\". qualifier object_type \"quantity\".\n\nTriplet 1: include qualifier \"point in time\" = \"spring 2007\". object \"show\". object_type \"television show\". qualifier object_type \"date\"? Actually qualifier object_type \"date\". So qualifiers list with relation \"point in time\", object \"spring 2007\", object_type \"date\". Good.\n\nTriplet 2: relation \"candidate for\", object \"Parliament of Finland\". qualifier \"point in time\" = \"2007\". object_type \"legislative body\". qualifier object_type \"year\". Or \"date\". Use \"year\". Good.\n\nTriplet 3: relation \"political party\", object \"Social Democratic Party\". object_type \"political party\". No qualifiers.\n\nNow produce JSON.\n\nStructure: {\"triplets\": [ {...}, ... ] }\n\nEach dict includes subject, relation, object, qualifiers (list), subject_type, object_type.\n\nDefine subject_type \"human\". object_type for show: \"television show\". For Parliament: \"legislative body\". For party: \"political party\". For nomination: \"political nomination\". For votes: not needed because we embed as qualifier.\n\nTriplet 4: object \"nomination\". object_type \"political nomination\". qualifiers: votes.\n\nNow produce final JSON.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1385,
+      "completion_tokens": 1431,
+      "total_tokens": 2816,
+      "cost": 0.000294515,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 0,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000294515,
+        "upstream_inference_prompt_cost": 5.1245e-05,
+        "upstream_inference_completions_cost": 0.00024327
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1184,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"left\",\n            \"object\": \"show\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"spring 2007\",\n                    \"object_type\": \"date\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"television show\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"candidate for\",\n            \"object\": \"Parliament of Finland\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2007\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"political party\",\n            \"object\": \"Social Democratic Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Tommy Tabermann\",\n            \"relation\": \"secured\",\n            \"object\": \"nomination\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"votes\",\n                    \"object\": \"4,972\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political nomination\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Tommy Tabermann",
+        "relation": "left",
+        "object": "show",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "spring 2007"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "television show"
+      },
+      {
+        "subject": "Tommy Tabermann",
+        "relation": "candidate for",
+        "object": "Parliament of Finland",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2007"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "legislative body"
+      },
+      {
+        "subject": "Tommy Tabermann",
+        "relation": "political party",
+        "object": "Social Democratic Party",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "political party"
+      },
+      {
+        "subject": "Tommy Tabermann",
+        "relation": "secured",
+        "object": "nomination",
+        "qualifiers": [
+          {
+            "relation": "votes",
+            "object": "4,972"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political nomination"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1385,
+    "completion_tokens": 1431,
+    "total_tokens": 2816,
+    "cost": 0.000294515,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000294515,
+      "upstream_inference_prompt_cost": 5.1245e-05,
+      "upstream_inference_completions_cost": 0.00024327
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1184,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 523,
+    "output_tokens_est": 395
+  },
+  "attempts": 1,
+  "latency_s": 49.93712513900027,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T13:52:28.951991+00:00",
+  "cache_key": "507064818c46e6fad562730a45ee62b8"
+}

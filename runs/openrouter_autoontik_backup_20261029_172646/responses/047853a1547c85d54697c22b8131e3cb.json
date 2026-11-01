@@ -1,0 +1,172 @@
+{
+  "task": {
+    "input_id": "c4908bf2f96c7520",
+    "input_hash": "e87759601121478ff3f2cf8925b32dafd7c4db841c2511eb24a2a089375a5a39",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793211037-1rxLOgv4J2pqLitm5wZG",
+    "object": "chat.completion",
+    "created": 1793211037,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"located in\",\n            \"object\": \"Westchester County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"located in\",\n            \"object\": \"New York\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"border of\",\n            \"object\": \"Pelham Manor\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"municipality\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"border of\",\n            \"object\": \"New Rochelle\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"hosted event\",\n            \"object\": \"PGA Championship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1923\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"sports competition\"\n        },\n        {\n            \"subject\": \"Gene Sarazen\",\n            \"relation\": \"winner of\",\n            \"object\": \"PGA Championship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1923\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports competition\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nEntities: Pelican? Actually \"Pelham Country Club\". It's a country club.\n\nRelations: location (located on the border of Pelham Manor and New Rochelle in Westchester County, New York). So we may need multiple location relations: maybe \"located in\" Westchester County, New York; also \"located on border of\" Pelham Manor and New Rochelle. Could be separate triplets: subject Pelham Country Club, relation \"located in\", object \"Westchester County\". Also \"located in\", object \"New York\". Also maybe \"located in\", object \"United States\"? Not in text. Also \"border of\" relation: maybe \"border location\" but we can treat as \"located on border of\" with object \"Pelham Manor\" and \"New Rochelle\". Could be two separate triplets: subject Pelham Country Club, relation \"border location\", object \"Pelham Manor\". Another: same with \"New Rochelle\". But we need to follow guidelines: use short reusable predicates. Could use \"located in\" for county and state, and \"border of\" for towns. Let's decide.\n\nAlso \"hosted\" relation: Pelham Country Club hosted the PGA Championship in 1923. So triplet: subject Pelham Country Club, relation \"hosted event\", object \"PGA Championship\". Qualifier: point in time 1923 (year). Also maybe \"event\" type.\n\nAlso \"won\" relation: Gene Sarazen won the PGA Championship (hosted there). So subject Gene Sarazen, relation \"award received\"? Actually \"won\" is a competition result. Could be \"winner of\". So triplet: subject Gene Sarazen, relation \"winner of\", object \"PGA Championship\". Qualifier: point in time 1923. Also maybe \"event type\" award? But object_type \"sports competition\". We'll set object_type \"sports competition\". Subject_type \"human\". Relation \"winner\". Use \"winner of\". Good.\n\nNeed to include subject_type for Pelham Country Club: \"country club\" is a type of \"organization\" or \"sports club\". Use \"organization\". object_type for Westchester County: \"county\". For New York: \"state\". For Pelham Manor: \"city\"? Actually \"Pelham Manor\" is a village/town. Use \"municipality\". For New Rochelle: \"city\". For PGA Championship: \"sports competition\". For Gene Sarazen: \"human\". Also include qualifiers list.\n\nNow format JSON: top-level key \"triplets\": list.\n\nEach dict includes subject, relation, object, qualifiers (list of dicts with relation, object, object_type), subject_type, object_type.\n\nLet's craft.\n\nTriplet 1: Pelham Country Club - located in - Westchester County. qualifiers none. subject_type organization, object_type county.\n\nTriplet 2: Pelham Country Club - located in - New York. subject_type organization, object_type state.\n\nTriplet 3: Pelham Country Club - border of - Pelham Manor. relation maybe \"border location\". Use \"border of\". object_type municipality.\n\nTriplet 4: Pelham Country Club - border of - New Rochelle. object_type city.\n\nTriplet 5: Pelham Country Club - hosted event - PGA Championship. qualifier point in time 1923 (year). subject_type organization, object_type sports competition.\n\nTriplet 6: Gene Sarazen - winner of - PGA Championship. qualifier point in time 1923 (year). subject_type human, object_type sports competition.\n\nPotential also \"located on border of Pelham Manor and New Rochelle\". Could also have a combined object but guidelines say separate for each.\n\nNow produce JSON.\n\nCheck that qualifiers objects have object_type: for year, object_type \"year\". relation \"point in time\". Good.\n\nNow output.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nEntities: Pelican? Actually \"Pelham Country Club\". It's a country club.\n\nRelations: location (located on the border of Pelham Manor and New Rochelle in Westchester County, New York). So we may need multiple location relations: maybe \"located in\" Westchester County, New York; also \"located on border of\" Pelham Manor and New Rochelle. Could be separate triplets: subject Pelham Country Club, relation \"located in\", object \"Westchester County\". Also \"located in\", object \"New York\". Also maybe \"located in\", object \"United States\"? Not in text. Also \"border of\" relation: maybe \"border location\" but we can treat as \"located on border of\" with object \"Pelham Manor\" and \"New Rochelle\". Could be two separate triplets: subject Pelham Country Club, relation \"border location\", object \"Pelham Manor\". Another: same with \"New Rochelle\". But we need to follow guidelines: use short reusable predicates. Could use \"located in\" for county and state, and \"border of\" for towns. Let's decide.\n\nAlso \"hosted\" relation: Pelham Country Club hosted the PGA Championship in 1923. So triplet: subject Pelham Country Club, relation \"hosted event\", object \"PGA Championship\". Qualifier: point in time 1923 (year). Also maybe \"event\" type.\n\nAlso \"won\" relation: Gene Sarazen won the PGA Championship (hosted there). So subject Gene Sarazen, relation \"award received\"? Actually \"won\" is a competition result. Could be \"winner of\". So triplet: subject Gene Sarazen, relation \"winner of\", object \"PGA Championship\". Qualifier: point in time 1923. Also maybe \"event type\" award? But object_type \"sports competition\". We'll set object_type \"sports competition\". Subject_type \"human\". Relation \"winner\". Use \"winner of\". Good.\n\nNeed to include subject_type for Pelham Country Club: \"country club\" is a type of \"organization\" or \"sports club\". Use \"organization\". object_type for Westchester County: \"county\". For New York: \"state\". For Pelham Manor: \"city\"? Actually \"Pelham Manor\" is a village/town. Use \"municipality\". For New Rochelle: \"city\". For PGA Championship: \"sports competition\". For Gene Sarazen: \"human\". Also include qualifiers list.\n\nNow format JSON: top-level key \"triplets\": list.\n\nEach dict includes subject, relation, object, qualifiers (list of dicts with relation, object, object_type), subject_type, object_type.\n\nLet's craft.\n\nTriplet 1: Pelham Country Club - located in - Westchester County. qualifiers none. subject_type organization, object_type county.\n\nTriplet 2: Pelham Country Club - located in - New York. subject_type organization, object_type state.\n\nTriplet 3: Pelham Country Club - border of - Pelham Manor. relation maybe \"border location\". Use \"border of\". object_type municipality.\n\nTriplet 4: Pelham Country Club - border of - New Rochelle. object_type city.\n\nTriplet 5: Pelham Country Club - hosted event - PGA Championship. qualifier point in time 1923 (year). subject_type organization, object_type sports competition.\n\nTriplet 6: Gene Sarazen - winner of - PGA Championship. qualifier point in time 1923 (year). subject_type human, object_type sports competition.\n\nPotential also \"located on border of Pelham Manor and New Rochelle\". Could also have a combined object but guidelines say separate for each.\n\nNow produce JSON.\n\nCheck that qualifiers objects have object_type: for year, object_type \"year\". relation \"point in time\". Good.\n\nNow output.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1402,
+      "completion_tokens": 1182,
+      "total_tokens": 2584,
+      "cost": 0.000263094,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1344,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000263094,
+        "upstream_inference_prompt_cost": 4.206e-05,
+        "upstream_inference_completions_cost": 0.000221034
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 858,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"located in\",\n            \"object\": \"Westchester County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"located in\",\n            \"object\": \"New York\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"border of\",\n            \"object\": \"Pelham Manor\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"municipality\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"border of\",\n            \"object\": \"New Rochelle\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Pelham Country Club\",\n            \"relation\": \"hosted event\",\n            \"object\": \"PGA Championship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1923\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"sports competition\"\n        },\n        {\n            \"subject\": \"Gene Sarazen\",\n            \"relation\": \"winner of\",\n            \"object\": \"PGA Championship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1923\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sports competition\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Pelham Country Club",
+        "relation": "located in",
+        "object": "Westchester County",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "county"
+      },
+      {
+        "subject": "Pelham Country Club",
+        "relation": "located in",
+        "object": "New York",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "state"
+      },
+      {
+        "subject": "Pelham Country Club",
+        "relation": "border of",
+        "object": "Pelham Manor",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "municipality"
+      },
+      {
+        "subject": "Pelham Country Club",
+        "relation": "border of",
+        "object": "New Rochelle",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "city"
+      },
+      {
+        "subject": "Pelham Country Club",
+        "relation": "hosted event",
+        "object": "PGA Championship",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1923"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "sports competition"
+      },
+      {
+        "subject": "Gene Sarazen",
+        "relation": "winner of",
+        "object": "PGA Championship",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1923"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "sports competition"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1402,
+    "completion_tokens": 1182,
+    "total_tokens": 2584,
+    "cost": 0.000263094,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1344,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000263094,
+      "upstream_inference_prompt_cost": 4.206e-05,
+      "upstream_inference_completions_cost": 0.000221034
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 858,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 607,
+    "output_tokens_est": 480
+  },
+  "attempts": 1,
+  "latency_s": 17.187518111000827,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:10:53.886075+00:00",
+  "cache_key": "047853a1547c85d54697c22b8131e3cb"
+}

@@ -1,0 +1,162 @@
+{
+  "task": {
+    "input_id": "edb16a596b12ddc6",
+    "input_hash": "ce29bb14977c57300f719d88fcc4cdff20f61f295f6e769de85959fe42ee6bf5",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793213935-Fgqw25uwz2QAXahG8pvC",
+    "object": "chat.completion",
+    "created": 1793213935,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"instance of\",\n            \"object\": \"botanical garden\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"type\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"located in\",\n            \"object\": \"Vienna\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"located in\",\n            \"object\": \"Austria\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"area\",\n            \"object\": \"8 hectares\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"adjacent to\",\n            \"object\": \"Belvedere gardens\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"garden\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"part of\",\n            \"object\": \"University of Vienna\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"university\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Botanical Garden of the University of Vienna\n\nThe Botanical Garden of the University of Vienna is a botanical garden in Vienna, Austria. It covers 8 hectares and is immediately adjacent to the Belvedere gardens. It is a part of the University of Vienna.\"\n\nWe need to identify entities: Botanical Garden of the University of Vienna (the garden), Vienna (city), Austria (country), 8 hectares (area), Belvedere gardens (another garden), University of Vienna (institution).\n\nTriplets:\n\n1. Botanical Garden of the University of Vienna — instance of — botanical garden (type: botanical garden). Relation maybe \"instance of\" or \"type\". Use \"instance of\". subject_type: \"botanical garden\"? Actually subject_type: \"botanical garden\". object_type: \"botanical garden\"? Might be \"type\". In examples they used occupation, field of work, etc. For location, they used \"location\". For \"is a botanical garden in Vienna, Austria\": we can have two facts: location (city) and location (country). Or \"located in\" relation.\n\nBetter: \n- subject: Botanical Garden of the University of Vienna\n- relation: \"instance of\"\n- object: \"botanical garden\"\n- qualifiers: none\n- subject_type: \"botanical garden\"\n- object_type: \"type\"? Actually object_type: \"botanical garden\"? Might be \"type of place\". But we can set object_type: \"type\". But guidelines: object_type is class the object is an instance of. For \"botanical garden\", the object is a class? Actually \"botanical garden\" is a type, not an instance. In example they used occupation: object_type \"profession\". So for \"instance of\", object_type could be \"type\". We'll set \"object_type\": \"type\".\n\n2. Botanical Garden ... — location — Vienna (city). Use relation \"located in\". object_type: \"city\". subject_type: \"botanical garden\".\n\n3. Botanical Garden ... — location — Austria (country). Could also be \"located in\" with qualifier \"country\"? But we can have separate triplet.\n\n4. Botanical Garden ... — area — 8 hectares. Relation \"area\". object_type: \"area\". Might need qualifier \"unit\". But we can treat \"8 hectares\" as object with type \"area\". subject_type: \"botanical garden\".\n\n5. Botanical Garden ... — adjacent to — Belvedere gardens. Relation \"adjacent to\". object_type: \"garden\". subject_type: \"botanical garden\".\n\n6. Botanical Garden ... — part of — University of Vienna. Relation \"part of\". object_type: \"university\". subject_type: \"botanical garden\".\n\nAlso maybe \"University of Vienna\" — location — Vienna, Austria. Not in text. Not needed.\n\nMake sure qualifiers list is empty for each.\n\nNow format JSON: {\"triplets\": [ ... ]}\n\nEach dict includes qualifiers list (empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Botanical Garden of the University of Vienna: subject_type \"botanical garden\".\n- Vienna: object_type \"city\".\n- Austria: object_type \"country\".\n- 8 hectares: object_type \"area\".\n- Belvedere gardens: object_type \"garden\".\n- University of Vienna: object_type \"university\".\n\nFor instance of relation: object_type \"type\". Or maybe \"botanical garden\" is a type, but we can set object_type \"type\". Subject_type \"botanical garden\". That seems okay.\n\nNow produce JSON list.\n\nCheck ordering: any order fine.\n\nLet's craft.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"Botanical Garden of the University of Vienna\n\nThe Botanical Garden of the University of Vienna is a botanical garden in Vienna, Austria. It covers 8 hectares and is immediately adjacent to the Belvedere gardens. It is a part of the University of Vienna.\"\n\nWe need to identify entities: Botanical Garden of the University of Vienna (the garden), Vienna (city), Austria (country), 8 hectares (area), Belvedere gardens (another garden), University of Vienna (institution).\n\nTriplets:\n\n1. Botanical Garden of the University of Vienna — instance of — botanical garden (type: botanical garden). Relation maybe \"instance of\" or \"type\". Use \"instance of\". subject_type: \"botanical garden\"? Actually subject_type: \"botanical garden\". object_type: \"botanical garden\"? Might be \"type\". In examples they used occupation, field of work, etc. For location, they used \"location\". For \"is a botanical garden in Vienna, Austria\": we can have two facts: location (city) and location (country). Or \"located in\" relation.\n\nBetter: \n- subject: Botanical Garden of the University of Vienna\n- relation: \"instance of\"\n- object: \"botanical garden\"\n- qualifiers: none\n- subject_type: \"botanical garden\"\n- object_type: \"type\"? Actually object_type: \"botanical garden\"? Might be \"type of place\". But we can set object_type: \"type\". But guidelines: object_type is class the object is an instance of. For \"botanical garden\", the object is a class? Actually \"botanical garden\" is a type, not an instance. In example they used occupation: object_type \"profession\". So for \"instance of\", object_type could be \"type\". We'll set \"object_type\": \"type\".\n\n2. Botanical Garden ... — location — Vienna (city). Use relation \"located in\". object_type: \"city\". subject_type: \"botanical garden\".\n\n3. Botanical Garden ... — location — Austria (country). Could also be \"located in\" with qualifier \"country\"? But we can have separate triplet.\n\n4. Botanical Garden ... — area — 8 hectares. Relation \"area\". object_type: \"area\". Might need qualifier \"unit\". But we can treat \"8 hectares\" as object with type \"area\". subject_type: \"botanical garden\".\n\n5. Botanical Garden ... — adjacent to — Belvedere gardens. Relation \"adjacent to\". object_type: \"garden\". subject_type: \"botanical garden\".\n\n6. Botanical Garden ... — part of — University of Vienna. Relation \"part of\". object_type: \"university\". subject_type: \"botanical garden\".\n\nAlso maybe \"University of Vienna\" — location — Vienna, Austria. Not in text. Not needed.\n\nMake sure qualifiers list is empty for each.\n\nNow format JSON: {\"triplets\": [ ... ]}\n\nEach dict includes qualifiers list (empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Botanical Garden of the University of Vienna: subject_type \"botanical garden\".\n- Vienna: object_type \"city\".\n- Austria: object_type \"country\".\n- 8 hectares: object_type \"area\".\n- Belvedere gardens: object_type \"garden\".\n- University of Vienna: object_type \"university\".\n\nFor instance of relation: object_type \"type\". Or maybe \"botanical garden\" is a type, but we can set object_type \"type\". Subject_type \"botanical garden\". That seems okay.\n\nNow produce JSON list.\n\nCheck ordering: any order fine.\n\nLet's craft.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1405,
+      "completion_tokens": 1117,
+      "total_tokens": 2522,
+      "cost": 0.000251029,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000251029,
+        "upstream_inference_prompt_cost": 4.215e-05,
+        "upstream_inference_completions_cost": 0.000208879
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 832,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"instance of\",\n            \"object\": \"botanical garden\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"type\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"located in\",\n            \"object\": \"Vienna\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"located in\",\n            \"object\": \"Austria\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"area\",\n            \"object\": \"8 hectares\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"adjacent to\",\n            \"object\": \"Belvedere gardens\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"garden\"\n        },\n        {\n            \"subject\": \"Botanical Garden of the University of Vienna\",\n            \"relation\": \"part of\",\n            \"object\": \"University of Vienna\",\n            \"qualifiers\": [],\n            \"subject_type\": \"botanical garden\",\n            \"object_type\": \"university\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Botanical Garden of the University of Vienna",
+        "relation": "instance of",
+        "object": "botanical garden",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "type"
+      },
+      {
+        "subject": "Botanical Garden of the University of Vienna",
+        "relation": "located in",
+        "object": "Vienna",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "city"
+      },
+      {
+        "subject": "Botanical Garden of the University of Vienna",
+        "relation": "located in",
+        "object": "Austria",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "country"
+      },
+      {
+        "subject": "Botanical Garden of the University of Vienna",
+        "relation": "area",
+        "object": "8 hectares",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "area"
+      },
+      {
+        "subject": "Botanical Garden of the University of Vienna",
+        "relation": "adjacent to",
+        "object": "Belvedere gardens",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "garden"
+      },
+      {
+        "subject": "Botanical Garden of the University of Vienna",
+        "relation": "part of",
+        "object": "University of Vienna",
+        "qualifiers": [],
+        "subject_type": "botanical garden",
+        "object_type": "university"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1405,
+    "completion_tokens": 1117,
+    "total_tokens": 2522,
+    "cost": 0.000251029,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000251029,
+      "upstream_inference_prompt_cost": 4.215e-05,
+      "upstream_inference_completions_cost": 0.000208879
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 832,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 555,
+    "output_tokens_est": 428
+  },
+  "attempts": 1,
+  "latency_s": 21.17589475600107,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:59:16.282379+00:00",
+  "cache_key": "299944460e6ad8c5e48cbd02700f4753"
+}

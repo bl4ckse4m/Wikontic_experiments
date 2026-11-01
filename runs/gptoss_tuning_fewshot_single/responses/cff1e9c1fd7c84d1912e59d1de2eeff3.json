@@ -1,0 +1,142 @@
+{
+  "task": {
+    "input_id": "caf3e190d514abaf",
+    "input_hash": "95a8858f4f75984dc57c257571bfa351bce6b132a081fa6dcc45471015adabc3",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-72d2754fcd557a0665cd8ff93d459a64",
+    "object": "chat.completion",
+    "created": 1791521471,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"date of birth\",\n            \"object\": \"April 23, 1939\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"occupation\",\n            \"object\": \"rancher\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"occupation\",\n            \"object\": \"retired educator\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"native of\",\n            \"object\": \"Dry Creek\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Beauregard Parish, Louisiana\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"member of\",\n            \"object\": \"Louisiana House of Representatives\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic\"\n                },\n                {\n                    \"relation\": \"electoral district\",\n                    \"object\": \"District 32\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Allen, Beauregard, and Calcasieu parishes\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Dorothy Sue Hill (born April 23, 1939) is a rancher and a retired educator from her native Dry Creek in Beauregard Parish, Louisiana, who is a Democratic member of the Louisiana House of Representatives for District 32 in Allen, Beauregard, and Calcasieu parishes in the southwestern portion of her state.\"\n\nWe need to parse.\n\nEntities: Dorothy Sue Hill (human). Date of birth: April 23, 1939.\n\nOccupations: rancher, retired educator.\n\nPlace of origin / native: Dry Creek in Beauregard Parish, Louisiana. So \"native of\" relation? Could be \"place of birth\" maybe not given. It says \"from her native Dry Creek in Beauregard Parish, Louisiana\". So we can have relation \"native of\" or \"place of origin\". Use \"native of\". object: Dry Creek. object_type: location (maybe \"settlement\").\n\nAlso \"Dry Creek\" is in Beauregard Parish, Louisiana. Could add location hierarchy but not required.\n\nPolitical role: Democratic member of the Louisiana House of Representatives for District 32 in Allen, Beauregard, and Calcasieu parishes.\n\nSo relation: \"member of\" maybe \"member of legislative body\". Subject: Dorothy Sue Hill. Object: Louisiana House of Representatives. Qualifiers: \"political party\": Democratic (maybe qualifier \"party affiliation\" or \"political ideology\"? Use qualifier relation \"political party\" with object \"Democratic\". Also \"point in time\"? Not given. Could add qualifier \"electoral district\" with object \"District 32\". Also \"place\" qualifiers: \"Allen, Beauregard, and Calcasieu parishes\". Could be qualifier \"place\". Might need multiple qualifiers.\n\nWe need to ensure each triplet has qualifiers list.\n\nAlso \"retired educator\" maybe occupation \"educator\" with qualifier \"status\" \"retired\". Could create two separate: occupation \"educator\" with qualifier \"qualifier\": \"status\" \"retired\". But guidelines: \"occupation\" relation; qualifiers can include \"approximation\"? Not needed. Use qualifier \"status\" maybe not defined. Could just have occupation \"educator\" and separate occupation \"rancher\". For retired, maybe separate occupation \"retired educator\" as object. Simpler: occupation \"educator\" with qualifier \"qualifier\": \"status\" \"retired\". But not sure if \"status\" is allowed. Could use qualifier \"qualifier\" generic? Not defined. Might just treat \"retired educator\" as occupation string.\n\nThus triplets:\n\n1. Dorothy Sue Hill - date of birth - April 23, 1939.\n\n2. Dorothy Sue Hill - occupation - rancher.\n\n3. Dorothy Sue Hill - occupation - educator (or \"retired educator\"?). Let's use \"educator\". Add qualifier: {\"relation\":\"status\",\"object\":\"retired\"} maybe acceptable. But \"status\" not listed in allowed qualifier relations. Allowed: \"polarity\", \"modality\", \"attribution\", \"condition\", \"unit\", \"approximation\", \"point in time\", \"place\". Not status. So can't use. So treat as occupation \"retired educator\". That's fine.\n\nThus occupation object: \"retired educator\". No qualifiers.\n\n4. Dorothy Sue Hill - native of - Dry Creek. Qualifier place? Could add \"place\" qualifier for \"Beauregard Parish, Louisiana\". But we can just set object \"Dry Creek\". Could also add qualifier \"place\" with \"Beauregard Parish, Louisiana\". But \"place\" qualifier is allowed. Let's include.\n\n5. Dorothy Sue Hill - member of - Louisiana House of Representatives. Qualifiers: political party \"Democratic\", electoral district \"District 32\", place \"Allen, Beauregard, and Calcasieu parishes\". Use qualifier relation \"political party\". Not listed but maybe allowed? Not in list. Allowed qualifiers list limited to those given. But examples used \"country of citizenship\", \"approximation\", etc. So we can have other qualifier relations; they didn't restrict. So we can use \"political party\". Also \"electoral district\". Also \"place\". Good.\n\nThus qualifiers list includes three.\n\nSubject_type: human. Object_type: date, profession, location, legislative body.\n\nDefine object_type for \"Louisiana House of Representatives\": \"legislative body\". For \"Dry Creek\": \"settlement\". For \"District 32\": maybe \"electoral district\". But qualifier object is \"District 32\" (string). No need type.\n\nNow produce JSON.\n\nCheck pronoun resolution: \"her native Dry Creek\" refers to Dorothy Sue Hill. Good.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1667,
+      "total_tokens": 3035,
+      "completion_tokens": 1368,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"date of birth\",\n            \"object\": \"April 23, 1939\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"occupation\",\n            \"object\": \"rancher\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"occupation\",\n            \"object\": \"retired educator\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"native of\",\n            \"object\": \"Dry Creek\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Beauregard Parish, Louisiana\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"settlement\"\n        },\n        {\n            \"subject\": \"Dorothy Sue Hill\",\n            \"relation\": \"member of\",\n            \"object\": \"Louisiana House of Representatives\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic\"\n                },\n                {\n                    \"relation\": \"electoral district\",\n                    \"object\": \"District 32\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Allen, Beauregard, and Calcasieu parishes\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Dorothy Sue Hill",
+        "relation": "date of birth",
+        "object": "April 23, 1939",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Dorothy Sue Hill",
+        "relation": "occupation",
+        "object": "rancher",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Dorothy Sue Hill",
+        "relation": "occupation",
+        "object": "retired educator",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Dorothy Sue Hill",
+        "relation": "native of",
+        "object": "Dry Creek",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "Beauregard Parish, Louisiana"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "settlement"
+      },
+      {
+        "subject": "Dorothy Sue Hill",
+        "relation": "member of",
+        "object": "Louisiana House of Representatives",
+        "qualifiers": [
+          {
+            "relation": "political party",
+            "object": "Democratic"
+          },
+          {
+            "relation": "electoral district",
+            "object": "District 32"
+          },
+          {
+            "relation": "place",
+            "object": "Allen, Beauregard, and Calcasieu parishes"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "legislative body"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1667,
+    "total_tokens": 3035,
+    "completion_tokens": 1368,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 558,
+    "output_tokens_est": 465
+  },
+  "attempts": 1,
+  "latency_s": 17.002443404009682,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:51:28.220892+00:00",
+  "cache_key": "cff1e9c1fd7c84d1912e59d1de2eeff3"
+}

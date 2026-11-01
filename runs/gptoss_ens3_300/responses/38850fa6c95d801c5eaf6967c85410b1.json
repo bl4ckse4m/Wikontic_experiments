@@ -1,0 +1,141 @@
+{
+  "task": {
+    "input_id": "1cfc58ad03848e3a",
+    "input_hash": "debd25aa2bd68e5abbcec2532d737ba08e2cc307037628166f6b45439a99f8e0",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-9212de5133d438a0cb3674064853da8b",
+    "object": "chat.completion",
+    "created": 1791548884,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1800\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"date of death\",\n            \"object\": \"1889\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"nationality\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"occupation\",\n            \"object\": \"horticulturist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"occupation\",\n            \"object\": \"garden designer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"movement\",\n            \"object\": \"Gardenesque school of landscape gardening\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"contemporaries\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"19th century\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"movement\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Robert Marnock (1800–1889) was one of the outstanding English horticulturalists and garden designers of the 19th century. He was considered by his contemporaries to be the best exponent of the Gardenesque school of landscape gardening.\"\n\nWe need triplets:\n\n- Subject: Robert Marnock\n- date of birth? Not given exact date, only year 1800. Could treat as date of birth = 1800? In example they used full date. If only year, we might still create date object \"1800\". Probably treat as date of birth \"1800\". Similarly date of death \"1889\". Should we include? Usually they include date of birth and death when given. Yes.\n\n- nationality: English? \"English horticulturalists\". It says \"English horticulturalists\". So Robert Marnock is English. Could have relation \"country of citizenship\" or \"nationality\". Use \"nationality\". object \"English\". subject_type human, object_type \"country\" or \"nationality\". We'll use \"nationality\" as relation.\n\n- occupation: horticulturalist, garden designer. So two occupation relations.\n\n- field of work: could be \"Gardenesque school of landscape gardening\". He was best exponent of that school. So relation \"notable work\" or \"field of work\"? The phrase \"best exponent of the Gardenesque school of landscape gardening\". So we can have relation \"movement\" maybe \"Gardenesque school of landscape gardening\". Use relation \"movement\" or \"school\". For simplicity, maybe \"movement\" with object \"Gardenesque school of landscape gardening\". Or \"field of work\". We'll capture as \"field of work\" = \"Gardenesque school of landscape gardening\". Also maybe relation \"notable for\" but not required.\n\n- The statement \"He was considered by his contemporaries to be the best exponent of the Gardenesque school of landscape gardening.\" This is a claim with attribution (by his contemporaries). So we need a triplet: (Robert Marnock, notable for, exponent of Gardenesque school of landscape gardening) with qualifier attribution: \"by his contemporaries\". Also polarity positive. Use relation \"notable for\" maybe. Or \"exponent of\". Might be \"role\" but we can use \"exponent of\". But object should be the school. So relation \"exponent of\". Not sure if such relation exists. Could use \"advocates\" but not. Use \"movement\" again but with qualifier \"polarity\"? Actually it's positive claim. The phrase \"was considered by his contemporaries to be the best exponent\". So we could have triplet (Robert Marnock, occupation, exponent) but no. Better: (Robert Marnock, notable for, Gardenesque school of landscape gardening) with qualifier attribution \"by his contemporaries\". However the object is a movement, not a thing. Could use relation \"movement\" and qualifier \"attribution\". Let's decide: relation \"movement\" (object \"Gardenesque school of landscape gardening\") and qualifier {\"relation\":\"attribution\",\"object\":\"contemporaries\"}.\n\nBut also we need to capture that he was considered the best exponent. Could also have relation \"rank\" but not needed. We'll just capture movement with attribution.\n\nNow types: subject_type \"human\". object_type for date: \"date\". For nationality: \"country\". For occupation: \"profession\". For movement: maybe \"movement\" or \"school\". Use \"movement\".\n\nNow qualifiers list.\n\nFor date of birth and death.\n\nAlso maybe \"century\" 19th century? He was of 19th century. Could have \"active period\" with qualifier point in time \"19th century\". Not required.\n\nLet's produce JSON.\n\nTriplets list:\n\n1. date of birth 1800\n2. date of death 1889\n3. nationality English (object_type \"country\")\n4. occupation horticulturalist\n5. occupation garden designer\n6. movement Gardenesque school of landscape gardening with qualifier attribution \"contemporaries\".\n\nMake sure qualifiers array with dict relation \"attribution\", object \"contemporaries\". Possibly also \"point in time\" \"19th century\"? Not explicit as attribute of movement. Could add as qualifier: {\"relation\":\"point in time\",\"object\":\"19th century\"} but not required. Might include.\n\nWe'll include both: attribution and point in time.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1642,
+      "total_tokens": 2940,
+      "completion_tokens": 1298,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1800\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"date of death\",\n            \"object\": \"1889\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"nationality\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"occupation\",\n            \"object\": \"horticulturist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"occupation\",\n            \"object\": \"garden designer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Robert Marnock\",\n            \"relation\": \"movement\",\n            \"object\": \"Gardenesque school of landscape gardening\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"contemporaries\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"19th century\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"movement\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Robert Marnock",
+        "relation": "date of birth",
+        "object": "1800",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Robert Marnock",
+        "relation": "date of death",
+        "object": "1889",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Robert Marnock",
+        "relation": "nationality",
+        "object": "English",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Robert Marnock",
+        "relation": "occupation",
+        "object": "horticulturist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Robert Marnock",
+        "relation": "occupation",
+        "object": "garden designer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Robert Marnock",
+        "relation": "movement",
+        "object": "Gardenesque school of landscape gardening",
+        "qualifiers": [
+          {
+            "relation": "attribution",
+            "object": "contemporaries"
+          },
+          {
+            "relation": "point in time",
+            "object": "19th century"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "movement"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1642,
+    "total_tokens": 2940,
+    "completion_tokens": 1298,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 535,
+    "output_tokens_est": 442
+  },
+  "attempts": 1,
+  "latency_s": 16.223790354997618,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:28:21.222518+00:00",
+  "cache_key": "38850fa6c95d801c5eaf6967c85410b1"
+}

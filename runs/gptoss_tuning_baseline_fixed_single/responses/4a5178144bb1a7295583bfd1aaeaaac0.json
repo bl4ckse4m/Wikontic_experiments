@@ -1,0 +1,172 @@
+{
+  "task": {
+    "input_id": "0d1a7abe905e213c",
+    "input_hash": "1bd52c6a38c86e6675ccaf7531210dc6458497225c1823f64540d93f54128494",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d051aa73d52eaee37fae950a141365cc",
+    "object": "chat.completion",
+    "created": 1791508806,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"White Americans\",\n            \"relation\": \"percentage of population\",\n            \"object\": \"44.6%\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"percentage\"\n        },\n        {\n            \"subject\": \"White Americans\",\n            \"relation\": \"population count\",\n            \"object\": \"3,704,243\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"White Americans of non-Hispanic origin\",\n            \"relation\": \"percentage of population\",\n            \"object\": \"35.1%\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"percentage\"\n        },\n        {\n            \"subject\": \"non-Hispanic whites\",\n            \"relation\": \"population count\",\n            \"object\": \"2,918,976\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Italian\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Irish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"German\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Russian\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Polish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Greek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text. Identify entities: New York City, White Americans, non-Hispanic whites, European American population, Italian ancestry, Irish ancestry, German ancestry, Russian ancestry, Polish ancestry, English ancestry, Greek ancestry.\n\nRelations: proportion of population, number of residents, demographic composition.\n\nWe need subject_type and object_type. For example, subject \"White Americans\" type \"ethnic group\". Object \"New York City\" type \"city\". Relation \"percentage of population in\" maybe \"population proportion\". We'll need to map to Wikidata-like predicates: \"population proportion\", \"population count\", \"ethnic group\", etc.\n\nTriplets:\n\n1. White Americans – proportion of population of – New York City: 44.6% (maybe relation \"percentage of population\" or \"population share\").\n\n2. White Americans – population count in – New York City: 3,704,243.\n\n3. White Americans of non-Hispanic origin – proportion of population of – New York City: 35.1%.\n\n4. non-Hispanic whites – population count in – New York City: 2,918,976.\n\n5. European American population of New York City – consists of individuals of – Italian ancestry (maybe relation \"has ancestry\").\n\nBut maybe better: \"European American population of New York City\" is not a distinct entity; we can say \"European American population of New York City\" type \"population group\". Relation \"includes ancestry\" with objects: Italian, Irish, German, Russian, Polish, English, Greek.\n\nAlternatively separate triplets: \"European American population of New York City\" – includes ancestry – Italian; etc.\n\nWe need qualifiers? Not needed.\n\nDefine subject_type: \"ethnic group\" for White Americans, \"ethnic group\" for non-Hispanic whites, \"population group\" for European American population, \"ancestry\" for Italian etc maybe \"ethnicity\".\n\nObject_type: \"city\" for New York City, \"number\" for percentages? Actually object is a percentage string; object_type \"percentage\". For count numbers: \"quantity\". For ancestry: \"ethnic group\".\n\nLet's craft JSON.\n\nTriplet list:\n\n{\n \"subject\":\"White Americans\",\n \"relation\":\"population share in\",\n \"object\":\"New York City\",\n \"qualifiers\":[{\"relation\":\"percentage\",\"object\":\"44.6%\"}],\n \"subject_type\":\"ethnic group\",\n \"object_type\":\"city\"\n}\n\nBut qualifiers must be attached to triplet, but the example used qualifiers for award date. Here we could embed percentage as qualifier, but also we could treat object as percentage. However object should be entity; percentage is not entity. Better to use qualifier.\n\nThus relation \"population count\" with qualifier \"count\". But we need both count and share.\n\nMaybe create two separate triplets: one with object \"44.6%\" and type \"percentage\". That's okay.\n\nThus:\n\nTriplet 1: subject White Americans, relation \"percentage of population\", object \"44.6%\", qualifiers [], subject_type \"ethnic group\", object_type \"percentage\".\n\nTriplet 2: subject White Americans, relation \"population count\", object \"3,704,243\", qualifiers [], object_type \"quantity\".\n\nTriplet 3: subject \"White Americans of non-Hispanic origin\", relation \"percentage of population\", object \"35.1%\", object_type \"percentage\".\n\nTriplet 4: subject \"non-Hispanic whites\", relation \"population count\", object \"2,918,976\", object_type \"quantity\".\n\nTriplet 5: subject \"European American population of New York City\", relation \"includes ancestry\", object \"Italian\", qualifiers [], subject_type \"population group\", object_type \"ethnic group\".\n\nSimilarly for Irish, German, Russian, Polish, English, Greek.\n\nWe need to decide naming: \"European American population of New York City\" maybe \"European American population (New York City)\". We'll keep as \"European American population of New York City\".\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1042,
+      "total_tokens": 2505,
+      "completion_tokens": 1463,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"White Americans\",\n            \"relation\": \"percentage of population\",\n            \"object\": \"44.6%\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"percentage\"\n        },\n        {\n            \"subject\": \"White Americans\",\n            \"relation\": \"population count\",\n            \"object\": \"3,704,243\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"White Americans of non-Hispanic origin\",\n            \"relation\": \"percentage of population\",\n            \"object\": \"35.1%\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"percentage\"\n        },\n        {\n            \"subject\": \"non-Hispanic whites\",\n            \"relation\": \"population count\",\n            \"object\": \"2,918,976\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ethnic group\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Italian\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Irish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"German\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Russian\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Polish\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"English\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"European American population of New York City\",\n            \"relation\": \"includes ancestry\",\n            \"object\": \"Greek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"population group\",\n            \"object_type\": \"ethnic group\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "White Americans",
+        "relation": "percentage of population",
+        "object": "44.6%",
+        "qualifiers": [],
+        "subject_type": "ethnic group",
+        "object_type": "percentage"
+      },
+      {
+        "subject": "White Americans",
+        "relation": "population count",
+        "object": "3,704,243",
+        "qualifiers": [],
+        "subject_type": "ethnic group",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "White Americans of non-Hispanic origin",
+        "relation": "percentage of population",
+        "object": "35.1%",
+        "qualifiers": [],
+        "subject_type": "ethnic group",
+        "object_type": "percentage"
+      },
+      {
+        "subject": "non-Hispanic whites",
+        "relation": "population count",
+        "object": "2,918,976",
+        "qualifiers": [],
+        "subject_type": "ethnic group",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "European American population of New York City",
+        "relation": "includes ancestry",
+        "object": "Italian",
+        "qualifiers": [],
+        "subject_type": "population group",
+        "object_type": "ethnic group"
+      },
+      {
+        "subject": "European American population of New York City",
+        "relation": "includes ancestry",
+        "object": "Irish",
+        "qualifiers": [],
+        "subject_type": "population group",
+        "object_type": "ethnic group"
+      },
+      {
+        "subject": "European American population of New York City",
+        "relation": "includes ancestry",
+        "object": "German",
+        "qualifiers": [],
+        "subject_type": "population group",
+        "object_type": "ethnic group"
+      },
+      {
+        "subject": "European American population of New York City",
+        "relation": "includes ancestry",
+        "object": "Russian",
+        "qualifiers": [],
+        "subject_type": "population group",
+        "object_type": "ethnic group"
+      },
+      {
+        "subject": "European American population of New York City",
+        "relation": "includes ancestry",
+        "object": "Polish",
+        "qualifiers": [],
+        "subject_type": "population group",
+        "object_type": "ethnic group"
+      },
+      {
+        "subject": "European American population of New York City",
+        "relation": "includes ancestry",
+        "object": "English",
+        "qualifiers": [],
+        "subject_type": "population group",
+        "object_type": "ethnic group"
+      },
+      {
+        "subject": "European American population of New York City",
+        "relation": "includes ancestry",
+        "object": "Greek",
+        "qualifiers": [],
+        "subject_type": "population group",
+        "object_type": "ethnic group"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1042,
+    "total_tokens": 2505,
+    "completion_tokens": 1463,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 876,
+    "output_tokens_est": 778
+  },
+  "attempts": 1,
+  "latency_s": 17.31470195100701,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:20:23.718655+00:00",
+  "cache_key": "4a5178144bb1a7295583bfd1aaeaaac0"
+}

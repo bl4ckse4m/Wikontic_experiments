@@ -1,0 +1,151 @@
+{
+  "task": {
+    "input_id": "287ed401f92bb798",
+    "input_hash": "91a2a0f4914e3f11cab5b4d693a7258ad19a809db76203f49bc95561e76f0e87",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-58716019a0b58327197695f7d2fbd8c0",
+    "object": "chat.completion",
+    "created": 1791549907,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Commonwealth nations\",\n            \"relation\": \"flag includes\",\n            \"object\": \"Union Jack\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political entity\",\n            \"object_type\": \"flag element\"\n        },\n        {\n            \"subject\": \"Commonwealth nations\",\n            \"relation\": \"quantity\",\n            \"object\": \"6\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political entity\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"flag element removed\",\n            \"object\": \"Union Jack\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1965\"\n                },\n                {\n                    \"relation\": \"order\",\n                    \"object\": \"first\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"flag element\"\n        },\n        {\n            \"subject\": \"South Africa\",\n            \"relation\": \"flag element removed\",\n            \"object\": \"Union Jack\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1994\"\n                },\n                {\n                    \"relation\": \"order\",\n                    \"object\": \"most recent\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"flag element\"\n        },\n        {\n            \"subject\": \"Gibraltar\",\n            \"relation\": \"flag includes\",\n            \"object\": \"Union Jack\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                },\n                {\n                    \"relation\": \"uniqueness\",\n                    \"object\": \"only\"\n                }\n            ],\n            \"subject_type\": \"overseas territory\",\n            \"object_type\": \"flag element\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from this text. Identify entities: Union Jack, flag, six Commonwealth nations, Canada, South Africa, Gibraltar, overseas territory, etc.\n\nWe must produce triplets with subject, relation, object, qualifiers, subject_type, object_type.\n\nLet's parse sentences.\n\nSentence 1: \"List of countries and territories with the Union Jack displayed on their flag\" - that's a title, not a factual statement.\n\nSentence 2: \"This is a list of countries and territories with a flag that incorporates the Union Jack.\" Could create triplet: (countries and territories, flag incorporates, Union Jack). But subject is \"countries and territories\". Might be generic, but we can create a class entity \"countries and territories\". Probably not needed.\n\nSentence 3: \"Six Commonwealth nations have the Union Jack on their national flag.\" Triplet: (Commonwealth nation, has flag element, Union Jack) but subject is \"Six Commonwealth nations\". Could be count. We'll create triplet: (Commonwealth nation, flag includes, Union Jack) with qualifier count = 6? Could treat as quantity: (Commonwealth nations, count, 6) but relation \"number of\" maybe. Let's create two: one for count, one for flag includes.\n\nBetter: subject: \"Commonwealth nations\" (type: political entity). relation: \"has flag element\". object: \"Union Jack\". qualifiers: maybe \"quantity\": 6. Use qualifier relation \"quantity\" maybe not defined. There's no rule for quantity qualifier; but we can treat as separate triplet: (Commonwealth nations, number of, 6). However \"number of\" not a standard relation. Could use \"count\". Perhaps we can skip count and just note that six exist; but we need to capture explicit fact. Use relation \"quantity\" maybe acceptable. Not sure.\n\nLet's see examples: they used \"award received\" with point in time qualifier. For numbers they might use \"quantity\". We'll do.\n\nTriplet 1:\nsubject: \"Commonwealth nations\"\nrelation: \"flag includes\"\nobject: \"Union Jack\"\nqualifiers: [] (maybe \"flag type\": \"national\")\nsubject_type: \"political entity\"\nobject_type: \"flag element\"\n\nTriplet 2:\nsubject: \"Commonwealth nations\"\nrelation: \"quantity\"\nobject: \"6\"\nqualifiers: []\nsubject_type: \"political entity\"\nobject_type: \"quantity\"\n\nBut \"quantity\" object type maybe \"quantity\". Ok.\n\nSentence 4: \"The first Commonwealth country to drop the Union Jack was Canada in 1965, after adopting a new national flag.\"\n\nFacts:\n- Canada is a Commonwealth country. (maybe not needed)\n- Canada dropped the Union Jack from its flag in 1965.\n- It was the first Commonwealth country to do so.\n\nTriplet: (Canada, flag element removed, Union Jack) with qualifier point in time 1965, maybe qualifier \"first\" but that's a qualifier of being first among Commonwealth countries. Could add qualifier \"order\" = \"first\". But relation \"order\" maybe.\n\nWe'll produce:\nsubject: \"Canada\"\nrelation: \"flag element removed\"\nobject: \"Union Jack\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1965\"},{\"relation\":\"order\",\"object\":\"first\"}]\nsubject_type: \"country\"\nobject_type: \"flag element\"\n\nAlso maybe: (Canada, adopted new national flag, true) but not needed.\n\nSentence 5: \"The most recent country to drop the Union Jack from its flag was South Africa in 1994, after adopting a new national flag.\"\n\nTriplet: (South Africa, flag element removed, Union Jack) qualifiers point in time 1994, order \"most recent\". Use order \"most recent\". So qualifiers accordingly.\n\nSentence 6: \"The only overseas territory without the Union Jack on its current flag is Gibraltar.\"\n\nFacts:\n- Gibraltar is an overseas territory.\n- Gibraltar's current flag does not have Union Jack.\n- It is the only overseas territory without Union Jack.\n\nTriplet: (Gibraltar, flag includes, Union Jack) with polarity negative (since it does NOT include). Also qualifier \"current\" maybe but not needed. Also qualifier \"only\" maybe but we can have qualifier \"uniqueness\" = \"only\". Use polarity negative.\n\nSo:\nsubject: \"Gibraltar\"\nrelation: \"flag includes\"\nobject: \"Union Jack\"\nqualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"},{\"relation\":\"uniqueness\",\"object\":\"only\"}]\nsubject_type: \"overseas territory\"\nobject_type: \"flag element\"\n\nAlso maybe (Gibraltar, territory type, overseas territory). But not needed.\n\nAlso note \"six Commonwealth nations have the Union Jack on their national flag.\" Could produce list of those nations, but not given.\n\nWe must ensure each object_type appropriate.\n\nNow produce JSON.\n\nCheck qualifiers: need list of dicts.\n\nWe'll include \"point in time\" qualifier as string date \"1965\" (object_type date). For \"order\" qualifier maybe object_type \"ordinal\". For \"uniqueness\", maybe object_type \"qualifier\" but fine.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1693,
+      "total_tokens": 3155,
+      "completion_tokens": 1462,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Commonwealth nations\",\n            \"relation\": \"flag includes\",\n            \"object\": \"Union Jack\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political entity\",\n            \"object_type\": \"flag element\"\n        },\n        {\n            \"subject\": \"Commonwealth nations\",\n            \"relation\": \"quantity\",\n            \"object\": \"6\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political entity\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"flag element removed\",\n            \"object\": \"Union Jack\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1965\"\n                },\n                {\n                    \"relation\": \"order\",\n                    \"object\": \"first\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"flag element\"\n        },\n        {\n            \"subject\": \"South Africa\",\n            \"relation\": \"flag element removed\",\n            \"object\": \"Union Jack\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1994\"\n                },\n                {\n                    \"relation\": \"order\",\n                    \"object\": \"most recent\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"flag element\"\n        },\n        {\n            \"subject\": \"Gibraltar\",\n            \"relation\": \"flag includes\",\n            \"object\": \"Union Jack\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                },\n                {\n                    \"relation\": \"uniqueness\",\n                    \"object\": \"only\"\n                }\n            ],\n            \"subject_type\": \"overseas territory\",\n            \"object_type\": \"flag element\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Commonwealth nations",
+        "relation": "flag includes",
+        "object": "Union Jack",
+        "qualifiers": [],
+        "subject_type": "political entity",
+        "object_type": "flag element"
+      },
+      {
+        "subject": "Commonwealth nations",
+        "relation": "quantity",
+        "object": "6",
+        "qualifiers": [],
+        "subject_type": "political entity",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Canada",
+        "relation": "flag element removed",
+        "object": "Union Jack",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1965"
+          },
+          {
+            "relation": "order",
+            "object": "first"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "flag element"
+      },
+      {
+        "subject": "South Africa",
+        "relation": "flag element removed",
+        "object": "Union Jack",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1994"
+          },
+          {
+            "relation": "order",
+            "object": "most recent"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "flag element"
+      },
+      {
+        "subject": "Gibraltar",
+        "relation": "flag includes",
+        "object": "Union Jack",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          },
+          {
+            "relation": "uniqueness",
+            "object": "only"
+          }
+        ],
+        "subject_type": "overseas territory",
+        "object_type": "flag element"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1693,
+    "total_tokens": 3155,
+    "completion_tokens": 1462,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 607,
+    "output_tokens_est": 515
+  },
+  "attempts": 1,
+  "latency_s": 17.217024580008,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:45:25.288392+00:00",
+  "cache_key": "ab1071f185607fe048f80d2ae3f49db2"
+}

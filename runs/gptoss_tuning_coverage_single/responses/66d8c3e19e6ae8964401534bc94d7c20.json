@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "d665a413a7aa8d0b",
+    "input_hash": "d8756a48e47ea135e7b2e47774eeb30b9a9ba98abbdd4d77951470dd8b4988fb",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-38f26108008a8113cc866276089b044d",
+    "object": "chat.completion",
+    "created": 1791507186,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"instance of\",\n            \"object\": \"district\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"instance of\",\n            \"object\": \"suburb\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Turku\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"located in country\",\n            \"object\": \"Finland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"located in\",\n            \"object\": \"southern part of Hirvensalo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"bridge between Hirvensalo and Satava\",\n            \"relation\": \"located in\",\n            \"object\": \"Haarla\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"bridge between Hirvensalo and Satava\",\n            \"relation\": \"connects\",\n            \"object\": \"Hirvensalo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"bridge between Hirvensalo and Satava\",\n            \"relation\": \"connects\",\n            \"object\": \"Satava\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"island\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Haarla\n\nHaarla (Finnish; \"Harlax\" in Swedish) is a district and a suburb of the city of Turku, in Finland. It is located in the southern part of the island of Hirvensalo, off the city's coastline. The bridge between Hirvensalo and Satava is located in Haarla.\"\n\nWe need to identify entities: Haarla, district, suburb, city of Turku, Finland, southern part, island of Hirvensalo, city's coastline, bridge between Hirvensalo and Satava.\n\nTriplets:\n\n1. Haarla - instance of - district (or \"subclass\"? relation: \"instance of\" maybe \"instance of\" or \"type\"? In examples they used \"occupation\". For location, they used \"subdivision of\"? Not sure. Use relation \"subdivision of\" maybe. But we need to follow Wikidata style: \"district of\" maybe \"located in the administrative territorial entity\". But we can use \"located in the administrative territorial entity\" relation. However they used \"award received\". For location they used \"located in\". In example they used \"field of work\". So we can use \"located in\" for location.\n\nFirst sentence: \"Haarla ... is a district and a suburb of the city of Turku, in Finland.\"\n\nThus we have two relations: Haarla - instance of - district; Haarla - instance of - suburb. Also relation: Haarla - located in administrative entity - Turku (city). Also Haarla - country - Finland (maybe via Turku). But text says \"in Finland\". So we can have Haarla - located in country - Finland.\n\nSecond sentence: \"It is located in the southern part of the island of Hirvensalo, off the city's coastline.\"\n\nThus Haarla - located in - southern part of Hirvensalo (object: \"southern part of Hirvensalo\"). Could split: Haarla - located in - southern part; qualifier: part of - Hirvensalo? But we can treat object as \"southern part of Hirvensalo\". Also \"off the city's coastline\" maybe a location relation: Haarla - located off - Turku's coastline. But maybe we can capture \"off the city's coastline\" as qualifier \"relative location\". Might be too complex. Simpler: Haarla - located in - southern part of Hirvensalo (object). Also we can add qualifier: \"part of\" -> Hirvensalo.\n\nThird sentence: \"The bridge between Hirvensalo and Satava is located in Haarla.\"\n\nThus Bridge (maybe \"bridge between Hirvensalo and Satava\") - located in - Haarla.\n\nWe need subject_type and object_type.\n\nDefine types:\n\n- Haarla: \"district\" (human? no, place). So subject_type: \"administrative division\" or \"place\". Use \"place\".\n- district: object_type: \"administrative division\".\n- suburb: object_type: \"administrative division\".\n- Turku: object_type: \"city\".\n- Finland: object_type: \"country\".\n- southern part of Hirvensalo: object_type: \"region\".\n- Hirvensalo: object_type: \"island\".\n- bridge between Hirvensalo and Satava: object_type: \"bridge\".\n- Satava: object_type: \"island\"? Not needed.\n\nNow qualifiers: For the \"southern part of Hirvensalo\" we could add qualifier \"part of\" -> Hirvensalo.\n\nBut qualifiers must be attached to a triplet. So we can have triplet: Haarla - located in - southern part (object: \"southern part\"). Qualifier: part of -> Hirvensalo.\n\nBut \"southern part\" is vague; maybe we treat object as \"southern part of Hirvensalo\". That's fine, no qualifier needed.\n\nAlso for \"bridge between Hirvensalo and Satava\" we might need to capture that the bridge connects Hirvensalo and Satava. But the sentence says \"The bridge between Hirvensalo and Satava is located in Haarla.\" So we have a bridge (subject) - located in - Haarla. Also we could have relation \"connects\" between bridge and Hirvensalo, and bridge and Satava, but not explicit; it's implied by \"bridge between\". Could treat as \"connects\" relation: Bridge - connects - Hirvensalo; Bridge - connects - Satava. But the phrase \"bridge between X and Y\" indicates it connects them. So we can extract two triplets: Bridge - connects - Hirvensalo; Bridge - connects - Satava. However the subject is \"The bridge between Hirvensalo and Satava\". So we need a name for the bridge; not given. Could use \"bridge between Hirvensalo and Satava\". That's acceptable.\n\nThus triplet: \"bridge between Hirvensalo and Satava\" - located in - Haarla.\n\nNow we need to include qualifiers? None.\n\nNow produce JSON.\n\nList of triplets:\n\n1. subject: \"Haarla\", relation: \"instance of\", object: \"district\", qualifiers: [], subject_type: \"place\", object_type: \"administrative division\".\n\n2. subject: \"Haarla\", relation: \"instance of\", object: \"suburb\", qualifiers: [], subject_type: \"place\", object_type: \"administrative division\".\n\n3. subject: \"Haarla\", relation: \"located in the administrative territorial entity\", object: \"Turku\", qualifiers: [], subject_type: \"place\", object_type: \"city\".\n\n4. subject: \"Haarla\", relation: \"located in country\", object: \"Finland\", qualifiers: [], subject_type: \"place\", object_type: \"country\". (maybe \"country\" relation is \"country\". Use \"country\".)\n\n5. subject: \"Haarla\", relation: \"located in\", object: \"southern part of Hirvensalo\", qualifiers: [], subject_type: \"place\", object_type: \"region\".\n\n6. subject: \"bridge between Hirvensalo and Satava\", relation: \"located in\", object: \"Haarla\", qualifiers: [], subject_type: \"bridge\", object_type: \"place\".\n\n7. subject: \"bridge between Hirvensalo and Satava\", relation: \"connects\", object: \"Hirvensalo\", qualifiers: [], subject_type: \"bridge\", object_type: \"island\".\n\n8. subject: \"bridge between Hirvensalo and Satava\", relation: \"connects\", object: \"Satava\", qualifiers: [], subject_type: \"bridge\", object_type: \"island\".\n\nPotentially also \"Haarla\" - \"part of\" - \"Hirvensalo\"? Actually Haarla is a district on Hirvensalo island. Could capture: Haarla - located on - Hirvensalo. But we already have \"southern part of Hirvensalo\". Might be okay.\n\nWe also might need \"Haarla\" - \"located in\" - \"southern part of Hirvensalo\". Already.\n\nNow produce JSON.\n\nCheck qualifiers: none.\n\nMake sure each dict includes keys: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nNow output."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1655,
+      "total_tokens": 3608,
+      "completion_tokens": 1953,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"instance of\",\n            \"object\": \"district\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"instance of\",\n            \"object\": \"suburb\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Turku\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"located in country\",\n            \"object\": \"Finland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Haarla\",\n            \"relation\": \"located in\",\n            \"object\": \"southern part of Hirvensalo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"bridge between Hirvensalo and Satava\",\n            \"relation\": \"located in\",\n            \"object\": \"Haarla\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"bridge between Hirvensalo and Satava\",\n            \"relation\": \"connects\",\n            \"object\": \"Hirvensalo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"bridge between Hirvensalo and Satava\",\n            \"relation\": \"connects\",\n            \"object\": \"Satava\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"island\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Haarla",
+        "relation": "instance of",
+        "object": "district",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Haarla",
+        "relation": "instance of",
+        "object": "suburb",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Haarla",
+        "relation": "located in the administrative territorial entity",
+        "object": "Turku",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "city"
+      },
+      {
+        "subject": "Haarla",
+        "relation": "located in country",
+        "object": "Finland",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "country"
+      },
+      {
+        "subject": "Haarla",
+        "relation": "located in",
+        "object": "southern part of Hirvensalo",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "region"
+      },
+      {
+        "subject": "bridge between Hirvensalo and Satava",
+        "relation": "located in",
+        "object": "Haarla",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "place"
+      },
+      {
+        "subject": "bridge between Hirvensalo and Satava",
+        "relation": "connects",
+        "object": "Hirvensalo",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "island"
+      },
+      {
+        "subject": "bridge between Hirvensalo and Satava",
+        "relation": "connects",
+        "object": "Satava",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "island"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1655,
+    "total_tokens": 3608,
+    "completion_tokens": 1953,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 602,
+    "output_tokens_est": 509
+  },
+  "attempts": 1,
+  "latency_s": 23.13391556499846,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:53:29.919877+00:00",
+  "cache_key": "66d8c3e19e6ae8964401534bc94d7c20"
+}

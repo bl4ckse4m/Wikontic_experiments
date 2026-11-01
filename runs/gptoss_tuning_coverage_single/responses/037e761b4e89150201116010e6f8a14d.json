@@ -1,0 +1,158 @@
+{
+  "task": {
+    "input_id": "16587494f9c7168d",
+    "input_hash": "3cd1d371eb8e062031ab8e3d54ab91178b7d141ffa2839885400253e4808d65c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-943cfa1c89fdeac0d7e230f42aef5070",
+    "object": "chat.completion",
+    "created": 1791501262,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"March on Washington for Jobs and Freedom\",\n            \"relation\": \"cause\",\n            \"object\": \"leaders meeting with members of Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"meeting with\",\n            \"object\": \"members of Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"human group\"\n        },\n        {\n            \"subject\": \"Assembled group\",\n            \"relation\": \"origin\",\n            \"object\": \"Washington Monument\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"monument\"\n        },\n        {\n            \"subject\": \"Assembled group\",\n            \"relation\": \"destination\",\n            \"object\": \"Lincoln Memorial\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"memorial\"\n        },\n        {\n            \"subject\": \"Leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"location\",\n            \"object\": \"Constitution Avenue\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"Leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"linked arms with\",\n            \"object\": \"crowd\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Constitution Avenue\"\n                }\n            ],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"human group\"\n        },\n        {\n            \"subject\": \"Leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"photographed\",\n            \"object\": \"leaders leading the march\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Constitution Avenue\"\n                }\n            ],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"activity\"\n        },\n        {\n            \"subject\": \"Assembled group\",\n            \"relation\": \"began to march without\",\n            \"object\": \"leaders\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"human group\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from this text.\n\nText describes \"March on Washington for Jobs and Freedom\". That's an event. Need to capture facts:\n\n- The march failed to start on time because its leaders were meeting with members of Congress. So: (March on Washington for Jobs and Freedom, failure to start on time, true?) Not typical relation. Could be \"event had cause\" or \"cause of delay\". Use relation \"cause of delay\" maybe? But we need Wikidata-style relations. Could use \"cause of failure to start\" not standard. Might use \"cause\" relation. Let's think: \"leaders were meeting with members of Congress\" is cause. So we can have two triplets:\n\n1. (March on Washington for Jobs and Freedom, participant, leaders) maybe? But leaders not named. Could be \"leaders of the march\". Might be \"leadership\" relation.\n\nBetter to capture:\n\n- (March on Washington for Jobs and Freedom, start time, delayed) Not good.\n\nMaybe we can capture: (March on Washington for Jobs and Freedom, cause of delay, leaders meeting with members of Congress). Use relation \"cause\". object is \"meeting of leaders with members of Congress\". Could be entity \"meeting with members of Congress\". We'll treat as object.\n\n- (Leaders, meeting with, members of Congress). But leaders not named.\n\n- (Assembled group, began to march from Washington Monument to Lincoln Memorial without leaders). So: (assembled group, movement route, Washington Monument to Lincoln Memorial). Could be relation \"route\". Or \"started from\" and \"ended at\". Could split.\n\n- (Leaders, met the march at Constitution Avenue). So: (Leaders, location of meeting, Constitution Avenue). Or (Leaders, met, March on Washington for Jobs and Freedom) with qualifier location.\n\n- (Leaders, linked arms at the head of a crowd, location Constitution Avenue) maybe.\n\n- (Leaders, photographed \"leading the march\") with qualifier \"purpose\" maybe.\n\nWe need to keep subject_type and object_type.\n\nSubject types: event, group, leaders (human group), location (Constitution Avenue), etc.\n\nLet's produce a set of clear factual statements:\n\n1. (March on Washington for Jobs and Freedom, instance of, protest) maybe.\n\nBut not explicit.\n\nBetter to stick to explicit facts:\n\n- The march failed to start on time because its leaders were meeting with members of Congress.\n\nTriplet: subject: March on Washington for Jobs and Freedom, relation: \"delayed start\", object: \"true\"? Not good.\n\nMaybe we can express: (March on Washington for Jobs and Freedom, cause of delayed start, meeting of leaders with members of Congress). Use relation \"cause\". object_type: \"event\".\n\n2. (Leaders of March on Washington for Jobs and Freedom, meeting with, members of Congress). subject_type: \"human group\". object_type: \"human group\".\n\n3. (Assembled group, began to march from, Washington Monument). relation \"origin\". object_type \"monument\".\n\n4. (Assembled group, marched to, Lincoln Memorial). relation \"destination\". object_type \"memorial\".\n\n5. (Leaders, met the march at, Constitution Avenue). relation \"meeting location\". object_type \"street\".\n\n6. (Leaders, linked arms with crowd at, Constitution Avenue). relation \"linked arms with\". object: \"crowd\". qualifiers maybe \"location\": Constitution Avenue.\n\n7. (Leaders, photographed \"leading the march\", location: Constitution Avenue). relation \"photographed\". object: \"leaders leading the march\". qualifier location.\n\nBut we need to keep qualifiers list.\n\nLet's design each triplet with qualifiers.\n\nTriplet 1:\nsubject: March on Washington for Jobs and Freedom\nrelation: cause of delayed start\nobject: meeting of leaders with members of Congress\nqualifiers: none\nsubject_type: event\nobject_type: event\n\nTriplet 2:\nsubject: Leaders of March on Washington for Jobs and Freedom\nrelation: meeting with\nobject: members of Congress\nqualifiers: []\nsubject_type: human group\nobject_type: human group\n\nTriplet 3:\nsubject: Assembled group\nrelation: origin\nobject: Washington Monument\nqualifiers: []\nsubject_type: human group\nobject_type: monument\n\nTriplet 4:\nsubject: Assembled group\nrelation: destination\nobject: Lincoln Memorial\nqualifiers: []\nsubject_type: human group\nobject_type: memorial\n\nTriplet 5:\nsubject: Leaders of March on Washington for Jobs and Freedom\nrelation: meeting location\nobject: Constitution Avenue\nqualifiers: []\nsubject_type: human group\nobject_type: street\n\nTriplet 6:\nsubject: Leaders of March on Washington for Jobs and Freedom\nrelation: linked arms with\nobject: crowd\nqualifiers: [{\"relation\":\"location\",\"object\":\"Constitution Avenue\"}]\nsubject_type: human group\nobject_type: human group\n\nTriplet 7:\nsubject: Leaders of March on Washington for Jobs and Freedom\nrelation: photographed\nobject: \"leading the march\"\nqualifiers: [{\"relation\":\"location\",\"object\":\"Constitution Avenue\"}]\nsubject_type: human group\nobject_type: activity\n\nWe also might need to capture that the assembled group began to march without the leaders. Could add qualifier \"without leaders\". But maybe not needed.\n\nTriplet 8:\nsubject: Assembled group\nrelation: began to march without\nobject: leaders\nqualifiers: []\nsubject_type: human group\nobject_type: human group\n\nBut \"began to march without them\" indicates they marched without leaders. So we can capture.\n\nNow ensure we use proper relation names: \"cause of delayed start\" maybe not standard. Could use \"cause\". Let's use \"cause\". So triplet 1: relation \"cause\". object: \"leaders meeting with members of Congress\". Good.\n\nTriplet 5: relation \"meeting location\" maybe \"location\". Use \"location\". So (Leaders..., location, Constitution Avenue). But we already have location qualifier elsewhere. Use \"location\". object_type \"street\".\n\nTriplet 6: relation \"linked arms with\". object \"crowd\". qualifier location.\n\nTriplet 7: relation \"photographed\". object \"leaders leading the march\". qualifier location.\n\nNow produce JSON.\n\nCheck subject_type and object_type values: we need classes like \"event\", \"human group\", \"monument\", \"memorial\", \"street\", \"activity\". Acceptable.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1663,
+      "total_tokens": 3525,
+      "completion_tokens": 1862,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"March on Washington for Jobs and Freedom\",\n            \"relation\": \"cause\",\n            \"object\": \"leaders meeting with members of Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"meeting with\",\n            \"object\": \"members of Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"human group\"\n        },\n        {\n            \"subject\": \"Assembled group\",\n            \"relation\": \"origin\",\n            \"object\": \"Washington Monument\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"monument\"\n        },\n        {\n            \"subject\": \"Assembled group\",\n            \"relation\": \"destination\",\n            \"object\": \"Lincoln Memorial\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"memorial\"\n        },\n        {\n            \"subject\": \"Leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"location\",\n            \"object\": \"Constitution Avenue\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"Leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"linked arms with\",\n            \"object\": \"crowd\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Constitution Avenue\"\n                }\n            ],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"human group\"\n        },\n        {\n            \"subject\": \"Leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"photographed\",\n            \"object\": \"leaders leading the march\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Constitution Avenue\"\n                }\n            ],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"activity\"\n        },\n        {\n            \"subject\": \"Assembled group\",\n            \"relation\": \"began to march without\",\n            \"object\": \"leaders\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human group\",\n            \"object_type\": \"human group\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "March on Washington for Jobs and Freedom",
+        "relation": "cause",
+        "object": "leaders meeting with members of Congress",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "event"
+      },
+      {
+        "subject": "Leaders of March on Washington for Jobs and Freedom",
+        "relation": "meeting with",
+        "object": "members of Congress",
+        "qualifiers": [],
+        "subject_type": "human group",
+        "object_type": "human group"
+      },
+      {
+        "subject": "Assembled group",
+        "relation": "origin",
+        "object": "Washington Monument",
+        "qualifiers": [],
+        "subject_type": "human group",
+        "object_type": "monument"
+      },
+      {
+        "subject": "Assembled group",
+        "relation": "destination",
+        "object": "Lincoln Memorial",
+        "qualifiers": [],
+        "subject_type": "human group",
+        "object_type": "memorial"
+      },
+      {
+        "subject": "Leaders of March on Washington for Jobs and Freedom",
+        "relation": "location",
+        "object": "Constitution Avenue",
+        "qualifiers": [],
+        "subject_type": "human group",
+        "object_type": "street"
+      },
+      {
+        "subject": "Leaders of March on Washington for Jobs and Freedom",
+        "relation": "linked arms with",
+        "object": "crowd",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Constitution Avenue"
+          }
+        ],
+        "subject_type": "human group",
+        "object_type": "human group"
+      },
+      {
+        "subject": "Leaders of March on Washington for Jobs and Freedom",
+        "relation": "photographed",
+        "object": "leaders leading the march",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Constitution Avenue"
+          }
+        ],
+        "subject_type": "human group",
+        "object_type": "activity"
+      },
+      {
+        "subject": "Assembled group",
+        "relation": "began to march without",
+        "object": "leaders",
+        "qualifiers": [],
+        "subject_type": "human group",
+        "object_type": "human group"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1663,
+    "total_tokens": 3525,
+    "completion_tokens": 1862,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 729,
+    "output_tokens_est": 637
+  },
+  "attempts": 1,
+  "latency_s": 20.818294553995656,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:14:43.409933+00:00",
+  "cache_key": "037e761b4e89150201116010e6f8a14d"
+}

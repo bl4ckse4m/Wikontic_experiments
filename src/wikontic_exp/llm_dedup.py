@@ -83,6 +83,19 @@ def partition_disagreements(groups: list[dict], candidates: list) -> dict:
             "note": "Pairwise heuristic comparison only; not quality or cluster accuracy"}
 
 
+def exact_selection(path: str, available: set[str], inputs: set[str]) -> list[str]:
+    """A locked input frame must not be filtered by extraction success."""
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
+    ids = data.get("input_ids") if isinstance(data, dict) else None
+    if (not isinstance(ids, list) or not ids
+            or any(not isinstance(i, str) or not i for i in ids)
+            or len(set(ids)) != len(ids)):
+        raise ValueError("Selection must contain unique nonempty input_ids")
+    if set(ids) - available or set(ids) - inputs:
+        raise ValueError("Selection has missing source records or source paragraphs")
+    return sorted(ids)
+
+
 async def run(args: argparse.Namespace) -> dict:
     inputs = {r["input_id"]: r for r in load_inputs(args.inputs)}
     records = [r for rd in args.run_dirs for r in load_run_records(Path(rd))]
@@ -92,7 +105,13 @@ async def run(args: argparse.Namespace) -> dict:
     for c in load_candidates(records):
         by_input[c.source["input_id"]].append(c)
     ids = sorted(by_input)
-    if args.selection_run_dir:
+    selection = getattr(args, "selection", None)
+    if selection:
+        if args.selection_run_dir or args.limit is not None:
+            raise ValueError("Exact --selection cannot be combined with --limit or --selection-run-dir")
+        available = {r["task"]["input_id"] for r in records}
+        ids = exact_selection(selection, available, set(inputs))
+    elif args.selection_run_dir:
         selected_ids = {r["task"]["input_id"] for r in load_run_records(Path(args.selection_run_dir))}
         if not selected_ids or selected_ids - set(ids):
             raise ValueError("Selection run is empty or has inputs missing from candidate runs")
@@ -130,6 +149,9 @@ async def run(args: argparse.Namespace) -> dict:
         async def one(iid: str) -> None:
             nonlocal permanent_error
             candidates = by_input[iid]
+            if not candidates:
+                result["failures"][iid] = "No usable extraction candidates; no merger request made"
+                return
             payload = {"title": inputs[iid]["title"], "paragraph_text": inputs[iid]["paragraph_text"],
                        "candidates": [{"id": i, "fact": c.fact} for i, c in enumerate(candidates)]}
             cache_spec = {"version": VERSION, "model": cfg.model, "prompt": prompt,
@@ -201,6 +223,7 @@ def main() -> int:
     p.add_argument("--openrouter", action="store_true", help="explicit OpenRouter route; no automatic fallback")
     p.add_argument("--model", default=None)
     p.add_argument("--limit", type=int, default=None)
+    p.add_argument("--selection", default=None, help="exact selection.json input_ids; no success filtering or subsampling")
     p.add_argument("--selection-run-dir", default=None, help="reuse exact input IDs from e.g. C2 run")
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--max-tokens", type=int, default=6000)

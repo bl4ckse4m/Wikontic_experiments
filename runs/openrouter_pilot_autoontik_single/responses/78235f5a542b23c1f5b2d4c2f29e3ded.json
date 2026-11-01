@@ -1,0 +1,170 @@
+{
+  "task": {
+    "input_id": "94b77532e2a4bf61",
+    "input_hash": "9e059d33a243fa5686b6c3eef8b7c87255dd45f42fd6043e680216c6bc801497",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793206826-bjdC3uHhreYLmzFZGBJm",
+    "object": "chat.completion",
+    "created": 1793206826,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Crusoe",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Vietnam War\",\n            \"relation\": \"killed in action count\",\n            \"object\": \"58,318\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"includes\",\n                    \"object\": \"missing and deaths in captivity\",\n                    \"object_type\": \"category\"\n                }\n            ],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Vietnam War\",\n            \"relation\": \"missing in action count\",\n            \"object\": \"1,602\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"originally\",\n                    \"object\": \"2,646\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Vietnam War\",\n            \"relation\": \"wounded in action count\",\n            \"object\": \"153,303\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"excluding\",\n                    \"object\": \"150,332 persons not requiring hospital care\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Vietnam War\",\n            \"relation\": \"prisoner of war count\",\n            \"object\": \"766-778\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"freed or escaped\",\n                    \"object\": \"652-662\",\n                    \"object_type\": \"quantity\"\n                },\n                {\n                    \"relation\": \"died in captivity\",\n                    \"object\": \"114-116\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to parse the text. It's a list of casualty numbers for Vietnam War. Entities: Vietnam War (conflict). Types: conflict. The numbers are categories: KIA or non-combat deaths, MIA, WIA, POW. Also missing, deaths in captivity, freed/escaped, died in captivity. We need to produce triplets.\n\nSubject: Vietnam War. Relation: casualties count? Could be \"casualties\" but need specific relation like \"number of killed in action\". Use \"killed in action count\" maybe. The object is a number. The object_type is \"quantity\". Also qualifiers: maybe include \"including missing & deaths in captivity\". That is a qualifier describing the count includes missing and deaths in captivity. So we can have qualifier relation \"includes\" object \"missing and deaths in captivity\". object_type maybe \"category\". Also need to capture MIA count with qualifier \"originally 2,646\". So original count is a qualifier.\n\nSimilarly WIA count with qualifier \"excluding 150,332 persons not requiring hospital care\". POW count with range \"766 -- 778\". Also qualifiers for POW: \"freed / escaped\" 652 -- 662, \"died in captivity\" 114 -- 116.\n\nWe need to decide how to represent ranges. Could treat as object \"766-778\". object_type \"quantity\". Qualifiers for subcounts.\n\nLet's produce separate triplets:\n\n1. subject: Vietnam War, relation: \"killed in action count\", object: \"58,318\", qualifiers: [{\"relation\":\"includes\",\"object\":\"missing and deaths in captivity\",\"object_type\":\"category\"}], subject_type: \"conflict\", object_type: \"quantity\".\n\n2. subject: Vietnam War, relation: \"missing in action count\", object: \"1,602\", qualifiers: [{\"relation\":\"originally\",\"object\":\"2,646\",\"object_type\":\"quantity\"}], subject_type: \"conflict\", object_type: \"quantity\".\n\n3. subject: Vietnam War, relation: \"wounded in action count\", object: \"153,303\", qualifiers: [{\"relation\":\"excluding\",\"object\":\"150,332 persons not requiring hospital care\",\"object_type\":\"quantity\"}], subject_type: \"conflict\", object_type: \"quantity\".\n\n4. subject: Vietnam War, relation: \"prisoner of war count\", object: \"766-778\", qualifiers: [\n   {\"relation\":\"freed or escaped\",\"object\":\"652-662\",\"object_type\":\"quantity\"},\n   {\"relation\":\"died in captivity\",\"object\":\"114-116\",\"object_type\":\"quantity\"}\n], subject_type: \"conflict\", object_type: \"quantity\".\n\nWe also might want separate triplet for \"prisoner of war count\" original range? Already included.\n\nMake sure qualifiers list each dict with relation, object, object_type.\n\nReturn JSON with \"triplets\": [ ... ].\n\nCheck formatting: each dict includes subject, relation, object, qualifiers, subject_type, object_type.\n\nLet's produce.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to parse the text. It's a list of casualty numbers for Vietnam War. Entities: Vietnam War (conflict). Types: conflict. The numbers are categories: KIA or non-combat deaths, MIA, WIA, POW. Also missing, deaths in captivity, freed/escaped, died in captivity. We need to produce triplets.\n\nSubject: Vietnam War. Relation: casualties count? Could be \"casualties\" but need specific relation like \"number of killed in action\". Use \"killed in action count\" maybe. The object is a number. The object_type is \"quantity\". Also qualifiers: maybe include \"including missing & deaths in captivity\". That is a qualifier describing the count includes missing and deaths in captivity. So we can have qualifier relation \"includes\" object \"missing and deaths in captivity\". object_type maybe \"category\". Also need to capture MIA count with qualifier \"originally 2,646\". So original count is a qualifier.\n\nSimilarly WIA count with qualifier \"excluding 150,332 persons not requiring hospital care\". POW count with range \"766 -- 778\". Also qualifiers for POW: \"freed / escaped\" 652 -- 662, \"died in captivity\" 114 -- 116.\n\nWe need to decide how to represent ranges. Could treat as object \"766-778\". object_type \"quantity\". Qualifiers for subcounts.\n\nLet's produce separate triplets:\n\n1. subject: Vietnam War, relation: \"killed in action count\", object: \"58,318\", qualifiers: [{\"relation\":\"includes\",\"object\":\"missing and deaths in captivity\",\"object_type\":\"category\"}], subject_type: \"conflict\", object_type: \"quantity\".\n\n2. subject: Vietnam War, relation: \"missing in action count\", object: \"1,602\", qualifiers: [{\"relation\":\"originally\",\"object\":\"2,646\",\"object_type\":\"quantity\"}], subject_type: \"conflict\", object_type: \"quantity\".\n\n3. subject: Vietnam War, relation: \"wounded in action count\", object: \"153,303\", qualifiers: [{\"relation\":\"excluding\",\"object\":\"150,332 persons not requiring hospital care\",\"object_type\":\"quantity\"}], subject_type: \"conflict\", object_type: \"quantity\".\n\n4. subject: Vietnam War, relation: \"prisoner of war count\", object: \"766-778\", qualifiers: [\n   {\"relation\":\"freed or escaped\",\"object\":\"652-662\",\"object_type\":\"quantity\"},\n   {\"relation\":\"died in captivity\",\"object\":\"114-116\",\"object_type\":\"quantity\"}\n], subject_type: \"conflict\", object_type: \"quantity\".\n\nWe also might want separate triplet for \"prisoner of war count\" original range? Already included.\n\nMake sure qualifiers list each dict with relation, object, object_type.\n\nReturn JSON with \"triplets\": [ ... ].\n\nCheck formatting: each dict includes subject, relation, object, qualifiers, subject_type, object_type.\n\nLet's produce.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1432,
+      "completion_tokens": 1015,
+      "total_tokens": 2447,
+      "cost": 0.00032535,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 48,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00032535,
+        "upstream_inference_prompt_cost": 7.16e-05,
+        "upstream_inference_completions_cost": 0.00025375
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 613,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Vietnam War\",\n            \"relation\": \"killed in action count\",\n            \"object\": \"58,318\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"includes\",\n                    \"object\": \"missing and deaths in captivity\",\n                    \"object_type\": \"category\"\n                }\n            ],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Vietnam War\",\n            \"relation\": \"missing in action count\",\n            \"object\": \"1,602\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"originally\",\n                    \"object\": \"2,646\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Vietnam War\",\n            \"relation\": \"wounded in action count\",\n            \"object\": \"153,303\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"excluding\",\n                    \"object\": \"150,332 persons not requiring hospital care\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Vietnam War\",\n            \"relation\": \"prisoner of war count\",\n            \"object\": \"766-778\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"freed or escaped\",\n                    \"object\": \"652-662\",\n                    \"object_type\": \"quantity\"\n                },\n                {\n                    \"relation\": \"died in captivity\",\n                    \"object\": \"114-116\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"conflict\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Vietnam War",
+        "relation": "killed in action count",
+        "object": "58,318",
+        "qualifiers": [
+          {
+            "relation": "includes",
+            "object": "missing and deaths in captivity"
+          }
+        ],
+        "subject_type": "conflict",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Vietnam War",
+        "relation": "missing in action count",
+        "object": "1,602",
+        "qualifiers": [
+          {
+            "relation": "originally",
+            "object": "2,646"
+          }
+        ],
+        "subject_type": "conflict",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Vietnam War",
+        "relation": "wounded in action count",
+        "object": "153,303",
+        "qualifiers": [
+          {
+            "relation": "excluding",
+            "object": "150,332 persons not requiring hospital care"
+          }
+        ],
+        "subject_type": "conflict",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Vietnam War",
+        "relation": "prisoner of war count",
+        "object": "766-778",
+        "qualifiers": [
+          {
+            "relation": "freed or escaped",
+            "object": "652-662"
+          },
+          {
+            "relation": "died in captivity",
+            "object": "114-116"
+          }
+        ],
+        "subject_type": "conflict",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1432,
+    "completion_tokens": 1015,
+    "total_tokens": 2447,
+    "cost": 0.00032535,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 48,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00032535,
+      "upstream_inference_prompt_cost": 7.16e-05,
+      "upstream_inference_completions_cost": 0.00025375
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 613,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 624,
+    "output_tokens_est": 497
+  },
+  "attempts": 1,
+  "latency_s": 6.0284640210011275,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T17:00:31.912544+00:00",
+  "cache_key": "78235f5a542b23c1f5b2d4c2f29e3ded"
+}

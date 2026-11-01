@@ -1,0 +1,141 @@
+{
+  "task": {
+    "input_id": "ad2742eefda9133b",
+    "input_hash": "82096561865a6dfbb44b8ad877ec5f16813c1d5e70afe56b40df5ff2b2df6b3f",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-1ebedf0353c3837634fd9d52aa1a1763",
+    "object": "chat.completion",
+    "created": 1791520546,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"date of release\",\n            \"object\": \"1974\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"performer\",\n            \"object\": \"Hank Snow\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"chart position\",\n            \"object\": \"U.S. country singles chart\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"1\"\n                },\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"7\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"duration at number one\",\n            \"object\": \"1 week\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"total weeks on chart\",\n            \"object\": \"10 weeks\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"gap since previous number one for artist\",\n            \"object\": \"12 years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"duration\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Hello Love (song)\n\n\"Hello Love\" is a 1974 single by Hank Snow. \"Hello Love\" was Snow's seventh and final number one on the U.S. country singles chart, and his first number one in twelve years. The single stayed at number one for a single week and spent a total of ten weeks on the chart.\"\n\nWe need to produce triplets.\n\nIdentify entities: \"Hello Love\" (song), Hank Snow (human), 1974 (date), U.S. country singles chart (chart), number one (position), seventh and final number one (ordinal?), first number one in twelve years (time interval), single week (duration), ten weeks (duration).\n\nWe need to decide relations.\n\nPossible relations:\n- \"Hello Love\" - \"instance of\" - \"song\"? Not required but could be \"type\". However example didn't include type for song. Might include \"genre\"? Not given.\n\n- \"Hello Love\" - \"publication date\" or \"release date\" - 1974. Relation maybe \"date of release\". Use \"date of release\". object_type date.\n\n- \"Hello Love\" - \"performer\" or \"artist\" - Hank Snow. Relation \"performer\". object_type human.\n\n- \"Hello Love\" - \"chart performance\" - \"number one on the U.S. country singles chart\". Could be \"chart position\" relation with object \"U.S. country singles chart\". Qualifiers: \"position\" maybe \"point in time\"? Not exactly. Could use \"peak position\" relation with qualifier \"position\" = \"1\". But guidelines: relation should be short unambiguous. Maybe \"chart position\" with object chart, qualifier \"position\" \"1\". Also qualifiers: \"point in time\" maybe not given. It says \"was Snow's seventh and final number one on the U.S. country singles chart\". So we can have triplet: subject \"Hello Love\", relation \"chart peak\", object \"U.S. country singles chart\", qualifiers: {\"relation\":\"position\",\"object\":\"1\"}, {\"relation\":\"ordinal\",\"object\":\"seventh\"}? Actually seventh number one for Snow, not for song. Might need separate fact: \"Hello Love\" was Snow's seventh number one. So subject: Hank Snow, relation: \"number of chart-topping singles\", object: \"7\"? But that's derived. The text says \"seventh and final number one\". So we can have triplet: subject \"Hello Love\", relation \"is number one on\", object \"U.S. country singles chart\", qualifiers: {\"relation\":\"ordinal for artist\",\"object\":\"seventh\"}? Might be too complex.\n\nSimplify: Create separate facts:\n\n1. Hello Love - date of release - 1974.\n2. Hello Love - performer - Hank Snow.\n3. Hello Love - chart achievement - \"number one on the U.S. country singles chart\". Could treat object as chart and qualifier \"position\" \"1\". Also qualifier \"ordinal for artist\" maybe \"seventh\". But we can have two separate statements: (a) It was Snow's seventh number one. So subject: Hank Snow, relation: \"number of number-one singles on U.S. country singles chart\", object: \"7\". But that's derived from \"seventh\". Might be okay.\n\nBut guidelines: only explicit facts. \"Snow's seventh and final number one\" explicitly says that Hello Love was his seventh number one. So we can capture: subject: Hello Love, relation: \"ordinal number of number-one singles for artist\", object: \"7\". But need proper relation.\n\nMaybe use \"ranking order\" relation with qualifier \"artist\" etc.\n\nSimplify: Use two triplets:\n\n- subject: Hello Love, relation: \"chart position\", object: \"U.S. country singles chart\", qualifiers: [{\"relation\":\"position\",\"object\":\"1\"}].\n\n- subject: Hello Love, relation: \"chart duration at number one\", object: \"1 week\", qualifiers: [] (unit weeks). Use relation \"duration at peak\". Could be \"duration at number one\". object \"1 week\". Provide unit qualifier? object_type \"duration\". Could embed unit.\n\n- subject: Hello Love, relation: \"total weeks on chart\", object: \"10 weeks\". qualifiers [].\n\n- Also \"first number one in twelve years\". This indicates that prior number one was twelve years earlier. Could capture: subject Hello Love, relation: \"first number one after\", object: \"12 years\". But maybe not needed.\n\nBetter to capture: subject: Hello Love, relation: \"first number one after gap\", object: \"12 years\". Use qualifier \"gap\". Might be too interpretive.\n\nProbably include: qualifier \"gap\" with object \"12 years\". Use relation \"gap\". But guidelines: qualifiers can be \"condition\", \"approximation\", \"unit\", etc. \"first number one in twelve years\" indicates time since previous number one. Could be qualifier \"time since previous number one\" with object \"12 years\". Use relation \"time since previous number one\". That's okay.\n\nLet's produce triplets:\n\n1. Hello Love - date of release - 1974.\n2. Hello Love - performer - Hank Snow.\n3. Hello Love - chart position - U.S. country singles chart, qualifiers: position 1.\n4. Hello Love - chart position ordinal for artist - 7 (seventh). Could be separate: subject: Hello Love, relation: \"artist's number-one count ordinal\", object: \"7\". But maybe combine with previous.\n\nMaybe better: Use qualifier \"ordinal\" on chart position: {\"relation\":\"ordinal\",\"object\":\"7\"} and also qualifier \"final\" maybe \"polarity\"? Not needed.\n\n5. Hello Love - duration at number one - 1 week (object \"1 week\", qualifier unit \"week\").\n\n6. Hello Love - total weeks on chart - 10 weeks.\n\n7. Hello Love - gap since previous number one for artist - 12 years (qualifier \"time since previous number one\").\n\nNow need subject_type and object_type.\n\n- Hello Love: song.\n- 1974: date.\n- Hank Snow: human.\n- U.S. country singles chart: chart (maybe \"music chart\").\n- position: object is chart, but position qualifier is numeric string \"1\". Could treat as quantity.\n\n- For duration at number one: object \"1 week\" type \"duration\". Could also have qualifier unit \"week\". But object includes unit.\n\n- total weeks on chart: object \"10 weeks\" type \"duration\".\n\n- gap: object \"12 years\" type \"duration\".\n\nNow format JSON.\n\nEach triplet dict with qualifiers list.\n\nLet's craft.\n\nTriplet 1:\n{\"subject\":\"Hello Love\",\"relation\":\"date of release\",\"object\":\"1974\",\"qualifiers\":[],\"subject_type\":\"song\",\"object_type\":\"date\"}\n\nTriplet 2:\n{\"subject\":\"Hello Love\",\"relation\":\"performer\",\"object\":\"Hank Snow\",\"qualifiers\":[],\"subject_type\":\"song\",\"object_type\":\"human\"}\n\nTriplet 3:\n{\"subject\":\"Hello Love\",\"relation\":\"chart position\",\"object\":\"U.S. country singles chart\",\"qualifiers\":[{\"relation\":\"position\",\"object\":\"1\"},{\"relation\":\"ordinal\",\"object\":\"7\"},{\"relation\":\"final\",\"object\":\"true\"}],\"subject_type\":\"song\",\"object_type\":\"music chart\"}\n\nBut \"final\" maybe not needed. Use only explicit qualifiers: \"seventh and final\". So include both ordinal and final. For final we could use qualifier \"final\" with object \"true\". Use relation \"final\" maybe not standard but okay.\n\nTriplet 4:\n{\"subject\":\"Hello Love\",\"relation\":\"duration at number one\",\"object\":\"1 week\",\"qualifiers\":[],\"subject_type\":\"song\",\"object_type\":\"duration\"}\n\nTriplet 5:\n{\"subject\":\"Hello Love\",\"relation\":\"total weeks on chart\",\"object\":\"10 weeks\",\"qualifiers\":[],\"subject_type\":\"song\",\"object_type\":\"duration\"}\n\nTriplet 6:\n{\"subject\":\"Hello Love\",\"relation\":\"gap since previous number one for artist\",\"object\":\"12 years\",\"qualifiers\":[],\"subject_type\":\"song\",\"object_type\":\"duration\"}\n\nCheck qualifiers: need to use allowed qualifier relations: \"position\", \"ordinal\", \"final\", \"unit\", \"point in time\", etc. \"final\" maybe not standard but could be \"polarity\"? Not. Could use \"polarity\" negative? No. Might just omit final.\n\nThus triplet 3 qualifiers: position 1, ordinal 7.\n\nNow produce JSON list.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1662,
+      "total_tokens": 3788,
+      "completion_tokens": 2126,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"date of release\",\n            \"object\": \"1974\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"performer\",\n            \"object\": \"Hank Snow\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"chart position\",\n            \"object\": \"U.S. country singles chart\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"1\"\n                },\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"7\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"duration at number one\",\n            \"object\": \"1 week\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"total weeks on chart\",\n            \"object\": \"10 weeks\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"Hello Love\",\n            \"relation\": \"gap since previous number one for artist\",\n            \"object\": \"12 years\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"duration\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Hello Love",
+        "relation": "date of release",
+        "object": "1974",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "date"
+      },
+      {
+        "subject": "Hello Love",
+        "relation": "performer",
+        "object": "Hank Snow",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Hello Love",
+        "relation": "chart position",
+        "object": "U.S. country singles chart",
+        "qualifiers": [
+          {
+            "relation": "position",
+            "object": "1"
+          },
+          {
+            "relation": "ordinal",
+            "object": "7"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "music chart"
+      },
+      {
+        "subject": "Hello Love",
+        "relation": "duration at number one",
+        "object": "1 week",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "duration"
+      },
+      {
+        "subject": "Hello Love",
+        "relation": "total weeks on chart",
+        "object": "10 weeks",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "duration"
+      },
+      {
+        "subject": "Hello Love",
+        "relation": "gap since previous number one for artist",
+        "object": "12 years",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "duration"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1662,
+    "total_tokens": 3788,
+    "completion_tokens": 2126,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 527,
+    "output_tokens_est": 435
+  },
+  "attempts": 1,
+  "latency_s": 24.596814903998165,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:36:11.751868+00:00",
+  "cache_key": "86105d3cc361a26f4953a00de886a968"
+}

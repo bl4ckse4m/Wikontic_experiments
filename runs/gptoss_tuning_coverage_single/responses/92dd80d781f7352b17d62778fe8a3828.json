@@ -1,0 +1,155 @@
+{
+  "task": {
+    "input_id": "2e7a3fa397aaf782",
+    "input_hash": "448946a13f0ebc573e5acdb20202c5e296c7cefd461505b53d4b0a82c1f8fa75",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-29faba5bf4c7cfba4daa7730d99be932",
+    "object": "chat.completion",
+    "created": 1791502048,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"located in\",\n            \"object\": \"Maniema\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"located on\",\n            \"object\": \"Lualaba\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"bank side\",\n                    \"object\": \"right\"\n                }\n            ],\n            \"subject_type\": \"town\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"located in country\",\n            \"object\": \"Democratic Republic of Congo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"located in territory\",\n            \"object\": \"Kasongo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"territory\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"hub for\",\n            \"object\": \"Arabs\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"trade good\",\n                    \"object\": \"ivory\"\n                }\n            ],\n            \"subject_type\": \"town\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"type\",\n            \"object\": \"slave trading state\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"end of the 19th century\"\n                }\n            ],\n            \"subject_type\": \"town\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"trade good\",\n            \"object\": \"ivory\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"commodity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Nyangwe\n\nNyangwe is a town in Maniema, on the right bank of the Lualaba in the Democratic Republic of Congo (territory of Kasongo). It was an important hub for the Arabs for trade goods like ivory and also one of the main slave trading states in the region at the end of the 19th century.\"\n\nWe need to parse.\n\nEntities: Nyangwe (town), Maniema (province/region), Lualaba (river), Democratic Republic of Congo (country), Kasongo (territory), Arabs (people/ethnic group), ivory (trade good), slave trading states (concept), region (maybe region), end of the 19th century (time period).\n\nTriplets:\n\n1. Nyangwe - instance of - town? relation \"instance of\" maybe but not required. Use \"subclass of\"? In example they used occupation etc. We can use \"location\" relations.\n\n- Nyangwe, relation \"located in\", object \"Maniema\". subject_type \"settlement\" maybe \"town\". object_type \"province\" or \"region\". Use \"town\" as subject_type.\n\n- Nyangwe, relation \"located on\", object \"right bank of the Lualaba\". Might be \"situated on\" but we can have \"located on\" with object \"Lualaba\". Could also have \"bank\" but keep simple: \"located on\", object \"Lualaba\". qualifiers: maybe \"side\", \"right bank\". Could add qualifier \"side\" with object \"right\". But not required.\n\n- Nyangwe, relation \"country\", object \"Democratic Republic of Congo\". Or \"located in country\". Use \"located in country\". subject_type \"town\". object_type \"country\".\n\n- Nyangwe, relation \"territory\", object \"Kasongo\". Actually text: \"(territory of Kasongo)\" meaning Nyangwe is in the territory of Kasongo. So relation \"located in territory\", object \"Kasongo\". subject_type \"town\". object_type \"territory\".\n\n- Nyangwe, relation \"historical role\", object \"important hub for the Arabs for trade goods like ivory\". Might split: \"hub for\" relation \"hub for\" maybe \"hub for trade\". Could create two: Nyangwe - \"hub for\" - \"Arabs\". But \"hub for the Arabs for trade goods like ivory\". So maybe relation \"hub for\" object \"Arabs\". Also qualifier \"trade goods\" \"ivory\". Could add qualifier \"trade good\" \"ivory\". Also \"important\" maybe not needed.\n\n- Nyangwe - \"involved in\" - \"slave trading\". Could be relation \"participated in\" - \"slave trade\". object_type \"activity\". Also qualifier \"time period\" \"end of the 19th century\". Also \"one of the main slave trading states in the region\". So relation \"type of entity\" maybe \"slave trading state\". But Nyangwe is a town, not a state. Text says \"one of the main slave trading states in the region\". So treat as \"was one of the main slave trading states\". So relation \"instance of\" maybe \"slave trading state\". But we can produce: Nyangwe - \"type\" - \"slave trading state\". qualifier \"point in time\" \"end of the 19th century\". Also \"region\" maybe \"region\". Could add qualifier \"region\" \"region\". But keep simple.\n\n- Also \"trade goods like ivory\". So we could have Nyangwe - \"trade good\" - \"ivory\". qualifier \"type\" \"trade good\". Not sure.\n\nLet's produce a set of clear triplets:\n\n1. Nyangwe - \"located in\" - Maniema. qualifiers none.\n\n2. Nyangwe - \"located on\" - Lualaba. qualifiers [{\"relation\":\"bank side\",\"object\":\"right\"}] maybe but we need relation names from Wikidata style. Could use \"bank\" but not sure. Simpler: add qualifier \"bank side\" as relation. Provide.\n\n3. Nyangwe - \"located in country\" - Democratic Republic of Congo.\n\n4. Nyangwe - \"located in territory\" - Kasongo.\n\n5. Nyangwe - \"hub for\" - Arabs. qualifier maybe \"purpose\" \"trade\". Could add qualifier \"trade good\" \"ivory\". Use qualifier relation \"trade good\" object \"ivory\".\n\n6. Nyangwe - \"type\" - \"slave trading state\". qualifier \"point in time\" \"end of the 19th century\". Also maybe qualifier \"region\" \"region\". But region unspecified; we can use \"region\" object \"region\". Might be ambiguous. Could skip.\n\n7. Nyangwe - \"trade good\" - \"ivory\". qualifier maybe \"type\" \"trade good\". But we already have ivory as qualifier for hub. Could also have separate.\n\nBut ensure each triplet's subject_type and object_type.\n\nDefine subject_type \"town\". object_type for Maniema \"province\". For Lualaba \"river\". For Democratic Republic of Congo \"country\". For Kasongo \"territory\". For Arabs \"ethnic group\". For ivory \"material\" or \"commodity\". For slave trading state \"political entity\" maybe \"state\". For \"slave trading state\" object_type \"state\". For \"ivory\" object_type \"commodity\".\n\nNow qualifiers: For hub for Arabs, we add qualifier \"trade good\" \"ivory\". Also maybe \"time period\" not given. Not needed.\n\nFor slave trading state, qualifier \"point in time\" \"end of the 19th century\". Also maybe \"region\" \"region\". But we can skip.\n\nNow produce JSON.\n\nCheck format: each dict includes \"subject\",\"relation\",\"object\",\"qualifiers\",\"subject_type\",\"object_type\". Qualifiers list of dicts with \"relation\",\"object\". Provide.\n\nLet's craft.\n\nTriplet list:\n\n1.\n{\n\"subject\":\"Nyangwe\",\n\"relation\":\"located in\",\n\"object\":\"Maniema\",\n\"qualifiers\":[],\n\"subject_type\":\"town\",\n\"object_type\":\"province\"\n}\n\n2.\n{\n\"subject\":\"Nyangwe\",\n\"relation\":\"located on\",\n\"object\":\"Lualaba\",\n\"qualifiers\":[{\"relation\":\"bank side\",\"object\":\"right\"}],\n\"subject_type\":\"town\",\n\"object_type\":\"river\"\n}\n\n3.\n{\n\"subject\":\"Nyangwe\",\n\"relation\":\"located in country\",\n\"object\":\"Democratic Republic of Congo\",\n\"qualifiers\":[],\n\"subject_type\":\"town\",\n\"object_type\":\"country\"\n}\n\n4.\n{\n\"subject\":\"Nyangwe\",\n\"relation\":\"located in territory\",\n\"object\":\"Kasongo\",\n\"qualifiers\":[],\n\"subject_type\":\"town\",\n\"object_type\":\"territory\"\n}\n\n5.\n{\n\"subject\":\"Nyangwe\",\n\"relation\":\"hub for\",\n\"object\":\"Arabs\",\n\"qualifiers\":[{\"relation\":\"trade good\",\"object\":\"ivory\"}],\n\"subject_type\":\"town\",\n\"object_type\":\"ethnic group\"\n}\n\n6.\n{\n\"subject\":\"Nyangwe\",\n\"relation\":\"type\",\n\"object\":\"slave trading state\",\n\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"end of the 19th century\"}],\n\"subject_type\":\"town\",\n\"object_type\":\"state\"\n}\n\n7.\n{\n\"subject\":\"Nyangwe\",\n\"relation\":\"trade good\",\n\"object\":\"ivory\",\n\"qualifiers\":[],\n\"subject_type\":\"town\",\n\"object_type\":\"commodity\"\n}\n\nCheck if any other facts: \"important hub\" maybe qualifier \"importance\" \"important\". Could add qualifier \"importance\" \"important\". But not required.\n\nNow produce JSON with key \"triplets\". Ensure no extra text."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1656,
+      "total_tokens": 3717,
+      "completion_tokens": 2061,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"located in\",\n            \"object\": \"Maniema\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"located on\",\n            \"object\": \"Lualaba\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"bank side\",\n                    \"object\": \"right\"\n                }\n            ],\n            \"subject_type\": \"town\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"located in country\",\n            \"object\": \"Democratic Republic of Congo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"located in territory\",\n            \"object\": \"Kasongo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"territory\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"hub for\",\n            \"object\": \"Arabs\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"trade good\",\n                    \"object\": \"ivory\"\n                }\n            ],\n            \"subject_type\": \"town\",\n            \"object_type\": \"ethnic group\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"type\",\n            \"object\": \"slave trading state\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"end of the 19th century\"\n                }\n            ],\n            \"subject_type\": \"town\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Nyangwe\",\n            \"relation\": \"trade good\",\n            \"object\": \"ivory\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"commodity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Nyangwe",
+        "relation": "located in",
+        "object": "Maniema",
+        "qualifiers": [],
+        "subject_type": "town",
+        "object_type": "province"
+      },
+      {
+        "subject": "Nyangwe",
+        "relation": "located on",
+        "object": "Lualaba",
+        "qualifiers": [
+          {
+            "relation": "bank side",
+            "object": "right"
+          }
+        ],
+        "subject_type": "town",
+        "object_type": "river"
+      },
+      {
+        "subject": "Nyangwe",
+        "relation": "located in country",
+        "object": "Democratic Republic of Congo",
+        "qualifiers": [],
+        "subject_type": "town",
+        "object_type": "country"
+      },
+      {
+        "subject": "Nyangwe",
+        "relation": "located in territory",
+        "object": "Kasongo",
+        "qualifiers": [],
+        "subject_type": "town",
+        "object_type": "territory"
+      },
+      {
+        "subject": "Nyangwe",
+        "relation": "hub for",
+        "object": "Arabs",
+        "qualifiers": [
+          {
+            "relation": "trade good",
+            "object": "ivory"
+          }
+        ],
+        "subject_type": "town",
+        "object_type": "ethnic group"
+      },
+      {
+        "subject": "Nyangwe",
+        "relation": "type",
+        "object": "slave trading state",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "end of the 19th century"
+          }
+        ],
+        "subject_type": "town",
+        "object_type": "state"
+      },
+      {
+        "subject": "Nyangwe",
+        "relation": "trade good",
+        "object": "ivory",
+        "qualifiers": [],
+        "subject_type": "town",
+        "object_type": "commodity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1656,
+    "total_tokens": 3717,
+    "completion_tokens": 2061,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 615,
+    "output_tokens_est": 523
+  },
+  "attempts": 1,
+  "latency_s": 25.523646440000448,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:27:54.196338+00:00",
+  "cache_key": "92dd80d781f7352b17d62778fe8a3828"
+}

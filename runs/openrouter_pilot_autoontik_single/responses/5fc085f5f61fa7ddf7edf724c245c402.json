@@ -1,0 +1,184 @@
+{
+  "task": {
+    "input_id": "f61f0473d0884681",
+    "input_hash": "602d414d93aef35d528f69b202be560c26440bfa5377ae1f936a6920bd2be31a",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793214727-HKNTQt13a1iXFfg1pmY2",
+    "object": "chat.completion",
+    "created": 1793214727,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Crusoe",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Logan\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Logan\",\n            \"relation\": \"located in\",\n            \"object\": \"Lawrence County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Lawrence County\",\n            \"relation\": \"located in\",\n            \"object\": \"Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Missouri\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Logan\",\n            \"relation\": \"located near\",\n            \"object\": \"U.S. Route 60\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Logan\",\n            \"relation\": \"distance to\",\n            \"object\": \"Marionville\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"distance\",\n                    \"object\": \"1 mile\",\n                    \"object_type\": \"distance\"\n                },\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"northeast\",\n                    \"object_type\": \"direction\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"home\",\n            \"relation\": \"located in\",\n            \"object\": \"Logan\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"several\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"human settlement\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Logan, Lawrence County, Missouri\n\nLogan is an unincorporated community in eastern Lawrence County, Missouri, United States. It is located off U.S. Route 60, one mile northeast of Marionette. Several homes are located there.\"\n\nWe need entities: Logan (place), Lawrence County, Missouri (county), United States (country), U.S. Route 60 (road), Marionville (town), maybe \"unincorporated community\" (type), \"eastern Lawrence County\" (region), \"one mile northeast\" (distance relation), \"several homes\" (maybe not needed as entity? Could be \"homes\" as objects located there). Probably we create triplets:\n\n- Logan - instance of - unincorporated community (subject_type: place? maybe \"human settlement\"? Use \"unincorporated community\" as object_type: \"settlement type\"? We'll follow pattern: subject_type \"human settlement\", object_type \"settlement type\". Relation \"instance of\" or \"type\". Use \"instance of\". Or \"settlement type\". In example they used \"occupation\". For place they might use \"instance of\". We'll use \"instance of\".\n\n- Logan - located in - Lawrence County (object_type: county). subject_type: human settlement.\n\n- Lawrence County - located in - Missouri (state). subject_type: county, object_type: state.\n\n- Missouri - located in - United States (country). subject_type: state, object_type: country.\n\n- Logan - located near - U.S. Route 60 (road). relation \"located off\" maybe \"located near\". Use \"located near\". qualifiers: maybe \"distance\"? Actually \"off U.S. Route 60\" implies adjacent. We'll just \"located near\".\n\n- Logan - distance from - Marionville (town) with qualifier \"distance\" \"one mile northeast\". Could have relation \"distance to\" with qualifier \"direction\" \"northeast\". Use relation \"distance to\". object: Marionville. qualifier relation \"distance\" object \"1 mile\". qualifier relation \"direction\" object \"northeast\". object_type for distance: \"distance\". direction: maybe \"direction\". We'll set object_type accordingly.\n\n- Several homes - located in - Logan. Subject \"homes\". Could be \"home\" as object_type \"building\". Relation \"located in\". But \"several homes are located there\" refers to Logan. So we can have subject \"home\" (plural). Maybe we create \"home\" entity type building. Use \"home\". We'll create triplet: \"home\" - located in - Logan. qualifiers maybe \"quantity\" \"several\". But not required.\n\nWe also need subject_type and object_type for each.\n\nDefine types:\n\n- Logan: human settlement (or \"unincorporated community\" is type). We'll set subject_type \"human settlement\".\n\n- unincorporated community: settlement type.\n\n- Lawrence County: county (type \"county\").\n\n- Missouri: state (type \"state\").\n\n- United States: country (type \"country\").\n\n- U.S. Route 60: highway (type \"road\").\n\n- Marionville: town (type \"town\").\n\n- home: building (type \"building\").\n\n- distance: distance (type \"distance\").\n\n- direction: direction (type \"direction\").\n\n- quantity: maybe not needed.\n\nNow format JSON list under \"triplets\". Provide qualifiers list.\n\nLet's craft.\n\nTriplet 1:\nsubject: \"Logan\"\nrelation: \"instance of\"\nobject: \"unincorporated community\"\nqualifiers: []\nsubject_type: \"human settlement\"\nobject_type: \"settlement type\"\n\nTriplet 2:\nsubject: \"Logan\"\nrelation: \"located in\"\nobject: \"Lawrence County\"\nqualifiers: []\nsubject_type: \"human settlement\"\nobject_type: \"county\"\n\nTriplet 3:\nsubject: \"Lawrence County\"\nrelation: \"located in\"\nobject: \"Missouri\"\nqualifiers: []\nsubject_type: \"county\"\nobject_type: \"state\"\n\nTriplet 4:\nsubject: \"Missouri\"\nrelation: \"located in\"\nobject: \"United States\"\nqualifiers: []\nsubject_type: \"state\"\nobject_type: \"country\"\n\nTriplet 5:\nsubject: \"Logan\"\nrelation: \"located near\"\nobject: \"U.S. Route 60\"\nqualifiers: []\nsubject_type: \"human settlement\"\nobject_type: \"road\"\n\nTriplet 6:\nsubject: \"Logan\"\nrelation: \"distance to\"\nobject: \"Marionville\"\nqualifiers: [\n {\"relation\":\"distance\",\"object\":\"1 mile\",\"object_type\":\"distance\"},\n {\"relation\":\"direction\",\"object\":\"northeast\",\"object_type\":\"direction\"}\n]\nsubject_type: \"human settlement\"\nobject_type: \"town\"\n\nTriplet 7:\nsubject: \"home\"\nrelation: \"located in\"\nobject: \"Logan\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"several\",\"object_type\":\"quantity\"}] maybe include quantity. But qualifiers must have object_type. We'll include.\n\nsubject_type: \"building\"\nobject_type: \"human settlement\"\n\nCheck naming: \"U.S. Route 60\" maybe object_type \"road\". Good.\n\nNow produce JSON with key \"triplets\". Ensure proper quoting.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract facts.\n\nText: \"Logan, Lawrence County, Missouri\n\nLogan is an unincorporated community in eastern Lawrence County, Missouri, United States. It is located off U.S. Route 60, one mile northeast of Marionette. Several homes are located there.\"\n\nWe need entities: Logan (place), Lawrence County, Missouri (county), United States (country), U.S. Route 60 (road), Marionville (town), maybe \"unincorporated community\" (type), \"eastern Lawrence County\" (region), \"one mile northeast\" (distance relation), \"several homes\" (maybe not needed as entity? Could be \"homes\" as objects located there). Probably we create triplets:\n\n- Logan - instance of - unincorporated community (subject_type: place? maybe \"human settlement\"? Use \"unincorporated community\" as object_type: \"settlement type\"? We'll follow pattern: subject_type \"human settlement\", object_type \"settlement type\". Relation \"instance of\" or \"type\". Use \"instance of\". Or \"settlement type\". In example they used \"occupation\". For place they might use \"instance of\". We'll use \"instance of\".\n\n- Logan - located in - Lawrence County (object_type: county). subject_type: human settlement.\n\n- Lawrence County - located in - Missouri (state). subject_type: county, object_type: state.\n\n- Missouri - located in - United States (country). subject_type: state, object_type: country.\n\n- Logan - located near - U.S. Route 60 (road). relation \"located off\" maybe \"located near\". Use \"located near\". qualifiers: maybe \"distance\"? Actually \"off U.S. Route 60\" implies adjacent. We'll just \"located near\".\n\n- Logan - distance from - Marionville (town) with qualifier \"distance\" \"one mile northeast\". Could have relation \"distance to\" with qualifier \"direction\" \"northeast\". Use relation \"distance to\". object: Marionville. qualifier relation \"distance\" object \"1 mile\". qualifier relation \"direction\" object \"northeast\". object_type for distance: \"distance\". direction: maybe \"direction\". We'll set object_type accordingly.\n\n- Several homes - located in - Logan. Subject \"homes\". Could be \"home\" as object_type \"building\". Relation \"located in\". But \"several homes are located there\" refers to Logan. So we can have subject \"home\" (plural). Maybe we create \"home\" entity type building. Use \"home\". We'll create triplet: \"home\" - located in - Logan. qualifiers maybe \"quantity\" \"several\". But not required.\n\nWe also need subject_type and object_type for each.\n\nDefine types:\n\n- Logan: human settlement (or \"unincorporated community\" is type). We'll set subject_type \"human settlement\".\n\n- unincorporated community: settlement type.\n\n- Lawrence County: county (type \"county\").\n\n- Missouri: state (type \"state\").\n\n- United States: country (type \"country\").\n\n- U.S. Route 60: highway (type \"road\").\n\n- Marionville: town (type \"town\").\n\n- home: building (type \"building\").\n\n- distance: distance (type \"distance\").\n\n- direction: direction (type \"direction\").\n\n- quantity: maybe not needed.\n\nNow format JSON list under \"triplets\". Provide qualifiers list.\n\nLet's craft.\n\nTriplet 1:\nsubject: \"Logan\"\nrelation: \"instance of\"\nobject: \"unincorporated community\"\nqualifiers: []\nsubject_type: \"human settlement\"\nobject_type: \"settlement type\"\n\nTriplet 2:\nsubject: \"Logan\"\nrelation: \"located in\"\nobject: \"Lawrence County\"\nqualifiers: []\nsubject_type: \"human settlement\"\nobject_type: \"county\"\n\nTriplet 3:\nsubject: \"Lawrence County\"\nrelation: \"located in\"\nobject: \"Missouri\"\nqualifiers: []\nsubject_type: \"county\"\nobject_type: \"state\"\n\nTriplet 4:\nsubject: \"Missouri\"\nrelation: \"located in\"\nobject: \"United States\"\nqualifiers: []\nsubject_type: \"state\"\nobject_type: \"country\"\n\nTriplet 5:\nsubject: \"Logan\"\nrelation: \"located near\"\nobject: \"U.S. Route 60\"\nqualifiers: []\nsubject_type: \"human settlement\"\nobject_type: \"road\"\n\nTriplet 6:\nsubject: \"Logan\"\nrelation: \"distance to\"\nobject: \"Marionville\"\nqualifiers: [\n {\"relation\":\"distance\",\"object\":\"1 mile\",\"object_type\":\"distance\"},\n {\"relation\":\"direction\",\"object\":\"northeast\",\"object_type\":\"direction\"}\n]\nsubject_type: \"human settlement\"\nobject_type: \"town\"\n\nTriplet 7:\nsubject: \"home\"\nrelation: \"located in\"\nobject: \"Logan\"\nqualifiers: [{\"relation\":\"quantity\",\"object\":\"several\",\"object_type\":\"quantity\"}] maybe include quantity. But qualifiers must have object_type. We'll include.\n\nsubject_type: \"building\"\nobject_type: \"human settlement\"\n\nCheck naming: \"U.S. Route 60\" maybe object_type \"road\". Good.\n\nNow produce JSON with key \"triplets\". Ensure proper quoting.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1404,
+      "completion_tokens": 1556,
+      "total_tokens": 2960,
+      "cost": 0.0004592,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 48,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.0004592,
+        "upstream_inference_prompt_cost": 7.02e-05,
+        "upstream_inference_completions_cost": 0.000389
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1084,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Logan\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Logan\",\n            \"relation\": \"located in\",\n            \"object\": \"Lawrence County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Lawrence County\",\n            \"relation\": \"located in\",\n            \"object\": \"Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Missouri\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Logan\",\n            \"relation\": \"located near\",\n            \"object\": \"U.S. Route 60\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Logan\",\n            \"relation\": \"distance to\",\n            \"object\": \"Marionville\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"distance\",\n                    \"object\": \"1 mile\",\n                    \"object_type\": \"distance\"\n                },\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"northeast\",\n                    \"object_type\": \"direction\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"home\",\n            \"relation\": \"located in\",\n            \"object\": \"Logan\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"several\",\n                    \"object_type\": \"quantity\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"human settlement\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Logan",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Logan",
+        "relation": "located in",
+        "object": "Lawrence County",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Lawrence County",
+        "relation": "located in",
+        "object": "Missouri",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "state"
+      },
+      {
+        "subject": "Missouri",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "Logan",
+        "relation": "located near",
+        "object": "U.S. Route 60",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "road"
+      },
+      {
+        "subject": "Logan",
+        "relation": "distance to",
+        "object": "Marionville",
+        "qualifiers": [
+          {
+            "relation": "distance",
+            "object": "1 mile"
+          },
+          {
+            "relation": "direction",
+            "object": "northeast"
+          }
+        ],
+        "subject_type": "human settlement",
+        "object_type": "town"
+      },
+      {
+        "subject": "home",
+        "relation": "located in",
+        "object": "Logan",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "several"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "human settlement"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1404,
+    "completion_tokens": 1556,
+    "total_tokens": 2960,
+    "cost": 0.0004592,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 48,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0004592,
+      "upstream_inference_prompt_cost": 7.02e-05,
+      "upstream_inference_completions_cost": 0.000389
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1084,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 693,
+    "output_tokens_est": 566
+  },
+  "attempts": 1,
+  "latency_s": 5.461316465996788,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T19:12:12.305716+00:00",
+  "cache_key": "5fc085f5f61fa7ddf7edf724c245c402"
+}

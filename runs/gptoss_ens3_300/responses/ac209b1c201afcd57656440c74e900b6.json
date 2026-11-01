@@ -1,0 +1,140 @@
+{
+  "task": {
+    "input_id": "035f19437f3130d9",
+    "input_hash": "b1b9d5d077272f9c836f960b477a3e66efdcf380f1496771066d096d44c4a715",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-5416bec3041d5e603883d570e2c6bf28",
+    "object": "chat.completion",
+    "created": 1791542919,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located in\",\n            \"object\": \"Logan County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located in\",\n            \"object\": \"West Virginia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located on\",\n            \"object\": \"County Route 16\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located on\",\n            \"object\": \"Buffalo Creek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"creek\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located northeast of\",\n            \"object\": \"Man\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"human settlement\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Crown, Logan County, West Virginia\n\nCrown is an unincorporated community in Logan County, West Virginia, United States. Crown is located on County Route 16 and Buffalo Creek northeast of Man.\"\n\nWe need to capture facts:\n\n- Crown is an unincorporated community (type: unincorporated community) located in Logan County, West Virginia, United States.\n\n- Crown is located on County Route 16.\n\n- Crown is located on Buffalo Creek? Actually \"Crown is located on County Route 16 and Buffalo Creek northeast of Man.\" Means Crown is located on County Route 16 and on Buffalo Creek, and it's northeast of Man.\n\nWe need separate triplets:\n\n1. (Crown, instance of, unincorporated community) maybe relation \"instance of\" or \"type\". In examples they used \"occupation\", \"award\". For location they used \"located in\" maybe \"located in the administrative territorial entity\". Use relation \"located in\". So:\n\n- Subject: Crown\n- relation: \"instance of\" or \"type\". Could be \"instance of\" with object \"unincorporated community\". Or \"subclass of\"? Let's use \"instance of\". object_type: \"human settlement\" maybe but they said object_type class. We'll put \"unincorporated community\" type \"human settlement\". For simplicity: object_type \"human settlement\".\n\nBut also need location: Crown is in Logan County, West Virginia, United States. Could be separate triplets:\n\n- Crown, located in administrative territorial entity, Logan County\n\n- Crown, located in administrative territorial entity, West Virginia\n\n- Crown, located in administrative territorial entity, United States\n\nBut maybe we treat hierarchical: Crown located in Logan County; Logan County located in West Virginia, etc. However the text says \"in Logan County, West Virginia, United States\". So we can produce three location relations, each with qualifiers maybe \"point in time\"? Not needed.\n\nTriplet: Crown, located in, Logan County\n\nTriplet: Crown, located in, West Virginia\n\nTriplet: Crown, located in, United States\n\nNow \"Crown is located on County Route 16\". Relation could be \"located on\" (for road). So:\n\n- Crown, located on, County Route 16\n\nObject_type: \"road\" probably.\n\nNext: \"Crown is located on Buffalo Creek\". So:\n\n- Crown, located on, Buffalo Creek\n\nObject_type: \"stream\" maybe \"creek\". We'll set \"creek\".\n\nNow \"northeast of Man\". So relation \"directional location\" maybe \"located northeast of\". Use relation \"located in direction of\" but we need a Wikidata style relation like \"located in the direction of\". Use \"located in direction of\". Let's define relation \"located in direction of\". object: \"Man\". Qualifier \"direction\" maybe but they said qualifiers for context like direction? Not necessary; we can just use relation \"located northeast of\". Might be okay.\n\nThus: Crown, located northeast of, Man.\n\nObject_type: \"human settlement\" maybe.\n\nNow subject_type for Crown: \"human settlement\". object_type accordingly.\n\nNow for each triplet we need qualifiers list (empty unless needed). None needed.\n\nNow produce JSON.\n\nCheck proper fields: \"subject\", \"relation\", \"object\", \"qualifiers\", \"subject_type\", \"object_type\".\n\nWe'll include:\n\nTriplet 1: Crown, instance of, unincorporated community. subject_type: \"human settlement\". object_type: \"settlement type\" maybe \"unincorporated community\". Use \"settlement type\".\n\nTriplet 2: Crown, located in, Logan County. object_type \"administrative territorial entity\". qualifiers [].\n\nTriplet 3: Crown, located in, West Virginia. object_type \"state\".\n\nTriplet 4: Crown, located in, United States. object_type \"country\".\n\nTriplet 5: Crown, located on, County Route 16. object_type \"road\".\n\nTriplet 6: Crown, located on, Buffalo Creek. object_type \"creek\".\n\nTriplet 7: Crown, located northeast of, Man. object_type \"human settlement\". maybe need qualifier \"direction\" but we used relation includes direction.\n\nOk produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1628,
+      "total_tokens": 2904,
+      "completion_tokens": 1276,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located in\",\n            \"object\": \"Logan County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located in\",\n            \"object\": \"West Virginia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located on\",\n            \"object\": \"County Route 16\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located on\",\n            \"object\": \"Buffalo Creek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"creek\"\n        },\n        {\n            \"subject\": \"Crown\",\n            \"relation\": \"located northeast of\",\n            \"object\": \"Man\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"human settlement\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Crown",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Crown",
+        "relation": "located in",
+        "object": "Logan County",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Crown",
+        "relation": "located in",
+        "object": "West Virginia",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "state"
+      },
+      {
+        "subject": "Crown",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "country"
+      },
+      {
+        "subject": "Crown",
+        "relation": "located on",
+        "object": "County Route 16",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "road"
+      },
+      {
+        "subject": "Crown",
+        "relation": "located on",
+        "object": "Buffalo Creek",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "creek"
+      },
+      {
+        "subject": "Crown",
+        "relation": "located northeast of",
+        "object": "Man",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "human settlement"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1628,
+    "total_tokens": 2904,
+    "completion_tokens": 1276,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 540,
+    "output_tokens_est": 447
+  },
+  "attempts": 1,
+  "latency_s": 15.83860745500715,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T10:48:55.718944+00:00",
+  "cache_key": "ac209b1c201afcd57656440c74e900b6"
+}

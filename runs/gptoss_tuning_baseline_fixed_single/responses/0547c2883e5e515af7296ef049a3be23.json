@@ -1,0 +1,142 @@
+{
+  "task": {
+    "input_id": "8ed547c920b40212",
+    "input_hash": "34101e0b630ebd1b92f0c80339a1d3a56b69dabc6f4b1a3cf66b6030560a0998",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-21963317c440539cc107ebe433186ae6",
+    "object": "chat.completion",
+    "created": 1791511929,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2010 FIFA World Cup\",\n            \"relation\": \"instance of\",\n            \"object\": \"FIFA World Cup\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"sports competition series\"\n        },\n        {\n            \"subject\": \"2010 FIFA World Cup\",\n            \"relation\": \"location\",\n            \"object\": \"South Africa\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start date\",\n                    \"object\": \"11 June 2010\"\n                },\n                {\n                    \"relation\": \"end date\",\n                    \"object\": \"11 July 2010\"\n                }\n            ],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FIFA\",\n            \"relation\": \"selected host\",\n            \"object\": \"South Africa\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2004\"\n                },\n                {\n                    \"relation\": \"for event\",\n                    \"object\": \"2010 FIFA World Cup\"\n                }\n            ],\n            \"subject_type\": \"sports governing body\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"South Africa\",\n            \"relation\": \"first African nation to host\",\n            \"object\": \"FIFA World Cup finals\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"sports tournament\"\n        },\n        {\n            \"subject\": \"Bidding process for 2010 FIFA World Cup\",\n            \"relation\": \"open to\",\n            \"object\": \"African nations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"process\",\n            \"object_type\": \"group of countries\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: 2010 FIFA World Cup (event), FIFA World Cup (series), 19th FIFA World Cup (ordinal), men's national association football teams (maybe group), South Africa (country), 11 June 2010 (date), 11 July 2010 (date), 2004 (year), FIFA (organization), Egypt (country), Morocco (country), African nation (concept), African nations (group).\n\nRelations: instance of? \"2010 FIFA World Cup\" is an instance of \"FIFA World Cup\". Also \"19th FIFA World Cup\" maybe ordinal.\n\n\"2010 FIFA World Cup\" took place in South Africa. So relation: location, \"place of event\". object_type: country.\n\nDate range: from 11 June to 11 July 2010. Could have qualifiers: start date, end date. Could create two triplets: \"start date\" and \"end date\". Or one triplet with qualifiers. We'll follow pattern: relation \"point in time\" qualifier? In example they used award with qualifier point in time. For event, we can have \"point in time\" qualifiers for start and end? Might create two qualifiers: \"start date\" and \"end date\". But qualifiers must be relation-object pairs attached to main triplet. Could have main triplet: \"2010 FIFA World Cup\" \"date\" \"2010\". But better: \"2010 FIFA World Cup\" \"point in time\" \"11 June 2010\" qualifier \"end date\" \"11 July 2010\". However typical Wikidata uses \"start time\" and \"end time\". We'll use qualifiers: start date, end date.\n\nAlso \"bidding process for hosting the tournament finals was open only to African nations.\" Could have triplet: \"bidding process for 2010 FIFA World Cup\" \"applicable to\" \"African nations\". Might be too detailed.\n\n\"In 2004, FIFA selected South Africa over Egypt and Morocco to become the first African nation to host the finals.\" Triplet: \"FIFA\" \"selected host for\" \"2010 FIFA World Cup\" with qualifiers: \"point in time\" \"2004\", \"selected country\" \"South Africa\", \"other candidates\" \"Egypt\", \"Morocco\". But maybe separate: \"FIFA\" \"selected\" \"South Africa\" qualifier \"point in time\" \"2004\", \"purpose\" \"host of 2010 FIFA World Cup\". Could also have \"South Africa\" \"first African nation to host\" \"FIFA World Cup finals\". We'll produce a few core triplets.\n\nLet's list:\n\n1. Subject: \"2010 FIFA World Cup\", relation: \"instance of\", object: \"FIFA World Cup\". subject_type: \"sports tournament\", object_type: \"sports competition series\".\n\n2. Subject: \"2010 FIFA World Cup\", relation: \"ordinal number\", object: \"19\". maybe \"ordinal\" but we can phrase \"edition number\". object_type: \"integer\". We'll maybe skip.\n\n3. Subject: \"2010 FIFA World Cup\", relation: \"location\", object: \"South Africa\". qualifiers: start date and end date.\n\nQualifiers: start date \"11 June 2010\", end date \"11 July 2010\". Use relations \"start date\", \"end date\". object_type date.\n\n4. Subject: \"FIFA\", relation: \"selected host\", object: \"South Africa\". qualifiers: point in time \"2004\", \"event\" \"2010 FIFA World Cup\". object_type: country.\n\n5. Subject: \"South Africa\", relation: \"first African nation to host\", object: \"FIFA World Cup finals\". object_type: event.\n\n6. Subject: \"Bidding process for 2010 FIFA World Cup\", relation: \"open to\", object: \"African nations\". subject_type: \"process\", object_type: \"group\".\n\nMaybe also: \"African nations\" type: \"group of countries\".\n\nLet's craft JSON.\n\nNeed each dict with subject, relation, object, qualifiers list, subject_type, object_type.\n\nWe'll include qualifiers as list of dicts.\n\nImplement.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1028,
+      "total_tokens": 2273,
+      "completion_tokens": 1245,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2010 FIFA World Cup\",\n            \"relation\": \"instance of\",\n            \"object\": \"FIFA World Cup\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"sports competition series\"\n        },\n        {\n            \"subject\": \"2010 FIFA World Cup\",\n            \"relation\": \"location\",\n            \"object\": \"South Africa\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start date\",\n                    \"object\": \"11 June 2010\"\n                },\n                {\n                    \"relation\": \"end date\",\n                    \"object\": \"11 July 2010\"\n                }\n            ],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"FIFA\",\n            \"relation\": \"selected host\",\n            \"object\": \"South Africa\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2004\"\n                },\n                {\n                    \"relation\": \"for event\",\n                    \"object\": \"2010 FIFA World Cup\"\n                }\n            ],\n            \"subject_type\": \"sports governing body\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"South Africa\",\n            \"relation\": \"first African nation to host\",\n            \"object\": \"FIFA World Cup finals\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"sports tournament\"\n        },\n        {\n            \"subject\": \"Bidding process for 2010 FIFA World Cup\",\n            \"relation\": \"open to\",\n            \"object\": \"African nations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"process\",\n            \"object_type\": \"group of countries\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "2010 FIFA World Cup",
+        "relation": "instance of",
+        "object": "FIFA World Cup",
+        "qualifiers": [],
+        "subject_type": "sports tournament",
+        "object_type": "sports competition series"
+      },
+      {
+        "subject": "2010 FIFA World Cup",
+        "relation": "location",
+        "object": "South Africa",
+        "qualifiers": [
+          {
+            "relation": "start date",
+            "object": "11 June 2010"
+          },
+          {
+            "relation": "end date",
+            "object": "11 July 2010"
+          }
+        ],
+        "subject_type": "sports tournament",
+        "object_type": "country"
+      },
+      {
+        "subject": "FIFA",
+        "relation": "selected host",
+        "object": "South Africa",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2004"
+          },
+          {
+            "relation": "for event",
+            "object": "2010 FIFA World Cup"
+          }
+        ],
+        "subject_type": "sports governing body",
+        "object_type": "country"
+      },
+      {
+        "subject": "South Africa",
+        "relation": "first African nation to host",
+        "object": "FIFA World Cup finals",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "sports tournament"
+      },
+      {
+        "subject": "Bidding process for 2010 FIFA World Cup",
+        "relation": "open to",
+        "object": "African nations",
+        "qualifiers": [],
+        "subject_type": "process",
+        "object_type": "group of countries"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1028,
+    "total_tokens": 2273,
+    "completion_tokens": 1245,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 575,
+    "output_tokens_est": 477
+  },
+  "attempts": 1,
+  "latency_s": 15.120033776998753,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:12:24.917054+00:00",
+  "cache_key": "0547c2883e5e515af7296ef049a3be23"
+}

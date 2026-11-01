@@ -1,0 +1,146 @@
+{
+  "task": {
+    "input_id": "189f64d958942a5a",
+    "input_hash": "d94090604edb9317b0fd04f1a5e865ed8bef70f6781699b7dbc9cb4f3b78f790",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-29f1174758b5adcc1e30d55ab437df07",
+    "object": "chat.completion",
+    "created": 1791509062,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"nationality\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"occupation\",\n            \"object\": \"radio personality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"occupation\",\n            \"object\": \"actress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"employer\",\n            \"object\": \"KYSR Star 98.7\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Los Angeles\"\n                },\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"nearly nine years\"\n                },\n                {\n                    \"relation\": \"position held\",\n                    \"object\": \"morning show host\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"radio station\"\n        },\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"employer\",\n            \"object\": \"Kansas City radio station\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Kansas City\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"initial employment\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"radio station\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: Jamie White (human). Relations: nationality (American). Occupation: radio personality, actress. Notable for: hosted mornings on KYSR Star 98.7 in Los Angeles for nearly nine years. So relation \"notable work\" or \"position held\". Could be \"hosted\" relation. Also \"employer\": KYSR Star 98.7 (radio station). Location: Los Angeles. Duration: nearly nine years (qualifier). Also earlier hired by a Kansas City radio station (employer). Could capture \"employer\" relation with qualifier \"location\" Kansas City. Also \"career\" maybe \"broadcasting jobs\". But we need factual relationships.\n\nLet's produce triplets:\n\n1. Jamie White - nationality - American (subject_type human, object_type country)\n\n2. Jamie White - occupation - radio personality (object_type profession)\n\n3. Jamie White - occupation - actress (object_type profession)\n\n4. Jamie White - position held - host of mornings (object maybe \"morning show host\" or \"host of mornings\") at KYSR Star 98.7 (object_type radio station) with qualifiers: location Los Angeles, point in time \"nearly nine years\" maybe duration. Use qualifier \"duration\" with object \"nearly nine years\". Also maybe \"point in time\" start? Not given. We'll include qualifier \"duration\".\n\n5. Jamie White - employer - KYSR Star 98.7 (object_type radio station) with qualifiers: location Los Angeles, position \"morning show host\", duration \"nearly nine years\". Could combine but we already have position held.\n\n6. Jamie White - employer - Kansas City radio station (object_type radio station) with qualifier \"initial employer\" maybe \"initially hired by\". Use relation \"employer\" with qualifier \"point in time\" maybe \"initial\". But we can just have qualifier \"initially hired\" but that's not a relation. Use qualifier \"initial\" maybe not needed. Could have qualifier \"location\" Kansas City.\n\nWe need to ensure qualifiers are attached to triplet.\n\nLet's craft JSON.\n\nTriplet list:\n\n- subject: \"Jamie White\"\n  relation: \"nationality\"\n  object: \"United States\"\n  qualifiers: []\n  subject_type: \"human\"\n  object_type: \"country\"\n\nBut text says \"American\". Use \"United States\" as country.\n\n- occupation radio personality\n\n- occupation actress\n\n- position held: \"morning show host\" (or \"host of mornings\") object: \"KYSR Star 98.7\" (radio station). qualifiers: location Los Angeles, duration \"nearly nine years\".\n\n- employer: \"KYSR Star 98.7\" with qualifier location Los Angeles, position \"morning show host\", duration \"nearly nine years\". Might be redundant but okay.\n\n- employer: \"Kansas City radio station\" (maybe unknown name). Use generic \"Kansas City radio station\". qualifiers: location \"Kansas City\", point in time \"initial\". Could use qualifier \"initially hired\" but relation \"point in time\" maybe not appropriate. Use qualifier \"initial employment\". But we need relation name. Use \"point in time\" with object \"initial\". Might be okay.\n\nBetter to have one employer triplet with qualifiers location and duration.\n\nLet's produce:\n\nTriplet 4: subject Jamie White, relation \"employed by\", object \"KYSR Star 98.7\", qualifiers: [{\"relation\":\"location\",\"object\":\"Los Angeles\"},{\"relation\":\"duration\",\"object\":\"nearly nine years\"}], subject_type human, object_type radio station.\n\nTriplet 5: subject Jamie White, relation \"employed by\", object \"Kansas City radio station\", qualifiers: [{\"relation\":\"location\",\"object\":\"Kansas City\"},{\"relation\":\"employment order\",\"object\":\"initial\"}] maybe.\n\nBut we need to keep relation names plausible: \"employer\", \"position held\". Use \"employer\". Qualifier \"location\". Qualifier \"duration\". Use \"employment order\" maybe not standard. Could use \"point in time\" with \"initial\". Accept.\n\nLet's craft final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 998,
+      "total_tokens": 2229,
+      "completion_tokens": 1231,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"nationality\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"occupation\",\n            \"object\": \"radio personality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"occupation\",\n            \"object\": \"actress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"employer\",\n            \"object\": \"KYSR Star 98.7\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Los Angeles\"\n                },\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"nearly nine years\"\n                },\n                {\n                    \"relation\": \"position held\",\n                    \"object\": \"morning show host\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"radio station\"\n        },\n        {\n            \"subject\": \"Jamie White\",\n            \"relation\": \"employer\",\n            \"object\": \"Kansas City radio station\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Kansas City\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"initial employment\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"radio station\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Jamie White",
+        "relation": "nationality",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Jamie White",
+        "relation": "occupation",
+        "object": "radio personality",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Jamie White",
+        "relation": "occupation",
+        "object": "actress",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Jamie White",
+        "relation": "employer",
+        "object": "KYSR Star 98.7",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Los Angeles"
+          },
+          {
+            "relation": "duration",
+            "object": "nearly nine years"
+          },
+          {
+            "relation": "position held",
+            "object": "morning show host"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "radio station"
+      },
+      {
+        "subject": "Jamie White",
+        "relation": "employer",
+        "object": "Kansas City radio station",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Kansas City"
+          },
+          {
+            "relation": "point in time",
+            "object": "initial employment"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "radio station"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 998,
+    "total_tokens": 2229,
+    "completion_tokens": 1231,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 581,
+    "output_tokens_est": 482
+  },
+  "attempts": 1,
+  "latency_s": 15.068372599009308,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:24:37.959805+00:00",
+  "cache_key": "db7fe1c49223b6ec7b3ff06c411e6d82"
+}

@@ -1,0 +1,158 @@
+{
+  "task": {
+    "input_id": "641c0b9c84064519",
+    "input_hash": "4f296ecd06e3216645a30d7fd4f63ef74cae9b60f457d34673890e4d5db90592",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-cb032b0d0015cbee26733cbbec7d0e1b",
+    "object": "chat.completion",
+    "created": 1791503658,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"instance of\",\n            \"object\": \"fictional character\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"character in\",\n            \"object\": \"The Chronicles of Narnia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"literary series\"\n        },\n        {\n            \"subject\": \"C.S. Lewis\",\n            \"relation\": \"author of\",\n            \"object\": \"The Chronicles of Narnia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"literary series\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"title\",\n            \"object\": \"Great Lion\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"context\",\n                    \"object\": \"The Lion, the Witch and the Wardrobe\"\n                }\n            ],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"appears in\",\n            \"object\": \"seven books of The Chronicles of Narnia series\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"books\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"name in Turkish\",\n            \"object\": \"lion\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"word\"\n        },\n        {\n            \"subject\": \"Lewis\",\n            \"relation\": \"capitalizes\",\n            \"object\": \"lion\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"reference to\",\n                    \"object\": \"Aslan\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"word\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"represents\",\n            \"object\": \"Jesus Christ\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Aslan\n\nAslan (/ ˈæsˌlæn / or / ˈæzˌlæn /) is a main character in C.S. Lewis's The Chronicles of Narnia series. He is ``the Great Lion ''of The Lion, the Witch and the Wardrobe and his role in Narnia is developed throughout the remaining Chronicles. Aslan is also the only character to appear in all seven books of the series. Aslan is Turkish for`` lion''. Lewis often capitalises the word lion in reference to Aslan since he represents Jesus Christ.\"\n\nWe need to extract factual relationships.\n\nEntities: Aslan (character), C.S. Lewis (author), The Chronicles of Narnia series (book series), The Lion, the Witch and the Wardrobe (specific book), Narnia (fictional land), \"the Great Lion\" (title), \"lion\" (Turkish word meaning lion), Jesus Christ (religious figure).\n\nRelations: instance of / main character, part of series, appears in, appears in all seven books, translation of name, capitalizes word lion, represents (Aslan represents Jesus Christ). Also \"the Great Lion\" is a title/epithet.\n\nWe need to use Wikidata-style relations. Some typical ones: \"instance of\", \"character in\", \"author\", \"part of\", \"has part\", \"appears in\", \"language of name\", \"named after\", \"represents\", \"occupation\"? Not.\n\nLet's propose:\n\n1. (Aslan, instance of, fictional character) subject_type human? Actually fictional character. object_type \"fictional character\". relation maybe \"instance of\". Use \"instance of\". Good.\n\n2. (Aslan, character in, The Chronicles of Narnia) relation \"character in\". object_type \"literary series\". subject_type \"fictional character\".\n\n3. (The Chronicles of Narnia, author, C.S. Lewis) maybe not directly in text: \"C.S. Lewis's The Chronicles of Narnia series\" indicates authorship. So (The Chronicles of Narnia, author, C.S. Lewis). Or (C.S. Lewis, author of, The Chronicles of Narnia). Choose one. We'll include (C.S. Lewis, author of, The Chronicles of Narnia). relation \"author of\". subject_type \"human\". object_type \"literary series\".\n\n4. (Aslan, epithet, Great Lion) relation \"epithet\". object_type \"title\". Might be \"title\". Use \"title\". We'll use \"title\". qualifiers maybe none.\n\n5. (Great Lion, part of, The Lion, the Witch and the Wardrobe) Actually \"the Great Lion of The Lion, the Witch and the Wardrobe\". Could be (Aslan, title, Great Lion) with qualifier \"point in time\"? Not needed. Or (Great Lion, appears in, The Lion, the Witch and the Wardrobe). But better: (Aslan, title, Great Lion) and maybe qualifier \"context\" linking to the book. Could add qualifier: {\"relation\":\"context\",\"object\":\"The Lion, the Witch and the Wardrobe\"}.\n\nBut spec says qualifiers are relation-object pairs attached to a triplet. So we can add qualifier.\n\n6. (Aslan, appears in, The Chronicles of Narnia) already covered by character in. Could also have (Aslan, appears in, all seven books of the series). But we have \"only character to appear in all seven books of the series\". So we can have (Aslan, appears in, all seven books of The Chronicles of Narnia series). object_type \"book series\"? Might be \"books\". Could use object \"seven books of The Chronicles of Narnia\". We'll create object \"seven books of The Chronicles of Narnia\". relation \"appears in\". qualifiers maybe none.\n\n7. (Aslan, name translation, lion) relation \"translation of name\". object_type \"word\". Could be \"lion\". Also note \"Aslan is Turkish for 'lion'\". So (Aslan, name in Turkish, lion). Use relation \"name in language\". object_type \"word\". We'll use \"name in Turkish\". Might be \"name in language\". We'll pick \"name in Turkish\". object_type \"word\".\n\n8. (Lewis, capitalizes, lion) but text: \"Lewis often capitalises the word lion in reference to Aslan\". So (Lewis, capitalizes, lion) with qualifier \"reference to\", object \"Aslan\". Or (Lewis, capitalizes, lion) and qualifier context Aslan. We'll do (Lewis, capitalizes, lion) with qualifier {\"relation\":\"reference to\",\"object\":\"Aslan\"}.\n\n9. (Aslan, represents, Jesus Christ) relation \"represents\". object_type \"human\" (religious figure). qualifier maybe none.\n\nAlso maybe (Aslan, role, Narnia) but not needed.\n\nNow need subject_type and object_type for each.\n\nDefine types:\n\n- Aslan: \"fictional character\"\n- fictional character: maybe \"character\"\n- The Chronicles of Narnia: \"literary series\"\n- C.S. Lewis: \"human\"\n- Great Lion: \"title\" or \"epithet\"\n- lion (word): \"word\"\n- Jesus Christ: \"human\" (religious figure)\n- Lewis: \"human\"\n- lion (capitalized word) object type \"word\"\n\nNow produce JSON.\n\nList of triplets:\n\n1. Aslan - instance of - fictional character\n2. Aslan - character in - The Chronicles of Narnia\n3. C.S. Lewis - author of - The Chronicles of Narnia\n4. Aslan - title - Great Lion (qualifier context The Lion, the Witch and the Wardrobe)\n5. Aslan - appears in - seven books of The Chronicles of Narnia series\n6. Aslan - name in Turkish - lion\n7. Lewis - capitalizes - lion (qualifier reference to Aslan)\n8. Aslan - represents - Jesus Christ\n\nCheck qualifiers: For #4, qualifier relation \"context\", object \"The Lion, the Witch and the Wardrobe\". For #7, qualifier \"reference to\", object \"Aslan\".\n\nMake sure each triplet includes qualifiers list (empty if none). Provide subject_type and object_type.\n\nDefine object types:\n\n- fictional character: \"fictional character\"\n- The Chronicles of Narnia: \"literary series\"\n- Great Lion: \"title\"\n- The Lion, the Witch and the Wardrobe: \"novel\"\n- seven books of The Chronicles of Narnia series: \"books\"\n- lion (word): \"word\"\n- Jesus Christ: \"human\"\n- lion (capitalized word) same as word.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1701,
+      "total_tokens": 3598,
+      "completion_tokens": 1897,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"instance of\",\n            \"object\": \"fictional character\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"character in\",\n            \"object\": \"The Chronicles of Narnia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"literary series\"\n        },\n        {\n            \"subject\": \"C.S. Lewis\",\n            \"relation\": \"author of\",\n            \"object\": \"The Chronicles of Narnia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"literary series\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"title\",\n            \"object\": \"Great Lion\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"context\",\n                    \"object\": \"The Lion, the Witch and the Wardrobe\"\n                }\n            ],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"title\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"appears in\",\n            \"object\": \"seven books of The Chronicles of Narnia series\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"books\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"name in Turkish\",\n            \"object\": \"lion\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"word\"\n        },\n        {\n            \"subject\": \"Lewis\",\n            \"relation\": \"capitalizes\",\n            \"object\": \"lion\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"reference to\",\n                    \"object\": \"Aslan\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"word\"\n        },\n        {\n            \"subject\": \"Aslan\",\n            \"relation\": \"represents\",\n            \"object\": \"Jesus Christ\",\n            \"qualifiers\": [],\n            \"subject_type\": \"fictional character\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Aslan",
+        "relation": "instance of",
+        "object": "fictional character",
+        "qualifiers": [],
+        "subject_type": "fictional character",
+        "object_type": "concept"
+      },
+      {
+        "subject": "Aslan",
+        "relation": "character in",
+        "object": "The Chronicles of Narnia",
+        "qualifiers": [],
+        "subject_type": "fictional character",
+        "object_type": "literary series"
+      },
+      {
+        "subject": "C.S. Lewis",
+        "relation": "author of",
+        "object": "The Chronicles of Narnia",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "literary series"
+      },
+      {
+        "subject": "Aslan",
+        "relation": "title",
+        "object": "Great Lion",
+        "qualifiers": [
+          {
+            "relation": "context",
+            "object": "The Lion, the Witch and the Wardrobe"
+          }
+        ],
+        "subject_type": "fictional character",
+        "object_type": "title"
+      },
+      {
+        "subject": "Aslan",
+        "relation": "appears in",
+        "object": "seven books of The Chronicles of Narnia series",
+        "qualifiers": [],
+        "subject_type": "fictional character",
+        "object_type": "books"
+      },
+      {
+        "subject": "Aslan",
+        "relation": "name in Turkish",
+        "object": "lion",
+        "qualifiers": [],
+        "subject_type": "fictional character",
+        "object_type": "word"
+      },
+      {
+        "subject": "Lewis",
+        "relation": "capitalizes",
+        "object": "lion",
+        "qualifiers": [
+          {
+            "relation": "reference to",
+            "object": "Aslan"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "word"
+      },
+      {
+        "subject": "Aslan",
+        "relation": "represents",
+        "object": "Jesus Christ",
+        "qualifiers": [],
+        "subject_type": "fictional character",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1701,
+    "total_tokens": 3598,
+    "completion_tokens": 1897,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 674,
+    "output_tokens_est": 582
+  },
+  "attempts": 1,
+  "latency_s": 23.660538001000532,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:54:42.405267+00:00",
+  "cache_key": "22949d6b667be208f2cbe045a933c060"
+}

@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "01c25794cb4e8e0d",
+    "input_hash": "5215b0fc7d91add18227d4c0f06920d2fe76cddd2213f9ebcfa743a4eb2140e5",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d12b55b9524be0dc00071d0e100e7a1b",
+    "object": "chat.completion",
+    "created": 1791500349,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"location\",\n            \"object\": \"northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"builder\",\n            \"object\": \"Abraham L. Erlanger\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"date of demolition\",\n            \"object\": \"1978\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Abraham L. Erlanger\",\n            \"relation\": \"occupation\",\n            \"object\": \"theatrical producer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Abraham L. Erlanger\",\n            \"relation\": \"member of\",\n            \"object\": \"Theatrical Syndicate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"founding member\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText:\n\n\"Erlanger Theatre\n\nThe Erlanger Theatre was one of Philadelphia’s most elaborately designed live performance theaters and was considered one of the most magnificent ever built in the United States. It was located at the northwest corner of 21st and Market Streets in Philadelphia, Pennsylvania and was built by Abraham L. Erlanger, theatrical producer and a founding member of the Theatrical Syndicate. It was demolished in 1978.\"\n\nWe need to identify entities: Erlanger Theatre (subject). Philadelphia (city). United States (country). 21st and Market Streets (intersection). Abraham L. Erlanger (person). Theatrical Syndicate (organization). 1978 (date). Also maybe \"theatre\" type.\n\nTriplets:\n\n1. (Erlanger Theatre, instance of, theatre) maybe but not explicit. We have \"was one of Philadelphia’s most elaborately designed live performance theaters\". So relation could be \"subclass of\" or \"type\". But we can capture \"location\" and \"architect/builder\".\n\n- Relation: \"located at\" with object \"northwest corner of 21st and Market Streets in Philadelphia, Pennsylvania\". Could split: location: \"Philadelphia, Pennsylvania\". Also more specific: \"northwest corner of 21st and Market Streets\". We'll create one triplet: subject Erlanger Theatre, relation \"location\", object \"northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania\". Provide qualifiers maybe \"point in time\" not needed.\n\n- Also \"built by\" relation: (Erlanger Theatre, builder, Abraham L. Erlanger). Use relation \"architect\" or \"builder\". Use \"built by\". We'll use \"builder\".\n\n- Also \"demolished in 1978\": relation \"date of demolition\" or \"dissolved\". Use \"date of demolition\". object \"1978\". qualifier none.\n\n- Also \"considered one of the most magnificent ever built in the United States\". That's a claim about magnitude. Could be relation \"notability\" but not standard. Might capture \"ranked among\" but not explicit. Might skip.\n\n- Also \"Abraham L. Erlanger\" is \"theatrical producer\" and \"founding member of the Theatrical Syndicate\". Could capture: (Abraham L. Erlanger, occupation, theatrical producer). (Abraham L. Erlanger, member of, Theatrical Syndicate) with qualifier \"role\" maybe \"founding member\". Use qualifier \"role\" with object \"founding member\". But we need to capture that he is a founding member. Could be relation \"member of\" with qualifier \"position\" = \"founding member\". We'll do.\n\n- Also \"Theatrical Syndicate\" is an organization.\n\n- Also \"Philadelphia\" is city in Pennsylvania, but not needed.\n\n- Also \"United States\" is country; claim about being \"most magnificent ever built in the United States\". Could capture (Erlanger Theatre, superlative ranking, United States) but not standard. Might skip.\n\nWe need subject_type and object_type.\n\nDefine types: Erlanger Theatre -> \"building\" or \"theatre\". Use \"building\". object types: location -> \"place\". builder -> \"human\". demolition date -> \"date\". For Abraham L. Erlanger -> \"human\". occupation -> \"profession\". Theatrical Syndicate -> \"organization\". member of -> \"organization\". qualifier role -> maybe \"role\". object_type for role: \"position\". Provide.\n\nNow produce JSON.\n\nList of triplets:\n\n1. Erlanger Theatre - location - northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania. qualifiers none. subject_type \"building\", object_type \"place\".\n\n2. Erlanger Theatre - builder - Abraham L. Erlanger. qualifiers none. subject_type \"building\", object_type \"human\".\n\n3. Erlanger Theatre - date of demolition - 1978. qualifiers none. subject_type \"building\", object_type \"date\".\n\n4. Abraham L. Erlanger - occupation - theatrical producer. qualifiers none. subject_type \"human\", object_type \"profession\".\n\n5. Abraham L. Erlanger - member of - Theatrical Syndicate. qualifiers: [{\"relation\":\"position\",\"object\":\"founding member\"}]. subject_type \"human\", object_type \"organization\".\n\nPotential also: \"Erlanger Theatre - country - United States\" but not explicit location. It says \"most magnificent ever built in the United States\". That's a claim about being built in US. Could capture location country: (Erlanger Theatre, country, United States). Might be okay. Use relation \"country\". object_type \"country\". Provide.\n\n6. Erlanger Theatre - country - United States. qualifiers none.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1671,
+      "total_tokens": 3027,
+      "completion_tokens": 1356,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"location\",\n            \"object\": \"northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"place\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"builder\",\n            \"object\": \"Abraham L. Erlanger\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"date of demolition\",\n            \"object\": \"1978\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Erlanger Theatre\",\n            \"relation\": \"country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Abraham L. Erlanger\",\n            \"relation\": \"occupation\",\n            \"object\": \"theatrical producer\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Abraham L. Erlanger\",\n            \"relation\": \"member of\",\n            \"object\": \"Theatrical Syndicate\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"position\",\n                    \"object\": \"founding member\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Erlanger Theatre",
+        "relation": "location",
+        "object": "northwest corner of 21st and Market Streets, Philadelphia, Pennsylvania",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "place"
+      },
+      {
+        "subject": "Erlanger Theatre",
+        "relation": "builder",
+        "object": "Abraham L. Erlanger",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "human"
+      },
+      {
+        "subject": "Erlanger Theatre",
+        "relation": "date of demolition",
+        "object": "1978",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "date"
+      },
+      {
+        "subject": "Erlanger Theatre",
+        "relation": "country",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "country"
+      },
+      {
+        "subject": "Abraham L. Erlanger",
+        "relation": "occupation",
+        "object": "theatrical producer",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Abraham L. Erlanger",
+        "relation": "member of",
+        "object": "Theatrical Syndicate",
+        "qualifiers": [
+          {
+            "relation": "position",
+            "object": "founding member"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1671,
+    "total_tokens": 3027,
+    "completion_tokens": 1356,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 523,
+    "output_tokens_est": 430
+  },
+  "attempts": 1,
+  "latency_s": 12.821776157004933,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T22:59:22.430654+00:00",
+  "cache_key": "8236e331065c8ea1453eed9673e3b352"
+}

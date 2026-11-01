@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "13be9d68373381f8",
+    "input_hash": "51fa2c94ae472ba7b676078c4c308db5ec3f642468d8eb40882878f56a4fa643",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d9558314adb8016afc6fbb392d3051a9",
+    "object": "chat.completion",
+    "created": 1791547988,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"recorded by\",\n            \"object\": \"Brooks & Dunn\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical duo\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"co-writer\",\n            \"object\": \"Ronnie Dunn\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"co-writer\",\n            \"object\": \"Terry McBride\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"release date\",\n            \"object\": \"June 2005\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"single from album\",\n            \"object\": \"Hillbilly Deluxe\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"reached number one on\",\n            \"object\": \"Billboard Hot Country Songs\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"September 2005\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"final number one hit for\",\n            \"object\": \"Brooks & Dunn\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical duo\"\n        },\n        {\n            \"subject\": \"Brooks & Dunn\",\n            \"relation\": \"number of number one hits\",\n            \"object\": \"20\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical duo\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: \"Play Something Country\" (song). \"Brooks & Dunn\" (American country music duo). \"Ronnie Dunn\" (person). \"Terry McBride\" (person). Album \"Hillbilly Deluxe\". Billboard Hot Country Songs charts (chart). Year 2005, June 2005 release. September 2005 chart top. It became the twentieth and final Number One hit of the duo's career.\n\nNow produce triplets.\n\nSubject types: song, human, duo, album, chart, etc.\n\nTriplets:\n\n1. (\"Play Something Country\", \"recorded by\", \"Brooks & Dunn\") - subject_type song, object_type musical duo.\n\n2. (\"Play Something Country\", \"co-writer\", \"Ronnie Dunn\") maybe \"author\" or \"composer\". Use relation \"co-writer\". object_type human.\n\n3. (\"Play Something Country\", \"co-writer\", \"Terry McBride\").\n\n4. (\"Play Something Country\", \"release date\", \"June 2005\") - object_type date. Possibly separate qualifiers: \"point in time\". Use relation \"publication date\". We'll use \"release date\".\n\n5. (\"Play Something Country\", \"single of\", \"Hillbilly Deluxe\") relation \"single of album\". Or \"album\" relation. Use \"album\" maybe.\n\nBetter: relation \"single from album\". object_type album.\n\n6. (\"Play Something Country\", \"chart position\", \"1\") with qualifier chart \"Billboard Hot Country Songs\" and point in time \"September 2005\". But we need separate triplet: (\"Play Something Country\", \"chart ranking\", \"Billboard Hot Country Songs\") with qualifier \"point in time\" \"September 2005\" and maybe \"rank\" \"1\". Could split.\n\nSimplify: (\"Play Something Country\", \"reached number one on\", \"Billboard Hot Country Songs\") with qualifier point in time September 2005.\n\nobject_type chart.\n\n7. (\"Play Something Country\", \"number one hit rank for\", \"Brooks & Dunn\") maybe \"number of number one hits\" but text: \"becoming the twentieth and final Number One hit of the duo's career\". So we can have (\"Play Something Country\", \"ordinal number of number one hit for\", \"Brooks & Dunn\") with qualifier \"value\" \"20\". But relation maybe \"ranking in artist's number one hits\". Use \"position in discography\" with qualifier \"ordinal\". Let's keep: relation \"career number one hit ordinal\" object \"Brooks & Dunn\". qualifier object \"20\". but we need object entity not number. Could set object \"twentieth number one hit\". Not ideal.\n\nBetter: separate triplet: (\"Brooks & Dunn\", \"number of number one hits\", \"20\") with qualifier \"final\" maybe. However text says this song is the twentieth and final Number One hit. So we can represent that as (\"Brooks & Dunn\", \"number of number one hits\", \"20\") with qualifier {\"relation\": \"final\", \"object\": \"true\"}? There is no such relation. Could use qualifier \"qualifier\": {\"relation\":\"final\",\"object\":\"true\"} but maybe use \"qualifier\": {\"relation\":\"status\",\"object\":\"final\"} but not defined. Might just include qualifier \"qualifier\": {\"relation\":\"final\",\"object\":\"true\"}.\n\nBut guidelines: qualifiers must be relations like \"point in time\", \"polarity\", \"modality\", etc. There's no \"final\". So maybe we treat as separate: (\"Play Something Country\", \"final number one hit for\", \"Brooks & Dunn\") - object_type musical duo. relation \"final number one hit for\". That's okay.\n\nAlso include that it's the twentieth number one hit: maybe relation \"ordinal number of number one hits for\" object \"Brooks & Dunn\". But not standard. Might just capture as two separate: \"twentieth number one hit for\". We'll create relation \"twentieth number one hit for\". Might be okay.\n\nAlso note \"American country music duo\" attribute: (\"Brooks & Dunn\", \"country of origin\", \"United States\") but not needed.\n\nAlso \"Billboard\" is a chart entity: \"Billboard Hot Country Songs charts\". Use object \"Billboard Hot Country Songs\".\n\nNow compile list with required fields subject_type, object_type.\n\nDefine subject_type for song: \"song\". For duo: \"musical duo\". For human: \"human\". Album: \"album\". Chart: \"music chart\". For ordinal relation maybe \"musical duo\".\n\nNow qualifiers list: for release date maybe none.\n\nFor chart ranking: qualifier point in time.\n\nLet's construct JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1676,
+      "total_tokens": 3123,
+      "completion_tokens": 1447,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"recorded by\",\n            \"object\": \"Brooks & Dunn\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical duo\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"co-writer\",\n            \"object\": \"Ronnie Dunn\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"co-writer\",\n            \"object\": \"Terry McBride\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"release date\",\n            \"object\": \"June 2005\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"single from album\",\n            \"object\": \"Hillbilly Deluxe\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"reached number one on\",\n            \"object\": \"Billboard Hot Country Songs\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"September 2005\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"Play Something Country\",\n            \"relation\": \"final number one hit for\",\n            \"object\": \"Brooks & Dunn\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical duo\"\n        },\n        {\n            \"subject\": \"Brooks & Dunn\",\n            \"relation\": \"number of number one hits\",\n            \"object\": \"20\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical duo\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Play Something Country",
+        "relation": "recorded by",
+        "object": "Brooks & Dunn",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "musical duo"
+      },
+      {
+        "subject": "Play Something Country",
+        "relation": "co-writer",
+        "object": "Ronnie Dunn",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Play Something Country",
+        "relation": "co-writer",
+        "object": "Terry McBride",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Play Something Country",
+        "relation": "release date",
+        "object": "June 2005",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "date"
+      },
+      {
+        "subject": "Play Something Country",
+        "relation": "single from album",
+        "object": "Hillbilly Deluxe",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "album"
+      },
+      {
+        "subject": "Play Something Country",
+        "relation": "reached number one on",
+        "object": "Billboard Hot Country Songs",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "September 2005"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "music chart"
+      },
+      {
+        "subject": "Play Something Country",
+        "relation": "final number one hit for",
+        "object": "Brooks & Dunn",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "musical duo"
+      },
+      {
+        "subject": "Brooks & Dunn",
+        "relation": "number of number one hits",
+        "object": "20",
+        "qualifiers": [],
+        "subject_type": "musical duo",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1676,
+    "total_tokens": 3123,
+    "completion_tokens": 1447,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 647,
+    "output_tokens_est": 555
+  },
+  "attempts": 1,
+  "latency_s": 18.01903959600895,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:13:26.675206+00:00",
+  "cache_key": "072596dc7d8fec05594ea98122f488a6"
+}

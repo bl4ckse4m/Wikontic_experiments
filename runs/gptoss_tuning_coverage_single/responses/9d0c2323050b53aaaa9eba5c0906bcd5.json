@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "09aa812a5af3541a",
+    "input_hash": "fb23896e292580efd50c51c101598da3315beec2d0e7a5bffdf2503130e51038",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-bad96b56266c209012ede69a71d6daa8",
+    "object": "chat.completion",
+    "created": 1791500914,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"instance of\",\n            \"object\": \"island\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"located in\",\n            \"object\": \"Ap Chau Bay\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"bay\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"located in\",\n            \"object\": \"New Territories\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"located in\",\n            \"object\": \"Hong Kong\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"special administrative region\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"administered by\",\n            \"object\": \"North District\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"administrative district\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"nearby\",\n            \"object\": \"Ap Tan Pai\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"northeast\"\n                }\n            ],\n            \"subject_type\": \"island\",\n            \"object_type\": \"islet\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Ap Lo Chun\n\nAp Lo Chun () is a small island in the New Territories of Hong Kong. It is located in Ap Chau Bay () between Ap Chau in the east and Sai Ap Chau in the west, with the islet of Ap Tan Pai nearby in the northeast. It is under the administration of North District.\"\n\nWe have entity Ap Lo Chun (island). Facts:\n\n- Ap Lo Chun is a small island. Relation: instance of? maybe \"instance of\" or \"subclass of\"? Use \"instance of\" with object \"island\". Could also use \"type\" but typical Wikidata uses \"instance of\". We'll use relation \"instance of\", object \"island\". subject_type: \"geographic entity\"? maybe \"island\". object_type: \"geographic feature\". We'll set subject_type \"island\" and object_type \"geographic feature\"? Actually object is \"island\" which is a class. So object_type \"geographic feature\". subject_type \"island\". Might be okay.\n\n- Ap Lo Chun is located in Ap Chau Bay. Relation: \"located in\". object: \"Ap Chau Bay\". qualifiers none. subject_type \"island\". object_type \"bay\".\n\n- Ap Chau Bay is between Ap Chau (east) and Sai Ap Chau (west). This is a relation: \"located between\". Could split into two: Ap Lo Chun located between Ap Chau (east) and Sai Ap Chau (west). Actually sentence: \"It is located in Ap Chau Bay () between Ap Chau in the east and Sai Ap Chau in the west\". The \"it\" refers to Ap Lo Chun. So Ap Lo Chun is located in Ap Chau Bay, and Ap Chau Bay is between Ap Chau and Sai Ap Chau. But we might capture that Ap Lo Chun is between Ap Chau and Sai Ap Chau? The phrase \"between ... in the east and ... in the west\" modifies Ap Chau Bay, not Ap Lo Chun. So we could create a triplet: Ap Chau Bay located between Ap Chau and Sai Ap Chau. But the subject is Ap Chau Bay, not Ap Lo Chun. However we only need facts about Ap Lo Chun? The instruction: extract meaningful triplets from text. So include that Ap Chau Bay is between Ap Chau and Sai Ap Chau. Provide qualifiers for direction? Could add qualifiers \"direction east\" etc. Simpler: two triplets: Ap Chau Bay located between Ap Chau and Sai Ap Chau. Use relation \"located between\". object maybe a list? Could create two separate relations: \"located east of\" and \"located west of\". But text says Ap Chau is east, Sai Ap Chau is west relative to Ap Chau Bay. So we can have:\n\n- Ap Chau Bay \"directional relation east of\" Ap Chau? Actually Ap Chau is east of Ap Chau Bay? The phrase \"between Ap Chau in the east and Sai Ap Chau in the west\" suggests Ap Chau is east of the bay, Sai Ap Chau west of the bay. So we can have:\n\nAp Chau Bay \"has east neighbor\" Ap Chau. Not sure.\n\nMaybe better to capture: Ap Chau Bay \"has part\" Ap Lo Chun? Not.\n\nSimplify: only extract explicit facts about Ap Lo Chun: small island, located in Ap Chau Bay, under administration of North District, nearby islet Ap Tan Pai in the northeast.\n\nWe can also capture relation: Ap Lo Chun \"has nearby\" Ap Tan Pai with qualifier direction \"northeast\". Use relation \"nearby\". object \"Ap Tan Pai\". qualifier direction.\n\nAlso \"under the administration of North District\". Relation: \"administered by\" or \"under administration of\". Use \"administered by\". object \"North District\". subject_type island, object_type administrative district.\n\nAlso \"Ap Lo Chun is in the New Territories of Hong Kong\". Relation: \"located in\". object \"New Territories\". Could also \"located in\" \"Hong Kong\". But phrase: \"in the New Territories of Hong Kong\". So we can have two hierarchical: Ap Lo Chun located in New Territories; New Territories part of Hong Kong. But we only need direct fact: Ap Lo Chun located in New Territories. Use relation \"located in\". object \"New Territories\". subject_type island, object_type region.\n\nAlso \"Ap Lo Chun is a small island\". Could also capture \"size\" but not given.\n\nNow qualifiers: For nearby relation, add qualifier \"direction\" with object \"northeast\". Use relation \"direction\". According to spec qualifiers use relation and object. So qualifier: {\"relation\":\"direction\",\"object\":\"northeast\"}.\n\nNow produce JSON.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- island: \"island\" (geographic feature)\n- island: subject_type \"island\"\n- object_type for \"island\": \"geographic feature\" maybe but object is class \"island\". Use \"geographic feature\".\n\n- Ap Chau Bay: type \"bay\". So object_type \"bay\". subject_type \"island\". relation \"located in\". object_type \"bay\".\n\n- New Territories: type \"region\". object_type \"region\". subject_type \"island\". relation \"located in\".\n\n- North District: type \"administrative district\". object_type \"administrative district\". relation \"administered by\".\n\n- Ap Tan Pai: type \"islet\". object_type \"islet\". relation \"nearby\". qualifier direction.\n\nNow produce list.\n\nCheck for duplicate: maybe also \"Ap Lo Chun is a small island in the New Territories of Hong Kong.\" Could also capture \"Ap Lo Chun is part of Hong Kong\". Use relation \"located in\" object \"Hong Kong\". But we already have New Territories. Might include both. But we can include both as separate triplets.\n\nLet's include both: Ap Lo Chun located in Hong Kong. object_type \"sovereign state\"? Actually Hong Kong is a \"special administrative region\". Use object_type \"special administrative region\". Provide.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1649,
+      "total_tokens": 3243,
+      "completion_tokens": 1594,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"instance of\",\n            \"object\": \"island\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"located in\",\n            \"object\": \"Ap Chau Bay\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"bay\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"located in\",\n            \"object\": \"New Territories\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"located in\",\n            \"object\": \"Hong Kong\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"special administrative region\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"administered by\",\n            \"object\": \"North District\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"administrative district\"\n        },\n        {\n            \"subject\": \"Ap Lo Chun\",\n            \"relation\": \"nearby\",\n            \"object\": \"Ap Tan Pai\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"northeast\"\n                }\n            ],\n            \"subject_type\": \"island\",\n            \"object_type\": \"islet\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Ap Lo Chun",
+        "relation": "instance of",
+        "object": "island",
+        "qualifiers": [],
+        "subject_type": "island",
+        "object_type": "geographic feature"
+      },
+      {
+        "subject": "Ap Lo Chun",
+        "relation": "located in",
+        "object": "Ap Chau Bay",
+        "qualifiers": [],
+        "subject_type": "island",
+        "object_type": "bay"
+      },
+      {
+        "subject": "Ap Lo Chun",
+        "relation": "located in",
+        "object": "New Territories",
+        "qualifiers": [],
+        "subject_type": "island",
+        "object_type": "region"
+      },
+      {
+        "subject": "Ap Lo Chun",
+        "relation": "located in",
+        "object": "Hong Kong",
+        "qualifiers": [],
+        "subject_type": "island",
+        "object_type": "special administrative region"
+      },
+      {
+        "subject": "Ap Lo Chun",
+        "relation": "administered by",
+        "object": "North District",
+        "qualifiers": [],
+        "subject_type": "island",
+        "object_type": "administrative district"
+      },
+      {
+        "subject": "Ap Lo Chun",
+        "relation": "nearby",
+        "object": "Ap Tan Pai",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "northeast"
+          }
+        ],
+        "subject_type": "island",
+        "object_type": "islet"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1649,
+    "total_tokens": 3243,
+    "completion_tokens": 1594,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 500,
+    "output_tokens_est": 408
+  },
+  "attempts": 1,
+  "latency_s": 19.175398686995322,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:08:53.892549+00:00",
+  "cache_key": "9d0c2323050b53aaaa9eba5c0906bcd5"
+}

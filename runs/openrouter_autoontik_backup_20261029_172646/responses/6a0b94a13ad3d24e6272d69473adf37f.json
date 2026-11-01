@@ -1,0 +1,175 @@
+{
+  "task": {
+    "input_id": "07752eb6531cce8f",
+    "input_hash": "a24434c51b2128583118c50a79edecfb821b0a3df062af4714cd5de1e9fb87a8",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793195005-Y2znDUdfhEXiZpx8b4OI",
+    "object": "chat.completion",
+    "created": 1793195005,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"instance of\",\n            \"object\": \"vertical lift rail drawbridge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"bridge type\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"crosses\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"connects\",\n            \"object\": \"Jackson County, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"connects\",\n            \"object\": \"Clay County, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"located in\",\n            \"object\": \"Kansas City, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"main span length\",\n            \"object\": \"427 foot\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"length\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"longest span rank\",\n            \"object\": \"United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"10\",\n                    \"object_type\": \"ordinal number\"\n                }\n            ],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nFirst, identify entities: \"Harry S. Truman Bridge\" (or \"Harry S Truman Bridge\" – note missing period). Also \"Missouri River\", \"Jackson County, Missouri\", \"Clay County, Missouri\", \"Kansas City, Missouri\", \"United States\". Also \"vertical lift rail drawbridge\" is a type of bridge. Also \"main span\" length 427 foot. Also \"tenth longest span in the United States\". Also \"bridge\" is a structure.\n\nWe need subject_type and object_type for each.\n\nDefine types: bridge (structure), river (waterbody), county (administrative division), city (city), country (country), span length (measurement), ranking (ordinal). For length: object_type \"length\" maybe \"measurement\". For ranking: object_type \"ordinal\" or \"ranking\". Use typical Wikidata classes: \"bridge\" (structure), \"river\" (waterbody), \"county\" (administrative territorial entity), \"city\" (city), \"United States\" (country), \"foot\" is unit, but we can treat \"427 foot\" as measurement.\n\nTriplets:\n\n1. subject: Harry S. Truman Bridge, relation: instance of, object: vertical lift rail drawbridge? Actually \"vertical lift rail drawbridge\" is type. Could have relation \"type\" or \"instance of\". Use \"instance of\" maybe. object_type: \"bridge type\". But we need relation short like \"instance of\". We'll include.\n\n2. subject: Harry S. Truman Bridge, relation: crosses, object: Missouri River. object_type: river.\n\n3. subject: Harry S. Truman Bridge, relation: connects, object: Jackson County, Missouri. object_type: county.\n\n4. subject: Harry S. Truman Bridge, relation: connects, object: Clay County, Missouri. object_type: county.\n\n5. subject: Harry S. Truman Bridge, relation: location, object: Kansas City, Missouri. Could be \"located in\". Use \"located in\". object_type: city.\n\n6. subject: Harry S. Truman Bridge, relation: main span length, object: 427 foot. Use relation \"main span length\". object_type: length (measurement). Also qualifier maybe unit foot? Already included.\n\n7. subject: Harry S. Truman Bridge, relation: rank in longest spans, object: tenth longest span in United States. Could split: relation \"rank\" with qualifier \"point in time\"? Not needed. Use relation \"rank\" object \"10\". But we need object entity. Could treat object as \"United States\". Actually statement: \"is the tenth longest span in the United States.\" So relation: \"rank in longest spans\" object: United States with qualifier \"ordinal\" 10? Better: relation \"longest span rank\" object \"United States\" with qualifier \"ordinal\" 10. Let's do: relation \"longest span rank\", object: United States, qualifier: relation \"ordinal\", object \"10\". object_type: country, qualifier object_type: integer (or \"ordinal number\").\n\nAlternatively we could have object \"tenth longest span\" as a concept, but better to link to United States.\n\nWe'll produce qualifiers list.\n\nAlso maybe include \"bridge name\" but not needed.\n\nNow need subject_type for bridge: \"bridge\". object_type for each.\n\nDefine types:\n\n- Harry S. Truman Bridge: \"bridge\"\n- vertical lift rail drawbridge: \"bridge type\" maybe \"bridge type\"\n- Missouri River: \"river\"\n- Jackson County, Missouri: \"county\"\n- Clay County, Missouri: \"county\"\n- Kansas City, Missouri: \"city\"\n- 427 foot: \"length\"\n- United States: \"country\"\n- ordinal 10: \"integer\" or \"ordinal number\". Use \"ordinal number\".\n\nNow format JSON: top-level key \"triplets\": list.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list of dicts, \"subject_type\", \"object_type\".\n\nFor qualifiers, include \"relation\", \"object\", \"object_type\".\n\nLet's craft.\n\nTriplet 1:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"instance of\"\nobject: \"vertical lift rail drawbridge\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"bridge type\"\n\nTriplet 2:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"crosses\"\nobject: \"Missouri River\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"river\"\n\nTriplet 3:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"connects\"\nobject: \"Jackson County, Missouri\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"county\"\n\nTriplet 4:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"connects\"\nobject: \"Clay County, Missouri\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"county\"\n\nTriplet 5:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"located in\"\nobject: \"Kansas City, Missouri\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"city\"\n\nTriplet 6:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"main span length\"\nobject: \"427 foot\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"length\"\n\nTriplet 7:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"longest span rank\"\nobject: \"United States\"\nqualifiers: [{\"relation\":\"ordinal\",\"object\":\"10\",\"object_type\":\"ordinal number\"}]\nsubject_type: \"bridge\"\nobject_type: \"country\"\n\nCheck if any other facts: \"tenth longest span in the United States\" also implies \"span length ranking\". That's captured.\n\nNow produce JSON.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nFirst, identify entities: \"Harry S. Truman Bridge\" (or \"Harry S Truman Bridge\" – note missing period). Also \"Missouri River\", \"Jackson County, Missouri\", \"Clay County, Missouri\", \"Kansas City, Missouri\", \"United States\". Also \"vertical lift rail drawbridge\" is a type of bridge. Also \"main span\" length 427 foot. Also \"tenth longest span in the United States\". Also \"bridge\" is a structure.\n\nWe need subject_type and object_type for each.\n\nDefine types: bridge (structure), river (waterbody), county (administrative division), city (city), country (country), span length (measurement), ranking (ordinal). For length: object_type \"length\" maybe \"measurement\". For ranking: object_type \"ordinal\" or \"ranking\". Use typical Wikidata classes: \"bridge\" (structure), \"river\" (waterbody), \"county\" (administrative territorial entity), \"city\" (city), \"United States\" (country), \"foot\" is unit, but we can treat \"427 foot\" as measurement.\n\nTriplets:\n\n1. subject: Harry S. Truman Bridge, relation: instance of, object: vertical lift rail drawbridge? Actually \"vertical lift rail drawbridge\" is type. Could have relation \"type\" or \"instance of\". Use \"instance of\" maybe. object_type: \"bridge type\". But we need relation short like \"instance of\". We'll include.\n\n2. subject: Harry S. Truman Bridge, relation: crosses, object: Missouri River. object_type: river.\n\n3. subject: Harry S. Truman Bridge, relation: connects, object: Jackson County, Missouri. object_type: county.\n\n4. subject: Harry S. Truman Bridge, relation: connects, object: Clay County, Missouri. object_type: county.\n\n5. subject: Harry S. Truman Bridge, relation: location, object: Kansas City, Missouri. Could be \"located in\". Use \"located in\". object_type: city.\n\n6. subject: Harry S. Truman Bridge, relation: main span length, object: 427 foot. Use relation \"main span length\". object_type: length (measurement). Also qualifier maybe unit foot? Already included.\n\n7. subject: Harry S. Truman Bridge, relation: rank in longest spans, object: tenth longest span in United States. Could split: relation \"rank\" with qualifier \"point in time\"? Not needed. Use relation \"rank\" object \"10\". But we need object entity. Could treat object as \"United States\". Actually statement: \"is the tenth longest span in the United States.\" So relation: \"rank in longest spans\" object: United States with qualifier \"ordinal\" 10? Better: relation \"longest span rank\" object \"United States\" with qualifier \"ordinal\" 10. Let's do: relation \"longest span rank\", object: United States, qualifier: relation \"ordinal\", object \"10\". object_type: country, qualifier object_type: integer (or \"ordinal number\").\n\nAlternatively we could have object \"tenth longest span\" as a concept, but better to link to United States.\n\nWe'll produce qualifiers list.\n\nAlso maybe include \"bridge name\" but not needed.\n\nNow need subject_type for bridge: \"bridge\". object_type for each.\n\nDefine types:\n\n- Harry S. Truman Bridge: \"bridge\"\n- vertical lift rail drawbridge: \"bridge type\" maybe \"bridge type\"\n- Missouri River: \"river\"\n- Jackson County, Missouri: \"county\"\n- Clay County, Missouri: \"county\"\n- Kansas City, Missouri: \"city\"\n- 427 foot: \"length\"\n- United States: \"country\"\n- ordinal 10: \"integer\" or \"ordinal number\". Use \"ordinal number\".\n\nNow format JSON: top-level key \"triplets\": list.\n\nEach dict includes \"subject\", \"relation\", \"object\", \"qualifiers\": list of dicts, \"subject_type\", \"object_type\".\n\nFor qualifiers, include \"relation\", \"object\", \"object_type\".\n\nLet's craft.\n\nTriplet 1:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"instance of\"\nobject: \"vertical lift rail drawbridge\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"bridge type\"\n\nTriplet 2:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"crosses\"\nobject: \"Missouri River\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"river\"\n\nTriplet 3:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"connects\"\nobject: \"Jackson County, Missouri\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"county\"\n\nTriplet 4:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"connects\"\nobject: \"Clay County, Missouri\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"county\"\n\nTriplet 5:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"located in\"\nobject: \"Kansas City, Missouri\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"city\"\n\nTriplet 6:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"main span length\"\nobject: \"427 foot\"\nqualifiers: []\nsubject_type: \"bridge\"\nobject_type: \"length\"\n\nTriplet 7:\n\nsubject: \"Harry S. Truman Bridge\"\nrelation: \"longest span rank\"\nobject: \"United States\"\nqualifiers: [{\"relation\":\"ordinal\",\"object\":\"10\",\"object_type\":\"ordinal number\"}]\nsubject_type: \"bridge\"\nobject_type: \"country\"\n\nCheck if any other facts: \"tenth longest span in the United States\" also implies \"span length ranking\". That's captured.\n\nNow produce JSON.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1411,
+      "completion_tokens": 1627,
+      "total_tokens": 3038,
+      "cost": 0.000346579,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000346579,
+        "upstream_inference_prompt_cost": 4.233e-05,
+        "upstream_inference_completions_cost": 0.000304249
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 0,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"instance of\",\n            \"object\": \"vertical lift rail drawbridge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"bridge type\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"crosses\",\n            \"object\": \"Missouri River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"connects\",\n            \"object\": \"Jackson County, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"connects\",\n            \"object\": \"Clay County, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"located in\",\n            \"object\": \"Kansas City, Missouri\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"main span length\",\n            \"object\": \"427 foot\",\n            \"qualifiers\": [],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"length\"\n        },\n        {\n            \"subject\": \"Harry S. Truman Bridge\",\n            \"relation\": \"longest span rank\",\n            \"object\": \"United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ordinal\",\n                    \"object\": \"10\",\n                    \"object_type\": \"ordinal number\"\n                }\n            ],\n            \"subject_type\": \"bridge\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "instance of",
+        "object": "vertical lift rail drawbridge",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "bridge type"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "crosses",
+        "object": "Missouri River",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "river"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "connects",
+        "object": "Jackson County, Missouri",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "county"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "connects",
+        "object": "Clay County, Missouri",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "county"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "located in",
+        "object": "Kansas City, Missouri",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "city"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "main span length",
+        "object": "427 foot",
+        "qualifiers": [],
+        "subject_type": "bridge",
+        "object_type": "length"
+      },
+      {
+        "subject": "Harry S. Truman Bridge",
+        "relation": "longest span rank",
+        "object": "United States",
+        "qualifiers": [
+          {
+            "relation": "ordinal",
+            "object": "10"
+          }
+        ],
+        "subject_type": "bridge",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1411,
+    "completion_tokens": 1627,
+    "total_tokens": 3038,
+    "cost": 0.000346579,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000346579,
+      "upstream_inference_prompt_cost": 4.233e-05,
+      "upstream_inference_completions_cost": 0.000304249
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 630,
+    "output_tokens_est": 503
+  },
+  "attempts": 1,
+  "latency_s": 13.999558748000709,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T13:43:38.474650+00:00",
+  "cache_key": "6a0b94a13ad3d24e6272d69473adf37f"
+}

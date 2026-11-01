@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "19c25d1fff71db34",
+    "input_hash": "cc4c42c5b4698c0ec204a1a67c3e6236efb22830103e927044e1d3a12464e977",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-6a5be52d8e2e7e1bb5c0416bbaaa6321",
+    "object": "chat.completion",
+    "created": 1791548534,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"has origin\",\n            \"object\": \"First Day Society\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"First Day Society\",\n            \"relation\": \"date of foundation\",\n            \"object\": \"1790\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"date of formation\",\n            \"object\": \"1817\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"original name\",\n            \"object\": \"Sunday and Adult School Union\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"American Sunday School Union\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1824\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"American Missionary Fellowship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1974\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"date of name adoption\",\n            \"object\": \"1 September 2011\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets about organization name changes, founding dates, etc.\n\nEntities: InFaith (current organization), First Day Society (origin), Sunday and Adult School Union (former name), American Sunday School Union (ASSU), American Missionary Fellowship, InFaith (again). Dates: First Day Society founded 1790. InFaith officially formed 1817 as \"Sunday and Adult School Union\". In 1824 name changed to \"American Sunday School Union\". In 1974 name changed to \"American Missionary Fellowship\". It became \"InFaith\" on September 1, 2011.\n\nWe need subject_type and object_type. For organizations: subject_type \"organization\". For date: object_type \"date\". For name: object_type \"name\" or \"organization\"? Probably name is a string, but maybe treat as organization entity with a distinct name? In examples, they treat award as award, occupation as profession. For name change, relation could be \"name changed to\" or \"renamed as\". Use \"renamed to\". Subject is organization (InFaith). Object is the new name entity (American Sunday School Union). But those are also organizations, or just name strings. We can treat them as organization entities with those names.\n\nFirst triplet: InFaith has its roots in the First Day Society (founded 1790). So relation \"has origin\" or \"origin\". Use \"has origin\". Subject InFaith (organization), object First Day Society (organization). Qualifier: date of founding 1790 for First Day Society? The text says First Day Society founded 1790. That is a fact about First Day Society, not necessarily a qualifier of the origin relation. We can create separate triplet: First Day Society date of foundation 1790. That is separate.\n\nSecond: InFaith officially formed in 1817 as the “Sunday and Adult School Union.” So relation \"date of formation\" maybe \"inception\". Use \"inception\" or \"date of formation\". Use \"date of formation\". Subject InFaith, object 1817 (date). Also we may want to capture that its original name was Sunday and Adult School Union. Could have separate triplet: InFaith has original name \"Sunday and Adult School Union\". Could use relation \"original name\". We'll create: InFaith original name Sunday and Adult School Union.\n\nThird: In 1824, the organization changed its name to “American Sunday School Union” (ASSU). So relation \"renamed to\". Subject InFaith, object American Sunday School Union. Qualifier point in time 1824.\n\nFourth: In 1974, the ASSU changed its name to “American Missionary Fellowship.” So same: InFaith renamed to American Missionary Fellowship, qualifier point in time 1974. Actually ASSU is same organization (InFaith). So treat subject InFaith.\n\nFifth: It became \"InFaith\" on September 1, 2011. So InFaith renamed to InFaith? That's self. Might be that organization took name InFaith on that date. So we can have triplet: InFaith renamed to InFaith (maybe ignore). But we could capture that name change on that date: InFaith renamed to InFaith with qualifier point in time 1 September 2011. But maybe capture that the organization adopted the current name InFaith on that date. Could have relation \"named as\" but we already have subject InFaith. Maybe we can capture \"date of current name adoption\". Use relation \"date of name adoption\". Subject InFaith, object 1 September 2011.\n\nAlso we need subject_type and object_type. For dates: object_type \"date\". For organization names: object_type \"organization\". For original name maybe object_type \"name\". But we can treat as organization entity.\n\nLet's decide relation names:\n\n- \"has origin\" (subject organization, object organization)\n- \"date of foundation\" (subject organization, object date)\n- \"date of formation\" (subject organization, object date)\n- \"original name\" (subject organization, object organization)\n- \"renamed to\" (subject organization, object organization)\n- \"date of name adoption\" (subject organization, object date)\n\nMake qualifiers: For rename events, qualifier \"point in time\" with date.\n\nNow produce JSON.\n\nList triplets:\n\n1. subject InFaith, relation has origin, object First Day Society, qualifiers [], subject_type organization, object_type organization.\n\n2. subject First Day Society, relation date of foundation, object 1790, qualifiers [], subject_type organization, object_type date.\n\n3. subject InFaith, relation date of formation, object 1817, qualifiers [], subject_type organization, object_type date.\n\n4. subject InFaith, relation original name, object Sunday and Adult School Union, qualifiers [], subject_type organization, object_type organization.\n\n5. subject InFaith, relation renamed to, object American Sunday School Union, qualifiers [{relation: point in time, object: 1824}], subject_type organization, object_type organization.\n\n6. subject InFaith, relation renamed to, object American Missionary Fellowship, qualifiers [{relation: point in time, object: 1974}], subject_type organization, object_type organization.\n\n7. subject InFaith, relation date of name adoption, object 1 September 2011, qualifiers [], subject_type organization, object_type date.\n\nCheck dates format: \"September 1, 2011\" -> \"1 September 2011\". Use that.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1678,
+      "total_tokens": 3235,
+      "completion_tokens": 1557,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"has origin\",\n            \"object\": \"First Day Society\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"First Day Society\",\n            \"relation\": \"date of foundation\",\n            \"object\": \"1790\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"date of formation\",\n            \"object\": \"1817\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"original name\",\n            \"object\": \"Sunday and Adult School Union\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"American Sunday School Union\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1824\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"renamed to\",\n            \"object\": \"American Missionary Fellowship\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1974\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"InFaith\",\n            \"relation\": \"date of name adoption\",\n            \"object\": \"1 September 2011\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "InFaith",
+        "relation": "has origin",
+        "object": "First Day Society",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "First Day Society",
+        "relation": "date of foundation",
+        "object": "1790",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "date"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "date of formation",
+        "object": "1817",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "date"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "original name",
+        "object": "Sunday and Adult School Union",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "renamed to",
+        "object": "American Sunday School Union",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1824"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "renamed to",
+        "object": "American Missionary Fellowship",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1974"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "organization"
+      },
+      {
+        "subject": "InFaith",
+        "relation": "date of name adoption",
+        "object": "1 September 2011",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "date"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1678,
+    "total_tokens": 3235,
+    "completion_tokens": 1557,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 613,
+    "output_tokens_est": 521
+  },
+  "attempts": 1,
+  "latency_s": 18.63270780700259,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:22:33.131238+00:00",
+  "cache_key": "22e75ff82b6f2aa0b9054e76e2de9d95"
+}

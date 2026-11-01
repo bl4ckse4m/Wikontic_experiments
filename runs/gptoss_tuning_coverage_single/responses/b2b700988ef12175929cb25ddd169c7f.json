@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "35621fc4b3b47c33",
+    "input_hash": "4c2c788020243d0f07b1d628a51597763c14240cd7a7327dce9c18a618f526ce",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-dab75523d7c593f81db9d6055a2dbc29",
+    "object": "chat.completion",
+    "created": 1791502253,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"date of birth\",\n            \"object\": \"October 29, 1952\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"occupation\",\n            \"object\": \"politician\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"region of activity\",\n            \"object\": \"Alabama\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"position held\",\n            \"object\": \"Commissioner of Agriculture and Industries\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"member of political party\",\n            \"object\": \"Democratic Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"candidate in election\",\n            \"object\": \"2010 Alabama gubernatorial election\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                },\n                {\n                    \"relation\": \"position sought\",\n                    \"object\": \"Governor of Alabama\"\n                },\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic Party\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"election\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText:\n\n\"Ron Sparks (politician)\n\nRonald D. Sparks (born October 29, 1952) is an American politician from the state of Alabama. He is the former Commissioner of Agriculture and Industries. Sparks is a member of the Democratic party, and was the Democratic candidate for Governor of Alabama in the state's 2010 gubernatorial election.\"\n\nWe need to produce triplets.\n\nIdentify entities:\n\n- Ron Sparks (also Ronald D. Sparks) – same person. Use \"Ron Sparks\" as subject? Probably \"Ron Sparks\". Provide subject_type \"human\". Also \"Ronald D. Sparks\" maybe same, but we can use \"Ron Sparks\". We'll treat as same.\n\nFacts:\n\n1. date of birth: October 29, 1952.\n\nRelation: \"date of birth\". object date.\n\n2. nationality: American (or \"country of citizenship\"?). Use relation \"country of citizenship\" maybe. The text says \"is an American politician\". So we can have (Ron Sparks, country of citizenship, United States). object_type \"country\". Or \"nationality\". Use \"country of citizenship\". We'll choose.\n\n3. occupation: politician. relation \"occupation\". object \"politician\". object_type \"profession\".\n\n4. location: from the state of Alabama. Could be \"place of residence\" or \"region of activity\". Use \"region of activity\" maybe. We'll use \"region of activity\" = Alabama. object_type \"state\". Or \"location\". We'll pick \"region of activity\".\n\n5. former position: Commissioner of Agriculture and Industries. Relation \"position held\". object \"Commissioner of Agriculture and Industries\". qualifiers: \"point in time\"? Not given. Could add qualifier \"status\" = former. But we have \"former Commissioner\". Could add qualifier \"qualifiers\": [{\"relation\":\"qualifier\", \"object\":\"former\"}] but there is no such relation. Maybe we can use \"qualifier\" \"end time\"? Not given. Could just state \"position held\" with qualifier \"qualifier\": \"former\". But spec says qualifiers are relations like point in time, location, etc. There's no \"status\". Could maybe use \"qualifier\": \"qualifier\" not allowed. Better to treat as \"position held\" with object \"Commissioner of Agriculture and Industries\". No qualifiers.\n\n6. party membership: member of the Democratic party. Relation \"member of political party\". object \"Democratic Party\". object_type \"political party\". Could also have \"political affiliation\". We'll use \"member of political party\".\n\n7. candidacy: Democratic candidate for Governor of Alabama in 2010 gubernatorial election. So relation \"candidate in election\". object \"2010 Alabama gubernatorial election\". qualifiers: maybe \"point in time\": 2010. Also \"position sought\": Governor of Alabama. Could add qualifier \"position sought\". Use relation \"position sought\". object \"Governor of Alabama\". Also \"political party\": Democratic Party maybe but already known.\n\nThus triplet: (Ron Sparks, candidate in election, 2010 Alabama gubernatorial election) with qualifiers: point in time 2010, position sought Governor of Alabama, political party Democratic Party.\n\nBut we need to ensure object_type for election: \"election\". For qualifiers: point in time date? Use \"2010\". object_type \"year\". For position sought: object_type \"political office\". For political party: object_type \"political party\".\n\nAlso maybe \"former Commissioner of Agriculture and Industries\" is a specific office in Alabama. Could add qualifier \"region\": Alabama. But not required.\n\nNow produce JSON list.\n\nSubject_type for all: \"human\". object_type accordingly.\n\nLet's craft.\n\nTriplets list:\n\n1 date of birth.\n\n2 country of citizenship.\n\n3 occupation.\n\n4 region of activity (Alabama) maybe.\n\n5 position held (Commissioner of Agriculture and Industries).\n\n6 member of political party (Democratic Party).\n\n7 candidate in election (2010 Alabama gubernatorial election) with qualifiers.\n\nCheck qualifiers format: list of dicts with relation and object.\n\nFor triplet 7 qualifiers: point in time 2010, position sought Governor of Alabama, political party Democratic Party.\n\nMake sure object_type for each.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1655,
+      "total_tokens": 2982,
+      "completion_tokens": 1327,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"date of birth\",\n            \"object\": \"October 29, 1952\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"country of citizenship\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"occupation\",\n            \"object\": \"politician\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"region of activity\",\n            \"object\": \"Alabama\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"position held\",\n            \"object\": \"Commissioner of Agriculture and Industries\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"member of political party\",\n            \"object\": \"Democratic Party\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Ron Sparks\",\n            \"relation\": \"candidate in election\",\n            \"object\": \"2010 Alabama gubernatorial election\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                },\n                {\n                    \"relation\": \"position sought\",\n                    \"object\": \"Governor of Alabama\"\n                },\n                {\n                    \"relation\": \"political party\",\n                    \"object\": \"Democratic Party\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"election\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Ron Sparks",
+        "relation": "date of birth",
+        "object": "October 29, 1952",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Ron Sparks",
+        "relation": "country of citizenship",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Ron Sparks",
+        "relation": "occupation",
+        "object": "politician",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Ron Sparks",
+        "relation": "region of activity",
+        "object": "Alabama",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "state"
+      },
+      {
+        "subject": "Ron Sparks",
+        "relation": "position held",
+        "object": "Commissioner of Agriculture and Industries",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "political office"
+      },
+      {
+        "subject": "Ron Sparks",
+        "relation": "member of political party",
+        "object": "Democratic Party",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "political party"
+      },
+      {
+        "subject": "Ron Sparks",
+        "relation": "candidate in election",
+        "object": "2010 Alabama gubernatorial election",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          },
+          {
+            "relation": "position sought",
+            "object": "Governor of Alabama"
+          },
+          {
+            "relation": "political party",
+            "object": "Democratic Party"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "election"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1655,
+    "total_tokens": 2982,
+    "completion_tokens": 1327,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 649,
+    "output_tokens_est": 556
+  },
+  "attempts": 1,
+  "latency_s": 16.387477358002798,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:31:10.398353+00:00",
+  "cache_key": "b2b700988ef12175929cb25ddd169c7f"
+}

@@ -1,0 +1,142 @@
+{
+  "task": {
+    "input_id": "088547ddc3ac21e8",
+    "input_hash": "5f109571545f23b86e95dd112d60390a8f87d9dcd56431c32d90f5a5e83516ae",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-312ff3583b8f42a7a0d6af75b4cb2860",
+    "object": "chat.completion",
+    "created": 1791547139,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"instance of\",\n            \"object\": \"urban park\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"park type\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Manhattan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"borough\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"New York City\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"located in the country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"number of visitors\",\n            \"object\": \"40 million\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2013\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"notable for\",\n            \"object\": \"most filmed locations\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"qualifier\",\n                    \"object\": \"one of the most filmed locations in the world\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"concept\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText: \"Central Park is an urban park in Manhattan, New York City. Central Park is the most visited urban park in the United States, with 40 million visitors in 2013, and one of the most filmed locations in the world.\"\n\nWe have entity Central Park.\n\nTriplets:\n\n1. Central Park - instance of / subclass? relation \"instance of\" maybe \"urban park\". Use relation \"instance of\" or \"type\". In example they used occupation etc. For places: maybe \"instance of\" with object \"urban park\". Use subject_type \"location\" maybe \"park\". object_type \"park type\". Let's decide: relation \"instance of\", object \"urban park\". subject_type \"park\". object_type \"park type\". Could also use \"location\" relation \"located in\". So:\n\n2. Central Park - located in - Manhattan. qualifier maybe \"located in\" with object \"Manhattan\". subject_type \"park\". object_type \"administrative territorial entity\". Also Manhattan is part of New York City, but we have \"Manhattan, New York City\". Could also have two location relations: \"located in\" Manhattan and \"located in\" New York City. Use separate.\n\n3. Central Park - located in - New York City. (maybe also \"located in\" United States). But we have \"Manhattan, New York City\". Manhattan is borough of NYC. So we can include both.\n\n4. Central Park - located in - United States (maybe via \"located in\" relation). Could also use \"country\". We'll include.\n\n5. Central Park - rank as \"most visited urban park in the United States\". This is a claim. Could be relation \"ranking\" or \"most visited\". Use relation \"most visited urban park in\". But need a predicate. Could use \"most visited\" with object \"urban park in United States\". Might be tricky. Maybe we split: Central Park - visitor count - 40 million. But that's a number with year. So relation \"number of visitors\" object \"40 million\". Qualifier point in time 2013.\n\nSo:\n\nTriplet: Central Park - number of visitors - 40 million. qualifiers: point in time 2013.\n\nSubject_type \"park\". object_type \"quantity\".\n\n6. Central Park - filming location rank - \"one of the most filmed locations in the world\". Could be relation \"notable filming location\". We'll use relation \"notable for filming\" maybe \"most filmed location\". Use object \"world\". Might be ambiguous. Perhaps use relation \"ranked among most filmed locations\" object \"world\". We'll include.\n\nTriplet: Central Park - ranking - \"most filmed location in the world\". But we need object as concept. Use object \"most filmed locations\". object_type \"concept\". qualifiers maybe none.\n\nBetter to stick to explicit facts: \"one of the most filmed locations in the world\". So relation \"notable as filmed location\" object \"world\". Might be okay.\n\nBut we must use Wikidata style predicates. Common ones: \"instance of\", \"located in the administrative territorial entity\", \"located in the country\", \"visitor count\", \"point in time\" qualifier, \"film location\". There is property \"filming location\" (P921?). Actually \"filming location\" is property for works. For a place, maybe \"notable for\". We'll just use \"notable for\" with object \"filming\". But we need explicit.\n\nLet's produce:\n\nTriplet list:\n\n1. Central Park - instance of - urban park.\n\n2. Central Park - located in the administrative territorial entity - Manhattan.\n\n3. Central Park - located in the administrative territorial entity - New York City.\n\n4. Central Park - located in the country - United States.\n\n5. Central Park - number of visitors - 40 million. qualifiers: point in time 2013.\n\n6. Central Park - notable for - filming location. qualifiers: {\"relation\":\"qualifier\",\"object\":\"one of the most filmed locations in the world\"}? Not correct.\n\nMaybe we can represent as: relation \"most filmed location rank\" object \"world\". qualifiers: {\"relation\":\"qualifier\",\"object\":\"one of the most\"} not needed.\n\nSimplify: Central Park - notable for - being one of the most filmed locations in the world. Object \"most filmed locations\". object_type \"concept\". We'll set object \"most filmed locations\". qualifiers maybe none.\n\nOk produce JSON.\n\nNeed subject_type and object_type.\n\nDefine:\n\n- subject_type for Central Park: \"park\".\n\n- object_type for urban park: \"park type\".\n\n- Manhattan: \"borough\". maybe \"administrative territorial entity\".\n\n- New York City: \"city\".\n\n- United States: \"country\".\n\n- number of visitors object: \"quantity\".\n\n- most filmed locations: \"concept\".\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1635,
+      "total_tokens": 3008,
+      "completion_tokens": 1373,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"instance of\",\n            \"object\": \"urban park\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"park type\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Manhattan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"borough\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"New York City\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"located in the country\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"park\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"number of visitors\",\n            \"object\": \"40 million\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2013\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Central Park\",\n            \"relation\": \"notable for\",\n            \"object\": \"most filmed locations\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"qualifier\",\n                    \"object\": \"one of the most filmed locations in the world\"\n                }\n            ],\n            \"subject_type\": \"park\",\n            \"object_type\": \"concept\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Central Park",
+        "relation": "instance of",
+        "object": "urban park",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "park type"
+      },
+      {
+        "subject": "Central Park",
+        "relation": "located in the administrative territorial entity",
+        "object": "Manhattan",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "borough"
+      },
+      {
+        "subject": "Central Park",
+        "relation": "located in the administrative territorial entity",
+        "object": "New York City",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "city"
+      },
+      {
+        "subject": "Central Park",
+        "relation": "located in the country",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "park",
+        "object_type": "country"
+      },
+      {
+        "subject": "Central Park",
+        "relation": "number of visitors",
+        "object": "40 million",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2013"
+          }
+        ],
+        "subject_type": "park",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Central Park",
+        "relation": "notable for",
+        "object": "most filmed locations",
+        "qualifiers": [
+          {
+            "relation": "qualifier",
+            "object": "one of the most filmed locations in the world"
+          }
+        ],
+        "subject_type": "park",
+        "object_type": "concept"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1635,
+    "total_tokens": 3008,
+    "completion_tokens": 1373,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 559,
+    "output_tokens_est": 467
+  },
+  "attempts": 1,
+  "latency_s": 17.01691552599368,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T11:59:16.957503+00:00",
+  "cache_key": "11bc0733a588d1fc4792a9d4d1354314"
+}

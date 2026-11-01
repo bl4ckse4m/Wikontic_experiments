@@ -1,0 +1,141 @@
+{
+  "task": {
+    "input_id": "c4c0e86beb2fe53f",
+    "input_hash": "70c67ce23c21a1688bba2c571cb84891ad0aa133e9cfa3a5fd83d5fb338d8708",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-3a6fdaf961c9f0b1b14a5deb4bbc2975",
+    "object": "chat.completion",
+    "created": 1791506608,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"type\",\n            \"object\": \"outdoor shopping center\",\n            \"qualifiers\": [],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"shopping center type\"\n        },\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"located in\",\n            \"object\": \"Livonia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Livonia\",\n            \"relation\": \"suburb of\",\n            \"object\": \"Detroit\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"located at\",\n            \"object\": \"southwest corner of Middlebelt Road and Plymouth Road\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"approximately\"\n                },\n                {\n                    \"relation\": \"distance\",\n                    \"object\": \"one mile south of I-96\"\n                }\n            ],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"intersection\"\n        },\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"anchor store\",\n            \"object\": \"Walmart\",\n            \"qualifiers\": [],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"company\"\n        },\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"anchor store\",\n            \"object\": \"Target\",\n            \"qualifiers\": [],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"company\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Wonderland Village\n\nWonderland Village is an outdoor shopping center in Livonia, Michigan, United States, a suburb of Detroit. The center is located at the southwest corner of Middlebelt Road and Plymouth Road, approximately one mile south of I-96. Walmart and Target are the complex's anchor stores.\"\n\nWe need to produce JSON with triplets list.\n\nIdentify entities: Wonderland Village (subject), outdoor shopping center (type), location: Livonia, Michigan, United States (maybe separate). Also \"a suburb of Detroit\" indicates Livonia is a suburb of Detroit. Could be a relation: \"located in\" or \"located in administrative territorial entity\". Use relation \"located in\". For \"The center is located at the southwest corner of Middlebelt Road and Plymouth Road, approximately one mile south of I-96.\" So we have location details: \"southwest corner of Middlebelt Road and Plymouth Road\". Could be relation \"coordinate location\" but we can treat as \"located at\" with object \"southwest corner of Middlebelt Road and Plymouth Road\". Also qualifier \"approximate distance\" maybe \"approximate distance\" relation? Use qualifier \"approximation\" for \"approximately one mile south of I-96\". Could also add qualifier \"direction\" but not needed. We'll attach qualifier \"approximation\" with object \"approximately one mile south of I-96\". Or maybe better: qualifier \"distance\" with object \"one mile south of I-96\" and \"approximation\" for \"approximately\". The spec says qualifiers can be \"approximation\" for \"about\", \"nearly\", \"over\". Here \"approximately\" qualifies the distance. So we can have qualifier \"approximation\": \"approximately\". But also we need to capture the distance as part of location? Might be okay to include qualifier \"approximation\" with object \"approximately\". But we need object entity; maybe \"approximately\" is not an entity. Could use object \"approximately\". That's okay.\n\nAlso anchor stores: Walmart and Target are anchor stores of the complex. So we have two triplets: (Walmart, anchor store of, Wonderland Village) or (Wonderland Village, anchor store, Walmart). The text: \"Walmart and Target are the complex's anchor stores.\" So relation: \"anchor store\" linking Wonderland Village to Walmart and Target. Use relation \"anchor store\" (object: Walmart). Subject: Wonderland Village. So two triplets.\n\nAlso \"Walmart\" and \"Target\" are companies (type: business). Could set object_type \"company\" or \"retail chain\". We'll use \"company\".\n\nSubject_type for Wonderland Village: \"shopping center\" or \"building\". Use \"shopping center\". object_type for location: \"city\" or \"administrative territorial entity\". For \"Livonia, Michigan, United States\": maybe treat as \"city\". We'll use \"city\". For \"United States\": \"country\". But we can just have one triplet: (Wonderland Village, located in, Livonia). Could also have (Livonia, located in, Michigan) etc but not required.\n\nAlso \"Livonia, Michigan, United States, a suburb of Detroit.\" So we could have (Livonia, suburb of, Detroit). Relation \"suburb of\". Subject_type \"city\". object_type \"city\". Good.\n\nNow produce triplets.\n\nList:\n\n1. (Wonderland Village, instance of, outdoor shopping center) maybe relation \"instance of\". But spec uses \"type of\". Could use \"type of\". Use \"type of\" relation. object_type \"shopping center\". subject_type \"shopping center\"? Actually subject_type \"shopping center\". object_type \"shopping center type\"? Might be \"shopping center\". We'll set subject_type \"shopping center\" and object_type \"shopping center type\". But maybe better: relation \"type\" with object \"outdoor shopping center\". object_type \"shopping center type\". We'll follow example: they used \"occupation\" with object \"physicist\". So we can use \"type\" relation.\n\n2. (Wonderland Village, located in, Livonia) qualifiers none. subject_type \"shopping center\". object_type \"city\".\n\n3. (Livonia, suburb of, Detroit). subject_type \"city\". object_type \"city\".\n\n4. (Wonderland Village, located at, southwest corner of Middlebelt Road and Plymouth Road). qualifiers: approximation? Actually \"approximately one mile south of I-96\". So qualifier: {\"relation\":\"approximation\",\"object\":\"approximately\"} maybe also \"distance\" qualifier? Not required. We'll add qualifier \"approximation\": \"approximately\". Also maybe \"distance from\" qualifier? Not needed.\n\n5. (Wonderland Village, anchor store, Walmart). subject_type \"shopping center\". object_type \"company\".\n\n6. (Wonderland Village, anchor store, Target). same.\n\nWe might also include (Walmart, type, retail corporation) but not needed.\n\nNow produce JSON.\n\nNeed each triplet dict with keys: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nFor qualifiers list, each dict has relation and object.\n\nFor triplet 4, qualifiers list includes approximation. Provide object \"approximately\". Could also include \"distance\" qualifier with object \"one mile south of I-96\". But spec says qualifiers for approximation; we can include both: one qualifier \"approximation\": \"approximately\", another \"distance\": \"one mile south of I-96\". Use relation \"distance\" maybe not standard but okay. Might be safer to only include approximation.\n\nLet's include two qualifiers: approximation and distance.\n\nQualifier 1: {\"relation\":\"approximation\",\"object\":\"approximately\"}.\n\nQualifier 2: {\"relation\":\"distance\",\"object\":\"one mile south of I-96\"}.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1646,
+      "total_tokens": 3212,
+      "completion_tokens": 1566,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"type\",\n            \"object\": \"outdoor shopping center\",\n            \"qualifiers\": [],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"shopping center type\"\n        },\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"located in\",\n            \"object\": \"Livonia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Livonia\",\n            \"relation\": \"suburb of\",\n            \"object\": \"Detroit\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"located at\",\n            \"object\": \"southwest corner of Middlebelt Road and Plymouth Road\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"approximately\"\n                },\n                {\n                    \"relation\": \"distance\",\n                    \"object\": \"one mile south of I-96\"\n                }\n            ],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"intersection\"\n        },\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"anchor store\",\n            \"object\": \"Walmart\",\n            \"qualifiers\": [],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"company\"\n        },\n        {\n            \"subject\": \"Wonderland Village\",\n            \"relation\": \"anchor store\",\n            \"object\": \"Target\",\n            \"qualifiers\": [],\n            \"subject_type\": \"shopping center\",\n            \"object_type\": \"company\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Wonderland Village",
+        "relation": "type",
+        "object": "outdoor shopping center",
+        "qualifiers": [],
+        "subject_type": "shopping center",
+        "object_type": "shopping center type"
+      },
+      {
+        "subject": "Wonderland Village",
+        "relation": "located in",
+        "object": "Livonia",
+        "qualifiers": [],
+        "subject_type": "shopping center",
+        "object_type": "city"
+      },
+      {
+        "subject": "Livonia",
+        "relation": "suburb of",
+        "object": "Detroit",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "city"
+      },
+      {
+        "subject": "Wonderland Village",
+        "relation": "located at",
+        "object": "southwest corner of Middlebelt Road and Plymouth Road",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "approximately"
+          },
+          {
+            "relation": "distance",
+            "object": "one mile south of I-96"
+          }
+        ],
+        "subject_type": "shopping center",
+        "object_type": "intersection"
+      },
+      {
+        "subject": "Wonderland Village",
+        "relation": "anchor store",
+        "object": "Walmart",
+        "qualifiers": [],
+        "subject_type": "shopping center",
+        "object_type": "company"
+      },
+      {
+        "subject": "Wonderland Village",
+        "relation": "anchor store",
+        "object": "Target",
+        "qualifiers": [],
+        "subject_type": "shopping center",
+        "object_type": "company"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1646,
+    "total_tokens": 3212,
+    "completion_tokens": 1566,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 557,
+    "output_tokens_est": 465
+  },
+  "attempts": 1,
+  "latency_s": 19.518241377998493,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:43:47.941897+00:00",
+  "cache_key": "09a7a2c3f697adf8176f39f944a28cbd"
+}

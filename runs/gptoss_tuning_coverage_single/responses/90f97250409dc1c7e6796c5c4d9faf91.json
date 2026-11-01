@@ -1,0 +1,174 @@
+{
+  "task": {
+    "input_id": "9c28170817d57b31",
+    "input_hash": "97f268d4695fa763ba2f09db505db941256c0234326fa0546fe5e3efb4593857",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-5a59a2b16c27a88431ca988ef1ddc56e",
+    "object": "chat.completion",
+    "created": 1791505407,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"instance of\",\n            \"object\": \"square\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"located in\",\n            \"object\": \"Trujillo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"located in\",\n            \"object\": \"La Libertad Region\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"located in\",\n            \"object\": \"Peru\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"situated at\",\n            \"object\": \"8th block of Pizarro street\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"situated in\",\n            \"object\": \"Historic Centre of Trujillo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"district\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"hosts\",\n            \"object\": \"cultural shows\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"cultural event\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"venue for\",\n            \"object\": \"Trujillo Book Festival\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2012\"\n                }\n            ],\n            \"subject_type\": \"square\",\n            \"object_type\": \"festival\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"has plant\",\n            \"object\": \"high ficus\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"plant\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"heritage designation\",\n            \"object\": \"Monumental Heritage of the Nation\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"declared by\",\n                    \"object\": \"National Institute of Culture of Peru\"\n                }\n            ],\n            \"subject_type\": \"square\",\n            \"object_type\": \"heritage status\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nIdentify entities: Plazuela El Recreo (a square), Trujillo (city), La Libertad Region (region), Peru (country), Pizarro street, Historic Centre of Trujillo, March 2012 (date), Trujillo Book Festival (event), high ficus (maybe plant), National Institute of Culture of Peru (institution), Monumental Heritage of the Nation (designation/heritage status).\n\nRelations: location, situated in, has part, event held in, date of event, declared by, heritage status.\n\nLet's parse sentences:\n\n\"The Plazuela El Recreo is a traditional square located in the Peruvian city of Trujillo in La Libertad Region in northern Peru.\"\n\nTriplet: Plazuela El Recreo – instance of – square? relation maybe \"instance of\" or \"type\". But we need specific relation like \"instance of\" or \"subclass of\". Not given in examples but we can use \"instance of\". object_type: \"square\" (maybe \"public square\").\n\nAlso location: Plazuela El Recreo – location – Trujillo. Also could have location – La Libertad Region, location – Peru. But we should capture hierarchical location: located in city of Trujillo, which is in La Libertad Region, which is in northern Peru. Could create separate triplets: location in Trujillo, location in La Libertad Region, location in Peru. Might be redundant but okay.\n\n\"Situated at the 8th block of the Pizarro street in the Historic Centre of Trujillo\" => location details: Plazuela El Recreo – situated at – 8th block of Pizarro street. Also \"in the Historic Centre of Trujillo\". So we can have relation \"located in\" with object \"8th block of Pizarro street\". Also \"located in\" with object \"Historic Centre of Trujillo\". Might need to treat \"8th block of Pizarro street\" as a location entity.\n\n\"In this square are held cultural shows\" => relation: Plazuela El Recreo – hosts – cultural shows. object_type: \"cultural show\" (maybe plural). Could be \"cultural event\". No qualifiers.\n\n\"and in March 2012 was the scenery of Trujero Book Festival.\" => The square was the scenery (venue) of Trujillo Book Festival in March 2012. So triplet: Plazuela El Recreo – venue for – Trujillo Book Festival. Qualifier: point in time = March 2012.\n\n\"The square has high ficus around.\" => Plazuela El Recreo – has vegetation – high ficus. Could use relation \"has plant\" or \"has flora\". We'll use \"has plant\". object_type: \"ficus\". Could add qualifier \"height\" but not given.\n\n\"This square has been declared Monumental Heritage of the Nation by the National Institute of Culture of Peru.\" => Triplet: Plazuela El Recreo – heritage designation – Monumental Heritage of the Nation. Qualifier: declared by = National Institute of Culture of Peru. Also maybe point in time not given.\n\nWe need subject_type and object_type for each.\n\nDefine types:\n\n- Plazuela El Recreo: \"public square\" or \"square\". subject_type: \"place\" or \"square\". Use \"square\".\n\n- Trujillo: \"city\". object_type: \"city\".\n\n- La Libertad Region: \"region\". object_type: \"region\".\n\n- Peru: \"country\".\n\n- 8th block of Pizarro street: maybe \"street block\". object_type: \"location\".\n\n- Historic Centre of Trujillo: \"historic district\". object_type: \"district\".\n\n- cultural shows: \"cultural event\". object_type: \"event\".\n\n- Trujillo Book Festival: \"festival\". object_type: \"festival\".\n\n- high ficus: \"plant\". object_type: \"plant\".\n\n- Monumental Heritage of the Nation: \"heritage designation\". object_type: \"heritage status\".\n\n- National Institute of Culture of Peru: \"government agency\". object_type: \"organization\".\n\nNow produce JSON list.\n\nEach triplet includes qualifiers list.\n\nLet's enumerate:\n\n1. Plazuela El Recreo – instance of – square. qualifiers [].\n\n2. Plazuela El Recreo – located in – Trujillo. qualifiers [].\n\n3. Plazuela El Recreo – located in – La Libertad Region. qualifiers [].\n\n4. Plazuela El Recreo – located in – Peru. qualifiers [].\n\n5. Plazuela El Recreo – situated at – 8th block of Pizarro street. qualifiers [].\n\n6. Plazuela El Recreo – situated in – Historic Centre of Trujillo. qualifiers [].\n\n7. Plazuela El Recreo – hosts – cultural shows. qualifiers [].\n\n8. Plazuela El Recreo – venue for – Trujillo Book Festival. qualifiers [{relation:\"point in time\", object:\"March 2012\"}].\n\n9. Plazuela El Recreo – has plant – high ficus. qualifiers [].\n\n10. Plazuela El Recreo – heritage designation – Monumental Heritage of the Nation. qualifiers [{relation:\"declared by\", object:\"National Institute of Culture of Peru\"}].\n\nCheck if \"declared by\" is a qualifier relation; yes qualifiers can be any relation.\n\nMake sure each dictionary includes \"subject_type\" and \"object_type\".\n\nDefine types:\n\n- square: \"square\" (maybe \"place\").\n\n- city: \"city\".\n\n- region: \"region\".\n\n- country: \"country\".\n\n- location: \"location\".\n\n- district: \"district\".\n\n- cultural show: \"cultural event\".\n\n- festival: \"festival\".\n\n- plant: \"plant\".\n\n- heritage designation: \"heritage status\".\n\n- organization: \"organization\".\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1694,
+      "total_tokens": 3550,
+      "completion_tokens": 1856,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"instance of\",\n            \"object\": \"square\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"located in\",\n            \"object\": \"Trujillo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"located in\",\n            \"object\": \"La Libertad Region\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"located in\",\n            \"object\": \"Peru\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"situated at\",\n            \"object\": \"8th block of Pizarro street\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"situated in\",\n            \"object\": \"Historic Centre of Trujillo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"district\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"hosts\",\n            \"object\": \"cultural shows\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"cultural event\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"venue for\",\n            \"object\": \"Trujillo Book Festival\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"March 2012\"\n                }\n            ],\n            \"subject_type\": \"square\",\n            \"object_type\": \"festival\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"has plant\",\n            \"object\": \"high ficus\",\n            \"qualifiers\": [],\n            \"subject_type\": \"square\",\n            \"object_type\": \"plant\"\n        },\n        {\n            \"subject\": \"Plazuela El Recreo\",\n            \"relation\": \"heritage designation\",\n            \"object\": \"Monumental Heritage of the Nation\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"declared by\",\n                    \"object\": \"National Institute of Culture of Peru\"\n                }\n            ],\n            \"subject_type\": \"square\",\n            \"object_type\": \"heritage status\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "instance of",
+        "object": "square",
+        "qualifiers": [],
+        "subject_type": "square",
+        "object_type": "concept"
+      },
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "located in",
+        "object": "Trujillo",
+        "qualifiers": [],
+        "subject_type": "square",
+        "object_type": "city"
+      },
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "located in",
+        "object": "La Libertad Region",
+        "qualifiers": [],
+        "subject_type": "square",
+        "object_type": "region"
+      },
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "located in",
+        "object": "Peru",
+        "qualifiers": [],
+        "subject_type": "square",
+        "object_type": "country"
+      },
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "situated at",
+        "object": "8th block of Pizarro street",
+        "qualifiers": [],
+        "subject_type": "square",
+        "object_type": "location"
+      },
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "situated in",
+        "object": "Historic Centre of Trujillo",
+        "qualifiers": [],
+        "subject_type": "square",
+        "object_type": "district"
+      },
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "hosts",
+        "object": "cultural shows",
+        "qualifiers": [],
+        "subject_type": "square",
+        "object_type": "cultural event"
+      },
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "venue for",
+        "object": "Trujillo Book Festival",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "March 2012"
+          }
+        ],
+        "subject_type": "square",
+        "object_type": "festival"
+      },
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "has plant",
+        "object": "high ficus",
+        "qualifiers": [],
+        "subject_type": "square",
+        "object_type": "plant"
+      },
+      {
+        "subject": "Plazuela El Recreo",
+        "relation": "heritage designation",
+        "object": "Monumental Heritage of the Nation",
+        "qualifiers": [
+          {
+            "relation": "declared by",
+            "object": "National Institute of Culture of Peru"
+          }
+        ],
+        "subject_type": "square",
+        "object_type": "heritage status"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1694,
+    "total_tokens": 3550,
+    "completion_tokens": 1856,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 810,
+    "output_tokens_est": 717
+  },
+  "attempts": 1,
+  "latency_s": 22.764651689001766,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:23:50.586562+00:00",
+  "cache_key": "90f97250409dc1c7e6796c5c4d9faf91"
+}

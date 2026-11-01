@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "84d0ce93d90f31e8",
+    "input_hash": "1ef5326409433f0337e713d2a82ef34e88e46014834cc0c31275864f783e6c5a",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-4dfd2c1b17a0b6f6ae371e95e118b13e",
+    "object": "chat.completion",
+    "created": 1791504671,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"point in time\",\n            \"object\": \"August 2, 1776\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"venue\",\n            \"object\": \"Independence Hall\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"location\",\n            \"object\": \"Philadelphia, Pennsylvania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"coordinate location\",\n            \"object\": \"39°56′56\\\"N 75°09′00\\\"W\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"coordinates\"\n        },\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"participant\",\n            \"object\": \"Delegates to the Second Continental Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"John Trumbull's painting Declaration of Independence\",\n            \"relation\": \"depicts\",\n            \"object\": \"five-man drafting committee of the Declaration of Independence\",\n            \"qualifiers\": [],\n            \"subject_type\": \"artwork\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"John Trumbull's painting Declaration of Independence\",\n            \"relation\": \"depicts\",\n            \"object\": \"Second Continental Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"artwork\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"five-man drafting committee of the Declaration of Independence\",\n            \"relation\": \"presented work to\",\n            \"object\": \"Second Continental Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text. The text describes the signing of the United States Declaration of Independence, includes painting, date, venue, location, coordinates, participants.\n\nWe need to produce triplets with subject, relation, object, qualifiers, subject_type, object_type.\n\nIdentify entities:\n\n- \"Signing of the United States Declaration of Independence\" (event)\n- \"United States Declaration of Independence\" (document)\n- \"John Trumbull's painting Declaration of Independence\" (painting)\n- \"five-man drafting committee of the Declaration of Independence\" (group)\n- \"Second Continental Congress\" (body)\n- Date: August 2, 1776\n- Venue: Independence Hall\n- Location: Philadelphia, Pennsylvania\n- Coordinates: 39°56′56\"N 75°09′00\"W (or decimal)\n- Participants: Delegates to the Second Continental Congress\n\nWe need to produce triplets:\n\n1. (Signing of the United States Declaration of Independence, instance of, event) maybe not needed but could.\n\nBut we need explicit facts.\n\nFrom text: \"Signing of the United States Declaration of Independence\" is the title.\n\nWe have \"Date August 2, 1776\" => relation \"point in time\" or \"date\". For events, use \"point in time\". So triplet: subject = Signing of the United States Declaration of Independence, relation = point in time, object = 2 August 1776 (or \"August 2, 1776\").\n\nQualifiers empty.\n\nsubject_type = \"event\", object_type = \"date\".\n\n2. Venue: Independence Hall. So (Signing..., venue, Independence Hall). subject_type event, object_type building.\n\n3. Location: Philadelphia, Pennsylvania. Could be \"location\". So (Signing..., location, Philadelphia, Pennsylvania). object_type = \"city\".\n\n4. Coordinates: maybe relation \"coordinate location\". So (Signing..., coordinate location, 39°56′56\"N 75°09′00\"W). object_type = \"coordinates\". Could also split as latitude and longitude but okay.\n\n5. Participants: Delegates to the Second Continental Congress. So (Signing..., participant, Delegates to the Second Continental Congress). object_type = \"group of people\" maybe \"human group\". Use \"participant\".\n\n6. The painting: \"John Trumbull's painting Declaration of Independence\" depicts the five-man drafting committee presenting their work to the Second Continental Congress. So we can have (John Trumbull's painting Declaration of Independence, depicts, five-man drafting committee of the Declaration of Independence). Also (John Trumbull's painting Declaration of Independence, depicts, Second Continental Congress) maybe but the phrase: \"depicting the five - man drafting committee of the Declaration of Independence presenting their work to the Second Continental Congress\". So the painting depicts the committee presenting their work to the Congress. Could capture two relations: \"depicts\" object = five-man drafting committee of the Declaration of Independence; also maybe \"depicts\" object = Second Continental Congress. But maybe better: (John Trumbull's painting Declaration of Independence, depicts, five-man drafting committee of the Declaration of Independence). And also (John Trumbull's painting Declaration of Independence, depicts, Second Continental Congress). Or we could have a more complex relation \"subject of depiction\". We'll include both.\n\nAlso we could have (five-man drafting committee of the Declaration of Independence, presented work to, Second Continental Congress). That's a relation \"presented work to\". But not sure if we have a specific predicate; maybe \"presented work to\". Use \"presented work to\". object_type = \"organization\". subject_type = \"group\". Provide qualifiers maybe none.\n\nAlso we have \"Signing of the United States Declaration of Independence\" is an event of signing the document. Could have relation \"signing of\" but maybe not needed.\n\nWe also have \"United States Declaration of Independence\" as document. Could have (Signing..., signatory of, United States Declaration of Independence) but not explicit.\n\nBetter to stick to explicit statements.\n\nLet's list triplets:\n\n1. Signing of the United States Declaration of Independence — point in time — August 2, 1776\n2. Signing of the United States Declaration of Independence — venue — Independence Hall\n3. Signing of the United States Declaration of Independence — location — Philadelphia, Pennsylvania\n4. Signing of the United States Declaration of Independence — coordinate location — 39°56′56\"N 75°09′00\"W\n5. Signing of the United States Declaration of Independence — participant — Delegates to the Second Continental Congress\n6. John Trumbull's painting Declaration of Independence — depicts — five-man drafting committee of the Declaration of Independence\n7. John Trumbull's painting Declaration of Independence — depicts — Second Continental Congress\n8. five-man drafting committee of the Declaration of Independence — presented work to — Second Continental Congress\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- Signing of the United States Declaration of Independence: event\n- point in time: date (object_type date)\n- venue: building (Independence Hall) => object_type building\n- location: city (Philadelphia, Pennsylvania) => object_type city\n- coordinate location: coordinates => object_type coordinates\n- participant: group of people (Delegates to the Second Continental Congress) => object_type group\n- John Trumbull's painting Declaration of Independence: artwork (painting) => subject_type artwork\n- depicts: object_type group or organization; for committee: group; for Congress: organization (legislative body)\n- five-man drafting committee of the Declaration of Independence: group\n- Second Continental Congress: organization (legislative body)\n- presented work to: relation; object_type organization\n\nNow qualifiers: none.\n\nMake JSON list.\n\nCheck naming: Use exact strings as in text for entities.\n\n- \"Signing of the United States Declaration of Independence\"\n- \"August 2, 1776\"\n- \"Independence Hall\"\n- \"Philadelphia, Pennsylvania\"\n- \"39°56′56\\\"N 75°09′00\\\"W\" maybe include spaces. Use same as text: \"39 ° 56 ′ 56 ''N 75 ° 09 ′ 00'' W\". But better normalized: \"39°56′56\\\"N 75°09′00\\\"W\". We'll use \"39°56′56\\\"N 75°09′00\\\"W\".\n\n- \"Delegates to the Second Continental Congress\"\n- \"John Trumbull's painting Declaration of Independence\"\n- \"five-man drafting committee of the Declaration of Independence\"\n- \"Second Continental Congress\"\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1771,
+      "total_tokens": 3646,
+      "completion_tokens": 1875,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"point in time\",\n            \"object\": \"August 2, 1776\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"venue\",\n            \"object\": \"Independence Hall\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"building\"\n        },\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"location\",\n            \"object\": \"Philadelphia, Pennsylvania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"coordinate location\",\n            \"object\": \"39°56′56\\\"N 75°09′00\\\"W\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"coordinates\"\n        },\n        {\n            \"subject\": \"Signing of the United States Declaration of Independence\",\n            \"relation\": \"participant\",\n            \"object\": \"Delegates to the Second Continental Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"event\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"John Trumbull's painting Declaration of Independence\",\n            \"relation\": \"depicts\",\n            \"object\": \"five-man drafting committee of the Declaration of Independence\",\n            \"qualifiers\": [],\n            \"subject_type\": \"artwork\",\n            \"object_type\": \"group of people\"\n        },\n        {\n            \"subject\": \"John Trumbull's painting Declaration of Independence\",\n            \"relation\": \"depicts\",\n            \"object\": \"Second Continental Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"artwork\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"five-man drafting committee of the Declaration of Independence\",\n            \"relation\": \"presented work to\",\n            \"object\": \"Second Continental Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Signing of the United States Declaration of Independence",
+        "relation": "point in time",
+        "object": "August 2, 1776",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "date"
+      },
+      {
+        "subject": "Signing of the United States Declaration of Independence",
+        "relation": "venue",
+        "object": "Independence Hall",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "building"
+      },
+      {
+        "subject": "Signing of the United States Declaration of Independence",
+        "relation": "location",
+        "object": "Philadelphia, Pennsylvania",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "city"
+      },
+      {
+        "subject": "Signing of the United States Declaration of Independence",
+        "relation": "coordinate location",
+        "object": "39°56′56\"N 75°09′00\"W",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "coordinates"
+      },
+      {
+        "subject": "Signing of the United States Declaration of Independence",
+        "relation": "participant",
+        "object": "Delegates to the Second Continental Congress",
+        "qualifiers": [],
+        "subject_type": "event",
+        "object_type": "group of people"
+      },
+      {
+        "subject": "John Trumbull's painting Declaration of Independence",
+        "relation": "depicts",
+        "object": "five-man drafting committee of the Declaration of Independence",
+        "qualifiers": [],
+        "subject_type": "artwork",
+        "object_type": "group of people"
+      },
+      {
+        "subject": "John Trumbull's painting Declaration of Independence",
+        "relation": "depicts",
+        "object": "Second Continental Congress",
+        "qualifiers": [],
+        "subject_type": "artwork",
+        "object_type": "organization"
+      },
+      {
+        "subject": "five-man drafting committee of the Declaration of Independence",
+        "relation": "presented work to",
+        "object": "Second Continental Congress",
+        "qualifiers": [],
+        "subject_type": "group of people",
+        "object_type": "organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1771,
+    "total_tokens": 3646,
+    "completion_tokens": 1875,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 714,
+    "output_tokens_est": 621
+  },
+  "attempts": 1,
+  "latency_s": 22.97443391399429,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:11:34.608622+00:00",
+  "cache_key": "6a1f85f6f9f7e1e189db182bf401f5d9"
+}

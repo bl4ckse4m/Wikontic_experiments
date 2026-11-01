@@ -1,0 +1,145 @@
+{
+  "task": {
+    "input_id": "1437467e9d7c8f08",
+    "input_hash": "62e61dd3af955ea264aac5bd0bdbe4580a2769bb0750dea536f5dd638f8076bd",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a58ae1d16dcbd0cd15d5b44b6f397d9e",
+    "object": "chat.completion",
+    "created": 1791548043,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"instance of\",\n            \"object\": \"rural municipality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division type\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Manitoba\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"date of incorporation\",\n            \"object\": \"22 December 1883\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"date of dissolution\",\n            \"object\": \"1 January 2015\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"merged with\",\n            \"object\": \"RM of Strathcona\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"resulting entity\",\n                    \"object\": \"Rural Municipality of Prairie Lakes\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"successor\",\n            \"object\": \"Rural Municipality of Prairie Lakes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"RM of Strathcona\",\n            \"relation\": \"successor\",\n            \"object\": \"Rural Municipality of Prairie Lakes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nEntities: Rural Municipality of Riverside (RM of Riverside). Also Manitoba (province). Also RM of Strathcona. Also Rural Municipality of Prairie Lakes.\n\nFacts:\n\n- Rural Municipality of Riverside is a former rural municipality in Manitoba. Relation: \"instance of\" maybe \"rural municipality\". Could use \"subclass of\"? But likely \"instance of\" relation: \"type of administrative territorial entity\". Use relation \"instance of\" or \"type\". In examples they used occupation etc. We need to pick appropriate relation: maybe \"administrative territorial entity\" but we can use \"type of administrative division\". Let's use \"instance of\" with object \"rural municipality\". Subject_type: \"administrative division\". object_type: \"administrative division type\".\n\n- It was originally incorporated as a rural municipality on December 22, 1883. So relation \"date of incorporation\" perhaps. Use relation \"date of incorporation\". object date. qualifiers none. subject_type: administrative division; object_type: date.\n\n- It ceased on January 1, 2015 as a result of its provincially mandated amalgamation with the RM of Strathcona to form the Rural Municipality of Prairie Lakes.\n\nWe have multiple facts:\n\n1) Rural Municipality of Riverside ceased on Jan 1 2015. Relation: \"dissolved\". object date. qualifiers maybe \"point in time\". But we can just have relation \"date of dissolution\". Use date.\n\n2) It amalgamated with RM of Strathcona to form Rural Municipality of Prairie Lakes. So relation \"amalgamated with\" maybe. Could split into two triplets: (Rural Municipality of Riverside, amalgamated with, RM of Strathcona) with qualifier \"resulting entity\": Rural Municipality of Prairie Lakes. Or separate: (Rural Municipality of Riverside, successor, Rural Municipality of Prairie Lakes). Also (RM of Strathcona, successor, Rural Municipality of Prairie Lakes). But we need to reflect text: \"as a result of ... amalgamation with the RM of Strathcona to form the Rural Municipality of Prairie Lakes.\"\n\nSo we can have:\n\n- (Rural Municipality of Riverside, amalgamation partner, RM of Strathcona) with qualifier \"resulting entity\" = Rural Municipality of Prairie Lakes.\n\nBut need relation names typical. Could use \"merged with\" or \"amalgamated with\". Let's use \"merged with\". object = RM of Strathcona. qualifiers: {\"relation\": \"resulting entity\", \"object\": \"Rural Municipality of Prairie Lakes\"}.\n\nAlso we can have (Rural Municipality of Riverside, successor, Rural Municipality of Prairie Lakes) maybe.\n\nBut ensure not duplicate.\n\nAlso note \"provincially mandated\" but that's an adjective. Could add qualifier \"mandated by\" = Manitoba? Probably not needed.\n\nAlso province location: (Rural Municipality of Riverside, located in administrative territorial entity, Manitoba). Use relation \"located in the administrative territorial entity\". object Manitoba. qualifiers none.\n\nSubject_type: \"administrative division\". object_type: \"province\" for Manitoba.\n\nAlso need type for RM of Strathcona: also administrative division. For Prairie Lakes same.\n\nDefine subject_type and object_type accordingly.\n\nNow produce JSON with list.\n\nLet's craft triplets:\n\n1) subject: Rural Municipality of Riverside; relation: \"instance of\"; object: \"rural municipality\"; qualifiers: []; subject_type: \"administrative division\"; object_type: \"administrative division type\".\n\n2) subject: Rural Municipality of Riverside; relation: \"located in the administrative territorial entity\"; object: \"Manitoba\"; qualifiers []; subject_type: \"administrative division\"; object_type: \"province\".\n\n3) subject: Rural Municipality of Riverside; relation: \"date of incorporation\"; object: \"22 December 1883\"; qualifiers []; subject_type: \"administrative division\"; object_type: \"date\".\n\n4) subject: Rural Municipality of Riverside; relation: \"date of dissolution\"; object: \"1 January 2015\"; qualifiers []; subject_type: \"administrative division\"; object_type: \"date\".\n\n5) subject: Rural Municipality of Riverside; relation: \"merged with\"; object: \"RM of Strathcona\"; qualifiers [{\"relation\":\"resulting entity\",\"object\":\"Rural Municipality of Prairie Lakes\"}]; subject_type: \"administrative division\"; object_type: \"administrative division\".\n\n6) subject: Rural Municipality of Riverside; relation: \"successor\"; object: \"Rural Municipality of Prairie Lakes\"; qualifiers []; subject_type: \"administrative division\"; object_type: \"administrative division\".\n\nPotential also add for RM of Strathcona successor.\n\n7) subject: RM of Strathcona; relation: \"successor\"; object: \"Rural Municipality of Prairie Lakes\"; qualifiers []; subject_type: \"administrative division\"; object_type: \"administrative division\".\n\nBut is RM of Strathcona mentioned as \"the RM of Strathcona\". Yes.\n\nAdd.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1664,
+      "total_tokens": 3143,
+      "completion_tokens": 1479,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"instance of\",\n            \"object\": \"rural municipality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division type\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Manitoba\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"province\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"date of incorporation\",\n            \"object\": \"22 December 1883\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"date of dissolution\",\n            \"object\": \"1 January 2015\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"merged with\",\n            \"object\": \"RM of Strathcona\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"resulting entity\",\n                    \"object\": \"Rural Municipality of Prairie Lakes\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Rural Municipality of Riverside\",\n            \"relation\": \"successor\",\n            \"object\": \"Rural Municipality of Prairie Lakes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"RM of Strathcona\",\n            \"relation\": \"successor\",\n            \"object\": \"Rural Municipality of Prairie Lakes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Rural Municipality of Riverside",
+        "relation": "instance of",
+        "object": "rural municipality",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "administrative division type"
+      },
+      {
+        "subject": "Rural Municipality of Riverside",
+        "relation": "located in the administrative territorial entity",
+        "object": "Manitoba",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "province"
+      },
+      {
+        "subject": "Rural Municipality of Riverside",
+        "relation": "date of incorporation",
+        "object": "22 December 1883",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "date"
+      },
+      {
+        "subject": "Rural Municipality of Riverside",
+        "relation": "date of dissolution",
+        "object": "1 January 2015",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "date"
+      },
+      {
+        "subject": "Rural Municipality of Riverside",
+        "relation": "merged with",
+        "object": "RM of Strathcona",
+        "qualifiers": [
+          {
+            "relation": "resulting entity",
+            "object": "Rural Municipality of Prairie Lakes"
+          }
+        ],
+        "subject_type": "administrative division",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Rural Municipality of Riverside",
+        "relation": "successor",
+        "object": "Rural Municipality of Prairie Lakes",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "RM of Strathcona",
+        "relation": "successor",
+        "object": "Rural Municipality of Prairie Lakes",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "administrative division"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1664,
+    "total_tokens": 3143,
+    "completion_tokens": 1479,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 667,
+    "output_tokens_est": 574
+  },
+  "attempts": 1,
+  "latency_s": 18.032430400999147,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:14:22.249225+00:00",
+  "cache_key": "f6d23896c7021d03983c60ddbe94d571"
+}

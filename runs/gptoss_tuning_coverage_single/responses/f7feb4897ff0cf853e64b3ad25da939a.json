@@ -1,0 +1,122 @@
+{
+  "task": {
+    "input_id": "190f65524b944209",
+    "input_hash": "d3266a3ff75b87c8ae9ba3751a2220bf072beb32b86edf6b78ce5658afbcc7f9",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-f22880f1a2018daf7b7a16f0bac58f1a",
+    "object": "chat.completion",
+    "created": 1791501347,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Beyoncé\",\n            \"relation\": \"child\",\n            \"object\": \"Blue Ivy Carter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"7 January 2012\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Lenox Hill Hospital\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Beyoncé\",\n            \"relation\": \"performed at\",\n            \"object\": \"Ovation Hall\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"four nights\"\n                },\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"resort's opening\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Revel Atlantic City\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"venue\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Beyoncé\n\nOn January 7, 2012, Beyoncé gave birth to her first child, a daughter, Blue Ivy Carter, at Lenov Hill Hospital in New York. Five months later, she performed for four nights at Revel Atlantic City's Ovation Hall to celebrate the resort's opening, her first performances since giving birth to Blue Ivy.\"\n\nWe need to parse facts:\n\n1. Beyoncé gave birth to her first child, a daughter, Blue Ivy Carter, on January 7, 2012, at Lenox Hill Hospital in New York.\n\nSo triplet: subject Beyoncé, relation \"child\", object \"Blue Ivy Carter\". Qualifiers: point in time 7 January 2012, place Lenox Hill Hospital (maybe location), maybe \"sex\" female? Not needed. Also \"first child\" maybe qualifier \"ordinal\" 1? Not required.\n\nWe also need \"date of birth\" for Blue Ivy Carter? Not given. Only birth date of child.\n\nWe also have \"Blue Ivy Carter\" is a daughter (gender). Could have relation \"sex\" female, but not explicit \"daughter\" indicates gender. Might include relation \"sex\" object \"female\". But not required.\n\nWe also have \"Beyoncé performed for four nights at Revel Atlantic City's Ovation Hall\". So triplet: subject Beyoncé, relation \"performance\", object \"Revel Atlantic City's Ovation Hall\"? Actually performance location. Could be relation \"performed at\" with object \"Ovation Hall\". Also qualifiers: duration \"four nights\", point in time \"five months later\" relative to previous date (but we can give date? Not explicit). Could also have \"event\" \"performances\" with qualifiers.\n\nBetter: create triplet: (Beyoncé, performed at, Ovation Hall). Qualifiers: {\"relation\":\"duration\",\"object\":\"four nights\"}; {\"relation\":\"point in time\",\"object\":\"~May 2012\"}? Not explicit. \"Five months later\" after Jan 7 2012 => around June 7 2012. But not explicit date, so we may not create point in time qualifier unless we compute. Probably not; we should not infer date. So we can add qualifier \"relative time\" maybe not allowed. So maybe just include duration.\n\nAlso \"to celebrate the resort's opening\" is purpose. Could be qualifier \"purpose\" with object \"resort's opening\". Not sure relation name. Could use \"purpose\". Might be okay.\n\nAlso \"her first performances since giving birth to Blue Ivy.\" That's a note about being first performances after birth. Could be qualifier \"condition\" \"first performances since giving birth to Blue Ivy\". Might be too complex.\n\nSimplify: produce two main triplets.\n\nTriplet 1:\n\nsubject: Beyoncé\nrelation: child\nobject: Blue Ivy Carter\nqualifiers: point in time 7 January 2012; location Lenox Hill Hospital; location New York? Could combine as \"Lenox Hill Hospital, New York\". Use separate qualifiers: place (Lenox Hill Hospital) and maybe \"city\" New York. Use relation \"place of birth\"? Actually it's location of birth event. Could use qualifier \"place\" with object \"Lenox Hill Hospital\". Also maybe \"city\" \"New York\". We'll include both.\n\nsubject_type: human\nobject_type: human (child)\n\nTriplet 2:\n\nsubject: Beyoncé\nrelation: performed at\nobject: Ovation Hall\nqualifiers: duration \"four nights\"; purpose \"celebrate the resort's opening\"; location \"Revel Atlantic City\" maybe as place qualifier; also \"event type\" maybe \"concert\". We'll include location qualifier \"Revel Atlantic City\". Also \"duration\" qualifier.\n\nsubject_type: human\nobject_type: venue\n\nNeed to ensure relation names are Wikidata-like: \"child\" is okay (P40). \"performed at\" maybe \"performer\" but relation \"performed at\" (P1344?) Actually \"performer\" is for event. Could use \"performance location\". We'll use \"performed at\". Acceptable.\n\nNow produce JSON.\n\nCheck qualifiers format: list of dicts with relation and object.\n\nAdd \"point in time\" qualifier for birth date.\n\nAdd \"place\" qualifier for Lenox Hill Hospital.\n\nAdd \"city\" qualifier for New York? Might be redundant. Could combine as \"Lenox Hill Hospital in New York\". We'll just have place \"Lenox Hill Hospital\". That's enough.\n\nSecond triplet qualifiers: \"duration\" \"four nights\". \"purpose\" \"resort's opening\". \"location\" \"Revel Atlantic City\". Use relation names: \"duration\", \"purpose\", \"location\". Accept.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1655,
+      "total_tokens": 2853,
+      "completion_tokens": 1198,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Beyoncé\",\n            \"relation\": \"child\",\n            \"object\": \"Blue Ivy Carter\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"7 January 2012\"\n                },\n                {\n                    \"relation\": \"place\",\n                    \"object\": \"Lenox Hill Hospital\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Beyoncé\",\n            \"relation\": \"performed at\",\n            \"object\": \"Ovation Hall\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"four nights\"\n                },\n                {\n                    \"relation\": \"purpose\",\n                    \"object\": \"resort's opening\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Revel Atlantic City\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"venue\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Beyoncé",
+        "relation": "child",
+        "object": "Blue Ivy Carter",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "7 January 2012"
+          },
+          {
+            "relation": "place",
+            "object": "Lenox Hill Hospital"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Beyoncé",
+        "relation": "performed at",
+        "object": "Ovation Hall",
+        "qualifiers": [
+          {
+            "relation": "duration",
+            "object": "four nights"
+          },
+          {
+            "relation": "purpose",
+            "object": "resort's opening"
+          },
+          {
+            "relation": "location",
+            "object": "Revel Atlantic City"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "venue"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1655,
+    "total_tokens": 2853,
+    "completion_tokens": 1198,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 384,
+    "output_tokens_est": 291
+  },
+  "attempts": 1,
+  "latency_s": 15.004839601002459,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:16:02.963493+00:00",
+  "cache_key": "f7feb4897ff0cf853e64b3ad25da939a"
+}

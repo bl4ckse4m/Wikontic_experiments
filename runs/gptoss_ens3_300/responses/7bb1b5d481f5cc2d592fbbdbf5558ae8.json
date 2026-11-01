@@ -1,0 +1,173 @@
+{
+  "task": {
+    "input_id": "0292bb2953e1606f",
+    "input_hash": "4ea9c76ac423813380cfc8d474f65f95c1dc785a1bff2fa48b9b23a44cd03e6a",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-932cec9ed57f724241a7036104addfc6",
+    "object": "chat.completion",
+    "created": 1791542798,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"filming location\",\n            \"object\": \"Denham Studios\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"studio\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"filming location\",\n            \"object\": \"Northchurch Common\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Berkhamsted\"\n                },\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Hertfordshire\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"filming location\",\n            \"object\": \"Orkney\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Scotland\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"production end date\",\n            \"object\": \"24 December 1938\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"release date\",\n            \"object\": \"12 August 1939\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"U.K.\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"premiere location\",\n            \"object\": \"New York City\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"5 October 1939\"\n                },\n                {\n                    \"relation\": \"premiere type\",\n                    \"object\": \"American\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"general release date\",\n            \"object\": \"two days later\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time relative to\",\n                    \"object\": \"American premiere\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date offset\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"The Spy in Black\n\n\"The Spy in Black\" was filmed at Denham Studios, with location shooting at Northchurch Common in Berkhamsted, Hertfordshire and in Orkney, Scotland. The film wrapped production on 24 December 1938 and was released in the U.K. on 12 August 1939 – 22 days before the country again went to war with Germany. Its American premiere was held in New York City on 5 October of that year, and it went into general release two days later.\"\n\nWe need to identify entities: The Spy in Black (film), Denham Studios (studio), Northchurch Common (location), Berkhamsted (town), Hertfordshire (county), Orkney (region), Scotland (country), 24 December 1938 (date), U.K. (country), 12 August 1939 (date), Germany (country), American premiere (event maybe), New York City (city), 5 October (date) of that year (1939), general release (event) two days later (date: 7 October 1939? Actually two days after 5 Oct is 7 Oct 1939). However must be explicit: \"two days later\" refers to after the American premiere. So we can represent as qualifier \"point in time\" as \"two days later\" maybe not a specific date. Possibly we treat as a qualifier with object \"two days later\". But spec says qualifiers object should be entity or concept; \"two days later\" is a time offset. Could be accepted.\n\nNow create triplets.\n\n1. (\"The Spy in Black\", \"film location\", \"Denham Studios\") – but filming at Denham Studios (studio). Relation could be \"filming location\". Use \"filming location\". subject_type film, object_type studio.\n\n2. (\"The Spy in Black\", \"filming location\", \"Northchurch Common\") – location shooting at Northchurch Common. object_type location (maybe \"park\" but just \"location\").\n\nBut also \"Northchurch Common in Berkhamsted, Hertfordshire\". Could add qualifiers for administrative divisions? Might add qualifiers: {\"relation\":\"located in\", \"object\":\"Berkhamsted\"} and then another qualifier \"located in\" \"Hertfordshire\". However qualifiers are attached to main triplet. Could do that.\n\nSimilarly filming location \"Orkney, Scotland\". So triplet with object \"Orkney\". qualifiers: located in Scotland.\n\n3. (\"The Spy in Black\", \"production end date\", \"24 December 1938\") – maybe relation \"wrapped production on\" -> \"production end date\". Use \"production end date\". qualifiers none.\n\n4. (\"The Spy in Black\", \"release date\", \"12 August 1939\") – with qualifier \"point in time\" maybe as part of release date? The relation \"release date\" is fine.\n\nAlso include release country \"U.K.\" maybe separate: (\"The Spy in Black\", \"country of release\", \"U.K.\") but text says released in the U.K. on 12 Aug 1939. Could combine with qualifiers: relation \"release date\" object \"12 August 1939\", qualifier \"country\" \"U.K.\" but spec says qualifiers are relation-object pairs attached to triplet. So we can have qualifier {\"relation\":\"country\", \"object\":\"U.K.\"}. Good.\n\n5. Another event: \"American premiere\" held in New York City on 5 October 1939. Triplet: (\"The Spy in Black\", \"premiere\", \"American premiere\")? Maybe better: (\"The Spy in Black\", \"premiere location\", \"New York City\") with qualifier point in time \"5 October 1939\". Or separate: (\"The Spy in Black\", \"American premiere date\", \"5 October 1939\") and location maybe separate.\n\nLet's make: (\"The Spy in Black\", \"premiere location\", \"New York City\") with qualifier point in time \"5 October 1939\". Also qualifier \"premiere type\" \"American\". But maybe just \"premiere location\" and qualifier \"point in time\". That's okay.\n\n6. General release two days later. So: (\"The Spy in Black\", \"general release date\", \"two days later\") with qualifier \"point in time relative to\" \"American premiere\". But spec maybe \"general release\" as event. Could produce: (\"The Spy in Black\", \"general release date\", \"two days later\") qualifier {\"relation\":\"point in time relative to\", \"object\":\"American premiere\"}; but not sure about relation names. Could just have qualifier \"point in time\" \"two days later\". That's fine.\n\n7. Also \"country again went to war with Germany\" is about U.K. but not about film. Not needed.\n\nNow need subject_type and object_type.\n\nDefine types: film (maybe \"film\"), studio, location, date, country, city, etc.\n\nLet's list triplets:\n\nTriplet1:\nsubject: \"The Spy in Black\"\nrelation: \"filming location\"\nobject: \"Denham Studios\"\nqualifiers: []\nsubject_type: \"film\"\nobject_type: \"studio\"\n\nTriplet2:\nsubject: \"The Spy in Black\"\nrelation: \"filming location\"\nobject: \"Northchurch Common\"\nqualifiers: [{\"relation\":\"located in\",\"object\":\"Berkhamsted\"},{\"relation\":\"located in\",\"object\":\"Hertfordshire\"}]\nsubject_type: \"film\"\nobject_type: \"location\"\n\nTriplet3:\nsubject: \"The Spy in Black\"\nrelation: \"filming location\"\nobject: \"Orkney\"\nqualifiers: [{\"relation\":\"located in\",\"object\":\"Scotland\"}]\nsubject_type: \"film\"\nobject_type: \"region\"\n\nTriplet4:\nsubject: \"The Spy in Black\"\nrelation: \"production end date\"\nobject: \"24 December 1938\"\nqualifiers: []\nsubject_type: \"film\"\nobject_type: \"date\"\n\nTriplet5:\nsubject: \"The Spy in Black\"\nrelation: \"release date\"\nobject: \"12 August 1939\"\nqualifiers: [{\"relation\":\"country\",\"object\":\"U.K.\"}]\nsubject_type: \"film\"\nobject_type: \"date\"\n\nTriplet6:\nsubject: \"The Spy in Black\"\nrelation: \"premiere location\"\nobject: \"New York City\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"5 October 1939\"},{\"relation\":\"premiere type\",\"object\":\"American\"}]\nsubject_type: \"film\"\nobject_type: \"city\"\n\nTriplet7:\nsubject: \"The Spy in Black\"\nrelation: \"general release date\"\nobject: \"two days later\"\nqualifiers: [{\"relation\":\"point in time relative to\",\"object\":\"American premiere\"}]\nsubject_type: \"film\"\nobject_type: \"date offset\"\n\nNeed to ensure relation names are plausible Wikidata style: \"filming location\" (P915?), \"production end date\" maybe \"production end date\". \"release date\" is fine. \"premiere location\" maybe \"premiere location\". \"general release date\". Could be okay.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1691,
+      "total_tokens": 3720,
+      "completion_tokens": 2029,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"filming location\",\n            \"object\": \"Denham Studios\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"studio\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"filming location\",\n            \"object\": \"Northchurch Common\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Berkhamsted\"\n                },\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Hertfordshire\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"filming location\",\n            \"object\": \"Orkney\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Scotland\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"production end date\",\n            \"object\": \"24 December 1938\",\n            \"qualifiers\": [],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"release date\",\n            \"object\": \"12 August 1939\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"U.K.\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"premiere location\",\n            \"object\": \"New York City\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"5 October 1939\"\n                },\n                {\n                    \"relation\": \"premiere type\",\n                    \"object\": \"American\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"The Spy in Black\",\n            \"relation\": \"general release date\",\n            \"object\": \"two days later\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time relative to\",\n                    \"object\": \"American premiere\"\n                }\n            ],\n            \"subject_type\": \"film\",\n            \"object_type\": \"date offset\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "The Spy in Black",
+        "relation": "filming location",
+        "object": "Denham Studios",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "studio"
+      },
+      {
+        "subject": "The Spy in Black",
+        "relation": "filming location",
+        "object": "Northchurch Common",
+        "qualifiers": [
+          {
+            "relation": "located in",
+            "object": "Berkhamsted"
+          },
+          {
+            "relation": "located in",
+            "object": "Hertfordshire"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "location"
+      },
+      {
+        "subject": "The Spy in Black",
+        "relation": "filming location",
+        "object": "Orkney",
+        "qualifiers": [
+          {
+            "relation": "located in",
+            "object": "Scotland"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "region"
+      },
+      {
+        "subject": "The Spy in Black",
+        "relation": "production end date",
+        "object": "24 December 1938",
+        "qualifiers": [],
+        "subject_type": "film",
+        "object_type": "date"
+      },
+      {
+        "subject": "The Spy in Black",
+        "relation": "release date",
+        "object": "12 August 1939",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "U.K."
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "date"
+      },
+      {
+        "subject": "The Spy in Black",
+        "relation": "premiere location",
+        "object": "New York City",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "5 October 1939"
+          },
+          {
+            "relation": "premiere type",
+            "object": "American"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "city"
+      },
+      {
+        "subject": "The Spy in Black",
+        "relation": "general release date",
+        "object": "two days later",
+        "qualifiers": [
+          {
+            "relation": "point in time relative to",
+            "object": "American premiere"
+          }
+        ],
+        "subject_type": "film",
+        "object_type": "date offset"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1691,
+    "total_tokens": 3720,
+    "completion_tokens": 2029,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 778,
+    "output_tokens_est": 685
+  },
+  "attempts": 1,
+  "latency_s": 23.290090994996717,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T10:47:01.631451+00:00",
+  "cache_key": "7bb1b5d481f5cc2d592fbbdbf5558ae8"
+}

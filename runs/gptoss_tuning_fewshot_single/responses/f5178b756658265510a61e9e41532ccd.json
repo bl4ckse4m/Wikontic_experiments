@@ -1,0 +1,175 @@
+{
+  "task": {
+    "input_id": "047e72e397797a2b",
+    "input_hash": "cab7d00212fb0113efc44d304f28ee57165f31f5a8d0401c5f259e44312f59b0",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-95fdc7f8eaf8fa4ce0ed038dc5d57e7a",
+    "object": "chat.completion",
+    "created": 1791514844,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"ASCII\",\n            \"relation\": \"first used commercially\",\n            \"object\": \"teleprinter code\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1963\"},\n                {\"relation\": \"bit length\", \"object\": \"seven-bit\"},\n                {\"relation\": \"used for\", \"object\": \"American Telephone & Telegraph's TWX network\"}\n            ],\n            \"subject_type\": \"code\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"TWX\",\n            \"relation\": \"owned by\",\n            \"object\": \"American Telephone & Telegraph\",\n            \"qualifiers\": [],\n            \"subject_type\": \"network\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"TWX\",\n            \"relation\": \"originally used\",\n            \"object\": \"ITA2\",\n            \"qualifiers\": [\n                {\"relation\": \"bit length\", \"object\": \"five-bit\"}\n            ],\n            \"subject_type\": \"network\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"ITA2\",\n            \"relation\": \"used by\",\n            \"object\": \"Telex\",\n            \"qualifiers\": [],\n            \"subject_type\": \"code\",\n            \"object_type\": \"system\"\n        },\n        {\n            \"subject\": \"Bob Bemer\",\n            \"relation\": \"introduced\",\n            \"object\": \"escape sequence\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"feature\"\n        },\n        {\n            \"subject\": \"Hugh McGregor Ross\",\n            \"relation\": \"helped to popularize\",\n            \"object\": \"ASCII\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"ASCII\",\n            \"relation\": \"originally called\",\n            \"object\": \"Bemer-Ross Code\",\n            \"qualifiers\": [\n                {\"relation\": \"place\", \"object\": \"Europe\"},\n                {\"relation\": \"attribution\", \"object\": \"Bob Bemer\"}\n            ],\n            \"subject_type\": \"code\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"Bob Bemer\",\n            \"relation\": \"title\",\n            \"object\": \"father of ASCII\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"title\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText:\n\n\"ASCII\n\nASCII itself was first used commercially during 1963 as a seven-bit teleprinter code for American Telephone & Telegraph's TWX (TeletypeWriter eXchange) network. TWX originally used the earlier five-bit ITA2, which was also used by the competing Telex teleprinter system. Bob Bemer introduced features such as the escape sequence. His British colleague Hugh McGregor Ross helped to popularize this work –  according to Bemer, \"so much so that the code that was to become ASCII was first called the Bemer-Ross Code in Europe\". Because of his extensive work on ASCII, Bemer has been called \"the father of ASCII.\"\"\n\nWe need to produce triplets.\n\nIdentify entities: ASCII (code), 1963 (date), seven-bit teleprinter code (maybe type), American Telephone & Telegraph (organisation), TWX (network), ITA2 (code), Telex (system), Bob Bemer (human), escape sequence (feature), Hugh McGregor Ross (human), Bemer-Ross Code (code name), Europe (place), father of ASCII (title).\n\nNow extract facts:\n\n1. ASCII - relation: \"first used commercially\" with point in time 1963, also as a seven-bit teleprinter code for AT&T's TWX network. So maybe two facts: \"ASCII\" \"first used commercially\" \"1963\" (qualifier point in time?). Actually relation \"first used commercially\" is an event. Could use relation \"first used commercially\" with object \"ASCII\"? Usually subject is ASCII, relation \"first used commercially\" object maybe \"teleprinter code\". But we need to capture that ASCII was first used commercially during 1963 as a seven-bit teleprinter code for AT&T's TWX network.\n\nWe could split:\n\n- Subject: ASCII, relation: \"first used commercially\", object: \"teleprinter code\", qualifiers: point in time 1963, \"bit length\" 7-bit, \"purpose\" maybe \"for American Telephone & Telegraph's TWX network\". But we need separate relations for each.\n\nBetter to produce separate triplets:\n\na) ASCII - relation: \"first used commercially\" - object: \"teleprinter code\" (or maybe \"ASCII\" is the code itself). Qualifiers: point in time 1963, \"bit length\" 7-bit, \"used for\" \"American Telephone & Telegraph's TWX network\". But we have limited relation set; we can use \"bit length\" as qualifier with relation \"unit\"? Not exactly. Could use qualifier \"unit\" with object \"seven-bit\". But \"unit\" expects measurement unit; maybe \"bit length\" is not standard. However we can use qualifier \"approximation\"? Not needed.\n\nSimplify: create triplet: {\"subject\":\"ASCII\",\"relation\":\"first used commercially\",\"object\":\"teleprinter code\",\"qualifiers\":[{\"relation\":\"point in time\",\"object\":\"1963\"},{\"relation\":\"bit length\",\"object\":\"seven-bit\"},{\"relation\":\"used for\",\"object\":\"American Telephone & Telegraph's TWX network\"}]}. But \"bit length\" not a standard qualifier; but allowed any qualifier relation. So okay.\n\nBut we also need entity types: subject_type \"code\", object_type \"device\"? maybe \"code\". We'll set object_type \"code\". For qualifiers, we just list.\n\n2. TWX - relation: \"developer\" or \"owner\"? Actually \"American Telephone & Telegraph's TWX network\". So TWX is a network belonging to AT&T. So triplet: subject: TWX, relation: \"owned by\", object: \"American Telephone & Telegraph\". Qualifiers maybe none. Types: TWX (network), AT&T (organisation).\n\n3. TWX originally used the earlier five-bit ITA2. So triplet: subject: TWX, relation: \"originally used\", object: \"ITA2\". Qualifier: maybe \"bit length\" five-bit. Also \"originally used\" maybe \"originally used\". We'll include qualifier \"bit length\" five-bit.\n\n4. ITA2 also used by competing Telex teleprinter system. So triplet: subject: ITA2, relation: \"used by\", object: \"Telex\". Qualifier: maybe \"competition\" not needed. Types: ITA2 (code), Telex (system).\n\n5. Bob Bemer introduced features such as the escape sequence. So triplet: subject: Bob Bemer, relation: \"introduced\", object: \"escape sequence\". Qualifier maybe \"feature type\". Also \"features such as the escape sequence\" indicates multiple features, but we capture one.\n\n6. Hugh McGregor Ross helped to popularize this work. So triplet: subject: Hugh McGregor Ross, relation: \"helped to popularize\", object: \"ASCII\". Qualifier maybe none.\n\n7. According to Bemer, the code that was to become ASCII was first called the Bemer-Ross Code in Europe. So triplet: subject: ASCII, relation: \"originally called\", object: \"Bemer-Ross Code\". Qualifier: place Europe, attribution Bemer. Also maybe \"point in time\" unknown; not needed.\n\n8. Bemer has been called \"the father of ASCII.\" So triplet: subject: Bob Bemer, relation: \"title\", object: \"father of ASCII\". Qualifier maybe none.\n\nAlso maybe \"Bob Bemer introduced features such as the escape sequence\" includes \"escape sequence\" as a feature. So object_type \"feature\".\n\nNow need subject_type and object_type for each.\n\nDefine types:\n\n- ASCII: code (or \"character encoding\")\n- teleprinter code: maybe \"code\"\n- American Telephone & Telegraph: organisation\n- TWX: network (or \"telecommunication network\")\n- ITA2: code\n- Telex: system (or \"teleprinter system\")\n- Bob Bemer: human\n- escape sequence: feature (or \"control character\")\n- Hugh McGregor Ross: human\n- Bemer-Ross Code: code name (code)\n- Europe: place\n- father of ASCII: title (or \"role\").\n\nWe'll assign plausible types.\n\nNow qualifiers: need to list as list of dicts.\n\nLet's craft each triplet.\n\nTriplet 1:\n\nsubject: \"ASCII\"\nrelation: \"first used commercially\"\nobject: \"teleprinter code\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"1963\"},{\"relation\":\"bit length\",\"object\":\"seven-bit\"},{\"relation\":\"used for\",\"object\":\"American Telephone & Telegraph's TWX network\"}]\nsubject_type: \"code\"\nobject_type: \"code\"\n\nTriplet 2:\n\nsubject: \"TWX\"\nrelation: \"owned by\"\nobject: \"American Telephone & Telegraph\"\nqualifiers: []\nsubject_type: \"network\"\nobject_type: \"organisation\"\n\nTriplet 3:\n\nsubject: \"TWX\"\nrelation: \"originally used\"\nobject: \"ITA2\"\nqualifiers: [{\"relation\":\"bit length\",\"object\":\"five-bit\"}]\nsubject_type: \"network\"\nobject_type: \"code\"\n\nTriplet 4:\n\nsubject: \"ITA2\"\nrelation: \"used by\"\nobject: \"Telex\"\nqualifiers: []\nsubject_type: \"code\"\nobject_type: \"system\"\n\nTriplet 5:\n\nsubject: \"Bob Bemer\"\nrelation: \"introduced\"\nobject: \"escape sequence\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"feature\"\n\nTriplet 6:\n\nsubject: \"Hugh McGregor Ross\"\nrelation: \"helped to popularize\"\nobject: \"ASCII\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"code\"\n\nTriplet 7:\n\nsubject: \"ASCII\"\nrelation: \"originally called\"\nobject: \"Bemer-Ross Code\"\nqualifiers: [{\"relation\":\"place\",\"object\":\"Europe\"},{\"relation\":\"attribution\",\"object\":\"Bob Bemer\"}]\nsubject_type: \"code\"\nobject_type: \"code\"\n\nTriplet 8:\n\nsubject: \"Bob Bemer\"\nrelation: \"title\"\nobject: \"father of ASCII\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"title\"\n\nCheck for any other explicit facts: \"Bob Bemer introduced features such as the escape sequence.\" Could also have \"Bob Bemer\" \"occupation\" \"computer scientist\"? Not in text. So ignore.\n\nAlso \"ASCII itself was first used commercially during 1963 as a seven-bit teleprinter code for American Telephone & Telegraph's TWX (TeletypeWriter eXchange) network.\" Already captured.\n\nAlso \"TWX originally used the earlier five-bit ITA2, which was also used by the competing Telex teleprinter system.\" Already captured.\n\nNow ensure qualifiers are attached correctly.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1729,
+      "total_tokens": 4067,
+      "completion_tokens": 2338,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"ASCII\",\n            \"relation\": \"first used commercially\",\n            \"object\": \"teleprinter code\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1963\"},\n                {\"relation\": \"bit length\", \"object\": \"seven-bit\"},\n                {\"relation\": \"used for\", \"object\": \"American Telephone & Telegraph's TWX network\"}\n            ],\n            \"subject_type\": \"code\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"TWX\",\n            \"relation\": \"owned by\",\n            \"object\": \"American Telephone & Telegraph\",\n            \"qualifiers\": [],\n            \"subject_type\": \"network\",\n            \"object_type\": \"organisation\"\n        },\n        {\n            \"subject\": \"TWX\",\n            \"relation\": \"originally used\",\n            \"object\": \"ITA2\",\n            \"qualifiers\": [\n                {\"relation\": \"bit length\", \"object\": \"five-bit\"}\n            ],\n            \"subject_type\": \"network\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"ITA2\",\n            \"relation\": \"used by\",\n            \"object\": \"Telex\",\n            \"qualifiers\": [],\n            \"subject_type\": \"code\",\n            \"object_type\": \"system\"\n        },\n        {\n            \"subject\": \"Bob Bemer\",\n            \"relation\": \"introduced\",\n            \"object\": \"escape sequence\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"feature\"\n        },\n        {\n            \"subject\": \"Hugh McGregor Ross\",\n            \"relation\": \"helped to popularize\",\n            \"object\": \"ASCII\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"ASCII\",\n            \"relation\": \"originally called\",\n            \"object\": \"Bemer-Ross Code\",\n            \"qualifiers\": [\n                {\"relation\": \"place\", \"object\": \"Europe\"},\n                {\"relation\": \"attribution\", \"object\": \"Bob Bemer\"}\n            ],\n            \"subject_type\": \"code\",\n            \"object_type\": \"code\"\n        },\n        {\n            \"subject\": \"Bob Bemer\",\n            \"relation\": \"title\",\n            \"object\": \"father of ASCII\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"title\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "ASCII",
+        "relation": "first used commercially",
+        "object": "teleprinter code",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1963"
+          },
+          {
+            "relation": "bit length",
+            "object": "seven-bit"
+          },
+          {
+            "relation": "used for",
+            "object": "American Telephone & Telegraph's TWX network"
+          }
+        ],
+        "subject_type": "code",
+        "object_type": "code"
+      },
+      {
+        "subject": "TWX",
+        "relation": "owned by",
+        "object": "American Telephone & Telegraph",
+        "qualifiers": [],
+        "subject_type": "network",
+        "object_type": "organisation"
+      },
+      {
+        "subject": "TWX",
+        "relation": "originally used",
+        "object": "ITA2",
+        "qualifiers": [
+          {
+            "relation": "bit length",
+            "object": "five-bit"
+          }
+        ],
+        "subject_type": "network",
+        "object_type": "code"
+      },
+      {
+        "subject": "ITA2",
+        "relation": "used by",
+        "object": "Telex",
+        "qualifiers": [],
+        "subject_type": "code",
+        "object_type": "system"
+      },
+      {
+        "subject": "Bob Bemer",
+        "relation": "introduced",
+        "object": "escape sequence",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "feature"
+      },
+      {
+        "subject": "Hugh McGregor Ross",
+        "relation": "helped to popularize",
+        "object": "ASCII",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "code"
+      },
+      {
+        "subject": "ASCII",
+        "relation": "originally called",
+        "object": "Bemer-Ross Code",
+        "qualifiers": [
+          {
+            "relation": "place",
+            "object": "Europe"
+          },
+          {
+            "relation": "attribution",
+            "object": "Bob Bemer"
+          }
+        ],
+        "subject_type": "code",
+        "object_type": "code"
+      },
+      {
+        "subject": "Bob Bemer",
+        "relation": "title",
+        "object": "father of ASCII",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "title"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1729,
+    "total_tokens": 4067,
+    "completion_tokens": 2338,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 690,
+    "output_tokens_est": 598
+  },
+  "attempts": 1,
+  "latency_s": 28.853360528999474,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:01:13.799425+00:00",
+  "cache_key": "f5178b756658265510a61e9e41532ccd"
+}

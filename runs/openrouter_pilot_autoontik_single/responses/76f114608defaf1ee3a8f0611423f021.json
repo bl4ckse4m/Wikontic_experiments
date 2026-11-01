@@ -1,0 +1,191 @@
+{
+  "task": {
+    "input_id": "44366470e644a091",
+    "input_hash": "05707a56909f0dd057900bd43cd9bdba04f5e61fcc79f3f30498a484f31e81a3",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793200501-BcJ6i70k9ExDzJsi9ufU",
+    "object": "chat.completion",
+    "created": 1793200501,
+    "model": "openai/gpt-oss-120b",
+    "provider": "CoreWeave",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"One Night of Sin\",\n            \"relation\": \"artist\",\n            \"object\": \"Joe Cocker\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"One Night of Sin\",\n            \"relation\": \"record label\",\n            \"object\": \"Capitol Records\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"One Night of Sin\",\n            \"relation\": \"release date\",\n            \"object\": \"June 1989\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"One Night of Sin\",\n            \"relation\": \"contains track\",\n            \"object\": \"When The Night Comes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"When The Night Comes\",\n            \"relation\": \"chart position\",\n            \"object\": \"US #11\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"chart position\"\n        },\n        {\n            \"subject\": \"When The Night Comes\",\n            \"relation\": \"writer\",\n            \"object\": \"Bryan Adams\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"When The Night Comes\",\n            \"relation\": \"writer\",\n            \"object\": \"Jim Vallance\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Bryan Adams\",\n            \"relation\": \"instrument played\",\n            \"object\": \"rhythm guitar\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"performed on\",\n                    \"object\": \"When The Night Comes\",\n                    \"object_type\": \"song\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"instrument\"\n        },\n        {\n            \"subject\": \"Joe Cocker\",\n            \"relation\": \"last US Top 40 hit\",\n            \"object\": \"When The Night Comes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"song\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the text.\n\nFirst, identify entities:\n\n- One Night of Sin (album)\n- Joe Cocker (human, singer)\n- Capitol Records (record label/company)\n- June 1989 (date)\n- \"When The Night Comes\" (song)\n- US #11 (chart position) maybe as chart position, but we can capture that the song reached US #11.\n- US Top 40 (chart) maybe not needed.\n- Bryan Adams (human, musician)\n- Jim Vallance (human, songwriter)\n- Bryan Adams (plays rhythm guitar on the song) => relation \"instrument performer\" or \"instrumentalist\". Use \"instrument played\" maybe \"instrument\" relation? Could be \"instrument\" but we need a relation connecting subject and object: \"instrument played\" maybe \"instrument\" is object \"rhythm guitar\". Or \"role\" = \"rhythm guitarist\". We'll use relation \"instrument played\" with object \"rhythm guitar\". Also \"songwriter\" relation for Bryan Adams and Jim Vallance wrote the song.\n\nAlso \"One Night of Sin\" is the twelfth studio album by Joe Cocker. So relation \"album type\" maybe \"studio album\". But we need \"artist\" relation: \"artist\" or \"performer\". Use \"artist\" relation linking album to Joe Cocker. Also \"album sequence number\" maybe \"ordinal number\" but not needed. Also \"release date\" relation linking album to June 1989. Also \"publisher\" or \"record label\" relation linking album to Capitol Records.\n\nAlso \"One Night of Sin\" contains the hit single \"When The Night Comes\". So relation \"contains track\" linking album to song.\n\nSong \"When The Night Comes\" has chart position US #11. So relation \"chart position\" with qualifier \"chart\" maybe \"US\". But we can have object \"11\" with qualifier \"chart\" = \"US\". Or object \"US #11\". Simpler: object \"US #11\" with object_type \"chart position\". Also \"song\" is a \"single\". Could have relation \"single of\" linking song to album.\n\nAlso \"When The Night Comes\" was Cocker's last US Top 40 hit. Could capture relation \"last US Top 40 hit\" but maybe not needed.\n\nAlso \"When The Night Comes\" was written by Bryan Adams and Jim Vallance. So relation \"composer\" or \"writer\". Use \"writer\" linking song to each person.\n\nAlso \"Bryan Adams\" plays rhythm guitar on the song. So relation \"instrument played\" linking Bryan Adams to \"rhythm guitar\" with qualifier \"on song\" maybe \"song\" qualifier linking to \"When The Night Comes\". But qualifiers must be attached to a triplet. So we can have triplet: subject \"Bryan Adams\", relation \"instrument played\", object \"rhythm guitar\", qualifiers: [{\"relation\":\"performed on\", \"object\":\"When The Night Comes\", \"object_type\":\"song\"}]. Need object_type for \"rhythm guitar\" as \"instrument\". And qualifier object_type \"song\". Good.\n\nNow define types:\n\n- One Night of Sin: album (type \"album\")\n- Joe Cocker: human (type \"human\")\n- Capitol Records: organization (type \"record label\" or \"organization\")\n- June 1989: date (type \"date\")\n- When The Night Comes: song (type \"song\")\n- US #11: chart position (type \"chart position\")\n- Bryan Adams: human\n- Jim Vallance: human\n- rhythm guitar: instrument (type \"instrument\")\n\nNow produce JSON list of triplets.\n\nList them:\n\n1. Album \"One Night of Sin\" - relation \"artist\" - object \"Joe Cocker\". qualifiers none. subject_type \"album\", object_type \"human\".\n\n2. Album \"One Night of Sin\" - relation \"record label\" - object \"Capitol Records\". qualifiers none. subject_type \"album\", object_type \"organization\".\n\n3. Album \"One Night of Sin\" - relation \"release date\" - object \"June 1989\". qualifiers none. subject_type \"album\", object_type \"date\".\n\n4. Album \"One Night of Sin\" - relation \"contains track\" - object \"When The Night Comes\". qualifiers none. subject_type \"album\", object_type \"song\".\n\n5. Song \"When The Night Comes\" - relation \"chart position\" - object \"US #11\". qualifiers maybe \"chart\" = \"US\". But we can just object \"US #11\". object_type \"chart position\". No qualifiers.\n\n6. Song \"When The Night Comes\" - relation \"writer\" - object \"Bryan Adams\". qualifiers none. subject_type \"song\", object_type \"human\".\n\n7. Song \"When The Night Comes\" - relation \"writer\" - object \"Jim Vallance\". qualifiers none.\n\n8. Bryan Adams - relation \"instrument played\" - object \"rhythm guitar\". qualifiers: performed on song. So qualifier relation \"performed on\", object \"When The Night Comes\", object_type \"song\". subject_type \"human\", object_type \"instrument\".\n\nPotential also: \"When The Night Comes\" is a \"single\". Could add relation \"type\" - object \"single\". But not necessary.\n\nAlso \"One Night of Sin\" is the twelfth studio album. Could add relation \"album type\" - object \"studio album\". But not required.\n\nAlso \"When The Night Comes\" was Cocker's last US Top 40 hit. Could add relation \"last US Top 40 hit\" linking Joe Cocker to song. But maybe include: subject \"Joe Cocker\", relation \"last US Top 40 hit\", object \"When The Night Comes\". object_type \"song\". That captures fact.\n\nLet's include that.\n\n9. Joe Cocker - relation \"last US Top 40 hit\" - object \"When The Night Comes\". qualifiers none. subject_type \"human\", object_type \"song\".\n\nNow ensure each triplet includes qualifiers list (empty if none). Provide JSON with key \"triplets\": [ ... ].\n\nMake sure each dict includes \"subject\", \"relation\", \"object\", \"qualifiers\", \"subject_type\", \"object_type\". For qualifiers, each dict includes \"relation\", \"object\", \"object_type\". Provide empty list [] if none.\n\nLet's craft final JSON.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the text.\n\nFirst, identify entities:\n\n- One Night of Sin (album)\n- Joe Cocker (human, singer)\n- Capitol Records (record label/company)\n- June 1989 (date)\n- \"When The Night Comes\" (song)\n- US #11 (chart position) maybe as chart position, but we can capture that the song reached US #11.\n- US Top 40 (chart) maybe not needed.\n- Bryan Adams (human, musician)\n- Jim Vallance (human, songwriter)\n- Bryan Adams (plays rhythm guitar on the song) => relation \"instrument performer\" or \"instrumentalist\". Use \"instrument played\" maybe \"instrument\" relation? Could be \"instrument\" but we need a relation connecting subject and object: \"instrument played\" maybe \"instrument\" is object \"rhythm guitar\". Or \"role\" = \"rhythm guitarist\". We'll use relation \"instrument played\" with object \"rhythm guitar\". Also \"songwriter\" relation for Bryan Adams and Jim Vallance wrote the song.\n\nAlso \"One Night of Sin\" is the twelfth studio album by Joe Cocker. So relation \"album type\" maybe \"studio album\". But we need \"artist\" relation: \"artist\" or \"performer\". Use \"artist\" relation linking album to Joe Cocker. Also \"album sequence number\" maybe \"ordinal number\" but not needed. Also \"release date\" relation linking album to June 1989. Also \"publisher\" or \"record label\" relation linking album to Capitol Records.\n\nAlso \"One Night of Sin\" contains the hit single \"When The Night Comes\". So relation \"contains track\" linking album to song.\n\nSong \"When The Night Comes\" has chart position US #11. So relation \"chart position\" with qualifier \"chart\" maybe \"US\". But we can have object \"11\" with qualifier \"chart\" = \"US\". Or object \"US #11\". Simpler: object \"US #11\" with object_type \"chart position\". Also \"song\" is a \"single\". Could have relation \"single of\" linking song to album.\n\nAlso \"When The Night Comes\" was Cocker's last US Top 40 hit. Could capture relation \"last US Top 40 hit\" but maybe not needed.\n\nAlso \"When The Night Comes\" was written by Bryan Adams and Jim Vallance. So relation \"composer\" or \"writer\". Use \"writer\" linking song to each person.\n\nAlso \"Bryan Adams\" plays rhythm guitar on the song. So relation \"instrument played\" linking Bryan Adams to \"rhythm guitar\" with qualifier \"on song\" maybe \"song\" qualifier linking to \"When The Night Comes\". But qualifiers must be attached to a triplet. So we can have triplet: subject \"Bryan Adams\", relation \"instrument played\", object \"rhythm guitar\", qualifiers: [{\"relation\":\"performed on\", \"object\":\"When The Night Comes\", \"object_type\":\"song\"}]. Need object_type for \"rhythm guitar\" as \"instrument\". And qualifier object_type \"song\". Good.\n\nNow define types:\n\n- One Night of Sin: album (type \"album\")\n- Joe Cocker: human (type \"human\")\n- Capitol Records: organization (type \"record label\" or \"organization\")\n- June 1989: date (type \"date\")\n- When The Night Comes: song (type \"song\")\n- US #11: chart position (type \"chart position\")\n- Bryan Adams: human\n- Jim Vallance: human\n- rhythm guitar: instrument (type \"instrument\")\n\nNow produce JSON list of triplets.\n\nList them:\n\n1. Album \"One Night of Sin\" - relation \"artist\" - object \"Joe Cocker\". qualifiers none. subject_type \"album\", object_type \"human\".\n\n2. Album \"One Night of Sin\" - relation \"record label\" - object \"Capitol Records\". qualifiers none. subject_type \"album\", object_type \"organization\".\n\n3. Album \"One Night of Sin\" - relation \"release date\" - object \"June 1989\". qualifiers none. subject_type \"album\", object_type \"date\".\n\n4. Album \"One Night of Sin\" - relation \"contains track\" - object \"When The Night Comes\". qualifiers none. subject_type \"album\", object_type \"song\".\n\n5. Song \"When The Night Comes\" - relation \"chart position\" - object \"US #11\". qualifiers maybe \"chart\" = \"US\". But we can just object \"US #11\". object_type \"chart position\". No qualifiers.\n\n6. Song \"When The Night Comes\" - relation \"writer\" - object \"Bryan Adams\". qualifiers none. subject_type \"song\", object_type \"human\".\n\n7. Song \"When The Night Comes\" - relation \"writer\" - object \"Jim Vallance\". qualifiers none.\n\n8. Bryan Adams - relation \"instrument played\" - object \"rhythm guitar\". qualifiers: performed on song. So qualifier relation \"performed on\", object \"When The Night Comes\", object_type \"song\". subject_type \"human\", object_type \"instrument\".\n\nPotential also: \"When The Night Comes\" is a \"single\". Could add relation \"type\" - object \"single\". But not necessary.\n\nAlso \"One Night of Sin\" is the twelfth studio album. Could add relation \"album type\" - object \"studio album\". But not required.\n\nAlso \"When The Night Comes\" was Cocker's last US Top 40 hit. Could add relation \"last US Top 40 hit\" linking Joe Cocker to song. But maybe include: subject \"Joe Cocker\", relation \"last US Top 40 hit\", object \"When The Night Comes\". object_type \"song\". That captures fact.\n\nLet's include that.\n\n9. Joe Cocker - relation \"last US Top 40 hit\" - object \"When The Night Comes\". qualifiers none. subject_type \"human\", object_type \"song\".\n\nNow ensure each triplet includes qualifiers list (empty if none). Provide JSON with key \"triplets\": [ ... ].\n\nMake sure each dict includes \"subject\", \"relation\", \"object\", \"qualifiers\", \"subject_type\", \"object_type\". For qualifiers, each dict includes \"relation\", \"object\", \"object_type\". Provide empty list [] if none.\n\nLet's craft final JSON.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1442,
+      "completion_tokens": 1828,
+      "total_tokens": 3270,
+      "cost": 0.00035402,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00035402,
+        "upstream_inference_prompt_cost": 4.326e-05,
+        "upstream_inference_completions_cost": 0.00031076
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1302,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"One Night of Sin\",\n            \"relation\": \"artist\",\n            \"object\": \"Joe Cocker\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"One Night of Sin\",\n            \"relation\": \"record label\",\n            \"object\": \"Capitol Records\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"One Night of Sin\",\n            \"relation\": \"release date\",\n            \"object\": \"June 1989\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"One Night of Sin\",\n            \"relation\": \"contains track\",\n            \"object\": \"When The Night Comes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"song\"\n        },\n        {\n            \"subject\": \"When The Night Comes\",\n            \"relation\": \"chart position\",\n            \"object\": \"US #11\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"chart position\"\n        },\n        {\n            \"subject\": \"When The Night Comes\",\n            \"relation\": \"writer\",\n            \"object\": \"Bryan Adams\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"When The Night Comes\",\n            \"relation\": \"writer\",\n            \"object\": \"Jim Vallance\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Bryan Adams\",\n            \"relation\": \"instrument played\",\n            \"object\": \"rhythm guitar\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"performed on\",\n                    \"object\": \"When The Night Comes\",\n                    \"object_type\": \"song\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"instrument\"\n        },\n        {\n            \"subject\": \"Joe Cocker\",\n            \"relation\": \"last US Top 40 hit\",\n            \"object\": \"When The Night Comes\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"song\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "One Night of Sin",
+        "relation": "artist",
+        "object": "Joe Cocker",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "human"
+      },
+      {
+        "subject": "One Night of Sin",
+        "relation": "record label",
+        "object": "Capitol Records",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "organization"
+      },
+      {
+        "subject": "One Night of Sin",
+        "relation": "release date",
+        "object": "June 1989",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "date"
+      },
+      {
+        "subject": "One Night of Sin",
+        "relation": "contains track",
+        "object": "When The Night Comes",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "song"
+      },
+      {
+        "subject": "When The Night Comes",
+        "relation": "chart position",
+        "object": "US #11",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "chart position"
+      },
+      {
+        "subject": "When The Night Comes",
+        "relation": "writer",
+        "object": "Bryan Adams",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "When The Night Comes",
+        "relation": "writer",
+        "object": "Jim Vallance",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Bryan Adams",
+        "relation": "instrument played",
+        "object": "rhythm guitar",
+        "qualifiers": [
+          {
+            "relation": "performed on",
+            "object": "When The Night Comes"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "instrument"
+      },
+      {
+        "subject": "Joe Cocker",
+        "relation": "last US Top 40 hit",
+        "object": "When The Night Comes",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "song"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1442,
+    "completion_tokens": 1828,
+    "total_tokens": 3270,
+    "cost": 0.00035402,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00035402,
+      "upstream_inference_prompt_cost": 4.326e-05,
+      "upstream_inference_completions_cost": 0.00031076
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1302,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 736,
+    "output_tokens_est": 609
+  },
+  "attempts": 1,
+  "latency_s": 25.76437527699818,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T15:15:26.417380+00:00",
+  "cache_key": "76f114608defaf1ee3a8f0611423f021"
+}

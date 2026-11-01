@@ -1,0 +1,164 @@
+{
+  "task": {
+    "input_id": "bee6b18e9f891bf2",
+    "input_hash": "f5e0f740e46649155f4ceb7baca0952706184e1a0a6ff4074323eee752fbff84",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793210534-2kLEkhkiRY4a970dGFid",
+    "object": "chat.completion",
+    "created": 1793210534,
+    "model": "openai/gpt-oss-120b",
+    "provider": "AkashML",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mount Franklin\",\n            \"relation\": \"instance of\",\n            \"object\": \"mountain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"geographical feature\"\n        },\n        {\n            \"subject\": \"Mount Franklin\",\n            \"relation\": \"located in\",\n            \"object\": \"Brindabella Ranges\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"Mount Franklin\",\n            \"relation\": \"border of\",\n            \"object\": \"Australian Capital Territory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\",\n                    \"object_type\": \"sovereign state\"\n                }\n            ],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Mount Franklin\",\n            \"relation\": \"border of\",\n            \"object\": \"New South Wales\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\",\n                    \"object_type\": \"sovereign state\"\n                }\n            ],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"summit of Mount Franklin\",\n            \"relation\": \"located in\",\n            \"object\": \"Australian Capital Territory\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain summit\",\n            \"object_type\": \"administrative territorial entity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Mount Franklin (Australian Capital Territory)\n\nMount Franklin is a mountain with an elevation of in the Brindabella Ranges that is located on the border between the Australian Capital Territory and New South Wales, Australia. The summit of the mountain is located in the Australian Capital Territory.\"\n\nWe need to parse facts.\n\nEntities: Mount Franklin (the mountain). Australian Capital Territory (ACT). New South Wales (NSW). Brindabella Ranges. Elevation (value missing? It says \"with an elevation of in the Brindabella Ranges\" - missing number). Might be incomplete; we can ignore missing value? Could note elevation unknown. Probably we skip because no value.\n\nRelations:\n\n- Mount Franklin is a mountain. So subject: Mount Franklin, relation: \"instance of\" or \"type\". Use \"instance of\" maybe \"mountain\". object: mountain (class). subject_type: mountain? Actually subject_type: \"mountain\". object_type: \"geographical feature\"? In example they used occupation etc. For \"Mount Franklin is a mountain\", we can have relation \"instance of\" with object \"mountain\". subject_type: \"mountain\"? Actually subject_type is class of subject, which is \"mountain\". object_type is class of object, which is \"geographical feature\" maybe. But we can set subject_type \"mountain\" and object_type \"geographical feature\". Or subject_type \"geographical feature\"? Let's think: subject is a specific mountain, so its type is \"mountain\". object is \"mountain\" which is a class; object_type maybe \"geographical feature\". In example they used \"human\" for subject type and \"profession\" for object type. So we follow: subject_type = \"mountain\", object_type = \"geographical feature\". Or maybe \"mountain\" is a subclass of \"geographical feature\". We'll set object_type \"geographical feature\". Good.\n\n- Mount Franklin has elevation (value missing). Since no number, maybe skip.\n\n- Mount Franklin is in the Brindabella Ranges. So relation: \"located in\" or \"part of\". Use \"located in\". object: Brindabella Ranges. subject_type: mountain. object_type: mountain range (or \"geographical region\").\n\n- Mount Franklin is located on the border between the Australian Capital Territory and New South Wales, Australia. So relation: \"border location\" maybe \"located on border of\". Could split into two relations: \"border of\" linking to ACT and NSW. Could create two triplets: subject Mount Franklin, relation \"border of\", object \"Australian Capital Territory\". Another with object \"New South Wales\". subject_type mountain, object_type \"administrative territorial entity\". Use \"border of\". Qualifiers maybe \"country\" = Australia? But both are states within Australia. Could add qualifier \"country\" with object \"Australia\". But not required.\n\n- The summit of the mountain is located in the Australian Capital Territory. So subject: \"summit of Mount Franklin\" maybe treat as \"summit of Mount Franklin\". Could create entity \"summit of Mount Franklin\". Or we could treat as \"Mount Franklin summit\". Simpler: subject \"summit of Mount Franklin\". relation \"located in\". object \"Australian Capital Territory\". subject_type \"mountain summit\". object_type \"administrative territorial entity\". Also could add qualifier \"part of\" linking to Mount Franklin? But not needed.\n\nWe need to include qualifiers list even if empty.\n\nNow produce JSON list.\n\nMake sure each dict includes subject, relation, object, qualifiers (list), subject_type, object_type.\n\nLet's define types:\n\n- mountain (subject_type)\n- geographical feature (object_type) for instance of? Actually relation \"instance of\" object \"mountain\". object_type \"geographical feature\". Good.\n\n- relation \"located in\" object \"Brindabella Ranges\". object_type \"mountain range\".\n\n- relation \"border of\" object \"Australian Capital Territory\". object_type \"administrative territorial entity\". Could also add qualifier \"country\" with object \"Australia\" type \"sovereign state\". But not required.\n\n- relation \"border of\" object \"New South Wales\". object_type \"administrative territorial entity\". qualifier \"country\" \"Australia\".\n\n- relation \"located in\" for summit: subject \"summit of Mount Franklin\". object \"Australian Capital Territory\". subject_type \"mountain summit\". object_type \"administrative territorial entity\".\n\nWe also might need a triplet linking summit to mountain: \"summit of Mount Franklin\" \"part of\" \"Mount Franklin\". Could be derived but not explicit. The sentence says \"The summit of the mountain is located in the Australian Capital Territory.\" So \"summit of the mountain\" refers to the summit of Mount Franklin. So we can treat subject \"summit of Mount Franklin\". Good.\n\nNow produce JSON.\n\nMake sure top-level key \"triplets\": list.\n\nLet's craft.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"Mount Franklin (Australian Capital Territory)\n\nMount Franklin is a mountain with an elevation of in the Brindabella Ranges that is located on the border between the Australian Capital Territory and New South Wales, Australia. The summit of the mountain is located in the Australian Capital Territory.\"\n\nWe need to parse facts.\n\nEntities: Mount Franklin (the mountain). Australian Capital Territory (ACT). New South Wales (NSW). Brindabella Ranges. Elevation (value missing? It says \"with an elevation of in the Brindabella Ranges\" - missing number). Might be incomplete; we can ignore missing value? Could note elevation unknown. Probably we skip because no value.\n\nRelations:\n\n- Mount Franklin is a mountain. So subject: Mount Franklin, relation: \"instance of\" or \"type\". Use \"instance of\" maybe \"mountain\". object: mountain (class). subject_type: mountain? Actually subject_type: \"mountain\". object_type: \"geographical feature\"? In example they used occupation etc. For \"Mount Franklin is a mountain\", we can have relation \"instance of\" with object \"mountain\". subject_type: \"mountain\"? Actually subject_type is class of subject, which is \"mountain\". object_type is class of object, which is \"geographical feature\" maybe. But we can set subject_type \"mountain\" and object_type \"geographical feature\". Or subject_type \"geographical feature\"? Let's think: subject is a specific mountain, so its type is \"mountain\". object is \"mountain\" which is a class; object_type maybe \"geographical feature\". In example they used \"human\" for subject type and \"profession\" for object type. So we follow: subject_type = \"mountain\", object_type = \"geographical feature\". Or maybe \"mountain\" is a subclass of \"geographical feature\". We'll set object_type \"geographical feature\". Good.\n\n- Mount Franklin has elevation (value missing). Since no number, maybe skip.\n\n- Mount Franklin is in the Brindabella Ranges. So relation: \"located in\" or \"part of\". Use \"located in\". object: Brindabella Ranges. subject_type: mountain. object_type: mountain range (or \"geographical region\").\n\n- Mount Franklin is located on the border between the Australian Capital Territory and New South Wales, Australia. So relation: \"border location\" maybe \"located on border of\". Could split into two relations: \"border of\" linking to ACT and NSW. Could create two triplets: subject Mount Franklin, relation \"border of\", object \"Australian Capital Territory\". Another with object \"New South Wales\". subject_type mountain, object_type \"administrative territorial entity\". Use \"border of\". Qualifiers maybe \"country\" = Australia? But both are states within Australia. Could add qualifier \"country\" with object \"Australia\". But not required.\n\n- The summit of the mountain is located in the Australian Capital Territory. So subject: \"summit of Mount Franklin\" maybe treat as \"summit of Mount Franklin\". Could create entity \"summit of Mount Franklin\". Or we could treat as \"Mount Franklin summit\". Simpler: subject \"summit of Mount Franklin\". relation \"located in\". object \"Australian Capital Territory\". subject_type \"mountain summit\". object_type \"administrative territorial entity\". Also could add qualifier \"part of\" linking to Mount Franklin? But not needed.\n\nWe need to include qualifiers list even if empty.\n\nNow produce JSON list.\n\nMake sure each dict includes subject, relation, object, qualifiers (list), subject_type, object_type.\n\nLet's define types:\n\n- mountain (subject_type)\n- geographical feature (object_type) for instance of? Actually relation \"instance of\" object \"mountain\". object_type \"geographical feature\". Good.\n\n- relation \"located in\" object \"Brindabella Ranges\". object_type \"mountain range\".\n\n- relation \"border of\" object \"Australian Capital Territory\". object_type \"administrative territorial entity\". Could also add qualifier \"country\" with object \"Australia\" type \"sovereign state\". But not required.\n\n- relation \"border of\" object \"New South Wales\". object_type \"administrative territorial entity\". qualifier \"country\" \"Australia\".\n\n- relation \"located in\" for summit: subject \"summit of Mount Franklin\". object \"Australian Capital Territory\". subject_type \"mountain summit\". object_type \"administrative territorial entity\".\n\nWe also might need a triplet linking summit to mountain: \"summit of Mount Franklin\" \"part of\" \"Mount Franklin\". Could be derived but not explicit. The sentence says \"The summit of the mountain is located in the Australian Capital Territory.\" So \"summit of the mountain\" refers to the summit of Mount Franklin. So we can treat subject \"summit of Mount Franklin\". Good.\n\nNow produce JSON.\n\nMake sure top-level key \"triplets\": list.\n\nLet's craft.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1408,
+      "completion_tokens": 1371,
+      "total_tokens": 2779,
+      "cost": 0.000298617,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.000298617,
+        "upstream_inference_prompt_cost": 4.224e-05,
+        "upstream_inference_completions_cost": 0.000256377
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 1192,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mount Franklin\",\n            \"relation\": \"instance of\",\n            \"object\": \"mountain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"geographical feature\"\n        },\n        {\n            \"subject\": \"Mount Franklin\",\n            \"relation\": \"located in\",\n            \"object\": \"Brindabella Ranges\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"Mount Franklin\",\n            \"relation\": \"border of\",\n            \"object\": \"Australian Capital Territory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\",\n                    \"object_type\": \"sovereign state\"\n                }\n            ],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Mount Franklin\",\n            \"relation\": \"border of\",\n            \"object\": \"New South Wales\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Australia\",\n                    \"object_type\": \"sovereign state\"\n                }\n            ],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"summit of Mount Franklin\",\n            \"relation\": \"located in\",\n            \"object\": \"Australian Capital Territory\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain summit\",\n            \"object_type\": \"administrative territorial entity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Mount Franklin",
+        "relation": "instance of",
+        "object": "mountain",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "geographical feature"
+      },
+      {
+        "subject": "Mount Franklin",
+        "relation": "located in",
+        "object": "Brindabella Ranges",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "mountain range"
+      },
+      {
+        "subject": "Mount Franklin",
+        "relation": "border of",
+        "object": "Australian Capital Territory",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "Australia"
+          }
+        ],
+        "subject_type": "mountain",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Mount Franklin",
+        "relation": "border of",
+        "object": "New South Wales",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "Australia"
+          }
+        ],
+        "subject_type": "mountain",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "summit of Mount Franklin",
+        "relation": "located in",
+        "object": "Australian Capital Territory",
+        "qualifiers": [],
+        "subject_type": "mountain summit",
+        "object_type": "administrative territorial entity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1408,
+    "completion_tokens": 1371,
+    "total_tokens": 2779,
+    "cost": 0.000298617,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.000298617,
+      "upstream_inference_prompt_cost": 4.224e-05,
+      "upstream_inference_completions_cost": 0.000256377
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 1192,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 571,
+    "output_tokens_est": 444
+  },
+  "attempts": 1,
+  "latency_s": 23.567883110001276,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T18:02:38.115937+00:00",
+  "cache_key": "a8c050abda56c42245a3aab81e859bed"
+}

@@ -1,0 +1,182 @@
+{
+  "task": {
+    "input_id": "0a9e75d4f493801d",
+    "input_hash": "8e3e7525cf4264b8ed8833bbbcccc447e6c650e718f7004c75e840335abcc264",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a0c3138da6170f3e9214c2046b9194b6",
+    "object": "chat.completion",
+    "created": 1791515042,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"member state of\",\n            \"object\": \"European Union\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"political entity\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"population\",\n            \"object\": \"82.8\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"million people\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"estimated\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Malta\",\n            \"relation\": \"member state of\",\n            \"object\": \"European Union\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"political entity\"\n        },\n        {\n            \"subject\": \"Malta\",\n            \"relation\": \"population\",\n            \"object\": \"0.4\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"million people\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"European Union\",\n            \"relation\": \"total fertility rate\",\n            \"object\": \"1.6\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"children per woman\"\n                }\n            ],\n            \"subject_type\": \"political entity\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Ireland\",\n            \"relation\": \"birth rate\",\n            \"object\": \"16.876\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"births per thousand people per year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"France\",\n            \"relation\": \"birth rate\",\n            \"object\": \"13.013\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"births per thousand people per year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"birth rate\",\n            \"object\": \"8.221\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"births per thousand people per year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText about demographics of EU.\n\nSentences:\n\n1. \"The most populous member state is Germany, with an estimated 82.8 million people, and the least populous member state is Malta with 0.4 million.\"\n\nWe can extract:\n\n- Germany is a member state (of European Union). Relation: \"member state of\". object: \"European Union\". subject_type: \"country\". object_type: \"political entity\". Possibly also \"population\" fact: \"population\" relation with object \"82.8 million people\". qualifiers: \"approximation\": \"estimated\". Also \"point in time\"? Not given. So we include qualifier \"approximation\" \"estimated\". Also unit \"million people\". Could treat as quantity with unit.\n\n- Malta is a member state of EU, population 0.4 million (no approximation word). Could treat as quantity.\n\n- Also \"most populous member state\" is a superlative; we can capture \"population rank\" maybe but not needed. We'll just capture the population numbers.\n\n2. \"Birth rates in the EU are low with the average woman having 1.6 children.\"\n\nFacts:\n\n- EU has birth rate? Actually \"average woman having 1.6 children\" is fertility rate. Relation: \"total fertility rate\" maybe. We'll use \"average number of children per woman\". object: \"1.6\". qualifier: \"unit\": \"children\". subject_type: \"political entity\". object_type: \"quantity\". Also \"point in time\"? Not given.\n\n- Also \"birth rates in the EU are low\" is a qualitative statement. Could capture as statement with polarity? Not needed maybe. But we could capture \"birth rates\" relation \"characteristic\" \"low\". But that's not explicit numeric. Might skip.\n\n3. \"The highest birth - rates are found in Ireland with 16.876 births per thousand people per year and France with 13.013 births per thousand people per year.\"\n\nFacts:\n\n- Ireland has birth rate 16.876 births per thousand people per year. Relation: \"birth rate\". object: \"16.876\". qualifiers: unit \"births per thousand people per year\". Could also split into quantity and unit.\n\n- France has birth rate 13.013 births per thousand people per year.\n\n4. \"Germany has the lowest birth rate in Europe with 8.221 births per thousand people per year.\"\n\nFact: Germany birth rate 8.221 births per thousand people per year.\n\nAlso \"lowest birth rate in Europe\" but we can just capture the numeric.\n\nWe also need subject_type and object_type.\n\nDefine types:\n\n- Germany: country\n- Malta: country\n- European Union: political entity (maybe \"supranational organization\")\n- Ireland, France: country\n- EU: political entity\n\n- population: object_type \"quantity\" maybe \"people\". Use \"population\" relation.\n\n- birth rate: object_type \"quantity\". Use unit qualifier.\n\n- total fertility rate: maybe \"fertility rate\". Use object_type \"quantity\".\n\nNow qualifiers: For population numbers, include unit \"million people\". Also \"approximation\": \"estimated\" for Germany.\n\nFor Malta, no approximation.\n\nFor birth rates, include unit \"births per thousand people per year\". Could also include \"point in time\"? Not given.\n\nNow produce JSON list.\n\nNeed each triplet dict with keys: subject, relation, object, qualifiers (list of dicts), subject_type, object_type.\n\nLet's craft.\n\nTriplets:\n\n1. {\"subject\":\"Germany\",\"relation\":\"member state of\",\"object\":\"European Union\",\"qualifiers\":[],\"subject_type\":\"country\",\"object_type\":\"political entity\"}\n\n2. {\"subject\":\"Germany\",\"relation\":\"population\",\"object\":\"82.8\",\"qualifiers\":[{\"relation\":\"unit\",\"object\":\"million people\"},{\"relation\":\"approximation\",\"object\":\"estimated\"}],\"subject_type\":\"country\",\"object_type\":\"quantity\"}\n\n3. {\"subject\":\"Malta\",\"relation\":\"member state of\",\"object\":\"European Union\",\"qualifiers\":[],\"subject_type\":\"country\",\"object_type\":\"political entity\"}\n\n4. {\"subject\":\"Malta\",\"relation\":\"population\",\"object\":\"0.4\",\"qualifiers\":[{\"relation\":\"unit\",\"object\":\"million people\"}],\"subject_type\":\"country\",\"object_type\":\"quantity\"}\n\n5. {\"subject\":\"European Union\",\"relation\":\"total fertility rate\",\"object\":\"1.6\",\"qualifiers\":[{\"relation\":\"unit\",\"object\":\"children per woman\"}],\"subject_type\":\"political entity\",\"object_type\":\"quantity\"}\n\n6. {\"subject\":\"Ireland\",\"relation\":\"birth rate\",\"object\":\"16.876\",\"qualifiers\":[{\"relation\":\"unit\",\"object\":\"births per thousand people per year\"}],\"subject_type\":\"country\",\"object_type\":\"quantity\"}\n\n7. {\"subject\":\"France\",\"relation\":\"birth rate\",\"object\":\"13.013\",\"qualifiers\":[{\"relation\":\"unit\",\"object\":\"births per thousand people per year\"}],\"subject_type\":\"country\",\"object_type\":\"quantity\"}\n\n8. {\"subject\":\"Germany\",\"relation\":\"birth rate\",\"object\":\"8.221\",\"qualifiers\":[{\"relation\":\"unit\",\"object\":\"births per thousand people per year\"}],\"subject_type\":\"country\",\"object_type\":\"quantity\"}\n\nPotential also \"Europe\" as region for lowest birth rate statement, but we already have Germany birth rate. Could add relation \"lowest birth rate in\" but that's derived. Not explicit numeric.\n\nAlso \"birth rates in the EU are low\" maybe capture as statement with polarity? Could add: subject \"birth rates in the EU\", relation \"characteristic\", object \"low\". But not necessary.\n\nWe'll keep these eight.\n\nCheck qualifiers: For population of Germany, we used object \"82.8\". Should we include \"million people\" as unit. Good.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1703,
+      "total_tokens": 3475,
+      "completion_tokens": 1772,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"member state of\",\n            \"object\": \"European Union\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"political entity\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"population\",\n            \"object\": \"82.8\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"million people\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"estimated\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Malta\",\n            \"relation\": \"member state of\",\n            \"object\": \"European Union\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"political entity\"\n        },\n        {\n            \"subject\": \"Malta\",\n            \"relation\": \"population\",\n            \"object\": \"0.4\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"million people\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"European Union\",\n            \"relation\": \"total fertility rate\",\n            \"object\": \"1.6\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"children per woman\"\n                }\n            ],\n            \"subject_type\": \"political entity\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Ireland\",\n            \"relation\": \"birth rate\",\n            \"object\": \"16.876\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"births per thousand people per year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"France\",\n            \"relation\": \"birth rate\",\n            \"object\": \"13.013\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"births per thousand people per year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Germany\",\n            \"relation\": \"birth rate\",\n            \"object\": \"8.221\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"births per thousand people per year\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Germany",
+        "relation": "member state of",
+        "object": "European Union",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "political entity"
+      },
+      {
+        "subject": "Germany",
+        "relation": "population",
+        "object": "82.8",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "million people"
+          },
+          {
+            "relation": "approximation",
+            "object": "estimated"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Malta",
+        "relation": "member state of",
+        "object": "European Union",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "political entity"
+      },
+      {
+        "subject": "Malta",
+        "relation": "population",
+        "object": "0.4",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "million people"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "European Union",
+        "relation": "total fertility rate",
+        "object": "1.6",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "children per woman"
+          }
+        ],
+        "subject_type": "political entity",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Ireland",
+        "relation": "birth rate",
+        "object": "16.876",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "births per thousand people per year"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "France",
+        "relation": "birth rate",
+        "object": "13.013",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "births per thousand people per year"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Germany",
+        "relation": "birth rate",
+        "object": "8.221",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "births per thousand people per year"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1703,
+    "total_tokens": 3475,
+    "completion_tokens": 1772,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 829,
+    "output_tokens_est": 736
+  },
+  "attempts": 1,
+  "latency_s": 21.846981164009776,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:04:24.936529+00:00",
+  "cache_key": "4493ac1b8c690b0e1dcec39f7666a9b1"
+}

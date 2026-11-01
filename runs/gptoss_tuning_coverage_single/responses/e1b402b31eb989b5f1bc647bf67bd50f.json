@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "a0ebae2a855dc039",
+    "input_hash": "7a5d4e6776f0707330763afa5680ba6c9ffb6b0640e91de9c7e5f04c4faaa610",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-ff3e14eef610c95f401a1641f32aaf3a",
+    "object": "chat.completion",
+    "created": 1791505589,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"instance of\",\n            \"object\": \"census-designated place\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"census-designated place\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Torrance County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"New Mexico\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"population\",\n            \"object\": \"148\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2000\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"part of\",\n            \"object\": \"Albuquerque Metropolitan Statistical Area\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"metropolitan statistical area\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Tajique, New Mexico\n\nTajique is a census-designated place (CDP) in Torrance County, New Mexico, United States. The population was 148 at the 2000 census. It is part of the Albuquerque Metropolitan Statistical Area.\"\n\nWe need to produce JSON with triplets.\n\nIdentify entities: Tajique (place), New Mexico (state), Torrance County (county), United States (country), population 148 (value), 2000 census (event), Albuquerque Metropolitan Statistical Area (MSA).\n\nTriplets:\n\n1. Tajique - instance of - census-designated place (CDP). Relation maybe \"instance of\" or \"type\". Use \"instance of\". object_type \"census-designated place\". subject_type \"human settlement\"? We'll use \"human settlement\". object_type \"census-designated place\". Could also use \"administrative territorial entity\". We'll choose.\n\n2. Tajique - located in the administrative territorial entity - Torrance County. relation \"located in the administrative territorial entity\". object_type \"county\". subject_type \"human settlement\".\n\n3. Torrance County - located in the administrative territorial entity - New Mexico. (But not explicitly said? It says \"Tajique is ... in Torrance County, New Mexico, United States.\" So we can infer that Torrance County is in New Mexico, but that's not a direct statement about Torridge County; it's part of the location phrase. The phrase \"in Torrance County, New Mexico, United States\" indicates that Tajique is in Torrance County, which is in New Mexico, which is in United States. The text doesn't explicitly state \"Torrance County is in New Mexico\", but it's implied by the hierarchical location. However we should only extract explicit facts. The phrase \"in Torrance County, New Mexico, United States\" can be parsed as Tajique is in Torrance County, and also Tajique is in New Mexico, and Tajique is in United States. So we can create separate location relations for Tajique.\n\nThus:\n\n3. Tajique - located in the administrative territorial entity - New Mexico.\n\n4. Tajique - located in the administrative territorial entity - United States.\n\n5. Tajique - population - 148. Relation \"population\". object_type \"quantity\". Need qualifier point in time 2000 census. So main triplet: subject Tajique, relation \"population\", object \"148\". qualifiers: point in time \"2000\". Could also include \"census\" qualifier? Use \"point in time\" with object \"2000\". object_type \"quantity\". Might also need \"census\" as qualifier? Not required.\n\n6. Tajique - part of - Albuquerque Metropolitan Statistical Area. Relation \"part of\". object_type \"metropolitan statistical area\". subject_type \"human settlement\".\n\nAlso maybe \"Tajique - located in the statistical region - Albuquerque Metropolitan Statistical Area\"? But \"part of\" is fine.\n\nNow subject_type and object_type for each.\n\nDefine types:\n\n- Tajique: human settlement (or \"census-designated place\"). Use \"human settlement\".\n- census-designated place: \"census-designated place\" (type: \"administrative territorial entity\"? but object_type \"census-designated place\").\n\n- Torrance County: \"county\". object_type \"county\".\n\n- New Mexico: \"state\". object_type \"state\".\n\n- United States: \"country\". object_type \"country\".\n\n- population number: object_type \"quantity\". Could be \"number\". Use \"quantity\".\n\n- 2000: date? Actually point in time is year. Use \"date\". object_type \"date\".\n\n- Albuquerque Metropolitan Statistical Area: \"metropolitan statistical area\". object_type \"metropolitan statistical area\".\n\nNow qualifiers list for population: [{\"relation\":\"point in time\",\"object\":\"2000\"}] (maybe \"2000 census\" but we have just year). Could also include \"census\" qualifier but not needed.\n\nNow produce JSON.\n\nCheck for any other facts: \"Tajique, New Mexico\" at top maybe indicates Tajique is in New Mexico. Already captured.\n\nNow produce final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1638,
+      "total_tokens": 2870,
+      "completion_tokens": 1232,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"instance of\",\n            \"object\": \"census-designated place\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"census-designated place\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Torrance County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"New Mexico\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"population\",\n            \"object\": \"148\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2000\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Tajique\",\n            \"relation\": \"part of\",\n            \"object\": \"Albuquerque Metropolitan Statistical Area\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"metropolitan statistical area\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Tajique",
+        "relation": "instance of",
+        "object": "census-designated place",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "census-designated place"
+      },
+      {
+        "subject": "Tajique",
+        "relation": "located in the administrative territorial entity",
+        "object": "Torrance County",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Tajique",
+        "relation": "located in the administrative territorial entity",
+        "object": "New Mexico",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "state"
+      },
+      {
+        "subject": "Tajique",
+        "relation": "located in the administrative territorial entity",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "country"
+      },
+      {
+        "subject": "Tajique",
+        "relation": "population",
+        "object": "148",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2000"
+          }
+        ],
+        "subject_type": "human settlement",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Tajique",
+        "relation": "part of",
+        "object": "Albuquerque Metropolitan Statistical Area",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "metropolitan statistical area"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1638,
+    "total_tokens": 2870,
+    "completion_tokens": 1232,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 547,
+    "output_tokens_est": 454
+  },
+  "attempts": 1,
+  "latency_s": 15.499712010998337,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:26:45.748542+00:00",
+  "cache_key": "e1b402b31eb989b5f1bc647bf67bd50f"
+}

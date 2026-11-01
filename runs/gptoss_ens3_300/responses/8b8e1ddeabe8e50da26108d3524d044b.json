@@ -1,0 +1,164 @@
+{
+  "task": {
+    "input_id": "0af7b5e365dc5b98",
+    "input_hash": "6306ecd4a3044da6e95ce601c0095f18a9b0577324d044ad6f3bbbb14d3b56dd",
+    "gen_index": 2,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-db40ef462df612979c02b138253ebcc4",
+    "object": "chat.completion",
+    "created": 1791547314,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"instance of\",\n            \"object\": \"direct democracy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"political system\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting method\",\n            \"object\": \"direct voting on legislation and executive bills\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"voting system\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting eligibility\",\n            \"object\": \"adult male citizen\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"demographic group\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting eligibility\",\n            \"object\": \"foreign resident\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"demographic group\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting eligibility\",\n            \"object\": \"slave\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"demographic group\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting eligibility\",\n            \"object\": \"woman\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"demographic group\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"proportion of eligible voters\",\n            \"object\": \"30 percent\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"probably\"\n                },\n                {\n                    \"relation\": \"of\",\n                    \"object\": \"total adult population\"\n                }\n            ],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"percentage\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts from the text.\n\nText: \"Athenian democracy\n\nIt was a system of direct democracy, in which participating citizens voted directly on legislation and executive bills. Participation was not open to all residents: to vote one had to be an adult, male citizen, i.e., not a foreign resident, a slave or a woman, and the number of these was ``probably no more than 30 percent of the total adult population. ''\"\n\nWe need triplets.\n\nSubject: Athenian democracy (entity type: political system? maybe \"government\" or \"political system\").\n\nRelations:\n\n- \"type of\": direct democracy? There's \"system of direct democracy\". So relation maybe \"government type\" or \"political system\". We'll use \"type of government\" maybe. But we need Wikidata-style relation. Could be \"instance of\" (P31). Use \"instance of\" relation: \"direct democracy\". So (Athenian democracy, instance of, direct democracy). subject_type: political system, object_type: political system.\n\n- \"voting method\": \"participating citizens voted directly on legislation and executive bills\". Could make triplet: (Athenian democracy, voting system, direct voting) or \"voting method\". We'll do (Athenian democracy, voting method, direct vote on legislation). object_type: voting system.\n\nBetter to keep simple: (Athenian democracy, has voting system, direct democracy). But we already used instance of. Maybe another: (Athenian democracy, legislation decided by, participating citizens). But subject is Athenian democracy, object: participating citizens (type: group of people). relation: \"participants\" maybe \"voters\". Use \"voter\" relation: (Athenian democracy, voter, participating citizen). However we need facts: \"participating citizens voted directly on legislation and executive bills\". Could encode as (participating citizen, voted on, legislation) but that's about action. But we need subject to be entity? Could be \"participating citizens\" as subject. Let's extract separate fact: (participating citizens, voting method, direct). object_type: voting method.\n\nBut maybe we should keep main entity: Athenian democracy has \"participating citizens\" as \"eligible voters\". So relation \"eligible voters\" = adult male citizens. Let's capture eligibility criteria.\n\nTriplet: (Athenian democracy, eligibility requirement, adult male citizen). subject_type: political system, object_type: demographic group.\n\nAlso need \"eligibility excludes foreign resident, slave, woman\". Could make separate negatives: (Athenian democracy, voting eligibility excludes, foreign resident) with qualifier polarity negative? Actually \"not a foreign resident\" means foreign residents are excluded. So we can have (Athenian democracy, voting eligibility, foreign resident) with qualifier polarity negative. Or we can have separate triplets with negative qualifier.\n\nWe have also \"number of eligible voters was probably no more than 30 percent of the total adult population.\" So triplet: (Athenian democracy, proportion of eligible voters, 30 percent) with qualifier approximation \"probably\" and qualifier reference \"total adult population\". object_type: percentage.\n\nWe need to represent approximation qualifier. For the proportion fact, we have object \"30 percent\". qualifier approximation \"probably\". Also maybe qualifier \"of\" total adult population? Could add qualifier relation \"of\" with object \"total adult population\". But not required; we can just have object \"30 percent of total adult population\". But object_type: percentage.\n\nBetter: object: \"30 percent\". qualifier relation \"of\", object: \"total adult population\". qualifier \"approximation\": \"probably\".\n\nNow, need subject_type for Athenian democracy: \"political system\". object_type for direct democracy: \"political system\". For eligibility requirement: \"demographic group\". For foreign resident etc: \"demographic group\". For proportion: \"percentage\". For total adult population: \"demographic group\".\n\nNow also mention \"adult male citizen\". object_type: demographic group.\n\nNow produce JSON.\n\nList triplets:\n\n1. Athenian democracy – instance of – direct democracy.\n2. Athenian democracy – voting method – direct voting on legislation and executive bills. Could be separate: (Athenian democracy, voting method, direct legislation voting). object_type: voting system.\n\nBut maybe combine with first. Let's keep one: (Athenian democracy, voting system, direct democracy). Might duplicate.\n\n3. Athenian democracy – eligibility requirement – adult male citizen.\n4. Athenian democracy – voting eligibility excludes – foreign resident (with polarity negative).\n5. Athenian democracy – voting eligibility excludes – slave (negative).\n6. Athenian democracy – voting eligibility excludes – woman (negative).\n7. Athenian democracy – proportion of eligible voters – 30 percent. qualifiers: approximation \"probably\", relation \"of\" total adult population, point in time? Not needed.\n\nWe need to include qualifiers structure. For negative qualifiers: relation \"polarity\", object \"negative\". For each exclude triplet, we add qualifier polarity negative? Actually the claim \"not a foreign resident\" is that foreign residents are not eligible. So the triplet could be (Athenian democracy, voting eligibility, foreign resident) with qualifier polarity negative. So we can have single relation \"voting eligibility\". We'll create three separate triplets each with qualifier polarity negative.\n\nNow produce JSON list.\n\nSubject_type for each: Athenian democracy – political system. Object_type for each: direct democracy – political system, voting system – voting system? We'll set \"voting system\". For adult male citizen – demographic group. For foreign resident etc – demographic group. For 30 percent – percentage.\n\nAdd qualifiers for proportion: approximation \"probably\". Also qualifier \"of\" total adult population.\n\nNow output.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1666,
+      "total_tokens": 3381,
+      "completion_tokens": 1715,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"instance of\",\n            \"object\": \"direct democracy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"political system\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting method\",\n            \"object\": \"direct voting on legislation and executive bills\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"voting system\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting eligibility\",\n            \"object\": \"adult male citizen\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"demographic group\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting eligibility\",\n            \"object\": \"foreign resident\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"demographic group\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting eligibility\",\n            \"object\": \"slave\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"demographic group\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"voting eligibility\",\n            \"object\": \"woman\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"demographic group\"\n        },\n        {\n            \"subject\": \"Athenian democracy\",\n            \"relation\": \"proportion of eligible voters\",\n            \"object\": \"30 percent\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"probably\"\n                },\n                {\n                    \"relation\": \"of\",\n                    \"object\": \"total adult population\"\n                }\n            ],\n            \"subject_type\": \"political system\",\n            \"object_type\": \"percentage\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Athenian democracy",
+        "relation": "instance of",
+        "object": "direct democracy",
+        "qualifiers": [],
+        "subject_type": "political system",
+        "object_type": "political system"
+      },
+      {
+        "subject": "Athenian democracy",
+        "relation": "voting method",
+        "object": "direct voting on legislation and executive bills",
+        "qualifiers": [],
+        "subject_type": "political system",
+        "object_type": "voting system"
+      },
+      {
+        "subject": "Athenian democracy",
+        "relation": "voting eligibility",
+        "object": "adult male citizen",
+        "qualifiers": [],
+        "subject_type": "political system",
+        "object_type": "demographic group"
+      },
+      {
+        "subject": "Athenian democracy",
+        "relation": "voting eligibility",
+        "object": "foreign resident",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "political system",
+        "object_type": "demographic group"
+      },
+      {
+        "subject": "Athenian democracy",
+        "relation": "voting eligibility",
+        "object": "slave",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "political system",
+        "object_type": "demographic group"
+      },
+      {
+        "subject": "Athenian democracy",
+        "relation": "voting eligibility",
+        "object": "woman",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "political system",
+        "object_type": "demographic group"
+      },
+      {
+        "subject": "Athenian democracy",
+        "relation": "proportion of eligible voters",
+        "object": "30 percent",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "probably"
+          },
+          {
+            "relation": "of",
+            "object": "total adult population"
+          }
+        ],
+        "subject_type": "political system",
+        "object_type": "percentage"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1666,
+    "total_tokens": 3381,
+    "completion_tokens": 1715,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 753,
+    "output_tokens_est": 660
+  },
+  "attempts": 1,
+  "latency_s": 20.11983047000831,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:02:14.645183+00:00",
+  "cache_key": "8b8e1ddeabe8e50da26108d3524d044b"
+}

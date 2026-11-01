@@ -1,0 +1,141 @@
+{
+  "task": {
+    "input_id": "1d7601303027fa73",
+    "input_hash": "b7a8d6bc47cf4de713f44bcdf2109f65be82168bd013568b0f21f166b1167cfe",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-a6f875a9c74dcd8d1611a1aa3594b061",
+    "object": "chat.completion",
+    "created": 1791548919,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"instance of\",\n            \"object\": \"Tournament of Nations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"sports tournament series\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"ordinal\",\n            \"object\": \"2\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"sport\",\n            \"object\": \"women's football\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"competition format\",\n            \"object\": \"friendly\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"competition format\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"location\",\n            \"object\": \"United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start date\",\n                    \"object\": \"26 July 2018\"\n                },\n                {\n                    \"relation\": \"end date\",\n                    \"object\": \"2 August 2018\"\n                }\n            ],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"participant\",\n            \"object\": \"same four teams as the previous tournament\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"team group\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText describes \"2018 Tournament of Nations\". It's the second Tournament of Nations, an international women's football tournament, consisting of a series of friendly games. It was held in the United States, from July 26 to August 2, 2018, and featured the same four teams as the previous tournament.\n\nWe need to extract facts:\n\n- Subject: 2018 Tournament of Nations (entity type: tournament maybe \"sports tournament\").\n- relation: instance of? Might be \"edition of\" maybe \"second\". Could be \"position in series\". Use relation \"edition\" or \"instance of\"? Not given list but we can use \"edition\" maybe. But we need specific Wikidata-style relations. Could use \"instance of\" = tournament. Also \"series ordinal\" = second. Could use \"ordinal\" qualifier.\n\nBetter: Triplet: (2018 Tournament of Nations, instance of, Tournament of Nations). But we might also have (2018 Tournament of Nations, edition number, 2). Use relation \"ordinal\" maybe. Not sure.\n\n- relation: sport, object: women's football (or association football). Use \"sport\". object_type: sport.\n\n- relation: tournament type: \"friendly tournament\" maybe \"type of competition\". Use \"competition format\" = friendly.\n\n- relation: location: United States. qualifier: point in time? Actually held in US, from July 26 to August 2, 2018. So we could have (2018 Tournament of Nations, location, United States) with qualifiers point in time start and end? Could have two qualifiers: \"start date\" and \"end date\". Use qualifiers: {\"relation\":\"start date\",\"object\":\"26 July 2018\"} and {\"relation\":\"end date\",\"object\":\"2 August 2018\"}.\n\n- relation: date: maybe \"point in time\" for event as whole? Could also add \"point in time\" qualifier with range? We'll use start and end.\n\n- relation: participant: four teams. Not named. Could just say \"same four teams as the previous tournament\". That's a relation: \"participants\" linking to \"same four teams as the previous tournament\". Might be ambiguous. Could also add relation \"participants\" with object \"same four teams as the previous tournament\". But object should be entity. Might be okay to use phrase.\n\nBetter to extract: (2018 Tournament of Nations, participant, previous tournament's four teams). But maybe we skip because not explicit names.\n\nBut we have: \"featured the same four teams as the previous tournament.\" So we could have relation \"featured teams\" object \"same four teams as the previous tournament\". We'll include.\n\nAlso relation: \"previous tournament\" = 2017 Tournament of Nations? Not given. So we can have qualifier linking to previous tournament entity.\n\nWe also have relation: \"held in\" maybe \"location\". Already.\n\nNow types:\n\nsubject_type: tournament (sports competition)\nobject_type vary: tournament (for instance of), sport (sport), country (geopolitical entity), date (date), etc.\n\nLet's construct list:\n\n1. (2018 Tournament of Nations, instance of, Tournament of Nations) qualifiers none. subject_type \"sports tournament\", object_type \"sports tournament series\"? maybe \"sports competition series\".\n\n2. (2018 Tournament of Nations, ordinal, \"2\") maybe relation \"ordinal\". object_type \"integer\". qualifiers none.\n\n3. (2018 Tournament of Nations, sport, women's football) object_type \"sport\". subject_type \"sports tournament\".\n\n4. (2018 Tournament of Nations, competition format, friendly) object_type \"competition format\". maybe \"friendly match\".\n\n5. (2018 Tournament of Nations, location, United States) qualifiers start date, end date.\n\n6. (2018 Tournament of Nations, participant, same four teams as the previous tournament) qualifiers none.\n\nSubject_type for each: \"sports tournament\". object_type accordingly.\n\nLet's format qualifiers list.\n\nFor #5 qualifiers: start date, end date.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1651,
+      "total_tokens": 2870,
+      "completion_tokens": 1219,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"instance of\",\n            \"object\": \"Tournament of Nations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"sports tournament series\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"ordinal\",\n            \"object\": \"2\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"sport\",\n            \"object\": \"women's football\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"competition format\",\n            \"object\": \"friendly\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"competition format\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"location\",\n            \"object\": \"United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start date\",\n                    \"object\": \"26 July 2018\"\n                },\n                {\n                    \"relation\": \"end date\",\n                    \"object\": \"2 August 2018\"\n                }\n            ],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"2018 Tournament of Nations\",\n            \"relation\": \"participant\",\n            \"object\": \"same four teams as the previous tournament\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports tournament\",\n            \"object_type\": \"team group\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "2018 Tournament of Nations",
+        "relation": "instance of",
+        "object": "Tournament of Nations",
+        "qualifiers": [],
+        "subject_type": "sports tournament",
+        "object_type": "sports tournament series"
+      },
+      {
+        "subject": "2018 Tournament of Nations",
+        "relation": "ordinal",
+        "object": "2",
+        "qualifiers": [],
+        "subject_type": "sports tournament",
+        "object_type": "integer"
+      },
+      {
+        "subject": "2018 Tournament of Nations",
+        "relation": "sport",
+        "object": "women's football",
+        "qualifiers": [],
+        "subject_type": "sports tournament",
+        "object_type": "sport"
+      },
+      {
+        "subject": "2018 Tournament of Nations",
+        "relation": "competition format",
+        "object": "friendly",
+        "qualifiers": [],
+        "subject_type": "sports tournament",
+        "object_type": "competition format"
+      },
+      {
+        "subject": "2018 Tournament of Nations",
+        "relation": "location",
+        "object": "United States",
+        "qualifiers": [
+          {
+            "relation": "start date",
+            "object": "26 July 2018"
+          },
+          {
+            "relation": "end date",
+            "object": "2 August 2018"
+          }
+        ],
+        "subject_type": "sports tournament",
+        "object_type": "country"
+      },
+      {
+        "subject": "2018 Tournament of Nations",
+        "relation": "participant",
+        "object": "same four teams as the previous tournament",
+        "qualifiers": [],
+        "subject_type": "sports tournament",
+        "object_type": "team group"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1651,
+    "total_tokens": 2870,
+    "completion_tokens": 1219,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 579,
+    "output_tokens_est": 486
+  },
+  "attempts": 1,
+  "latency_s": 15.142832951998571,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:28:54.850758+00:00",
+  "cache_key": "c16732cc4d34492de2ee44adf0ce3d9e"
+}

@@ -1,0 +1,177 @@
+{
+  "task": {
+    "input_id": "0a7490b0b7c71f40",
+    "input_hash": "617949f535601faeb1b369e1c1d05ba7afd5ad7caa2183f6ed7eff6e7540704e",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-1134af8afc5d27e4be47cfe094b6a4b7",
+    "object": "chat.completion",
+    "created": 1791547314,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"series finale of\",\n            \"object\": \"Star Trek: Voyager\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"episode number\",\n            \"object\": \"25\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"season\",\n                    \"object\": \"7\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"episode number\",\n            \"object\": \"26\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"season\",\n                    \"object\": \"7\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"overall episode number\",\n            \"object\": \"171\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"overall episode number\",\n            \"object\": \"172\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"date of first broadcast\",\n            \"object\": \"May 23, 2001\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"broadcast network\",\n                    \"object\": \"UPN\"\n                },\n                {\n                    \"relation\": \"format\",\n                    \"object\": \"double-length episode\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"media release\",\n            \"object\": \"DVD collection\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"format\",\n                    \"object\": \"double-length episode\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"media collection\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"broadcast format\",\n            \"object\": \"two-part story\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"broadcast type\",\n                    \"object\": \"syndicated\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"narrative format\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need extract facts from the text. Let's parse.\n\nText mentions:\n\n- \"Endgame (Star Trek: Voyager)\" title.\n\n- \"Endgame is the series finale of the American science fiction television series Star Trek: Voyager, episodes 25 and 26 of the seventh season and 171 and 172 in the overall series.\"\n\nSo facts:\n\n1. Endgame (subject) - relation: \"instance of\" maybe \"episode\"? but we need use specific relation. Could be \"part of series\" or \"series finale of\". There's relation \"series finale of\". We'll use relation \"series finale of\". Object: \"Star Trek: Voyager\". subject_type: maybe \"television episode\". object_type: \"television series\".\n\n2. Endgame - relation: \"episode number\" maybe multiple. It is episodes 25 and 26 of the seventh season. So we may create two triplets: (Endgame, episode number, 25) with qualifier season 7? Actually \"episode number\" maybe ambiguous. Could use relation \"episode number\" and qualifier \"season\" = 7. Also another for 26. Or could have relation \"part of season\" etc. Simpler: (Endgame, part of season, \"season 7\") with qualifiers episode numbers 25 and 26. But guidelines: split coordinated subjects/objects. We'll produce two triplets: (Endgame, episode number, 25) and (Endgame, episode number, 26) with qualifier \"season\" -> 7.\n\nSimilarly overall series numbers: 171 and 172. So two more triplets: (Endgame, overall episode number, 171) and (Endgame, overall episode number, 172). qualifiers none.\n\n3. \"It was originally shown May 23, 2001 on the UPN network as a double-length episode\". So triplet: (Endgame, first broadcast date, \"May 23, 2001\") with qualifier \"broadcast network\" = \"UPN\". Also qualifier \"format\" = \"double-length episode\". Need relation names: \"date of first broadcast\" maybe \"publication date\". We'll use \"date of first broadcast\". object_type date. Qualifiers: broadcast network, format.\n\n4. \"later presented as such in DVD collections\". So (Endgame, format, \"double-length episode\") maybe already captured. Could also have (Endgame, media release, \"DVD collection\") with qualifier \"format\" = \"double-length\". But the text says \"later presented as such in DVD collections\". So fact: Endgame was presented as double-length episode in DVD collections. We'll maybe create (Endgame, media format, \"DVD collection\") with qualifier \"presentation\" = \"double-length\". Not sure.\n\n5. \"but it is shown in syndicated broadcasts as a two-part story.\" So (Endgame, broadcast version, \"two-part story\") with qualifier \"syndicated broadcasts\". Could also be relation \"syndicated broadcast format\". We'll produce (Endgame, broadcast format, \"two-part story\") with qualifier \"broadcast type\" = \"syndicated\".\n\nNeed subject_type: \"television episode\". object_type: appropriate.\n\nDefine relations: Use Wikidata-like: \"series finale of\", \"episode number\", \"overall episode number\", \"date of first broadcast\", \"broadcast network\", \"format\", \"media release\", \"broadcast format\". Acceptable.\n\nMake qualifiers list of dicts.\n\nNow construct JSON.\n\nList of triplets:\n\n1. subject Endgame, relation series finale of, object Star Trek: Voyager, qualifiers none, subject_type television episode, object_type television series.\n\n2. Endgame, episode number, 25, qualifiers [{relation:\"season\", object:\"7\"}], subject_type television episode, object_type integer? maybe \"episode number\". Use object_type \"integer\". Similarly for 26.\n\n3. Endgame, episode number, 26, qualifier season 7.\n\n4. Endgame, overall episode number, 171, qualifiers none (maybe also season? not needed). subject_type tv episode, object_type integer.\n\n5. Endgame, overall episode number, 172, qualifiers none.\n\n6. Endgame, date of first broadcast, May 23, 2001, qualifiers [{relation:\"broadcast network\", object:\"UPN\"}, {relation:\"format\", object:\"double-length episode\"}], subject_type tv episode, object_type date.\n\n7. Endgame, media release, \"DVD collection\", qualifiers [{relation:\"format\", object:\"double-length episode\"}], subject_type tv episode, object_type \"media collection\".\n\n8. Endgame, broadcast format, \"two-part story\", qualifiers [{relation:\"broadcast type\", object:\"syndicated\"}], subject_type tv episode, object_type \"narrative format\".\n\nCheck qualifiers naming: Use \"relation\": \"broadcast network\". Good.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1680,
+      "total_tokens": 3255,
+      "completion_tokens": 1575,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"series finale of\",\n            \"object\": \"Star Trek: Voyager\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"television series\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"episode number\",\n            \"object\": \"25\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"season\",\n                    \"object\": \"7\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"episode number\",\n            \"object\": \"26\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"season\",\n                    \"object\": \"7\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"overall episode number\",\n            \"object\": \"171\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"overall episode number\",\n            \"object\": \"172\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"integer\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"date of first broadcast\",\n            \"object\": \"May 23, 2001\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"broadcast network\",\n                    \"object\": \"UPN\"\n                },\n                {\n                    \"relation\": \"format\",\n                    \"object\": \"double-length episode\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"media release\",\n            \"object\": \"DVD collection\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"format\",\n                    \"object\": \"double-length episode\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"media collection\"\n        },\n        {\n            \"subject\": \"Endgame\",\n            \"relation\": \"broadcast format\",\n            \"object\": \"two-part story\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"broadcast type\",\n                    \"object\": \"syndicated\"\n                }\n            ],\n            \"subject_type\": \"television episode\",\n            \"object_type\": \"narrative format\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Endgame",
+        "relation": "series finale of",
+        "object": "Star Trek: Voyager",
+        "qualifiers": [],
+        "subject_type": "television episode",
+        "object_type": "television series"
+      },
+      {
+        "subject": "Endgame",
+        "relation": "episode number",
+        "object": "25",
+        "qualifiers": [
+          {
+            "relation": "season",
+            "object": "7"
+          }
+        ],
+        "subject_type": "television episode",
+        "object_type": "integer"
+      },
+      {
+        "subject": "Endgame",
+        "relation": "episode number",
+        "object": "26",
+        "qualifiers": [
+          {
+            "relation": "season",
+            "object": "7"
+          }
+        ],
+        "subject_type": "television episode",
+        "object_type": "integer"
+      },
+      {
+        "subject": "Endgame",
+        "relation": "overall episode number",
+        "object": "171",
+        "qualifiers": [],
+        "subject_type": "television episode",
+        "object_type": "integer"
+      },
+      {
+        "subject": "Endgame",
+        "relation": "overall episode number",
+        "object": "172",
+        "qualifiers": [],
+        "subject_type": "television episode",
+        "object_type": "integer"
+      },
+      {
+        "subject": "Endgame",
+        "relation": "date of first broadcast",
+        "object": "May 23, 2001",
+        "qualifiers": [
+          {
+            "relation": "broadcast network",
+            "object": "UPN"
+          },
+          {
+            "relation": "format",
+            "object": "double-length episode"
+          }
+        ],
+        "subject_type": "television episode",
+        "object_type": "date"
+      },
+      {
+        "subject": "Endgame",
+        "relation": "media release",
+        "object": "DVD collection",
+        "qualifiers": [
+          {
+            "relation": "format",
+            "object": "double-length episode"
+          }
+        ],
+        "subject_type": "television episode",
+        "object_type": "media collection"
+      },
+      {
+        "subject": "Endgame",
+        "relation": "broadcast format",
+        "object": "two-part story",
+        "qualifiers": [
+          {
+            "relation": "broadcast type",
+            "object": "syndicated"
+          }
+        ],
+        "subject_type": "television episode",
+        "object_type": "narrative format"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1680,
+    "total_tokens": 3255,
+    "completion_tokens": 1575,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 811,
+    "output_tokens_est": 718
+  },
+  "attempts": 1,
+  "latency_s": 18.775426159991184,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:02:13.299026+00:00",
+  "cache_key": "35386d541e2a6a503809739844838aea"
+}

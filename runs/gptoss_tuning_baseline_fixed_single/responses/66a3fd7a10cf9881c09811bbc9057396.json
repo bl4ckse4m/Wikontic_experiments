@@ -1,0 +1,154 @@
+{
+  "task": {
+    "input_id": "bf7cd504cd365456",
+    "input_hash": "7a89f41d47f1cbe0754daf1d43ceada92894df6eddcad1384875324fb7c3b870",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c5c140e564909d76b5322aba022461a8",
+    "object": "chat.completion",
+    "created": 1791513074,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"recorded by\",\n            \"object\": \"Elvis Presley\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"recording date\",\n            \"object\": \"October 1976\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"last single released before death of\",\n            \"object\": \"Elvis Presley\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"16 August 1977\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"writer\",\n            \"object\": \"Layng Martine, Jr.\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"cover version by\",\n            \"object\": \"Status Quo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical group\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"cover version by\",\n            \"object\": \"Cliffhanger\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical group\"\n        },\n        {\n            \"subject\": \"Elvis Presley\",\n            \"relation\": \"recorded\",\n            \"object\": \"Way Down\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Graceland\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"29 October 1976\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"song\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: Way Down (song), Elvis Presley (human), October 1976 (date), August 16, 1977 (date), Layng Martine, Jr. (human), Status Quo (band), Cliffhanger (band? maybe group), Graceland (place), 29 October 1976 (date).\n\nRelations: \"instance of\" maybe song, but not required. We can include \"recorded by\", \"recording date\", \"release date\"? The text: \"Way Down is a song recorded by Elvis Presley.\" So triplet: Way Down - recorded by - Elvis Presley. subject_type: song, object_type: human.\n\n\"Recorded in October 1976\" refers to the recording date of the song. So Way Down - recording date - October 1976. qualifiers maybe point in time? Actually the date is the object. So object_type: date.\n\n\"It was his last single released before his death on August 16, 1977.\" So Way Down - last single released before death of - Elvis Presley? Might be \"last single released before death\" relation. Could be \"last single before death\" but maybe we can capture: Way Down - last single released before death - Elvis Presley (qualifier point in time: August 16, 1977). Or simpler: Way Down - release date - August 16, 1977? Actually death date is August 16, 1977, not release date. The text says \"last single released before his death on August 16, 1977.\" So we can have triplet: Way Down - last single released before death of - Elvis Presley, qualifiers: point in time = August 16, 1977. Subject_type song, object_type human.\n\n\"The song was written by Layng Martine, Jr.\" So Way Down - writer - Layng Martine, Jr. (subject_type song, object_type human).\n\n\"and was later covered by Status Quo and Cliffhanger.\" So Way Down - cover version by - Status Quo (qualifier maybe point in time unknown). Also Way Down - cover version by - Cliffhanger.\n\n\"Presley recorded the song at his home studio in Graceland on 29 October 1976.\" So Elvis Presley - recorded - Way Down, qualifiers: location = Graceland, point in time = 29 October 1976. Or we could have Way Down - recorded at - Graceland (qualifier point in time). But better: Elvis Presley - recorded - Way Down with qualifiers.\n\nWe need to include subject_type and object_type for each.\n\nDefine types: song (song), human (human), date (date), band (musical group), place (location). For cover version by, object_type: musical group.\n\nNow produce JSON list.\n\nLet's craft triplets:\n\n1. subject: Way Down, relation: instance of, object: song? Not required but could include. But example didn't include instance of. Might be okay but not necessary. We'll include main facts.\n\nTriplet list:\n\n- Way Down - recorded by - Elvis Presley (qualifiers none). subject_type: song, object_type: human.\n\n- Way Down - recording date - October 1976 (subject_type song, object_type date). Possibly qualifier: point in time? Not needed.\n\n- Way Down - last single released before death of - Elvis Presley, qualifiers: point in time: August 16, 1977. subject_type song, object_type human.\n\n- Way Down - writer - Layng Martine, Jr. subject_type song, object_type human.\n\n- Way Down - cover version by - Status Quo. subject_type song, object_type musical group.\n\n- Way Down - cover version by - Cliffhanger. subject_type song, object_type musical group.\n\n- Elvis Presley - recorded - Way Down, qualifiers: location: Graceland, point in time: 29 October 1976. subject_type human, object_type song.\n\n- Graceland - location type? Not needed as object.\n\nWe need to ensure qualifiers format: list of dicts with relation and object.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1017,
+      "total_tokens": 2334,
+      "completion_tokens": 1317,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"recorded by\",\n            \"object\": \"Elvis Presley\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"recording date\",\n            \"object\": \"October 1976\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"last single released before death of\",\n            \"object\": \"Elvis Presley\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"16 August 1977\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"writer\",\n            \"object\": \"Layng Martine, Jr.\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"cover version by\",\n            \"object\": \"Status Quo\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical group\"\n        },\n        {\n            \"subject\": \"Way Down\",\n            \"relation\": \"cover version by\",\n            \"object\": \"Cliffhanger\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"musical group\"\n        },\n        {\n            \"subject\": \"Elvis Presley\",\n            \"relation\": \"recorded\",\n            \"object\": \"Way Down\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Graceland\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"29 October 1976\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"song\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Way Down",
+        "relation": "recorded by",
+        "object": "Elvis Presley",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Way Down",
+        "relation": "recording date",
+        "object": "October 1976",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "date"
+      },
+      {
+        "subject": "Way Down",
+        "relation": "last single released before death of",
+        "object": "Elvis Presley",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "16 August 1977"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Way Down",
+        "relation": "writer",
+        "object": "Layng Martine, Jr.",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Way Down",
+        "relation": "cover version by",
+        "object": "Status Quo",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "musical group"
+      },
+      {
+        "subject": "Way Down",
+        "relation": "cover version by",
+        "object": "Cliffhanger",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "musical group"
+      },
+      {
+        "subject": "Elvis Presley",
+        "relation": "recorded",
+        "object": "Way Down",
+        "qualifiers": [
+          {
+            "relation": "location",
+            "object": "Graceland"
+          },
+          {
+            "relation": "point in time",
+            "object": "29 October 1976"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "song"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1017,
+    "total_tokens": 2334,
+    "completion_tokens": 1317,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 630,
+    "output_tokens_est": 532
+  },
+  "attempts": 1,
+  "latency_s": 15.841220041998895,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:31:30.563970+00:00",
+  "cache_key": "66a3fd7a10cf9881c09811bbc9057396"
+}

@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "91fc895f36d0b55a",
+    "input_hash": "1ee92ebc878c7b843f76d2ba6e610a089cbb3c59d4c6a9862a60cc9974d5ef78",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-012f8e372cdea08ec992ca5ec0b6e8ed",
+    "object": "chat.completion",
+    "created": 1791505082,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Problems of Philosophy\",\n            \"relation\": \"instance of\",\n            \"object\": \"book\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"class\"\n        },\n        {\n            \"subject\": \"The Problems of Philosophy\",\n            \"relation\": \"author\",\n            \"object\": \"Bertrand Russell\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"The Problems of Philosophy\",\n            \"relation\": \"publication date\",\n            \"object\": \"1912\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"The Problems of Philosophy\",\n            \"relation\": \"subject\",\n            \"object\": \"philosophy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"field of study\"\n        },\n        {\n            \"subject\": \"Bertrand Russell\",\n            \"relation\": \"focuses on\",\n            \"object\": \"knowledge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Bertrand Russell\",\n            \"relation\": \"focuses on\",\n            \"object\": \"metaphysics\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of study\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"The Problems of Philosophy\n\nThe Problems of Philosophy is a 1912 book by Bertrand Russell, in which the author attempts to create a brief and accessible guide to the problems of philosophy. Focusing on problems he believes will provoke positive and constructive discussion, Russell concentrates on knowledge rather than metaphysics: If it is uncertain that external objects exist, how can we then have knowledge of them but by probability. There is no reason to doubt the existence of external objects simply because of sense data.\"\n\nWe need to extract factual relationships.\n\nEntities: \"The Problems of Philosophy\" (book), \"1912\" (date), \"Bertrand Russell\" (human), \"author\" refers to Russell, \"guide to the problems of philosophy\" maybe a work, but we can capture that the book is a guide? The text says \"attempts to create a brief and accessible guide to the problems of philosophy.\" So we can have relation \"subject\" maybe \"purpose\" or \"objective\". Use \"aims to create\" maybe relation \"objective\". Not sure about allowed relations; we need to use Wikidata-style predicates. Could use \"has author\", \"publication date\", \"genre\", \"topic\", \"focus\". Let's think typical Wikidata properties: \"author\" (P50), \"publication date\" (P577), \"instance of\" (P31) = book, \"subject\" (P921) = philosophy, \"focus\" maybe \"field of work\". \"knowledge\" vs \"metaphysics\" not a factual relation but a statement of concentration: \"Russell concentrates on knowledge rather than metaphysics.\" Could be relation \"focuses on\" with object \"knowledge\". Also \"does not focus on\" \"metaphysics\". Might be too interpretive.\n\nWe also have statements about external objects existence and knowledge; these are philosophical claims, not factual relationships about entities. Probably we ignore them because they are not factual statements about entities but about philosophical positions. However they are claims: \"There is no reason to doubt the existence of external objects simply because of sense data.\" That's a claim, but we could encode as (external objects, existence, asserted) but not typical. Probably we skip philosophical content.\n\nThus extract:\n\n1. (The Problems of Philosophy, instance of, book)\n2. (The Problems of Philosophy, author, Bertrand Russell)\n3. (The Problems of Philosophy, publication date, 1912)\n4. (The Problems of Philosophy, subject, philosophy) maybe \"problems of philosophy\" but that's the title. Could use \"topic\" = \"philosophy\".\n5. (Bertrand Russell, aims to create, guide to the problems of philosophy) maybe not needed.\nBetter: (Bertrand Russell, work, The Problems of Philosophy) but that's same as author.\n\nAlso \"The Problems of Philosophy\" attempts to create a brief and accessible guide to the problems of philosophy. Could be relation \"has purpose\" with object \"brief and accessible guide to the problems of philosophy\". Might be okay.\n\nAlso \"Russell concentrates on knowledge rather than metaphysics.\" Could be (Bertrand Russell, focus, knowledge) and maybe qualifier \"negative\" for metaphysics? Not sure.\n\nWe need subject_type and object_type.\n\nDefine types: book (book), human (human), date (date), philosophy (field of study), knowledge (concept), metaphysics (field of study), guide (document? maybe \"guide\").\n\nLet's produce triplets:\n\nTriplet 1:\nsubject: \"The Problems of Philosophy\"\nrelation: \"instance of\"\nobject: \"book\"\nqualifiers: []\nsubject_type: \"book\"\nobject_type: \"class\"\n\nTriplet 2:\nsubject: \"The Problems of Philosophy\"\nrelation: \"author\"\nobject: \"Bertrand Russell\"\nqualifiers: []\nsubject_type: \"book\"\nobject_type: \"human\"\n\nTriplet 3:\nsubject: \"The Problems of Philosophy\"\nrelation: \"publication date\"\nobject: \"1912\"\nqualifiers: []\nsubject_type: \"book\"\nobject_type: \"date\"\n\nTriplet 4:\nsubject: \"The Problems of Philosophy\"\nrelation: \"subject\"\nobject: \"philosophy\"\nqualifiers: []\nsubject_type: \"book\"\nobject_type: \"field of study\"\n\nTriplet 5:\nsubject: \"Bertrand Russell\"\nrelation: \"focuses on\"\nobject: \"knowledge\"\nqualifiers: []\nsubject_type: \"human\"\nobject_type: \"concept\"\n\nTriplet 6:\nsubject: \"Bertrand Russell\"\nrelation: \"does not focus on\"\nobject: \"metaphysics\"\nqualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"}]? Actually we need to represent negative claim: \"rather than metaphysics\" indicates he does not concentrate on metaphysics. Could encode as polarity negative on relation \"focuses on\". So we could have (Bertrand Russell, focuses on, metaphysics) with qualifier polarity negative. That matches guidelines.\n\nThus Triplet 6:\nsubject: \"Bertrand Russell\"\nrelation: \"focuses on\"\nobject: \"metaphysics\"\nqualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"}]\nsubject_type: \"human\"\nobject_type: \"field of study\"\n\nTriplet 7: maybe (Bertrand Russell, created, \"brief and accessible guide to the problems of philosophy\") but that's similar to book's purpose. Could be (The Problems of Philosophy, aim, \"brief and accessible guide to the problems of philosophy\") but object is phrase. Might be okay.\n\nBut we need to keep object as a named entity or concept. \"brief and accessible guide to the problems of philosophy\" is a description. Could treat as \"guide\". So (The Problems of Philosophy, purpose, \"guide to the problems of philosophy\") with qualifier \"description\" maybe not needed.\n\nSimplify: skip.\n\nThus produce JSON with list of 6 triplets.\n\nCheck qualifiers: only triplet 6 has qualifier.\n\nMake sure each dict includes qualifiers list (empty list if none). Provide subject_type and object_type.\n\nDefine object_type for \"knowledge\" as \"concept\". For \"metaphysics\" as \"field of study\". For \"philosophy\" as \"field of study\". For \"book\" object_type \"class\". For \"author\" object_type \"human\". For \"publication date\" object_type \"date\". For \"instance of\" object_type \"class\". Good.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1682,
+      "total_tokens": 3357,
+      "completion_tokens": 1675,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"The Problems of Philosophy\",\n            \"relation\": \"instance of\",\n            \"object\": \"book\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"class\"\n        },\n        {\n            \"subject\": \"The Problems of Philosophy\",\n            \"relation\": \"author\",\n            \"object\": \"Bertrand Russell\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"The Problems of Philosophy\",\n            \"relation\": \"publication date\",\n            \"object\": \"1912\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"The Problems of Philosophy\",\n            \"relation\": \"subject\",\n            \"object\": \"philosophy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"book\",\n            \"object_type\": \"field of study\"\n        },\n        {\n            \"subject\": \"Bertrand Russell\",\n            \"relation\": \"focuses on\",\n            \"object\": \"knowledge\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Bertrand Russell\",\n            \"relation\": \"focuses on\",\n            \"object\": \"metaphysics\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"field of study\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "The Problems of Philosophy",
+        "relation": "instance of",
+        "object": "book",
+        "qualifiers": [],
+        "subject_type": "book",
+        "object_type": "class"
+      },
+      {
+        "subject": "The Problems of Philosophy",
+        "relation": "author",
+        "object": "Bertrand Russell",
+        "qualifiers": [],
+        "subject_type": "book",
+        "object_type": "human"
+      },
+      {
+        "subject": "The Problems of Philosophy",
+        "relation": "publication date",
+        "object": "1912",
+        "qualifiers": [],
+        "subject_type": "book",
+        "object_type": "date"
+      },
+      {
+        "subject": "The Problems of Philosophy",
+        "relation": "subject",
+        "object": "philosophy",
+        "qualifiers": [],
+        "subject_type": "book",
+        "object_type": "field of study"
+      },
+      {
+        "subject": "Bertrand Russell",
+        "relation": "focuses on",
+        "object": "knowledge",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "concept"
+      },
+      {
+        "subject": "Bertrand Russell",
+        "relation": "focuses on",
+        "object": "metaphysics",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "field of study"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1682,
+    "total_tokens": 3357,
+    "completion_tokens": 1675,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 504,
+    "output_tokens_est": 412
+  },
+  "attempts": 1,
+  "latency_s": 20.491534841996327,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:18:23.470968+00:00",
+  "cache_key": "dc6870ac22c821d46a5bbffc3c646c18"
+}

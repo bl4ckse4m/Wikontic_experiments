@@ -1,0 +1,193 @@
+{
+  "task": {
+    "input_id": "5230fbb1d9818b10",
+    "input_hash": "dbba9b83227371a74a1bf998485bfa19a8aa431c4892349558c39cc0fbbfde1a",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-2099e745e805a09ac97f8048da7019dd",
+    "object": "chat.completion",
+    "created": 1791503123,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"instance of\",\n            \"object\": \"country\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"class\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"located in\",\n            \"object\": \"North America\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"continent\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"number of provinces\",\n            \"object\": \"10\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"number of territories\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"has coast on\",\n            \"object\": \"Atlantic Ocean\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"ocean\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"has coast on\",\n            \"object\": \"Pacific Ocean\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"ocean\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"has coast on\",\n            \"object\": \"Arctic Ocean\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"ocean\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"rank by total area\",\n            \"object\": \"2\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ranking type\",\n                    \"object\": \"second-largest\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"shares land border with\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"capital\",\n            \"object\": \"Ottawa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"capital city\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"largest metropolitan area\",\n            \"object\": \"Toronto\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"largest metropolitan area\",\n            \"object\": \"Montreal\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"largest metropolitan area\",\n            \"object\": \"Vancouver\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts from the text.\n\nText:\n\n\"Canada\n\nCanada ( ) is a country in the northern part of North America. Its ten provinces and three territories extend from the Atlantic to the Pacific and northward into the Arctic Ocean, covering , making it the world's second-largest country by total area. Its southern border with the United States, stretching some , is the world's longest bi-national land border. Canada's capital is Ottawa, and its three largest metropolitan areas are Toronto, Montreal, and Vancouver.\"\n\nThere are missing numbers (placeholders) like covering , stretching some , but we ignore missing values. We extract explicit facts:\n\n- Canada is a country.\n- Canada is located in the northern part of North America. Relation maybe \"located in\" or \"continent\". Use \"located in\" with object \"North America\". Could also use \"region\" but we choose \"located in\". subject_type: \"country\". object_type: \"continent\".\n\n- Canada has ten provinces and three territories. Could be two facts: \"Canada\" \"has administrative division count\" but we need explicit: \"Canada\" \"has administrative division\" \"province\" with qualifier count? Might be better: \"Canada\" \"has part\" \"province\" (subject_type country, object_type administrative division). But we need to capture number: \"ten provinces\" and \"three territories\". Could create two triplets: (Canada, number of provinces, 10) and (Canada, number of territories, 3). Use relation \"number of provinces\" and \"number of territories\". object_type \"quantity\". We'll include qualifiers? Not needed.\n\n- The provinces and territories extend from the Atlantic to the Pacific and northward into the Arctic Ocean. That's a description of extent. Could capture \"Canada\" \"has coast on\" \"Atlantic Ocean\", \"Pacific Ocean\", \"Arctic Ocean\". Use separate triplets.\n\n- Canada covering (missing area). Not present.\n\n- Canada is the world's second-largest country by total area. So (Canada, rank by total area, 2) with qualifier \"ranking type\" maybe \"second-largest\". Use relation \"ranking by total area\" object \"2\". Also maybe \"world's second-largest country\" as \"ranking\" but we can capture as (Canada, rank by total area, 2). object_type \"quantity\". Add qualifier \"qualifier\": {\"relation\":\"ranking type\",\"object\":\"second-largest\"}? Not needed.\n\n- Its southern border with the United States, stretching some , is the world's longest bi-national land border. So (Canada, shares border with, United States). Also (Canada, border length, ???) missing. Also (Canada, longest bi-national land border, world) but we can capture: (Canada, border type, \"land border\")? Better: (Canada, longest bi-national land border, \"world\")? Might be too complex. We'll capture (Canada, shares land border with, United States). Also maybe (Canada, border length ranking, \"longest\") but not explicit.\n\n- Canada's capital is Ottawa. So (Canada, capital, Ottawa).\n\n- Canada's three largest metropolitan areas are Toronto, Montreal, and Vancouver. So three triplets: (Canada, largest metropolitan area, Toronto) etc. Could also include qualifier rank (1,2,3). Not required.\n\nNow assign subject_type and object_type.\n\n- Canada: country.\n- North America: continent.\n- provinces: administrative division (province). object_type \"province\".\n- territories: \"territory\".\n- Atlantic Ocean: \"ocean\".\n- Pacific Ocean: \"ocean\".\n- Arctic Ocean: \"ocean\".\n- United States: \"country\".\n- Ottawa: \"capital city\".\n- Toronto, Montreal, Vancouver: \"city\" or \"metropolitan area\". Use \"city\".\n\n- rank by total area: object_type \"quantity\". Could also be \"ordinal\". Use \"quantity\".\n\n- number of provinces: object_type \"quantity\". same for territories.\n\nNow qualifiers: none needed except maybe for ranking. Could add qualifier \"ranking type\": \"second-largest\". But we already have rank 2. Might be okay.\n\nLet's construct JSON.\n\nTriplets list:\n\n1. Canada - instance of - country? Not needed maybe but we can include \"instance of\". But not explicit. The text says \"Canada ... is a country\". So relation \"instance of\" with object \"country\". Use relation \"instance of\". object_type \"class\". subject_type \"country\"? Actually subject_type \"country\". object_type \"class\". We'll include.\n\n2. Canada - located in - North America. subject_type country, object_type continent.\n\n3. Canada - number of provinces - 10. object_type quantity.\n\n4. Canada - number of territories - 3.\n\n5. Canada - has coast on - Atlantic Ocean.\n\n6. Canada - has coast on - Pacific Ocean.\n\n7. Canada - has coast on - Arctic Ocean.\n\n8. Canada - rank by total area - 2. qualifiers maybe {\"relation\":\"ranking type\",\"object\":\"second-largest\"}.\n\n9. Canada - shares land border with - United States. object_type country. Could add qualifier \"border type\": \"land\". But not needed.\n\n10. Canada - capital - Ottawa. object_type capital city.\n\n11. Canada - largest metropolitan area - Toronto.\n\n12. Canada - largest metropolitan area - Montreal.\n\n13. Canada - largest metropolitan area - Vancouver.\n\nWe might also include \"border length\" but missing.\n\nNow produce JSON.\n\nCheck qualifiers format: list of dicts with relation and object.\n\nFor ranking triplet, include qualifier.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1674,
+      "total_tokens": 3500,
+      "completion_tokens": 1826,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"instance of\",\n            \"object\": \"country\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"class\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"located in\",\n            \"object\": \"North America\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"continent\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"number of provinces\",\n            \"object\": \"10\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"number of territories\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"has coast on\",\n            \"object\": \"Atlantic Ocean\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"ocean\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"has coast on\",\n            \"object\": \"Pacific Ocean\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"ocean\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"has coast on\",\n            \"object\": \"Arctic Ocean\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"ocean\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"rank by total area\",\n            \"object\": \"2\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ranking type\",\n                    \"object\": \"second-largest\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"shares land border with\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"capital\",\n            \"object\": \"Ottawa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"capital city\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"largest metropolitan area\",\n            \"object\": \"Toronto\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"largest metropolitan area\",\n            \"object\": \"Montreal\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Canada\",\n            \"relation\": \"largest metropolitan area\",\n            \"object\": \"Vancouver\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Canada",
+        "relation": "instance of",
+        "object": "country",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "class"
+      },
+      {
+        "subject": "Canada",
+        "relation": "located in",
+        "object": "North America",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "continent"
+      },
+      {
+        "subject": "Canada",
+        "relation": "number of provinces",
+        "object": "10",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Canada",
+        "relation": "number of territories",
+        "object": "3",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Canada",
+        "relation": "has coast on",
+        "object": "Atlantic Ocean",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "ocean"
+      },
+      {
+        "subject": "Canada",
+        "relation": "has coast on",
+        "object": "Pacific Ocean",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "ocean"
+      },
+      {
+        "subject": "Canada",
+        "relation": "has coast on",
+        "object": "Arctic Ocean",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "ocean"
+      },
+      {
+        "subject": "Canada",
+        "relation": "rank by total area",
+        "object": "2",
+        "qualifiers": [
+          {
+            "relation": "ranking type",
+            "object": "second-largest"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Canada",
+        "relation": "shares land border with",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Canada",
+        "relation": "capital",
+        "object": "Ottawa",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "capital city"
+      },
+      {
+        "subject": "Canada",
+        "relation": "largest metropolitan area",
+        "object": "Toronto",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "city"
+      },
+      {
+        "subject": "Canada",
+        "relation": "largest metropolitan area",
+        "object": "Montreal",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "city"
+      },
+      {
+        "subject": "Canada",
+        "relation": "largest metropolitan area",
+        "object": "Vancouver",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "city"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1674,
+    "total_tokens": 3500,
+    "completion_tokens": 1826,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 910,
+    "output_tokens_est": 817
+  },
+  "attempts": 1,
+  "latency_s": 22.734513316005177,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:45:46.274038+00:00",
+  "cache_key": "6a98487afcd5efb2012822371faed487"
+}

@@ -1,0 +1,169 @@
+{
+  "task": {
+    "input_id": "0329c00ab84dbfb7",
+    "input_hash": "ef3955836e76dd469b95e963f3fab7075270c5bd59cd8f59a3258b6f2f4f3f02",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-458f5ae6df798d7a5fdfd4e33c3c5d6e",
+    "object": "chat.completion",
+    "created": 1791542857,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"record sales\",\n            \"object\": \"75 million records\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"over\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"worldwide\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"ranking\",\n            \"object\": \"Number 1 MC\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2003\"\n                },\n                {\n                    \"relation\": \"source\",\n                    \"object\": \"MTV 22 Greatest MCs countdown\"\n                },\n                {\n                    \"relation\": \"method\",\n                    \"object\": \"voted by the viewers\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"position\"\n        },\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"inducted into\",\n            \"object\": \"National Recording Registry\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                },\n                {\n                    \"relation\": \"institution\",\n                    \"object\": \"Library of Congress\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"institution\"\n        },\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"inducted into\",\n            \"object\": \"Rock and Roll Hall of Fame\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2017\"\n                },\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"first year of eligibility\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"institution\"\n        },\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"list inclusion\",\n            \"object\": \"100 Greatest Artists of All Time\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"source\",\n                    \"object\": \"Rolling Stone\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"list\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText mentions Tupac Shakur (subject). Facts:\n\n- \"Shakur is one of the best-selling music artists of all time having sold over 75 million records worldwide.\"\n\nSo we can have (Tupac Shakur, sales, \"over 75 million records worldwide\") maybe relation \"sales volume\" or \"record sales\". Probably \"record sales\" with object \"75 million records\". Qualifier \"approximation\": \"over\". Could also have \"sales amount\" with qualifier \"approximation\". Let's produce a triplet: (Tupac Shakur, record sales, \"75 million records\") with qualifier approximation \"over\". Also \"worldwide\" maybe qualifier \"location\" = worldwide.\n\n- \"In 2003, MTV's \"22 Greatest MCs\" countdown listed Shakur as the \"Number 1 MC\", as voted by the viewers.\"\n\nTriplet: (Tupac Shakur, ranking, \"Number 1 MC\") with qualifier point in time 2003, qualifier source \"MTV's \\\"22 Greatest MCs\\\" countdown\". Also qualifier \"method\": \"voted by the viewers\". Could encode as qualifiers.\n\n- \"In 2010, he was inducted to the Library of Congress' National Recording Registry.\"\n\nTriplet: (Tupac Shakur, inducted into, \"National Recording Registry\") with qualifier point in time 2010, qualifier \"institution\": \"Library of Congress\". Actually \"inducted to the Library of Congress' National Recording Registry\" means the registry is part of Library of Congress. So object = \"National Recording Registry\". qualifier \"point in time\" = 2010.\n\n- \"In 2017, he was inducted into the Rock and Roll Hall of Fame in his first year of eligibility.\"\n\nTriplet: (Tupac Shakur, inducted into, \"Rock and Roll Hall of Fame\") with qualifier point in time 2017, qualifier \"eligibility year\" maybe \"first year of eligibility\". Could be qualifier \"condition\": \"first year of eligibility\". Let's add qualifier \"condition\": \"first year of eligibility\". Also maybe qualifier \"point in time\": 2017.\n\n- \"Rolling Stone named Shakur in the list of the 100 Greatest Artists of All Time.\"\n\nTriplet: (Tupac Shakur, listed in, \"100 Greatest Artists of All Time\") with qualifier \"source\": \"Rolling Stone\". No date given; could be unspecified. Possibly also \"ranking\" but not number. So relation \"list inclusion\". Use relation \"named in list\". We'll choose \"list inclusion\". object_type \"list\". qualifier source.\n\nSubject type: human. Object types: sales volume (quantity), ranking (position), institution (registry/hall of fame), list.\n\nNeed to produce JSON with list of triplets.\n\nDefine relation names: use Wikidata style: \"record sales\", \"ranking\", \"inducted into\", \"list inclusion\". Possibly \"award received\" but not award. Use \"induction\" maybe \"inducted into\". We'll keep.\n\nQualifiers: \"point in time\", \"source\", \"method\", \"approximation\", \"condition\", \"location\". Provide as list.\n\nNow construct each triplet dictionary with required fields.\n\nTriplet1:\n\nsubject: \"Tupac Shakur\"\nrelation: \"record sales\"\nobject: \"75 million records\"\nqualifiers: [{\"relation\": \"approximation\", \"object\": \"over\"}, {\"relation\": \"location\", \"object\": \"worldwide\"}]\nsubject_type: \"human\"\nobject_type: \"quantity\"\n\nTriplet2:\n\nsubject: \"Tupac Shakur\"\nrelation: \"ranking\"\nobject: \"Number 1 MC\"\nqualifiers: [{\"relation\": \"point in time\", \"object\": \"2003\"}, {\"relation\": \"source\", \"object\": \"MTV 22 Greatest MCs countdown\"}, {\"relation\": \"method\", \"object\": \"voted by the viewers\"}]\nsubject_type: \"human\"\nobject_type: \"position\"\n\nTriplet3:\n\nsubject: \"Tupac Shakur\"\nrelation: \"inducted into\"\nobject: \"National Recording Registry\"\nqualifiers: [{\"relation\": \"point in time\", \"object\": \"2010\"}, {\"relation\": \"institution\", \"object\": \"Library of Congress\"}]\nsubject_type: \"human\"\nobject_type: \"institution\"\n\nTriplet4:\n\nsubject: \"Tupac Shakur\"\nrelation: \"inducted into\"\nobject: \"Rock and Roll Hall of Fame\"\nqualifiers: [{\"relation\": \"point in time\", \"object\": \"2017\"}, {\"relation\": \"condition\", \"object\": \"first year of eligibility\"}]\nsubject_type: \"human\"\nobject_type: \"institution\"\n\nTriplet5:\n\nsubject: \"Tupac Shakur\"\nrelation: \"list inclusion\"\nobject: \"100 Greatest Artists of All Time\"\nqualifiers: [{\"relation\": \"source\", \"object\": \"Rolling Stone\"}]\nsubject_type: \"human\"\nobject_type: \"list\"\n\nPotentially also \"best-selling music artist\" but that's a claim. Could add \"best-selling status\" etc. The statement: \"one of the best-selling music artists of all time\". Could be relation \"commercial success ranking\". But we already have record sales.\n\nWe could also have (Tupac Shakur, commercial ranking, \"best-selling music artist\") with qualifier \"point in time\": not given. Could skip.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1703,
+      "total_tokens": 3344,
+      "completion_tokens": 1641,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"record sales\",\n            \"object\": \"75 million records\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"over\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"worldwide\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"ranking\",\n            \"object\": \"Number 1 MC\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2003\"\n                },\n                {\n                    \"relation\": \"source\",\n                    \"object\": \"MTV 22 Greatest MCs countdown\"\n                },\n                {\n                    \"relation\": \"method\",\n                    \"object\": \"voted by the viewers\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"position\"\n        },\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"inducted into\",\n            \"object\": \"National Recording Registry\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                },\n                {\n                    \"relation\": \"institution\",\n                    \"object\": \"Library of Congress\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"institution\"\n        },\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"inducted into\",\n            \"object\": \"Rock and Roll Hall of Fame\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2017\"\n                },\n                {\n                    \"relation\": \"condition\",\n                    \"object\": \"first year of eligibility\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"institution\"\n        },\n        {\n            \"subject\": \"Tupac Shakur\",\n            \"relation\": \"list inclusion\",\n            \"object\": \"100 Greatest Artists of All Time\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"source\",\n                    \"object\": \"Rolling Stone\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"list\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Tupac Shakur",
+        "relation": "record sales",
+        "object": "75 million records",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "over"
+          },
+          {
+            "relation": "location",
+            "object": "worldwide"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Tupac Shakur",
+        "relation": "ranking",
+        "object": "Number 1 MC",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2003"
+          },
+          {
+            "relation": "source",
+            "object": "MTV 22 Greatest MCs countdown"
+          },
+          {
+            "relation": "method",
+            "object": "voted by the viewers"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "position"
+      },
+      {
+        "subject": "Tupac Shakur",
+        "relation": "inducted into",
+        "object": "National Recording Registry",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          },
+          {
+            "relation": "institution",
+            "object": "Library of Congress"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "institution"
+      },
+      {
+        "subject": "Tupac Shakur",
+        "relation": "inducted into",
+        "object": "Rock and Roll Hall of Fame",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2017"
+          },
+          {
+            "relation": "condition",
+            "object": "first year of eligibility"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "institution"
+      },
+      {
+        "subject": "Tupac Shakur",
+        "relation": "list inclusion",
+        "object": "100 Greatest Artists of All Time",
+        "qualifiers": [
+          {
+            "relation": "source",
+            "object": "Rolling Stone"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "list"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1703,
+    "total_tokens": 3344,
+    "completion_tokens": 1641,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 753,
+    "output_tokens_est": 661
+  },
+  "attempts": 1,
+  "latency_s": 20.322942080994835,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T10:47:58.322205+00:00",
+  "cache_key": "ddfb62cc2e7c6720c380ddff05f4e5a9"
+}

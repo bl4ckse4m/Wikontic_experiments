@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "f9a00615ef2941b8",
+    "input_hash": "ba71b32e1c152c48159fd5829a0fc9b44888a42243edc190eb743ee2720d19ef",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-e58444273daad471f3baa33c95003d8e",
+    "object": "chat.completion",
+    "created": 1791514529,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Saint Lucia\",\n            \"relation\": \"named after\",\n            \"object\": \"Saint Lucy of Syracuse\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Saint Lucia\",\n            \"relation\": \"located in\",\n            \"object\": \"Windward Islands\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"archipelago\"\n        },\n        {\n            \"subject\": \"Saint Lucy of Syracuse\",\n            \"relation\": \"date of birth\",\n            \"object\": \"283 AD\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Saint Lucy of Syracuse\",\n            \"relation\": \"date of death\",\n            \"object\": \"304 AD\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"French sailors\",\n            \"relation\": \"shipwrecked on\",\n            \"object\": \"Saint Lucia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"13 December\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Saint Lucy of Syracuse\",\n            \"relation\": \"feast day\",\n            \"object\": \"13 December\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText mentions Saint Lucia (country). Named after Saint Lucy of Syracuse (AD 283 – 304). It's the only country named after a historical woman. Legend: French sailors shipwrecked here on 13 December, the feast day of St. Lucy, thus naming the island in honor of \"Sainte Lucie.\"\n\nWe need to produce triplets with subject_type and object_type.\n\nPotential entities:\n\n- Saint Lucia (country)\n- Saint Lucy of Syracuse (human)\n- Saint Lucy of Syracuse: date of birth? AD 283 – 304 is lifespan. Could produce date of birth 283 AD, date of death 304 AD.\n- Saint Lucia: named after Saint Lucy of Syracuse (relation: named after)\n- Saint Lucia: instance of country (maybe not needed)\n- Saint Lucia: location: Windward Islands (relation: part of? maybe \"located in\")\n- Saint Lucia: only country named after a historical woman (maybe relation: \"named after\" with qualifier \"historical woman\"? Might be too complex. Could have triplet: Saint Lucia - \"named after\" - Saint Lucy of Syracuse, qualifiers: maybe \"type of namesake\" etc. But we can just have that.\n\n- French sailors: maybe not needed as entity.\n\n- Shipwreck date: 13 December (no year). Could have triplet: French sailors - \"shipwrecked on\" - Saint Lucia, qualifiers: point in time 13 December (maybe year unknown). Or \"shipwrecked on\" relation.\n\n- Saint Lucy of Syracuse: feast day 13 December (maybe not needed).\n\n- Saint Lucia: \"named after\" - Saint Lucy of Syracuse, qualifier: point in time 13 December (the naming event). But maybe better to have separate triplet: Saint Lucia - \"named after\" - Saint Lucy of Syracuse, qualifiers: none.\n\n- Saint Lucy of Syracuse: \"date of birth\" 283 AD, \"date of death\" 304 AD.\n\n- Saint Lucy of Syracuse: \"occupation\"? Not given.\n\n- Saint Lucia: \"located in\" - Windward Islands (region). Could be \"part of\" relation.\n\n- Saint Lucia: \"country\" type.\n\n- Saint Lucia: \"only country named after a historical woman\" maybe relation: \"unique attribute\" but maybe skip.\n\nWe need subject_type and object_type.\n\nDefine types:\n\n- Saint Lucia: \"country\"\n- Saint Lucy of Syracuse: \"human\"\n- Windward Islands: \"archipelago\" or \"region\". Use \"archipelago\".\n- French sailors: \"human group\" maybe \"group of people\". Use \"group of people\".\n- 13 December: \"date\" (day-month). Could be \"date\".\n\n- AD 283: \"date\" (year). Use \"year\". But we can combine as \"283 AD\". Use \"date\".\n\n- AD 304: \"date\".\n\nNow produce JSON.\n\nTriplets list:\n\n1. subject: Saint Lucia, relation: named after, object: Saint Lucy of Syracuse, qualifiers: [], subject_type: country, object_type: human.\n\n2. subject: Saint Lucia, relation: located in, object: Windward Islands, qualifiers: [], subject_type: country, object_type: archipelago.\n\n3. subject: Saint Lucy of Syracuse, relation: date of birth, object: 283 AD, qualifiers: [], subject_type: human, object_type: date.\n\n4. subject: Saint Lucy of Syracuse, relation: date of death, object: 304 AD, qualifiers: [], subject_type: human, object_type: date.\n\n5. subject: French sailors, relation: shipwrecked on, object: Saint Lucia, qualifiers: [{\"relation\":\"point in time\",\"object\":\"13 December\"}], subject_type: group of people, object_type: country.\n\n6. subject: Saint Lucy of Syracuse, relation: feast day, object: 13 December, qualifiers: [], subject_type: human, object_type: date.\n\nPotential also: Saint Lucia - \"only country named after a historical woman\" maybe relation: \"unique attribute\" but skip.\n\nMake sure qualifiers list is list of dicts.\n\nReturn JSON with key \"triplets\". Ensure no extra text.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1024,
+      "total_tokens": 2244,
+      "completion_tokens": 1220,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Saint Lucia\",\n            \"relation\": \"named after\",\n            \"object\": \"Saint Lucy of Syracuse\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Saint Lucia\",\n            \"relation\": \"located in\",\n            \"object\": \"Windward Islands\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"archipelago\"\n        },\n        {\n            \"subject\": \"Saint Lucy of Syracuse\",\n            \"relation\": \"date of birth\",\n            \"object\": \"283 AD\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Saint Lucy of Syracuse\",\n            \"relation\": \"date of death\",\n            \"object\": \"304 AD\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"French sailors\",\n            \"relation\": \"shipwrecked on\",\n            \"object\": \"Saint Lucia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"13 December\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Saint Lucy of Syracuse\",\n            \"relation\": \"feast day\",\n            \"object\": \"13 December\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Saint Lucia",
+        "relation": "named after",
+        "object": "Saint Lucy of Syracuse",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "human"
+      },
+      {
+        "subject": "Saint Lucia",
+        "relation": "located in",
+        "object": "Windward Islands",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "archipelago"
+      },
+      {
+        "subject": "Saint Lucy of Syracuse",
+        "relation": "date of birth",
+        "object": "283 AD",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Saint Lucy of Syracuse",
+        "relation": "date of death",
+        "object": "304 AD",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "French sailors",
+        "relation": "shipwrecked on",
+        "object": "Saint Lucia",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "13 December"
+          }
+        ],
+        "subject_type": "group of people",
+        "object_type": "country"
+      },
+      {
+        "subject": "Saint Lucy of Syracuse",
+        "relation": "feast day",
+        "object": "13 December",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1024,
+    "total_tokens": 2244,
+    "completion_tokens": 1220,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 512,
+    "output_tokens_est": 413
+  },
+  "attempts": 1,
+  "latency_s": 14.986690459991223,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:55:44.976128+00:00",
+  "cache_key": "6e1e9d57e72e58f46d7adb565df3f2b3"
+}

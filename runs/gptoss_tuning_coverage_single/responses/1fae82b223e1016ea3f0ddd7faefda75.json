@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "bcb67829bdf18122",
+    "input_hash": "2c660ab8201924cd00eb8aa179ff44f51099a9b7df82b84ddfe8c57b1f085880",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-7c7c0380c38d7999cb771da9a69ef9c4",
+    "object": "chat.completion",
+    "created": 1791506361,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"single of\",\n            \"object\": \"Eyo!\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ordinal position\",\n                    \"object\": \"1\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"author\",\n            \"object\": \"Miquel Wiels\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"author\",\n            \"object\": \"A. Putte\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"author\",\n            \"object\": \"P. Gillis\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"producer\",\n            \"object\": \"Studio 100\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"theme music for\",\n            \"object\": \"K3 sitcom Hallo K3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"television series\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText:\n\n\"Hallo K3\n\n\"Hallo K3\" is the first single to be released from Flemish/Dutch girl group K3's eleventh studio album Eyo!. It was written by Miquel Wiels, A. Putte, P. Gillis, and produced by Studio 100. The song is also the intro for the same-named K3 sitcom Hallo K3\"\n\nWe need to parse facts.\n\nEntities: \"Hallo K3\" (song), \"K3\" (girl group), \"Eyo!\" (album), \"Miquel Wiels\", \"A. Putte\", \"P. Gillis\", \"Studio 100\" (producer), \"K3 sitcom Hallo K3\" (TV show). Also \"first single\" maybe relation \"position in release order\". \"eleventh studio album\" relation \"album of\". \"written by\" relation \"author\" or \"composer\". \"produced by\" relation \"producer\". \"intro for\" relation \"intro for\" maybe \"theme music for\". We'll need to map to Wikidata-style relations: \"instance of\" maybe not needed. Use \"single of\" maybe \"single of\". But we need to choose appropriate relation names.\n\nGiven guidelines: use specific Wikidata-style predicates. For music: \"single of\" maybe \"single of\". In Wikidata, there is \"single of\" (P2641). Also \"recorded by\", \"written by\" (P58). \"produced by\" (P162). \"intro for\" maybe \"theme music for\" (P2285). \"first single\" could be \"position in release order\" (P1545) with value \"1\". But we can also express as \"ordinal position\" qualifier. Simpler: we can have triplet: (Hallo K3, single of, Eyo!) with qualifier \"ordinal position\" = 1. Also \"album of\" maybe \"album\" relation.\n\nAlso \"first single to be released from ... album\". So we can have:\n\nsubject: Hallo K3 (song)\nrelation: \"single of\"\nobject: Eyo! (album)\nqualifiers: [{\"relation\":\"ordinal position\",\"object\":\"1\"}] maybe \"point in time\"? Not needed.\n\nAlso \"written by\" multiple authors: create separate triplets for each writer.\n\nsubject: Hallo K3, relation: \"author\", object: Miquel Wiels (or \"writer\"). Use \"author\" (P50) maybe \"author\". For songs, \"composer\" (P86) or \"lyricist\". We'll just use \"author\". Could also use \"written by\". Use \"author\".\n\nSimilarly for A. Putte, P. Gillis.\n\nAlso \"produced by\": subject: Hallo K3, relation: \"producer\", object: Studio 100.\n\nAlso \"intro for\": subject: Hallo K3, relation: \"theme music for\", object: K3 sitcom Hallo K3 (maybe \"Hallo K3 (TV series)\" but we can just \"K3 sitcom Hallo K3\").\n\nAlso \"first single to be released from ... album\" indicates that it's the first single from that album. So we could add qualifier \"first\" but we already have ordinal position.\n\nAlso \"Flemish/Dutch girl group K3\" indicates K3 is a girl group, maybe relation \"instance of\" but not needed.\n\nWe need subject_type and object_type.\n\nSubject_type for Hallo K3: \"song\" or \"musical work\". Use \"song\".\n\nObject_type for Eyo!: \"album\". Use \"album\".\n\nFor authors: object_type \"human\". For producer: \"organization\" maybe \"company\". Studio 100 is a production company, type \"organization\".\n\nFor theme music: object_type \"television series\". Use \"television series\".\n\nNow qualifiers: For ordinal position, relation \"ordinal position\" maybe \"position\". Use \"ordinal position\". object \"1\". qualifier type? Not needed.\n\nNow produce JSON.\n\nList of triplets:\n\n1. Hallo K3 - single of - Eyo! ; qualifiers: ordinal position 1 ; subject_type song ; object_type album.\n\n2. Hallo K3 - author - Miquel Wiels ; qualifiers [] ; subject_type song ; object_type human.\n\n3. Hallo K3 - author - A. Putte ; qualifiers [] ; subject_type song ; object_type human.\n\n4. Hallo K3 - author - P. Gillis ; qualifiers [] ; subject_type song ; object_type human.\n\n5. Hallo K3 - producer - Studio 100 ; qualifiers [] ; subject_type song ; object_type organization.\n\n6. Hallo K3 - theme music for - K3 sitcom Hallo K3 ; qualifiers [] ; subject_type song ; object_type television series.\n\nPotential also: \"first single\" could be captured as qualifier \"first\" but we have ordinal position.\n\nMake sure to include \"qualifiers\": list of dicts.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1663,
+      "total_tokens": 3044,
+      "completion_tokens": 1381,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"single of\",\n            \"object\": \"Eyo!\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"ordinal position\",\n                    \"object\": \"1\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"author\",\n            \"object\": \"Miquel Wiels\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"author\",\n            \"object\": \"A. Putte\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"author\",\n            \"object\": \"P. Gillis\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"producer\",\n            \"object\": \"Studio 100\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Hallo K3\",\n            \"relation\": \"theme music for\",\n            \"object\": \"K3 sitcom Hallo K3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"television series\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Hallo K3",
+        "relation": "single of",
+        "object": "Eyo!",
+        "qualifiers": [
+          {
+            "relation": "ordinal position",
+            "object": "1"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "album"
+      },
+      {
+        "subject": "Hallo K3",
+        "relation": "author",
+        "object": "Miquel Wiels",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Hallo K3",
+        "relation": "author",
+        "object": "A. Putte",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Hallo K3",
+        "relation": "author",
+        "object": "P. Gillis",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "Hallo K3",
+        "relation": "producer",
+        "object": "Studio 100",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Hallo K3",
+        "relation": "theme music for",
+        "object": "K3 sitcom Hallo K3",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "television series"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1663,
+    "total_tokens": 3044,
+    "completion_tokens": 1381,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 481,
+    "output_tokens_est": 389
+  },
+  "attempts": 1,
+  "latency_s": 17.381309344003967,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:39:38.708129+00:00",
+  "cache_key": "1fae82b223e1016ea3f0ddd7faefda75"
+}

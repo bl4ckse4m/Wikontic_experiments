@@ -1,0 +1,151 @@
+{
+  "task": {
+    "input_id": "43db8466ad84c624",
+    "input_hash": "9a89b3316be07ab940fa94b197d25c73b7d7df17e430d6e5a9fc931b3630137a",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-7633001a1e1b22837f496b5d75875638",
+    "object": "chat.completion",
+    "created": 1791510115,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"genre\",\n            \"object\": \"R&B\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music genre\"\n        },\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"performer\",\n            \"object\": \"R. Kelly\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"included in album\",\n            \"object\": \"R. Kelly (album)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"release year\",\n                    \"object\": \"1995\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"R. Kelly (album)\",\n            \"relation\": \"release year\",\n            \"object\": \"1995\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"chart peak\",\n            \"object\": \"Billboard R&B chart\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"peak position\",\n                    \"object\": \"1\"\n                },\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"2 weeks\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"chart peak\",\n            \"object\": \"Billboard Hot 100\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"peak position\",\n                    \"object\": \"5\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: \"I Can't Sleep Baby (If I)\" (song), R. Kelly (person, singer), 1995 (year), eponymous album (album), Billboard R&B chart (chart), Billboard Hot 100 (chart). Also relationships: song type (R&B single), performer, from album, release year, chart positions, weeks at #1, peaked at #5.\n\nWe need subject_type and object_type. Provide plausible classes: song, human, date/year, album, chart, rank, etc.\n\nTriplets:\n\n1. Subject: \"I Can't Sleep Baby (If I)\" ; relation: \"instance of\" ; object: \"song\" maybe. But not required. Use occupation? Use \"genre\": \"R&B\". relation: \"genre\". object_type: \"music genre\". subject_type: \"song\".\n\n2. \"I Can't Sleep Baby (If I)\" ; relation: \"performer\" ; object: \"R. Kelly\". qualifiers none. subject_type song, object_type human.\n\n3. \"I Can't Sleep Baby (If I)\" ; relation: \"included in album\" ; object: \"R. Kelly (album)\"? The album is eponymous, named \"R. Kelly\". So object: \"R. Kelly (album)\". Provide qualifier: \"point in time\": \"1995\". Or maybe separate: album release year. But we can add qualifier for release year.\n\n4. \"R. Kelly (album)\" ; relation: \"release year\" ; object: \"1995\". subject_type album, object_type date/year.\n\n5. Chart performance: \"I Can't Sleep Baby (If I)\" ; relation: \"chart position\" ; object: \"Billboard R&B chart\". qualifiers: point in time? Not given. qualifiers: \"peak position\": \"#1\". \"duration\": \"two weeks\". But qualifiers must be relation-object pairs. So we can have qualifiers: {\"relation\":\"peak position\",\"object\":\"1\"} and {\"relation\":\"duration\",\"object\":\"2 weeks\"} maybe.\n\nBut also note that it spent two weeks at #1 on the Billboard R&B chart (Kelly's sixth #1 R&B hit). So we can have a triplet: subject song, relation \"chart ranking\", object \"Billboard R&B chart\". qualifiers: peak position 1, duration 2 weeks, rank order maybe \"sixth #1 R&B hit\" but that's about artist.\n\nAlso separate: \"I Can't Sleep Baby (If I)\" ; relation \"peak position\" ; object \"5\" ; qualifiers: chart \"Billboard Hot 100\". Could also have separate triplet: chart position on Hot 100.\n\nBetter to have two separate chart performance triplets.\n\nTriplet 5: subject song, relation \"chart peak\", object \"Billboard R&B chart\". qualifiers: {\"relation\":\"peak position\",\"object\":\"1\"},{\"relation\":\"duration\",\"object\":\"2 weeks\"}.\n\nTriplet 6: subject song, relation \"chart peak\", object \"Billboard Hot 100\". qualifiers: {\"relation\":\"peak position\",\"object\":\"5\"}.\n\nAlso note \"Kelly's sixth #1 R&B hit\". Could have triplet: subject \"R. Kelly\", relation \"number of #1 R&B hits\", object \"6\". But maybe not needed.\n\nWe also need subject_type and object_type for each.\n\nDefine types:\n\n- song: \"song\"\n- human: \"human\"\n- album: \"album\"\n- date/year: \"year\" or \"date\"\n- chart: \"music chart\"\n- rank: maybe \"rank\" but object is chart, not rank. For qualifiers, object types: \"ordinal number\" or \"duration\". Use \"number\" and \"duration\".\n\nLet's craft JSON.\n\nList of triplets:\n\n1. song genre\n2. song performer\n3. song included in album (with qualifier release year)\n4. album release year (maybe separate)\n5. song chart peak on Billboard R&B chart with qualifiers peak position 1, duration 2 weeks\n6. song chart peak on Billboard Hot 100 with qualifier peak position 5\n\nPotential also: \"R. Kelly\" is a singer (occupation). Could add but not required.\n\nLet's produce.\n\nMake sure qualifiers list of dicts.\n\nObject types:\n\n- genre: \"music genre\"\n- performer: object_type \"human\"\n- album: \"album\"\n- year: \"year\"\n- chart: \"music chart\"\n- peak position: \"ordinal number\" maybe \"number\"\n- duration: \"duration\"\n\nImplement.\n\nJSON format exactly.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1015,
+      "total_tokens": 2400,
+      "completion_tokens": 1385,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"genre\",\n            \"object\": \"R&B\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music genre\"\n        },\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"performer\",\n            \"object\": \"R. Kelly\",\n            \"qualifiers\": [],\n            \"subject_type\": \"song\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"included in album\",\n            \"object\": \"R. Kelly (album)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"release year\",\n                    \"object\": \"1995\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"album\"\n        },\n        {\n            \"subject\": \"R. Kelly (album)\",\n            \"relation\": \"release year\",\n            \"object\": \"1995\",\n            \"qualifiers\": [],\n            \"subject_type\": \"album\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"chart peak\",\n            \"object\": \"Billboard R&B chart\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"peak position\",\n                    \"object\": \"1\"\n                },\n                {\n                    \"relation\": \"duration\",\n                    \"object\": \"2 weeks\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        },\n        {\n            \"subject\": \"I Can't Sleep Baby (If I)\",\n            \"relation\": \"chart peak\",\n            \"object\": \"Billboard Hot 100\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"peak position\",\n                    \"object\": \"5\"\n                }\n            ],\n            \"subject_type\": \"song\",\n            \"object_type\": \"music chart\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "I Can't Sleep Baby (If I)",
+        "relation": "genre",
+        "object": "R&B",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "music genre"
+      },
+      {
+        "subject": "I Can't Sleep Baby (If I)",
+        "relation": "performer",
+        "object": "R. Kelly",
+        "qualifiers": [],
+        "subject_type": "song",
+        "object_type": "human"
+      },
+      {
+        "subject": "I Can't Sleep Baby (If I)",
+        "relation": "included in album",
+        "object": "R. Kelly (album)",
+        "qualifiers": [
+          {
+            "relation": "release year",
+            "object": "1995"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "album"
+      },
+      {
+        "subject": "R. Kelly (album)",
+        "relation": "release year",
+        "object": "1995",
+        "qualifiers": [],
+        "subject_type": "album",
+        "object_type": "year"
+      },
+      {
+        "subject": "I Can't Sleep Baby (If I)",
+        "relation": "chart peak",
+        "object": "Billboard R&B chart",
+        "qualifiers": [
+          {
+            "relation": "peak position",
+            "object": "1"
+          },
+          {
+            "relation": "duration",
+            "object": "2 weeks"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "music chart"
+      },
+      {
+        "subject": "I Can't Sleep Baby (If I)",
+        "relation": "chart peak",
+        "object": "Billboard Hot 100",
+        "qualifiers": [
+          {
+            "relation": "peak position",
+            "object": "5"
+          }
+        ],
+        "subject_type": "song",
+        "object_type": "music chart"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1015,
+    "total_tokens": 2400,
+    "completion_tokens": 1385,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 611,
+    "output_tokens_est": 513
+  },
+  "attempts": 1,
+  "latency_s": 16.433480923005845,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:42:12.094879+00:00",
+  "cache_key": "fa31092e44231bcd25d8b29ff9cbba33"
+}

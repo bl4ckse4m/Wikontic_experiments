@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "7bbf05007867d91f",
+    "input_hash": "16c6fc10bad77e2b9f75aaa4c340fb52e18e68c43ede74f5beb54e7da9653d76",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-29d617d9196baefa5ded1b0f568205ce",
+    "object": "chat.completion",
+    "created": 1791518827,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Motley\",\n            \"relation\": \"instance of\",\n            \"object\": \"locality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Motley\",\n            \"relation\": \"located in\",\n            \"object\": \"Toowoomba Region\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"administrative region\"\n        },\n        {\n            \"subject\": \"Toowoomba Region\",\n            \"relation\": \"located in\",\n            \"object\": \"Darling Downs\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative region\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Darling Downs\",\n            \"relation\": \"located in\",\n            \"object\": \"Southern Queensland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Southern Queensland\",\n            \"relation\": \"located in\",\n            \"object\": \"Queensland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Queensland\",\n            \"relation\": \"located in\",\n            \"object\": \"Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Motley\",\n            \"relation\": \"population\",\n            \"object\": \"9\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2016\"\n                },\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Australian Census\"\n                },\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"people\"\n                }\n            ],\n            \"subject_type\": \"place\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Motley, Queensland\n\nMotley is a locality in the Toowoomba Region of the Darling Downs in southern Queensland, Australia. At the 2016 Australian Census Motley and surrounds recorded a population of 9.\"\n\nEntities: Motley (a locality), Queensland (state), Toowoomba Region (administrative region), Darling Downs (region), southern Queensland (subregion), Australia (country). Also 2016 Australian Census (event). Population recorded: 9 (people). \"Motley and surrounds recorded a population of 9.\"\n\nWe need triplets:\n\n1. Motley - instance of? relation \"instance of\" maybe \"locality\". But we need specific relation: \"location type\"? In examples they used \"occupation\", \"award received\". For places, typical relation: \"subclass of\"? But we can use \"location type\" or \"instance of\". Let's use \"instance of\" with object \"locality\". subject_type \"place\", object_type \"administrative division\"? Let's set object_type \"locality\". Provide qualifiers maybe none.\n\n2. Motley - located in - Toowoomba Region. relation \"located in\". qualifiers none. subject_type \"place\", object_type \"administrative region\".\n\n3. Toowoomba Region - part of - Darling Downs? Actually Toowoomba Region is in Darling Downs region. So \"located in\" or \"part of\". Use \"located in\". subject_type \"administrative region\", object_type \"region\".\n\n4. Darling Downs - located in - southern Queensland. Use \"located in\". object_type \"region\". subject_type \"region\".\n\n5. Southern Queensland - located in - Queensland. Use \"located in\". object_type \"state\". subject_type \"region\".\n\n6. Queensland - located in - Australia. Use \"located in\". object_type \"country\". subject_type \"state\".\n\n7. 2016 Australian Census - point in time? It's an event. Could have relation \"date of\" but it's a specific year. We'll treat as event with date qualifier? Actually the census is in 2016. So we could have triplet: \"2016 Australian Census\" - \"point in time\" - \"2016\". But maybe not needed. The fact: At the 2016 Australian Census Motley and surrounds recorded a population of 9. So we need a triplet: Motley - \"population\" - \"9\". With qualifiers: point in time \"2016\", source \"Australian Census\". Also maybe \"unit\" \"people\". Also \"qualifier\" \"approximation\"? No, exact 9.\n\nSo triplet: subject \"Motley\", relation \"population\", object \"9\". qualifiers: point in time \"2016\", source? There's no \"source\" qualifier defined but we can use \"attribution\" maybe \"Australian Census\". Use \"attribution\". Also \"unit\": \"people\". So qualifiers list includes {\"relation\":\"point in time\",\"object\":\"2016\"} , {\"relation\":\"attribution\",\"object\":\"Australian Census\"} , {\"relation\":\"unit\",\"object\":\"people\"}.\n\nAlso \"Motley and surrounds\" includes surrounds, but we treat as Motley.\n\nAlso maybe \"Motley\" - \"located in\" - \"Queensland\". Could also directly. But we already have chain.\n\nWe also might include \"Motley\" - \"country\" - \"Australia\". But not necessary.\n\nNow need subject_type and object_type for each.\n\nDefine types:\n\n- Motley: place (or \"locality\").\n- locality: maybe \"administrative division\". We'll set object_type \"locality\".\n- Toowoomba Region: administrative region (maybe \"region\").\n- Darling Downs: region.\n- Southern Queensland: region.\n- Queensland: state.\n- Australia: country.\n- 2016 Australian Census: event (census).\n- population number: \"quantity\" maybe \"number\". object_type \"quantity\". But they used \"quantity\" qualifier for statements. For object we can set \"9\" with type \"quantity\". Or \"population\" relation expects object \"9\". object_type \"quantity\". Good.\n\nNow produce JSON.\n\nCheck qualifiers: \"point in time\" qualifier object \"2016\". Should we include \"Australian Census\" as attribution? Use relation \"attribution\". Good.\n\nNow produce list.\n\nOrder not important.\n\nLet's craft JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1634,
+      "total_tokens": 2953,
+      "completion_tokens": 1319,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Motley\",\n            \"relation\": \"instance of\",\n            \"object\": \"locality\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Motley\",\n            \"relation\": \"located in\",\n            \"object\": \"Toowoomba Region\",\n            \"qualifiers\": [],\n            \"subject_type\": \"place\",\n            \"object_type\": \"administrative region\"\n        },\n        {\n            \"subject\": \"Toowoomba Region\",\n            \"relation\": \"located in\",\n            \"object\": \"Darling Downs\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative region\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Darling Downs\",\n            \"relation\": \"located in\",\n            \"object\": \"Southern Queensland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Southern Queensland\",\n            \"relation\": \"located in\",\n            \"object\": \"Queensland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Queensland\",\n            \"relation\": \"located in\",\n            \"object\": \"Australia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Motley\",\n            \"relation\": \"population\",\n            \"object\": \"9\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2016\"\n                },\n                {\n                    \"relation\": \"attribution\",\n                    \"object\": \"Australian Census\"\n                },\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"people\"\n                }\n            ],\n            \"subject_type\": \"place\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Motley",
+        "relation": "instance of",
+        "object": "locality",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Motley",
+        "relation": "located in",
+        "object": "Toowoomba Region",
+        "qualifiers": [],
+        "subject_type": "place",
+        "object_type": "administrative region"
+      },
+      {
+        "subject": "Toowoomba Region",
+        "relation": "located in",
+        "object": "Darling Downs",
+        "qualifiers": [],
+        "subject_type": "administrative region",
+        "object_type": "region"
+      },
+      {
+        "subject": "Darling Downs",
+        "relation": "located in",
+        "object": "Southern Queensland",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "region"
+      },
+      {
+        "subject": "Southern Queensland",
+        "relation": "located in",
+        "object": "Queensland",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "state"
+      },
+      {
+        "subject": "Queensland",
+        "relation": "located in",
+        "object": "Australia",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "Motley",
+        "relation": "population",
+        "object": "9",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2016"
+          },
+          {
+            "relation": "attribution",
+            "object": "Australian Census"
+          },
+          {
+            "relation": "unit",
+            "object": "people"
+          }
+        ],
+        "subject_type": "place",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1634,
+    "total_tokens": 2953,
+    "completion_tokens": 1319,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 622,
+    "output_tokens_est": 530
+  },
+  "attempts": 1,
+  "latency_s": 16.631266159005463,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:07:23.951569+00:00",
+  "cache_key": "1d23a8579d401b0a7175d25ab03752b0"
+}

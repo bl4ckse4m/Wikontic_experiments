@@ -1,0 +1,145 @@
+{
+  "task": {
+    "input_id": "209f6dca818ad4d4",
+    "input_hash": "419b64843b56ca7c5fc82c79926742bc3620804267a96c59ccdc1df7ce58558b",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-56084b0322464db4b5a3dc8b967bc7ed",
+    "object": "chat.completion",
+    "created": 1791515778,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Logan County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"West Virginia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located on\",\n            \"object\": \"County Route 16\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located on\",\n            \"object\": \"Buffalo Creek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"watercourse\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located relative to\",\n            \"object\": \"Man\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"east-northeast\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"human settlement\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Pardee, West Virginia\n\nPardee is an unincorporated community in Logan County, West Virginia, United States. Pardee is located on County Route 16 and Buffalo Creek east-northeast of Man.\"\n\nWe have entity \"Pardee\" (likely a place). Subject type maybe \"human settlement\" or \"community\". We'll use \"unincorporated community\". Relation: \"instance of\" maybe but not required; we can use \"type\" relation? In examples they used \"occupation\", \"award received\". For location, they used \"located in\". So we can produce:\n\n1. Pardee - relation \"instance of\" - object \"unincorporated community\". But maybe better \"type\" relation. However we need specific Wikidata style: \"instance of\". Use that.\n\nsubject_type: \"human settlement\". object_type: \"administrative division\"? Actually \"unincorporated community\" is a type of settlement. object_type: \"settlement type\". We'll just put \"settlement type\".\n\n2. Pardee - relation \"located in the administrative territorial entity\" - object \"Logan County\". Qualifiers: \"place\" maybe \"West Virginia\" and \"United States\". But we can have separate statements: located in Logan County (which itself is in West Virginia). Could also have \"located in\" West Virginia, United States. We'll extract both.\n\nSo:\n\n- subject: \"Pardee\", relation: \"located in the administrative territorial entity\", object: \"Logan County\". qualifiers none. subject_type: \"human settlement\". object_type: \"county\".\n\n- Also maybe \"located in the administrative territorial entity\" -> \"West Virginia\". Could add qualifier \"point in time\"? Not needed.\n\n- Also \"located in the administrative territorial entity\" -> \"United States\". Could add.\n\nBut maybe we should capture the hierarchy: \"Logan County, West Virginia, United States\". Could treat as one object \"Logan County, West Virginia, United States\". But better separate.\n\n3. Pardee - relation \"located on\" - object \"County Route 16\". qualifiers none. subject_type: \"human settlement\". object_type: \"road\".\n\n4. Pardee - relation \"located on\" - object \"Buffalo Creek\". qualifiers none. object_type: \"watercourse\".\n\n5. Pardee - relation \"directional location relative to\" - object \"Man\". qualifiers: relation \"direction\", object \"east-northeast\". Also maybe \"distance\"? Not given. So we add qualifier direction.\n\nsubject_type: \"human settlement\". object_type: \"human settlement\" (Man is likely a town). We'll just use \"human settlement\".\n\nNow ensure qualifiers format: list of dicts with relation and object.\n\nFor directional qualifier: relation \"direction\", object \"east-northeast\". Also maybe \"relative to\" is captured by relation itself. But we have relation \"located relative to\". We'll use relation \"located relative to\". But we already have \"located on\". For directional we can use \"located relative to\". Let's define:\n\nsubject: \"Pardee\", relation: \"located relative to\", object: \"Man\", qualifiers: [{\"relation\":\"direction\",\"object\":\"east-northeast\"}].\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- Pardee: \"human settlement\"\n- unincorporated community: \"settlement type\"\n- Logan County: \"county\"\n- West Virginia: \"state\"\n- United States: \"country\"\n- County Route 16: \"road\"\n- Buffalo Creek: \"river\" or \"stream\". Use \"watercourse\".\n- Man: \"human settlement\"\n\nNow produce JSON.\n\nList of triplets:\n\n1. Pardee - instance of - unincorporated community\n2. Pardee - located in the administrative territorial entity - Logan County\n3. Pardee - located in the administrative territorial entity - West Virginia\n4. Pardee - located in the administrative territorial entity - United States\n5. Pardee - located on - County Route 16\n6. Pardee - located on - Buffalo Creek\n7. Pardee - located relative to - Man (qualifier direction east-northeast)\n\nCheck for any other facts: \"Pardee, West Virginia\" maybe indicates that Pardee is in West Virginia. Already captured.\n\nNow produce JSON with \"triplets\": list.\n\nMake sure each dict includes \"qualifiers\": [] if none.\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1637,
+      "total_tokens": 2981,
+      "completion_tokens": 1344,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"Logan County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"West Virginia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located in the administrative territorial entity\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located on\",\n            \"object\": \"County Route 16\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located on\",\n            \"object\": \"Buffalo Creek\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"watercourse\"\n        },\n        {\n            \"subject\": \"Pardee\",\n            \"relation\": \"located relative to\",\n            \"object\": \"Man\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"east-northeast\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"human settlement\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Pardee",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Pardee",
+        "relation": "located in the administrative territorial entity",
+        "object": "Logan County",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Pardee",
+        "relation": "located in the administrative territorial entity",
+        "object": "West Virginia",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "state"
+      },
+      {
+        "subject": "Pardee",
+        "relation": "located in the administrative territorial entity",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "country"
+      },
+      {
+        "subject": "Pardee",
+        "relation": "located on",
+        "object": "County Route 16",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "road"
+      },
+      {
+        "subject": "Pardee",
+        "relation": "located on",
+        "object": "Buffalo Creek",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "watercourse"
+      },
+      {
+        "subject": "Pardee",
+        "relation": "located relative to",
+        "object": "Man",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "east-northeast"
+          }
+        ],
+        "subject_type": "human settlement",
+        "object_type": "human settlement"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1637,
+    "total_tokens": 2981,
+    "completion_tokens": 1344,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 599,
+    "output_tokens_est": 507
+  },
+  "attempts": 1,
+  "latency_s": 17.061107328001526,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:16:35.911283+00:00",
+  "cache_key": "568e64b6b8f69dccf018f2383a5e9207"
+}

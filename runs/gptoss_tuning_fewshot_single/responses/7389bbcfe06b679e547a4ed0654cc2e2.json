@@ -1,0 +1,158 @@
+{
+  "task": {
+    "input_id": "798820e9ec975245",
+    "input_hash": "17820214027c7d9f387dba25829e4d6030dab20e8a7ee35db5f232a2d8110090",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-e3a1024a1afaaec5efd39215cd504425",
+    "object": "chat.completion",
+    "created": 1791518727,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"alias\",\n            \"object\": \"Yellowstone Ski Resort\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"name\"\n        },\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"type\",\n            \"object\": \"private residential club\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization type\"\n        },\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"type\",\n            \"object\": \"ski resort\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization type\"\n        },\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"type\",\n            \"object\": \"golf resort\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization type\"\n        },\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"located in\",\n            \"object\": \"Montana\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"USA\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Rocky Mountain ski and golf club\",\n            \"relation\": \"located in\",\n            \"object\": \"Madison County\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"eastern\"\n                },\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Montana\"\n                },\n                {\n                    \"relation\": \"west of\",\n                    \"object\": \"Big Sky\"\n                },\n                {\n                    \"relation\": \"south of\",\n                    \"object\": \"Bozeman\"\n                },\n                {\n                    \"relation\": \"northwest of\",\n                    \"object\": \"Yellowstone National Park\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"administrative territorial entity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Yellowstone Club\n\nThe Yellowstone Club, also Yellowstone Ski Resort, is a private residential club, ski resort, and golf resort located in the state of Montana, USA. The Rocky Mountain ski and golf club is located in eastern Madison County, just west of Big Sky, Montana, south of Bozeman and northwest of Yellowstone National Park.\"\n\nWe need to produce triplets.\n\nEntities: Yellowstone Club (also known as Yellowstone Ski Resort). It is a private residential club, ski resort, and golf resort. Located in the state of Montana, USA. Also described as \"The Rocky Mountain ski and golf club\" maybe same? The phrase \"The Rocky Mountain ski and golf club is located in eastern Madison County, just west of Big Sky, Montana, south of Bozeman and northwest of Yellowstone National Park.\"\n\nInterpretation: \"The Rocky Mountain ski and golf club\" likely refers to Yellowstone Club (maybe a description). But we treat as separate entity? The text says \"The Rocky Mountain ski and golf club is located in eastern Madison County...\" Could be same as Yellowstone Club, but not explicit. It could be a description of the same club. However we should not assume identity unless explicit. It says \"The Rocky Mountain ski and golf club\" - maybe a nickname. Not clear. Safer to treat as separate entity.\n\nTriplets:\n\n1. Subject: Yellowstone Club, relation: \"instance of\" maybe not needed. We need specific relations: \"type\" maybe \"private residential club\", \"ski resort\", \"golf resort\". Use relation \"instance of\" or \"type\". In examples they used \"occupation\", \"field of work\". For organizations, maybe \"type of organization\". But we can use \"type\" relation. Let's use \"type of organization\" maybe \"private residential club\". But we need object_type: maybe \"organization\". Let's define:\n\n- {\"subject\":\"Yellowstone Club\",\"relation\":\"type\",\"object\":\"private residential club\",\"qualifiers\":[],\"subject_type\":\"organization\",\"object_type\":\"organization type\"}.\n\nSimilarly for ski resort and golf resort.\n\n2. Also \"also Yellowstone Ski Resort\" indicates alias. Could be relation \"also known as\". Use relation \"alias\". So triplet: subject Yellowstone Club, relation \"alias\", object \"Yellowstone Ski Resort\". Qualifiers none. Types: subject organization, object maybe \"name\".\n\n3. Location: Yellowstone Club located in state of Montana, USA. So relation \"located in\". object \"Montana, USA\". Could split into two: \"Montana\" (state) and \"USA\" (country). Use qualifiers maybe \"country\". But we can have two triplets: one for state, one for country. Use \"located in\" with object \"Montana\". qualifiers maybe \"country\" \"USA\". But guidelines: qualifiers attach only to claim they modify. Could add qualifier \"country\" relation. Let's do: subject Yellowstone Club, relation \"located in\", object \"Montana\". qualifiers [{\"relation\":\"country\",\"object\":\"USA\"}]. subject_type organization, object_type administrative territorial entity (state).\n\n4. The Rocky Mountain ski and golf club located in eastern Madison County, just west of Big Sky, Montana, south of Bozeman and northwest of Yellowstone National Park.\n\nSo subject: Rocky Mountain ski and golf club. Relation \"located in\". Object \"Madison County\". Qualifiers: \"region\" \"eastern\", \"state\" \"Montana\", \"country\" \"USA\"? Not explicit USA but Montana is US state. Could add qualifiers: \"direction relative to Big Sky\" etc. We need to capture location descriptors as qualifiers: \"just west of Big Sky, Montana\" -> qualifier relation \"west of\" object \"Big Sky\". \"south of Bozeman\" qualifier \"south of\" object \"Bozeman\". \"northwest of Yellowstone National Park\" qualifier \"northwest of\" object \"Yellowstone National Park\". Also \"eastern\" qualifier maybe \"part of\" but we can use qualifier \"direction\" \"eastern\". Use \"direction\" relation.\n\nThus triplet: subject \"Rocky Mountain ski and golf club\", relation \"located in\", object \"Madison County\". qualifiers list: [{\"relation\":\"region\",\"object\":\"eastern\"},{\"relation\":\"state\",\"object\":\"Montana\"},{\"relation\":\"west of\",\"object\":\"Big Sky\"},{\"relation\":\"south of\",\"object\":\"Bozeman\"},{\"relation\":\"northwest of\",\"object\":\"Yellowstone National Park\"}].\n\nSubject_type: organization (club). Object_type: administrative territorial entity (county).\n\nAlso maybe \"Rocky Mountain ski and golf club\" is same as Yellowstone Club? Not explicit, so separate.\n\nAlso \"Big Sky, Montana\" includes state; we can just use \"Big Sky\". It's a town. So object_type \"town\".\n\n\"Bozeman\" is city.\n\n\"Yellowstone National Park\" is national park.\n\nNow also \"Yellowstone Club\" is in USA. Could add qualifier \"country\". Already added.\n\nNow we need to ensure each triplet includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types: organization, organization type, name, administrative territorial entity, town, city, national park, country.\n\nLet's craft JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1659,
+      "total_tokens": 3189,
+      "completion_tokens": 1530,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"alias\",\n            \"object\": \"Yellowstone Ski Resort\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"name\"\n        },\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"type\",\n            \"object\": \"private residential club\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization type\"\n        },\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"type\",\n            \"object\": \"ski resort\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization type\"\n        },\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"type\",\n            \"object\": \"golf resort\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"organization type\"\n        },\n        {\n            \"subject\": \"Yellowstone Club\",\n            \"relation\": \"located in\",\n            \"object\": \"Montana\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"USA\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"administrative territorial entity\"\n        },\n        {\n            \"subject\": \"Rocky Mountain ski and golf club\",\n            \"relation\": \"located in\",\n            \"object\": \"Madison County\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"region\",\n                    \"object\": \"eastern\"\n                },\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Montana\"\n                },\n                {\n                    \"relation\": \"west of\",\n                    \"object\": \"Big Sky\"\n                },\n                {\n                    \"relation\": \"south of\",\n                    \"object\": \"Bozeman\"\n                },\n                {\n                    \"relation\": \"northwest of\",\n                    \"object\": \"Yellowstone National Park\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"administrative territorial entity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Yellowstone Club",
+        "relation": "alias",
+        "object": "Yellowstone Ski Resort",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "name"
+      },
+      {
+        "subject": "Yellowstone Club",
+        "relation": "type",
+        "object": "private residential club",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization type"
+      },
+      {
+        "subject": "Yellowstone Club",
+        "relation": "type",
+        "object": "ski resort",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization type"
+      },
+      {
+        "subject": "Yellowstone Club",
+        "relation": "type",
+        "object": "golf resort",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "organization type"
+      },
+      {
+        "subject": "Yellowstone Club",
+        "relation": "located in",
+        "object": "Montana",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "USA"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "administrative territorial entity"
+      },
+      {
+        "subject": "Rocky Mountain ski and golf club",
+        "relation": "located in",
+        "object": "Madison County",
+        "qualifiers": [
+          {
+            "relation": "region",
+            "object": "eastern"
+          },
+          {
+            "relation": "state",
+            "object": "Montana"
+          },
+          {
+            "relation": "west of",
+            "object": "Big Sky"
+          },
+          {
+            "relation": "south of",
+            "object": "Bozeman"
+          },
+          {
+            "relation": "northwest of",
+            "object": "Yellowstone National Park"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "administrative territorial entity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1659,
+    "total_tokens": 3189,
+    "completion_tokens": 1530,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 687,
+    "output_tokens_est": 595
+  },
+  "attempts": 1,
+  "latency_s": 19.20154903200455,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:05:47.401056+00:00",
+  "cache_key": "7389bbcfe06b679e547a4ed0654cc2e2"
+}

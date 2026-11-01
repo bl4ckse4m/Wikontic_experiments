@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "047b0a994faa7464",
+    "input_hash": "f837836bf9e635eaae93772ecd1b0bf933f5160cb5410e74d979d036ec825f93",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-e5ea3c4dfbdf7b0c40ea582f5c7d62c1",
+    "object": "chat.completion",
+    "created": 1791546712,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"date of birth\",\n            \"object\": \"20 January 1945\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Dissen am Teutoburger Wald\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"date of death\",\n            \"object\": \"28 May 1991\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"nationality\",\n            \"object\": \"West Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"occupation\",\n            \"object\": \"bobsledder\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"sport\",\n            \"object\": \"bobsleigh\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"award received\",\n            \"object\": \"bronze medal\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1972 Winter Olympics\"\n                },\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"four-man bobsleigh\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Sapporo\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"award\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Walter Steinbauer\n\nWalter Steinbauer (20 January 1945 in Dissen am Teutoburger Wald – 28 May 1991) was a West German bobsledder who competed from the late 1960s to the mid-1970s. He won a bronze medal in the four-man event at the 1972 Winter Olympics in Sapporo.\"\n\nWe need to extract facts:\n\n- date of birth: 20 January 1945\n- place of birth: Dissen am Teutoburger Wald (city/town)\n- date of death: 28 May 1991\n- nationality: West German (maybe \"country of citizenship\" or \"nationality\")\n- occupation: bobsledder (profession / sport)\n- sport: bobsleigh? relation \"sport\" maybe.\n- competed from: late 1960s to mid-1970s – time period of activity. Could be expressed as qualifiers on \"competition participation\". Might create a triplet: (Walter Steinbauer, participant in, bobsleigh competitions) with qualifiers \"point in time\" range? But guidelines: numbers, quantities, temporal restrictions: dates, durations, \"from... to...\". Could express as qualifiers on \"active years\". There is no standard relation defined, but we can use \"active years\" maybe. However need to choose a Wikidata-style relation. Could use \"career start\" and \"career end\". But text says \"competed from the late 1960s to the mid-1970s\". Could create two triplets:\n\n- (Walter Steinbauer, career start, 1960s) with qualifier approximation \"late\".\n- (Walter Steinbauer, career end, 1970s) with qualifier approximation \"mid\".\n\nBut maybe better: \"active period\" relation. Not sure.\n\nSimplify: We'll capture \"competed in\" with qualifiers \"point in time\" start and end.\n\nTriplet: (Walter Steinbauer, participated in, bobsleigh) with qualifiers start and end approximations.\n\nBut also we have the medal: He won a bronze medal in the four-man event at the 1972 Winter Olympics in Sapporo.\n\nSo triplet: (Walter Steinbauer, award received, bronze medal) with qualifiers: \"for event\", \"four-man bobsleigh\", \"point in time\" 1972, \"location\" Sapporo, maybe \"competition\" Winter Olympics 1972.\n\nBetter: (Walter Steinbauer, medal awarded, bronze medal) with qualifiers: {\"relation\":\"point in time\",\"object\":\"1972 Winter Olympics\"}, {\"relation\":\"event\",\"object\":\"four-man bobsleigh\"}, {\"relation\":\"location\",\"object\":\"Sapporo\"}.\n\nAlso need object types: bronze medal is award; event is sport event; location is city; date is date.\n\nAlso need subject_type: human.\n\nObject_type for date of birth: date.\n\nPlace of birth: location.\n\nNationality: country.\n\nOccupation: profession.\n\nNow produce JSON.\n\nNeed to include qualifiers as list of dicts.\n\nLet's define relations:\n\n- \"date of birth\"\n- \"place of birth\"\n- \"date of death\"\n- \"nationality\"\n- \"occupation\"\n- \"sport\" maybe \"sport\" relation connecting person to sport. Could use \"sport\" or \"field of work\". Use \"sport\" (makes sense).\n- \"career start\" maybe but not required. Might skip due to complexity.\n\n- \"award received\" for bronze medal.\n\nNow qualifiers for award: point in time, location, event.\n\nWe'll also maybe include \"medal type\" but not needed.\n\nThus produce triplets list.\n\nSubject_type: \"human\".\n\nObject_type per relation:\n\n- date of birth: date\n- place of birth: location\n- date of death: date\n- nationality: country\n- occupation: profession\n- sport: sport\n- award received: award\n\nQualifiers object types: point in time -> date (or event?). For \"1972 Winter Olympics\" maybe treat as event. So \"object_type\": \"event\". For location qualifier: location. For event qualifier: sport event (maybe \"sport event\").\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1662,
+      "total_tokens": 2990,
+      "completion_tokens": 1328,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"date of birth\",\n            \"object\": \"20 January 1945\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Dissen am Teutoburger Wald\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"date of death\",\n            \"object\": \"28 May 1991\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"nationality\",\n            \"object\": \"West Germany\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"occupation\",\n            \"object\": \"bobsledder\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"sport\",\n            \"object\": \"bobsleigh\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"sport\"\n        },\n        {\n            \"subject\": \"Walter Steinbauer\",\n            \"relation\": \"award received\",\n            \"object\": \"bronze medal\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1972 Winter Olympics\"\n                },\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"four-man bobsleigh\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Sapporo\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"award\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Walter Steinbauer",
+        "relation": "date of birth",
+        "object": "20 January 1945",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Walter Steinbauer",
+        "relation": "place of birth",
+        "object": "Dissen am Teutoburger Wald",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "location"
+      },
+      {
+        "subject": "Walter Steinbauer",
+        "relation": "date of death",
+        "object": "28 May 1991",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Walter Steinbauer",
+        "relation": "nationality",
+        "object": "West Germany",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "country"
+      },
+      {
+        "subject": "Walter Steinbauer",
+        "relation": "occupation",
+        "object": "bobsledder",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Walter Steinbauer",
+        "relation": "sport",
+        "object": "bobsleigh",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "sport"
+      },
+      {
+        "subject": "Walter Steinbauer",
+        "relation": "award received",
+        "object": "bronze medal",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1972 Winter Olympics"
+          },
+          {
+            "relation": "event",
+            "object": "four-man bobsleigh"
+          },
+          {
+            "relation": "location",
+            "object": "Sapporo"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "award"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1662,
+    "total_tokens": 2990,
+    "completion_tokens": 1328,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 631,
+    "output_tokens_est": 539
+  },
+  "attempts": 1,
+  "latency_s": 16.66124777600635,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T11:52:09.662088+00:00",
+  "cache_key": "c8288869e35ff8a71ee5924097c8814a"
+}

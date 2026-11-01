@@ -1,0 +1,146 @@
+{
+  "task": {
+    "input_id": "eaa185502803d36f",
+    "input_hash": "1a4b750bbe17333acb2ea0cc97f2baf746f2ccc6745ef8356bf27d4977f08f48",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-c0f526aa1e4d39a3f95e781bd24e57e1",
+    "object": "chat.completion",
+    "created": 1791514161,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"inception\",\n            \"object\": \"2003\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"established by\",\n            \"object\": \"Ministry of Education, Universities and Research\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"jointly with\",\n                    \"object\": \"Ministry of Economy and Finance\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"government agency\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"headquarters location\",\n            \"object\": \"Genoa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"has part\",\n            \"object\": \"laboratory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"10\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Italy\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"field of work\",\n            \"object\": \"research\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"does not offer\",\n            \"object\": \"undergraduate degrees\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"education level\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText mentions \"Institute of technology\" maybe heading. Then: In 2003, the Ministry of Education, Universities and Research and the Ministry of Economy and Finance jointly established the Istituto Italiano di Tecnologia (Italian Institute of Technology), headquartered in Genoa with 10 laboratories around Italy, which however focuses on research and does not offer undergraduate degrees.\n\nEntities:\n\n- Ministry of Education, Universities and Research (maybe \"Ministry of Education, Universities and Research\")\n- Ministry of Economy and Finance\n- Istituto Italiano di Tecnologia (Italian Institute of Technology)\n- Genoa (city)\n- 10 laboratories (maybe count)\n- Italy (country)\n- research (field)\n- undergraduate degrees (type of education)\n\nRelations:\n\n- establishment date: Istituto Italiano di Tecnologia was established in 2003.\n- established by: Ministry of Education, Universities and Research (jointly) and Ministry of Economy and Finance. Could be two separate relations or one with qualifier \"jointly\". We'll create two triplets: subject = Istituto Italiano di Tecnologia, relation = \"established by\", object = Ministry of Education, Universities and Research. qualifiers maybe \"jointly with\" but we can just have separate.\n\n- location/headquarters: Istituto Italiano di Tecnologia headquartered in Genoa.\n\n- has part: Istituto Italiano di Tecnologia has laboratories (10) around Italy. Could be relation \"has part\" with object \"laboratory\". Qualifier \"quantity\" 10, \"location\" Italy.\n\n- focus: Istituto Italiano di Technology focuses on research. relation \"field of work\" maybe.\n\n- does not offer: Istituto Italiano di Technology does not offer undergraduate degrees. Could be relation \"does not offer\" object \"undergraduate degrees\". Might be \"education level offered\" with qualifier \"none\". But we can include as relation \"does not offer\" with object \"undergraduate degrees\". subject_type organization, object_type education.\n\nWe need subject_type and object_type.\n\nDefine types:\n\n- Ministry of Education, Universities and Research: government agency.\n- Ministry of Economy and Finance: government agency.\n- Istituto Italiano di Tecnologia: organization (research institute).\n- Genoa: city.\n- Laboratory: facility.\n- Italy: country.\n- Research: field of work (maybe \"research\" as field).\n- Undergraduate degrees: education level.\n\nNow qualifiers: For establishment date, we can have qualifier point in time 2003. Or we can have relation \"inception\" with date. But example uses award with qualifier point in time. For establishment, we can have relation \"inception\" with object \"2003\". Or \"date of establishment\". We'll use relation \"inception\" maybe.\n\nBetter: Triplet: subject: Istituto Italiano di Tecnologia, relation: \"inception\", object: \"2003\". qualifiers none.\n\nBut also we need \"established by\" with qualifiers \"jointly\". Could add qualifier \"jointly with\" object \"Ministry of Economy and Finance\". But qualifiers must be relation-object pairs attached to a triplet. So we could have one triplet: subject Istituto Italiano di Tecnologia, relation \"established by\", object \"Ministry of Education, Universities and Research\", qualifiers: [{\"relation\":\"jointly with\",\"object\":\"Ministry of Economy and Finance\"}]. That captures joint establishment.\n\nLet's do that.\n\nNow headquarters: relation \"headquarters location\", object \"Genoa\". qualifiers maybe none.\n\nLaboratories: relation \"has part\", object \"laboratory\". qualifiers: quantity 10, location Italy.\n\nFocus: relation \"field of work\", object \"research\". qualifiers none.\n\nDoes not offer: relation \"does not offer\", object \"undergraduate degrees\". qualifiers none.\n\nNow produce JSON.\n\nNeed each triplet dict includes \"qualifiers\": list of dicts.\n\nsubject_type and object_type.\n\nDefine:\n\n- Istituto Italiano di Tecnologia: organization (research institute)\n- Ministry of Education, Universities and Research: government agency\n- Ministry of Economy and Finance: government agency\n- 2003: date\n- Genoa: city\n- laboratory: facility (maybe \"laboratory\")\n- Italy: country\n- research: field of work (maybe \"research\" as field)\n- undergraduate degrees: education level\n\nNow create list.\n\nTriplet 1: subject Istituto Italiano di Tecnologia, relation \"inception\", object \"2003\", qualifiers [], subject_type \"organization\", object_type \"date\".\n\nTriplet 2: subject Istituto Italiano di Tecnologia, relation \"established by\", object \"Ministry of Education, Universities and Research\", qualifiers [{\"relation\":\"jointly with\",\"object\":\"Ministry of Economy and Finance\"}], subject_type \"organization\", object_type \"government agency\".\n\nTriplet 3: subject Istituto Italiano di Tecnologia, relation \"headquarters location\", object \"Genoa\", qualifiers [], subject_type \"organization\", object_type \"city\".\n\nTriplet 4: subject Istituto Italiano di Tecnologia, relation \"has part\", object \"laboratory\", qualifiers [{\"relation\":\"quantity\",\"object\":\"10\"},{\"relation\":\"location\",\"object\":\"Italy\"}], subject_type \"organization\", object_type \"facility\".\n\nTriplet 5: subject Istituto Italiano di Tecnologia, relation \"field of work\", object \"research\", qualifiers [], subject_type \"organization\", object_type \"field of work\".\n\nTriplet 6: subject Istituto Italiano di Technology, relation \"does not offer\", object \"undergraduate degrees\", qualifiers [], subject_type \"organization\", object_type \"education level\".\n\nCheck naming: \"Istituto Italiano di Tecnologia\" also known as \"Italian Institute of Technology\". Use primary name.\n\nMake sure JSON formatting correct.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 995,
+      "total_tokens": 2588,
+      "completion_tokens": 1593,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"inception\",\n            \"object\": \"2003\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"established by\",\n            \"object\": \"Ministry of Education, Universities and Research\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"jointly with\",\n                    \"object\": \"Ministry of Economy and Finance\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"government agency\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"headquarters location\",\n            \"object\": \"Genoa\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"has part\",\n            \"object\": \"laboratory\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"quantity\",\n                    \"object\": \"10\"\n                },\n                {\n                    \"relation\": \"location\",\n                    \"object\": \"Italy\"\n                }\n            ],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"facility\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"field of work\",\n            \"object\": \"research\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"field of work\"\n        },\n        {\n            \"subject\": \"Istituto Italiano di Tecnologia\",\n            \"relation\": \"does not offer\",\n            \"object\": \"undergraduate degrees\",\n            \"qualifiers\": [],\n            \"subject_type\": \"organization\",\n            \"object_type\": \"education level\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Istituto Italiano di Tecnologia",
+        "relation": "inception",
+        "object": "2003",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "date"
+      },
+      {
+        "subject": "Istituto Italiano di Tecnologia",
+        "relation": "established by",
+        "object": "Ministry of Education, Universities and Research",
+        "qualifiers": [
+          {
+            "relation": "jointly with",
+            "object": "Ministry of Economy and Finance"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "government agency"
+      },
+      {
+        "subject": "Istituto Italiano di Tecnologia",
+        "relation": "headquarters location",
+        "object": "Genoa",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "city"
+      },
+      {
+        "subject": "Istituto Italiano di Tecnologia",
+        "relation": "has part",
+        "object": "laboratory",
+        "qualifiers": [
+          {
+            "relation": "quantity",
+            "object": "10"
+          },
+          {
+            "relation": "location",
+            "object": "Italy"
+          }
+        ],
+        "subject_type": "organization",
+        "object_type": "facility"
+      },
+      {
+        "subject": "Istituto Italiano di Tecnologia",
+        "relation": "field of work",
+        "object": "research",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "field of work"
+      },
+      {
+        "subject": "Istituto Italiano di Tecnologia",
+        "relation": "does not offer",
+        "object": "undergraduate degrees",
+        "qualifiers": [],
+        "subject_type": "organization",
+        "object_type": "education level"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 995,
+    "total_tokens": 2588,
+    "completion_tokens": 1593,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 621,
+    "output_tokens_est": 523
+  },
+  "attempts": 1,
+  "latency_s": 19.051580924002337,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T02:49:41.255629+00:00",
+  "cache_key": "59861a7fe1b15d8dd93ed623a95bb41c"
+}

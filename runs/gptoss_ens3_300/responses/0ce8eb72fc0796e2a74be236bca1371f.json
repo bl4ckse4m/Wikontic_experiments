@@ -1,0 +1,141 @@
+{
+  "task": {
+    "input_id": "1af77c77be65122e",
+    "input_hash": "333516a0f3a5655af27b42454a9312d90294a624329fdf3bac65f133652079d2",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-cb24ee41a4e51767f2597b25f45ecafd",
+    "object": "chat.completion",
+    "created": 1791548711,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Staples Pond\",\n            \"relation\": \"location\",\n            \"object\": \"Temple\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Maine\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"water body\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Staples Pond\",\n            \"relation\": \"alternative name\",\n            \"object\": \"Santa Claus Lake\",\n            \"qualifiers\": [],\n            \"subject_type\": \"water body\",\n            \"object_type\": \"name\"\n        },\n        {\n            \"subject\": \"Staples Pond\",\n            \"relation\": \"outflow\",\n            \"object\": \"Temple Stream\",\n            \"qualifiers\": [],\n            \"subject_type\": \"water body\",\n            \"object_type\": \"stream\"\n        },\n        {\n            \"subject\": \"Temple Stream\",\n            \"relation\": \"outflow\",\n            \"object\": \"Sandy River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stream\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Sandy River\",\n            \"relation\": \"location\",\n            \"object\": \"Farmington\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Sandy River\",\n            \"relation\": \"outflow\",\n            \"object\": \"Kennebec River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"river\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract factual triplets.\n\nText: \"Staples Pond is located in the town of Temple, Maine, in the United States. Some locals prefer to call it \"Santa Claus Lake\", because of its appearance from the air. Water from Staples Pond flows via Temple Stream to the Sandy River in Farmington, and thence to the Kennebec River.\"\n\nEntities: Staples Pond (probably a lake/pond). Temple, Maine (town). United States (country). Santa Claus Lake (alternative name). Temple Stream (stream). Sandy River (river). Farmington (city/town). Kennebec River (river).\n\nRelations:\n\n- location: (Staples Pond, location, Temple, Maine) maybe location in town. Could also have location in United States as broader.\n\n- also alternative name: \"some locals prefer to call it 'Santa Claus Lake'\". So (Staples Pond, alternative name, Santa Claus Lake). Relation maybe \"named after\" but more like \"alias\" or \"alternative name\". Use relation \"also known as\" maybe \"alternative name\". We'll choose \"alternative name\".\n\n- Reason for name: because of its appearance from the air. That's a cause but we might not include cause unless explicit relation \"named because of appearance\". Could add qualifier to the alternative name: cause \"appearance from the air\". But maybe not needed.\n\n- Water flow: \"Water from Staples Pond flows via Temple Stream to the Sandy River in Farmington, and thence to the Kennebec River.\" So we can have (Staples Pond, outflow, Temple Stream). Or (Staples Pond, water flows to, Temple Stream). Use relation \"outflow\". Also (Temple Stream, tributary of, Sandy River) but that's about stream flows to river. But the text says water from Staples Pond flows via Temple Stream to the Sandy River in Farmington. So we could have (Staples Pond, outflow, Sandy River) with qualifier \"via\", but better separate: (Staples Pond, outflow, Temple Stream) and (Temple Stream, outflow, Sandy River) maybe \"flows into\". Also (Sandy River, flows into, Kennebec River) (or \"tributary of\").\n\nBut we need only facts explicitly reported. The phrase \"and thence to the Kennebec River\" indicates that Sandy River flows to Kennebec River. So we can capture (Sandy River, tributary of, Kennebec River) or (Sandy River, flows into, Kennebec River). Use relation \"flows into\".\n\nAlso location of Sandy River in Farmington. So (Sandy River, location, Farmington). (Temple Stream, location?), not mentioned.\n\nNow types: subject_type: for each entity.\n\n- Staples Pond: \"lake\" or \"pond\". Use \"water body\". object_type for location: \"town\". etc.\n\nDefine types:\n\nsubject_type: \"water body\" for Staples Pond, Temple Stream is \"stream\", Sandy River \"river\", Kennebec River \"river\", Santa Claus Lake is \"alternative name\" maybe type \"name\". For location relations, object_type \"town\", \"state\", \"country\". Temple is a town. Maine is a state. United States is a country.\n\nWe may need to split location into two statements: in town of Temple, Maine, in United States. Could have (Staples Pond, location, Temple) and (Staples Pond, location, United States). Possibly also (Temple, part of, Maine) but not in text.\n\nBut the phrase \"in the town of Temple, Maine, in the United States.\" So we can capture hierarchical location: (Staples Pond, location, Temple) and (Staples Pond, location, United States). Or we could include qualifiers: for location Temple, qualifier \"state\" Maine, \"country\" United States. But guidelines: qualifiers should be attached to a specific claim. Could do (Staples Pond, location, Temple) with qualifiers [ {\"relation\":\"state\",\"object\":\"Maine\"}, {\"relation\":\"country\",\"object\":\"United States\"} ]. That seems okay.\n\nLet's produce triplets:\n\n1. (Staples Pond, location, Temple) with qualifiers state Maine, country United States. subject_type water body, object_type town.\n\n2. (Staples Pond, alternative name, Santa Claus Lake). subject_type water body, object_type name.\n\n3. (Staples Pond, outflow, Temple Stream). subject_type water body, object_type stream.\n\n4. (Temple Stream, outflow, Sandy River). subject_type stream, object_type river.\n\n5. (Sandy River, location, Farmington). subject_type river, object_type town.\n\n6. (Sandy River, outflow, Kennebec River). subject_type river, object_type river.\n\nWe might also include (Sandy River, tributary of, Kennebec River) but outflow is okay.\n\nCheck for qualifiers: none else.\n\nMake sure JSON formatting.\n\nLet's craft final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1652,
+      "total_tokens": 3042,
+      "completion_tokens": 1390,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Staples Pond\",\n            \"relation\": \"location\",\n            \"object\": \"Temple\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"state\",\n                    \"object\": \"Maine\"\n                },\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"United States\"\n                }\n            ],\n            \"subject_type\": \"water body\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Staples Pond\",\n            \"relation\": \"alternative name\",\n            \"object\": \"Santa Claus Lake\",\n            \"qualifiers\": [],\n            \"subject_type\": \"water body\",\n            \"object_type\": \"name\"\n        },\n        {\n            \"subject\": \"Staples Pond\",\n            \"relation\": \"outflow\",\n            \"object\": \"Temple Stream\",\n            \"qualifiers\": [],\n            \"subject_type\": \"water body\",\n            \"object_type\": \"stream\"\n        },\n        {\n            \"subject\": \"Temple Stream\",\n            \"relation\": \"outflow\",\n            \"object\": \"Sandy River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"stream\",\n            \"object_type\": \"river\"\n        },\n        {\n            \"subject\": \"Sandy River\",\n            \"relation\": \"location\",\n            \"object\": \"Farmington\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Sandy River\",\n            \"relation\": \"outflow\",\n            \"object\": \"Kennebec River\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"river\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Staples Pond",
+        "relation": "location",
+        "object": "Temple",
+        "qualifiers": [
+          {
+            "relation": "state",
+            "object": "Maine"
+          },
+          {
+            "relation": "country",
+            "object": "United States"
+          }
+        ],
+        "subject_type": "water body",
+        "object_type": "town"
+      },
+      {
+        "subject": "Staples Pond",
+        "relation": "alternative name",
+        "object": "Santa Claus Lake",
+        "qualifiers": [],
+        "subject_type": "water body",
+        "object_type": "name"
+      },
+      {
+        "subject": "Staples Pond",
+        "relation": "outflow",
+        "object": "Temple Stream",
+        "qualifiers": [],
+        "subject_type": "water body",
+        "object_type": "stream"
+      },
+      {
+        "subject": "Temple Stream",
+        "relation": "outflow",
+        "object": "Sandy River",
+        "qualifiers": [],
+        "subject_type": "stream",
+        "object_type": "river"
+      },
+      {
+        "subject": "Sandy River",
+        "relation": "location",
+        "object": "Farmington",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "town"
+      },
+      {
+        "subject": "Sandy River",
+        "relation": "outflow",
+        "object": "Kennebec River",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "river"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1652,
+    "total_tokens": 3042,
+    "completion_tokens": 1390,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 520,
+    "output_tokens_est": 428
+  },
+  "attempts": 1,
+  "latency_s": 17.153520011008368,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:25:29.252430+00:00",
+  "cache_key": "0ce8eb72fc0796e2a74be236bca1371f"
+}

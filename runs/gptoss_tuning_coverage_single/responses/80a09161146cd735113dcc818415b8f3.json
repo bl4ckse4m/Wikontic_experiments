@@ -1,0 +1,138 @@
+{
+  "task": {
+    "input_id": "1631186ab2e4f081",
+    "input_hash": "a6b1117b32b97f2a6295f8385f03e94eff6790fdf1e51f52bef12e08a330de22",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-aac6f5ef5ddbadcf83639a292d89d18c",
+    "object": "chat.completion",
+    "created": 1791501262,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Marussia Motors\",\n            \"relation\": \"date of dissolution\",\n            \"object\": \"April 2014\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Marussia Motors staff\",\n            \"relation\": \"joined\",\n            \"object\": \"government-run technical institute\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 2014\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Marussia F1 team\",\n            \"relation\": \"country of registration\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Marussia F1 team\",\n            \"relation\": \"independent from\",\n            \"object\": \"Marussia Motors\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"company\"\n        },\n        {\n            \"subject\": \"Marussia F1 team\",\n            \"relation\": \"ceased trading\",\n            \"object\": \"true\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"7 November 2014\"\n                },\n                {\n                    \"relation\": \"announced by\",\n                    \"object\": \"administrator\"\n                }\n            ],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"boolean\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText:\n\n\"Marussia Motors\n\nIn April 2014, the Marussia Motors company was disbanded, with staff leaving to join a government-run technical institute. The Marussia F1 team continued unaffected as a British entity, independent of the Russian car company. However, on 7 November 2014 the administrator announced that the F1 team had ceased trading.\"\n\nWe need to identify entities: Marussia Motors (company), Marussia F1 team (team), British entity (maybe \"British entity\" as type), Russian car company (refers to Marussia Motors?), government-run technical institute (institution), administrator (person? unspecified), F1 team (same as Marussia F1 team). Dates: April 2014 (month-year), 7 November 2014 (date).\n\nExtract facts:\n\n1. Marussia Motors company was disbanded in April 2014.\nRelation: \"dissolved\" or \"disbanded\". Use \"dissolved\" maybe. In Wikidata, property \"dissolved, abolished or demolished date\" is \"dissolved, abolished or demolished\". But we can use \"date of dissolution\". So triplet: (Marussia Motors, date of dissolution, April 2014). subject_type: organization/company. object_type: date (month-year). Qualifiers none.\n\n2. Staff left to join a government-run technical institute. This is about staff of Marussia Motors. Could be: (Marussia Motors staff, employment transition, government-run technical institute). But we need subject as \"staff\" maybe \"Marussia Motors staff\". Relation: \"member of\" maybe not. Could be \"staff left to join\". Use relation \"joined\". So (Marussia Motors staff, joined, government-run technical institute). Qualifier: point in time April 2014? The clause \"with staff leaving to join a government-run technical institute\" is part of same sentence, likely same time. Could add qualifier point in time April 2014. Subject_type: group of people. Object_type: organization/institution.\n\n3. Marussia F1 team continued unaffected as a British entity, independent of the Russian car company. So fact: (Marussia F1 team, country of registration, United Kingdom) or \"located in\" maybe \"country\". Use relation \"country of origin\" or \"registered in\". We'll use \"country of registration\" = United Kingdom (British entity). Also \"independent of\" relation: (Marussia F1 team, independent from, Marussia Motors). So two triplets.\n\n4. The administrator announced on 7 November 2014 that the F1 team had ceased trading. So fact: (Marussia F1 team, ceased trading, true) with qualifier point in time 7 November 2014, and maybe \"announced by\" relation: (Marussia F1 team, announcement made by, administrator) with qualifier point in time. But we need to capture the announcement event. Could be event: (administrator, announced, \"Marussia F1 team ceased trading\") with qualifier point in time 7 November 2014. But we need object as statement? Might be better: (Marussia F1 team, ceased trading, true) with qualifier point in time 7 November 2014, and qualifier \"announced by\" administrator. Use qualifiers: {\"relation\":\"point in time\",\"object\":\"7 November 2014\"}, {\"relation\":\"announced by\",\"object\":\"administrator\"}.\n\nWe need subject_type and object_type.\n\nDefine types: \"Marussia Motors\" - organization/company. \"April 2014\" - date. \"Marussia Motors staff\" - group of people. \"government-run technical institute\" - organization/institution. \"Marussia F1 team\" - sports team/organization. \"United Kingdom\" - country. \"Marussia Motors\" again as Russian car company (company). \"administrator\" - person (maybe unspecified). \"ceased trading\" - event/status maybe \"business status\". Use object_type \"business status\" or \"event\". We'll use \"status\". For \"independent from\" relation object type \"organization\". For \"joined\" object type \"organization\". For \"announced by\" object type \"human\". For \"ceased trading\" object maybe \"business activity\". We'll pick \"status\".\n\nNow produce JSON.\n\nList triplets:\n\n1.\nsubject: \"Marussia Motors\"\nrelation: \"date of dissolution\"\nobject: \"April 2014\"\nqualifiers: []\nsubject_type: \"company\"\nobject_type: \"date\"\n\n2.\nsubject: \"Marussia Motors staff\"\nrelation: \"joined\"\nobject: \"government-run technical institute\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"April 2014\"}]\nsubject_type: \"group of people\"\nobject_type: \"organization\"\n\n3.\nsubject: \"Marussia F1 team\"\nrelation: \"country of registration\"\nobject: \"United Kingdom\"\nqualifiers: []\nsubject_type: \"sports team\"\nobject_type: \"country\"\n\n4.\nsubject: \"Marussia F1 team\"\nrelation: \"independent from\"\nobject: \"Marussia Motors\"\nqualifiers: []\nsubject_type: \"sports team\"\nobject_type: \"company\"\n\n5.\nsubject: \"Marussia F1 team\"\nrelation: \"ceased trading\"\nobject: \"true\"\nqualifiers: [{\"relation\":\"point in time\",\"object\":\"7 November 2014\"},{\"relation\":\"announced by\",\"object\":\"administrator\"}]\nsubject_type: \"sports team\"\nobject_type: \"boolean\"\n\nAlternatively object_type \"status\". Use \"status\". We'll keep \"boolean\".\n\nMake sure JSON format correct.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1657,
+      "total_tokens": 3180,
+      "completion_tokens": 1523,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Marussia Motors\",\n            \"relation\": \"date of dissolution\",\n            \"object\": \"April 2014\",\n            \"qualifiers\": [],\n            \"subject_type\": \"company\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Marussia Motors staff\",\n            \"relation\": \"joined\",\n            \"object\": \"government-run technical institute\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"April 2014\"\n                }\n            ],\n            \"subject_type\": \"group of people\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Marussia F1 team\",\n            \"relation\": \"country of registration\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Marussia F1 team\",\n            \"relation\": \"independent from\",\n            \"object\": \"Marussia Motors\",\n            \"qualifiers\": [],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"company\"\n        },\n        {\n            \"subject\": \"Marussia F1 team\",\n            \"relation\": \"ceased trading\",\n            \"object\": \"true\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"7 November 2014\"\n                },\n                {\n                    \"relation\": \"announced by\",\n                    \"object\": \"administrator\"\n                }\n            ],\n            \"subject_type\": \"sports team\",\n            \"object_type\": \"boolean\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Marussia Motors",
+        "relation": "date of dissolution",
+        "object": "April 2014",
+        "qualifiers": [],
+        "subject_type": "company",
+        "object_type": "date"
+      },
+      {
+        "subject": "Marussia Motors staff",
+        "relation": "joined",
+        "object": "government-run technical institute",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "April 2014"
+          }
+        ],
+        "subject_type": "group of people",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Marussia F1 team",
+        "relation": "country of registration",
+        "object": "United Kingdom",
+        "qualifiers": [],
+        "subject_type": "sports team",
+        "object_type": "country"
+      },
+      {
+        "subject": "Marussia F1 team",
+        "relation": "independent from",
+        "object": "Marussia Motors",
+        "qualifiers": [],
+        "subject_type": "sports team",
+        "object_type": "company"
+      },
+      {
+        "subject": "Marussia F1 team",
+        "relation": "ceased trading",
+        "object": "true",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "7 November 2014"
+          },
+          {
+            "relation": "announced by",
+            "object": "administrator"
+          }
+        ],
+        "subject_type": "sports team",
+        "object_type": "boolean"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1657,
+    "total_tokens": 3180,
+    "completion_tokens": 1523,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 528,
+    "output_tokens_est": 436
+  },
+  "attempts": 1,
+  "latency_s": 18.216737729999295,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:14:40.807492+00:00",
+  "cache_key": "80a09161146cd735113dcc818415b8f3"
+}

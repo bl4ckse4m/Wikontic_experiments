@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "ae7d30851f524fce",
+    "input_hash": "42486b3bd89addac00ac69a3c098090cf057f35d873a1a242920c74b6c6a031f",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-6564c3ae56a044d187761e27987b36ca",
+    "object": "chat.completion",
+    "created": 1791520546,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Alain Krivine\",\n            \"relation\": \"leader of\",\n            \"object\": \"May 1968 revolt\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"May 1968\"},\n                {\"relation\": \"place\", \"object\": \"Paris\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Alain Krivine\",\n            \"relation\": \"member of\",\n            \"object\": \"political bureau of the LCR\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1960s\"},\n                {\"relation\": \"role\", \"object\": \"last of the generation radicalised in the 1960s\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Alain Krivine\",\n            \"relation\": \"candidate of\",\n            \"object\": \"LCR\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1969\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Alain Krivine\",\n            \"relation\": \"vote share\",\n            \"object\": \"1.05%\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1969\"},\n                {\"relation\": \"unit\", \"object\": \"percent\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Alain Krivine\n\nKrivine was one of the leaders of the May 1968 revolt in Paris, and was the last of the generation radicalised in the 1960s to serve on the political bureau of the LCR. He was the candidate of the LCR at the French presidential election on 1969, getting 1.05% of the votes.\"\n\nWe need to parse.\n\nFirst, subject: Alain Krivine (human). Also \"Krivine\" refers to same.\n\nTriplet 1: Alain Krivine - occupation? Not given. But \"one of the leaders of the May 1968 revolt in Paris\". Relation: \"leadership role\" maybe \"position held\" or \"role\". Use \"position held\" maybe. Object: \"May 1968 revolt\". Could be event. So relation: \"leader of\". object: \"May 1968 revolt\". qualifiers: place \"Paris\". Also point in time \"May 1968\". So qualifiers: {\"relation\":\"point in time\",\"object\":\"May 1968\"} and {\"relation\":\"place\",\"object\":\"Paris\"}.\n\nTriplet 2: Alain Krivine - \"member of\" or \"served on\" political bureau of LCR. Relation: \"member of\". object: \"political bureau of the LCR\". Could treat object as \"political bureau of LCR\". Qualifiers: \"generation radicalised in the 1960s\" maybe attribute? The phrase: \"was the last of the generation radicalised in the 1960s to serve on the political bureau of the LCR.\" So we can capture that he was \"member of\" political bureau of LCR, with qualifier \"generation radicalised in the 1960s\" maybe as \"qualifier\": {\"relation\":\"generation\",\"object\":\"radicalised in the 1960s\"} but not standard. Could use \"qualifier\": {\"relation\":\"point in time\",\"object\":\"1960s\"}? But that refers to generation, not event. Might be okay to include point in time \"1960s\". Also \"last of the generation\" maybe not needed. We'll include qualifier \"point in time\":\"1960s\". Also maybe \"qualifier\":\"role\",\"object\":\"last of the generation radicalised in the 1960s\". But guidelines: qualifiers are limited to defined types: time, place, role, polarity, modality, attribution, condition, unit, approximation. So we can use \"role\" to indicate \"last of the generation radicalised in the 1960s\". But role is for role context. Might be okay: qualifier role = \"last of the generation radicalised in the 1960s\". We'll include.\n\nTriplet 3: Alain Krivine - \"candidate of\" LCR at French presidential election 1969. Relation: \"candidate of\". object: \"LCR\". qualifiers: point in time \"1969\", maybe also \"event\":\"French presidential election\". Could add qualifier \"point in time\":\"1969\". Also maybe \"place\":\"France\". But not explicit. We'll add \"point in time\":\"1969\". Also maybe \"election\":\"French presidential election\". Could treat as qualifier \"event\":\"French presidential election\". But not defined. We'll just include point in time.\n\nTriplet 4: Alain Krivine - \"percentage of votes received\" 1.05%. Relation: \"vote share\". object: \"1.05%\". qualifiers: point in time \"1969\" maybe same election. Also \"unit\":\"percent\". Also \"approximation\"? Not approximate. So qualifiers: point in time \"1969\", unit \"percent\". Also maybe \"qualifier\":\"context\",\"object\":\"French presidential election\". Not needed.\n\nWe need subject_type and object_type. For human, \"human\". For event \"May 1968 revolt\": object_type \"event\". For political bureau of LCR: maybe \"organization\" or \"political body\". We'll set \"political bureau of LCR\" as \"organization\". For LCR: organization (political party). For vote share: object_type \"quantity\". Use \"percentage\". For \"1.05%\" object_type \"quantity\". For \"candidate of\": object_type \"political party\". LCR is a political party.\n\nNow produce JSON.\n\nCheck qualifiers format: list of dicts with relation and object strings.\n\nTriplet 1 qualifiers: point in time May 1968, place Paris.\n\nTriplet 2 qualifiers: point in time 1960s, role \"last of the generation radicalised in the 1960s\". Might be redundant but okay.\n\nTriplet 3 qualifiers: point in time 1969, event maybe not needed.\n\nTriplet 4 qualifiers: point in time 1969, unit percent.\n\nMake sure each triplet includes qualifiers list (could be empty). Provide subject_type and object_type.\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1669,
+      "total_tokens": 3055,
+      "completion_tokens": 1386,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Alain Krivine\",\n            \"relation\": \"leader of\",\n            \"object\": \"May 1968 revolt\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"May 1968\"},\n                {\"relation\": \"place\", \"object\": \"Paris\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"event\"\n        },\n        {\n            \"subject\": \"Alain Krivine\",\n            \"relation\": \"member of\",\n            \"object\": \"political bureau of the LCR\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1960s\"},\n                {\"relation\": \"role\", \"object\": \"last of the generation radicalised in the 1960s\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Alain Krivine\",\n            \"relation\": \"candidate of\",\n            \"object\": \"LCR\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1969\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Alain Krivine\",\n            \"relation\": \"vote share\",\n            \"object\": \"1.05%\",\n            \"qualifiers\": [\n                {\"relation\": \"point in time\", \"object\": \"1969\"},\n                {\"relation\": \"unit\", \"object\": \"percent\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Alain Krivine",
+        "relation": "leader of",
+        "object": "May 1968 revolt",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "May 1968"
+          },
+          {
+            "relation": "place",
+            "object": "Paris"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "event"
+      },
+      {
+        "subject": "Alain Krivine",
+        "relation": "member of",
+        "object": "political bureau of the LCR",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1960s"
+          },
+          {
+            "relation": "role",
+            "object": "last of the generation radicalised in the 1960s"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Alain Krivine",
+        "relation": "candidate of",
+        "object": "LCR",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1969"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political party"
+      },
+      {
+        "subject": "Alain Krivine",
+        "relation": "vote share",
+        "object": "1.05%",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1969"
+          },
+          {
+            "relation": "unit",
+            "object": "percent"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1669,
+    "total_tokens": 3055,
+    "completion_tokens": 1386,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 475,
+    "output_tokens_est": 383
+  },
+  "attempts": 1,
+  "latency_s": 17.484503440005938,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:36:04.641310+00:00",
+  "cache_key": "ee066ed471d02a12bcc9159ea435d978"
+}

@@ -1,0 +1,147 @@
+{
+  "task": {
+    "input_id": "be7ef0c7c21e7a08",
+    "input_hash": "3fbe0429e583ffa2db13c28b2217a90c87d62bc791388ffec8215f9356527896",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-42c69623a3d1a1720e2e14f5f2cbd20c",
+    "object": "chat.completion",
+    "created": 1791520994,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1920\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Mangyongdae\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1920\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"parent\",\n            \"object\": \"Kim Hyŏng-jik\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"parent\",\n            \"object\": \"Kang Pan-sŏk\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"brother\",\n            \"object\": \"Kim Il-sung\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"age difference\",\n                    \"object\": \"8 years\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"family of Kim Yong-ju\",\n            \"relation\": \"moved to\",\n            \"object\": \"southern Manchuria\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"when Kim Yong-ju was 3 years old\"\n                }\n            ],\n            \"subject_type\": \"family\",\n            \"object_type\": \"region\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Kim Yong-ju\n\nKim Yong-ju was born to Kim Hyŏng-jik and Kang Pan-sŏk in Mangyongdae in 1920, 8 years after his elder brother Kim Il-sung. When Kim was 3 years old, his family moved to southern Manchuria.\"\n\nWe have subject: Kim Yong-ju.\n\nFacts:\n\n1. date of birth: 1920 (explicit). So triplet: subject \"Kim Yong-ju\", relation \"date of birth\", object \"1920\". qualifier none. subject_type human, object_type date.\n\n2. place of birth: Mangyongdae. So relation \"place of birth\". object \"Mangyongdae\". qualifier maybe point in time 1920? Usually place of birth is independent; but we could add qualifier point in time 1920? The text says \"in Mangyongdae in 1920\". Could treat as separate: place of birth Mangyongdae, qualifier point in time 1920. But guidelines: qualifiers attach only to claim they modify. Here \"born to ... in Mangyongdae in 1920\". So both place and date are part of same event. Could produce two separate facts: date of birth and place of birth, each with qualifier point in time? For date of birth we already have date. For place of birth we could add qualifier point in time 1920. That seems okay.\n\n3. parents: \"born to Kim Hyŏng-jik and Kang Pan-sŏk\". So two parent relations.\n\nTriplet: subject \"Kim Yong-ju\", relation \"parent\", object \"Kim Hyŏng-jik\". qualifier maybe \"role\" parent? Actually relation \"parent\" is fine. subject_type human, object_type human.\n\nSimilarly for Kang Pan-sŏk.\n\n4. sibling: \"8 years after his elder brother Kim Il-sung\". This indicates Kim Il-sung is elder brother. So relation \"sibling\" maybe \"brother\". So triplet: subject \"Kim Yong-ju\", relation \"brother\", object \"Kim Il-sung\". qualifier \"point in time\" maybe \"1920\"? Actually the statement about age difference: \"8 years after his elder brother\". Could add qualifier \"age difference\" but not defined. Could add qualifier \"approximation\"? Not needed. Could add qualifier \"point in time\" maybe \"1920\"? Not necessary. Probably just sibling relation.\n\nAlso we could capture \"elder brother\" as qualifier \"order\" maybe \"elder\". But not required.\n\n5. When Kim was 3 years old, his family moved to southern Manchuria. So event: family moved to southern Manchuria. Subject maybe \"Kim Yong-ju's family\". Could treat as \"family of Kim Yong-ju\". Relation \"moved to\". Object \"southern Manchuria\". Qualifier \"point in time\" = when Kim was 3 years old. That is 1923 (since born 1920). But we shouldn't compute. Use qualifier \"age\" maybe \"3 years old\". According to guidelines, we can use qualifier \"point in time\" with object \"when Kim was 3 years old\". But better to use qualifier \"age\" not defined. Use \"point in time\" with object \"when Kim Yong-ju was 3 years old\". That is explicit phrase.\n\nThus triplet: subject \"family of Kim Yong-ju\", relation \"moved to\", object \"southern Manchuria\". qualifiers: [{\"relation\":\"point in time\",\"object\":\"when Kim Yong-ju was 3 years old\"}].\n\nSubject_type maybe \"family\". object_type \"region\".\n\nWe also need subject_type for each.\n\nDefine types: human, human, location, region, family.\n\nLet's produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1656,
+      "total_tokens": 2876,
+      "completion_tokens": 1220,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"date of birth\",\n            \"object\": \"1920\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Mangyongdae\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1920\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"parent\",\n            \"object\": \"Kim Hyŏng-jik\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"parent\",\n            \"object\": \"Kang Pan-sŏk\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Kim Yong-ju\",\n            \"relation\": \"brother\",\n            \"object\": \"Kim Il-sung\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"age difference\",\n                    \"object\": \"8 years\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"family of Kim Yong-ju\",\n            \"relation\": \"moved to\",\n            \"object\": \"southern Manchuria\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"when Kim Yong-ju was 3 years old\"\n                }\n            ],\n            \"subject_type\": \"family\",\n            \"object_type\": \"region\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Kim Yong-ju",
+        "relation": "date of birth",
+        "object": "1920",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Kim Yong-ju",
+        "relation": "place of birth",
+        "object": "Mangyongdae",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1920"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "location"
+      },
+      {
+        "subject": "Kim Yong-ju",
+        "relation": "parent",
+        "object": "Kim Hyŏng-jik",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Kim Yong-ju",
+        "relation": "parent",
+        "object": "Kang Pan-sŏk",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "Kim Yong-ju",
+        "relation": "brother",
+        "object": "Kim Il-sung",
+        "qualifiers": [
+          {
+            "relation": "age difference",
+            "object": "8 years"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      },
+      {
+        "subject": "family of Kim Yong-ju",
+        "relation": "moved to",
+        "object": "southern Manchuria",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "when Kim Yong-ju was 3 years old"
+          }
+        ],
+        "subject_type": "family",
+        "object_type": "region"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1656,
+    "total_tokens": 2876,
+    "completion_tokens": 1220,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 564,
+    "output_tokens_est": 472
+  },
+  "attempts": 1,
+  "latency_s": 15.41476694800076,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:43:30.430547+00:00",
+  "cache_key": "ea7f2b06dda2c56dbcfdcad8bc85e751"
+}

@@ -1,0 +1,172 @@
+{
+  "task": {
+    "input_id": "01579ab4a163d05b",
+    "input_hash": "f56d25a64746bc0a77c347d6e49dfebb3d6c13028a235636b7e901cdcdecc2f9",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-8fdf51d53c837210fd63e55cc78d6b3f",
+    "object": "chat.completion",
+    "created": 1791542662,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"home of\",\n            \"object\": \"United Nations Office at Geneva\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1946\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"located in\",\n            \"object\": \"Geneva\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"located in\",\n            \"object\": \"Switzerland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"built\",\n            \"object\": \"construction\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1929\"\n                },\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"1938\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"activity\"\n        },\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"headquarters of\",\n            \"object\": \"League of Nations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Secretary-General of the United Nations\",\n            \"relation\": \"signed\",\n            \"object\": \"Headquarters Agreement\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1946\"\n                }\n            ],\n            \"subject_type\": \"position\",\n            \"object_type\": \"document\"\n        },\n        {\n            \"subject\": \"Headquarters Agreement\",\n            \"relation\": \"with party\",\n            \"object\": \"Swiss authorities\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"government\"\n        },\n        {\n            \"subject\": \"Switzerland\",\n            \"relation\": \"member of\",\n            \"object\": \"United Nations\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2002\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nIdentify entities: Palace of Nations, United Nations Office at Geneva, Geneva, Switzerland, League of Nations, United Nations, Secretary-General of the United Nations, Swiss authorities, Switzerland (again), United Nations (again). Also dates: 1929, 1938, 1946, 2002.\n\nRelations:\n\n- Palace of Nations is the home of United Nations Office at Geneva.\n- Palace of Nations is located in Geneva, Switzerland. Possibly two location relations: located in Geneva; located in Switzerland (maybe both). The text: \"located in Geneva, Switzerland.\" So location: Geneva (city) and Switzerland (country). Could have \"located in\" relation.\n\n- Palace of Nations was built between 1929 and 1938 to serve as the headquarters of the League of Nations. So built (construction) with qualifiers point in time start 1929, end 1938. Also purpose: serve as headquarters of League of Nations. Could be relation \"headquarters of\" maybe.\n\n- It has served as the home of the United Nations Office at Geneva since 1946 when the Secretary-General ... signed a Headquarters Agreement with the Swiss authorities. So \"served as home of\" maybe same as \"home of\". Already captured earlier. But we can add relation \"start time\" qualifier 1946.\n\n- \"Secretary-General of the United Nations signed a Headquarters Agreement with the Swiss authorities\". So relation: Secretary-General of the United Nations -> signed -> Headquarters Agreement (object). Could be \"signed\" relation. Also qualifier: point in time 1946.\n\n- \"Switzerland did not become a member of the United Nations until 2002.\" So relation: Switzerland -> member of -> United Nations, with qualifier polarity negative? Actually statement is \"did not become a member until 2002\", meaning membership started 2002. It's not a negated claim; it's stating that before 2002 not member, but became member in 2002. So we can represent as \"member of\" with qualifier point in time 2002. No negation.\n\nBut note the rule: we should not infer membership earlier. So we just capture membership with point in time 2002.\n\nAlso \"United Nations Office at Geneva\" is part of United Nations. Could capture \"part of\" relation but not explicit in text. Not needed.\n\nNow define subject_type and object_type.\n\n- Palace of Nations: building (maybe \"building\").\n- United Nations Office at Geneva: organization (UN office).\n- Geneva: city.\n- Switzerland: country.\n- League of Nations: organization.\n- Secretary-General of the United Nations: position/person? It's a position, but could treat as human role. Might be \"human\" if we treat as role holder unspecified. Probably \"human\" not safe. Could set subject_type \"position\". Object_type \"agreement\". But \"Headquarters Agreement\" is a document.\n\n- Swiss authorities: organization (government). Could be \"government\" or \"authority\". Use \"government\".\n\n- United Nations: organization.\n\nNow build triplets list.\n\nTriplet 1:\nsubject: Palace of Nations\nrelation: home of\nobject: United Nations Office at Geneva\nqualifiers: []\nsubject_type: building\nobject_type: organization\n\nTriplet 2:\nsubject: Palace of Nations\nrelation: located in\nobject: Geneva\nqualifiers: []\nsubject_type: building\nobject_type: city\n\nTriplet 3:\nsubject: Palace of Nations\nrelation: located in\nobject: Switzerland\nqualifiers: []\nsubject_type: building\nobject_type: country\n\nTriplet 4:\nsubject: Palace of Nations\nrelation: construction period\nobject: (maybe \"1929–1938\") but better use qualifiers. Relation could be \"built\". Object: \"construction\". Could use \"built\" with qualifiers start and end. Let's do relation: \"built\". Object: \"construction\". Qualifiers: point in time start 1929, point in time end 1938. But spec expects qualifiers with relation and object. Use \"start time\" and \"end time\". We'll use \"start time\" and \"end time\". So object maybe \"null\"? But must have object entity. Could set object \"Palace of Nations\" built? Hmm. Might set object \"construction\". Use object_type \"activity\". Accept.\n\nTriplet 5:\nsubject: Palace of Nations\nrelation: purpose\nobject: headquarters of League of Nations\nBut we can split: \"headquarters of\" relation. So subject: Palace of Nations, relation: headquarters of, object: League of Nations. qualifiers: none. subject_type building, object_type organization.\n\nTriplet 6:\nsubject: Palace of Nations\nrelation: start serving as home of United Nations Office at Geneva\nBetter: relation: \"home of\" already captured, qualifiers point in time 1946. So we can add qualifier to triplet 1: but triplet 1 already exists without qualifier. We could create another triplet with qualifier. Let's create triplet 1 with qualifier point in time 1946. But also earlier mention maybe earlier? The building was built earlier for League. So we can keep two separate: one for League (headquarters) and one for UN Office with qualifier.\n\nThus modify: Triplet 1: Palace of Nations - home of - United Nations Office at Geneva, qualifiers: point in time 1946.\n\nTriplet 5: Palace of Nations - headquarters of - League of Nations, qualifiers: start time maybe 1929? Actually built to serve as headquarters of League of Nations. Could add qualifier \"point in time\" 1929-1938? Not needed.\n\nTriplet 6:\nsubject: Secretary-General of the United Nations\nrelation: signed\nobject: Headquarters Agreement\nqualifiers: point in time 1946\n\nTriplet 7:\nsubject: Headquarters Agreement\nrelation: with party\nobject: Swiss authorities\nqualifiers: none (maybe point in time 1946 as well, but not needed)\n\nTriplet 8:\nsubject: Switzerland\nrelation: member of\nobject: United Nations\nqualifiers: point in time 2002\n\nNow need subject_type/object_type.\n\nDefine:\n\n- Secretary-General of the United Nations: position (human role). Could set subject_type \"position\". object_type \"agreement\".\n\n- Headquarters Agreement: document.\n\n- Swiss authorities: organization/government.\n\n- United Nations Office at Geneva: organization.\n\nNow produce JSON.\n\nCheck qualifiers naming: Use \"relation\": \"point in time\", \"object\": \"1946\". For start/end perhaps \"start time\", \"end time\". Use as described. Not sure if allowed but seems fine.\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1685,
+      "total_tokens": 3604,
+      "completion_tokens": 1919,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"home of\",\n            \"object\": \"United Nations Office at Geneva\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1946\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"located in\",\n            \"object\": \"Geneva\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"located in\",\n            \"object\": \"Switzerland\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"built\",\n            \"object\": \"construction\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"start time\",\n                    \"object\": \"1929\"\n                },\n                {\n                    \"relation\": \"end time\",\n                    \"object\": \"1938\"\n                }\n            ],\n            \"subject_type\": \"building\",\n            \"object_type\": \"activity\"\n        },\n        {\n            \"subject\": \"Palace of Nations\",\n            \"relation\": \"headquarters of\",\n            \"object\": \"League of Nations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"building\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Secretary-General of the United Nations\",\n            \"relation\": \"signed\",\n            \"object\": \"Headquarters Agreement\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1946\"\n                }\n            ],\n            \"subject_type\": \"position\",\n            \"object_type\": \"document\"\n        },\n        {\n            \"subject\": \"Headquarters Agreement\",\n            \"relation\": \"with party\",\n            \"object\": \"Swiss authorities\",\n            \"qualifiers\": [],\n            \"subject_type\": \"document\",\n            \"object_type\": \"government\"\n        },\n        {\n            \"subject\": \"Switzerland\",\n            \"relation\": \"member of\",\n            \"object\": \"United Nations\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2002\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"organization\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Palace of Nations",
+        "relation": "home of",
+        "object": "United Nations Office at Geneva",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1946"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Palace of Nations",
+        "relation": "located in",
+        "object": "Geneva",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "city"
+      },
+      {
+        "subject": "Palace of Nations",
+        "relation": "located in",
+        "object": "Switzerland",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "country"
+      },
+      {
+        "subject": "Palace of Nations",
+        "relation": "built",
+        "object": "construction",
+        "qualifiers": [
+          {
+            "relation": "start time",
+            "object": "1929"
+          },
+          {
+            "relation": "end time",
+            "object": "1938"
+          }
+        ],
+        "subject_type": "building",
+        "object_type": "activity"
+      },
+      {
+        "subject": "Palace of Nations",
+        "relation": "headquarters of",
+        "object": "League of Nations",
+        "qualifiers": [],
+        "subject_type": "building",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Secretary-General of the United Nations",
+        "relation": "signed",
+        "object": "Headquarters Agreement",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1946"
+          }
+        ],
+        "subject_type": "position",
+        "object_type": "document"
+      },
+      {
+        "subject": "Headquarters Agreement",
+        "relation": "with party",
+        "object": "Swiss authorities",
+        "qualifiers": [],
+        "subject_type": "document",
+        "object_type": "government"
+      },
+      {
+        "subject": "Switzerland",
+        "relation": "member of",
+        "object": "United Nations",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2002"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "organization"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1685,
+    "total_tokens": 3604,
+    "completion_tokens": 1919,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 774,
+    "output_tokens_est": 682
+  },
+  "attempts": 1,
+  "latency_s": 23.409278499006177,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T10:44:46.243243+00:00",
+  "cache_key": "cd53fab6a41f524292d0a4d5e3663585"
+}

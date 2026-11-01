@@ -1,0 +1,153 @@
+{
+  "task": {
+    "input_id": "033ed8735a0460f0",
+    "input_hash": "c18f00acb76db549f35a55b3c1203dc827d9de5a0fe93affb62998649c2c7435",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-f5b2f9cc1a1d4d1b81eae4c2cdaeea9e",
+    "object": "chat.completion",
+    "created": 1791542887,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"date of birth\",\n            \"object\": \"7 February 1923\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Olomouc, Czechoslovakia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"date of death\",\n            \"object\": \"26 June 1999\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"place of death\",\n            \"object\": \"Rome, Italy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"occupation\",\n            \"object\": \"journalist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"occupation\",\n            \"object\": \"politician\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"member of\",\n            \"object\": \"parliament\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"member of\",\n            \"object\": \"European Parliament\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"affiliation\",\n                    \"object\": \"Italian Socialist Party\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from text.\n\nText includes:\n\n\"Jiří Pelikán (politician)\n\nJiří Pelikán (7 February 1923 in Olomouc, Czechoslovakia – 26 June 1999 in Rome, Italy) was a Czechoslovakian journalist and member of parliament, then a member of the European Parliament for the Italian Socialist Party.\"\n\nFacts:\n\n- Jiří Pelikán date of birth: 7 February 1923.\n- Place of birth: Olomouc, Czechoslovakia.\n- Date of death: 26 June 1999.\n- Place of death: Rome, Italy.\n- Occupation: journalist (Czechoslovakian journalist). So occupation = journalist.\n- Nationality maybe \"Czechoslovakian\". Could have relation \"country of citizenship\" or \"nationality\". Not required unless explicit. It says \"was a Czechoslovakian journalist\". So we can have (Jiří Pelikán, occupation, journalist) and maybe (Jiří Pelikán, country of citizenship, Czechoslovakia) but \"Czechoslovakian journalist\" indicates nationality. Might treat as occupation plus nationality qualifier? Possibly separate.\n\n- Member of parliament (presumably Czechoslovakian parliament). So (Jiří Pelikán, member of, Parliament of Czechoslovakia) maybe. But text says \"member of parliament\". Not specific. Could use object \"parliament\". We'll use \"parliament\" as generic.\n\n- Then a member of the European Parliament for the Italian Socialist Party. So (Jiří Pelikán, member of, European Parliament) with qualifier \"political party\" = Italian Socialist Party or \"for political party\" maybe relation \"affiliation\". Could also create separate triplet (Jiří Pelikán, political party, Italian Socialist Party). But we need to capture that he was member of the European Parliament for that party. So we can have (Jiří Pelikán, member of, European Parliament) with qualifier {\"relation\":\"affiliation\",\"object\":\"Italian Socialist Party\"}.\n\nWe also might have (Jiří Pelikán, occupation, politician) from header \"(politician)\". The header says \"Jiří Pelikán (politician)\". That's a classification. So we can include occupation = politician.\n\nSubject_type: human. Object_type: appropriate.\n\nDefine relation names: date of birth, date of death, place of birth, place of death, occupation, member of, political party, etc. Use \"member of\" for institutions.\n\nNow qualifiers list.\n\nTriplet list:\n\n1. subject: Jiří Pelikán, relation: date of birth, object: 7 February 1923, qualifiers: [], subject_type: human, object_type: date.\n\n2. subject: Jiří Pelikán, relation: place of birth, object: Olomouc, Czechoslovakia. Could separate city and country? We'll keep combined string. object_type: location.\n\n3. subject: Jiří Pelikán, relation: date of death, object: 26 June 1999.\n\n4. subject: Jiři Pelikán, relation: place of death, object: Rome, Italy.\n\n5. subject: Jiří Pelikán, relation: occupation, object: journalist.\n\n6. subject: Jiří Pelikán, relation: occupation, object: politician. (from header)\n\n7. subject: Jiří Pelikán, relation: member of, object: parliament. Might need qualifier \"country\" = Czechoslovakia? Not explicit. Could add qualifier \"country\" maybe. But not required.\n\n8. subject: Jiří Pelikán, relation: member of, object: European Parliament, qualifiers: [{\"relation\":\"affiliation\",\"object\":\"Italian Socialist Party\"}].\n\nAlternatively, also separate (Jiří Pelikán, political party, Italian Socialist Party). But that might be redundant.\n\nWe also may include (Italian Socialist Party, country, Italy) not needed.\n\nMake sure each entry has subject_type and object_type.\n\nDefine object types: date, location, profession, political party, legislative body.\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1655,
+      "total_tokens": 3011,
+      "completion_tokens": 1356,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"date of birth\",\n            \"object\": \"7 February 1923\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"place of birth\",\n            \"object\": \"Olomouc, Czechoslovakia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"date of death\",\n            \"object\": \"26 June 1999\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"place of death\",\n            \"object\": \"Rome, Italy\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"location\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"occupation\",\n            \"object\": \"journalist\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"occupation\",\n            \"object\": \"politician\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"profession\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"member of\",\n            \"object\": \"parliament\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        },\n        {\n            \"subject\": \"Jiří Pelikán\",\n            \"relation\": \"member of\",\n            \"object\": \"European Parliament\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"affiliation\",\n                    \"object\": \"Italian Socialist Party\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"legislative body\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Jiří Pelikán",
+        "relation": "date of birth",
+        "object": "7 February 1923",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Jiří Pelikán",
+        "relation": "place of birth",
+        "object": "Olomouc, Czechoslovakia",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "location"
+      },
+      {
+        "subject": "Jiří Pelikán",
+        "relation": "date of death",
+        "object": "26 June 1999",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "date"
+      },
+      {
+        "subject": "Jiří Pelikán",
+        "relation": "place of death",
+        "object": "Rome, Italy",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "location"
+      },
+      {
+        "subject": "Jiří Pelikán",
+        "relation": "occupation",
+        "object": "journalist",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Jiří Pelikán",
+        "relation": "occupation",
+        "object": "politician",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "profession"
+      },
+      {
+        "subject": "Jiří Pelikán",
+        "relation": "member of",
+        "object": "parliament",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "legislative body"
+      },
+      {
+        "subject": "Jiří Pelikán",
+        "relation": "member of",
+        "object": "European Parliament",
+        "qualifiers": [
+          {
+            "relation": "affiliation",
+            "object": "Italian Socialist Party"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "legislative body"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1655,
+    "total_tokens": 3011,
+    "completion_tokens": 1356,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 628,
+    "output_tokens_est": 536
+  },
+  "attempts": 1,
+  "latency_s": 16.943257170001743,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T10:48:24.868791+00:00",
+  "cache_key": "f97c0ec438df70e7de626e241f320e41"
+}

@@ -1,0 +1,149 @@
+{
+  "task": {
+    "input_id": "29ec982b3cc6a7dd",
+    "input_hash": "7e3a172f3b49b6ebed9624b42a17f2a172df5de06eb802dc0572bfdcd6d5b2a7",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-854c5fd707b62adcaf7b57008cf2459c",
+    "object": "chat.completion",
+    "created": 1791516082,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"instance of\",\n            \"object\": \"mountain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"located in\",\n            \"object\": \"Alt Urgell\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"comarca\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"located in\",\n            \"object\": \"Catalonia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"located in\",\n            \"object\": \"Spain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"elevation\",\n            \"object\": \"2,648\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"metres\"\n                },\n                {\n                    \"relation\": \"reference point\",\n                    \"object\": \"sea level\"\n                }\n            ],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"highest point in\",\n            \"object\": \"Serra del Cadí mountain range\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"highest point in\",\n            \"object\": \"Catalan Pre-Pyrenees\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Vulturó\n\nVulturó is a mountain located in the \"comarca\" of Alt Urgell in Catalonia, Spain. It has an elevation of 2,648 metres above sea level. It is the highest mountain in the Serra del Cadí mountain range, and in the Catalan Pre-Pyrenees.\"\n\nEntities: Vulturó (mountain). Alt Urgell (comarca). Catalonia (region). Spain (country). Elevation 2,648 metres above sea level. Highest mountain in Serra del Cadí mountain range. Also highest in Catalan Pre-Pyrenees.\n\nWe need triplets:\n\n1. Vulturó - instance of - mountain? relation maybe \"instance of\". But example uses \"occupation\" etc. Could use \"type\". Not sure allowed. Probably \"instance of\" relation. object_type \"mountain\". subject_type \"mountain\"? Actually subject_type \"mountain\". object_type \"geographical feature\"? Might just use \"mountain\". Let's follow pattern: relation \"instance of\", object \"mountain\". subject_type \"mountain\". object_type \"class\". But we need consistent.\n\nBetter: \"Vulturó\" relation \"mountain type\"? Hmm.\n\nMaybe we can include location: Vulturó - location - Alt Urgell. qualifiers: place? Actually location relation.\n\nTriplet: subject Vulturó, relation \"located in\", object \"Alt Urgell\". qualifiers maybe none. subject_type \"mountain\", object_type \"comarca\". Also could add \"located in\" with \"Catalonia\" and \"Spain\". Could split: Vulturó located in Alt Urgell. Also Alt Urgell located in Catalonia? Not in text. Only Vulturó located in Alt Urgell in Catalonia, Spain. Could capture hierarchical location with qualifiers? Could add qualifiers \"place\" maybe \"Catalonia\" and \"Spain\". But rule: qualifiers attach only to claim they modify. The phrase \"located in the 'comarca' of Alt Urgell in Catalonia, Spain.\" So location is Alt Urgell, and qualifiers indicate that Alt Urgell is in Catalonia, Spain. Could represent as qualifiers: \"place\" relation? Might use qualifier \"region\" etc. But safer: create separate triplet: Vulturó located in Alt Urgell. Also Vulturó located in Catalonia. Also Vulturó located in Spain. Since text says \"in Alt Urgell in Catalonia, Spain\". So we can extract three location relations.\n\nElevation: Vulturó elevation 2,648 metres above sea level. Relation \"elevation\". object \"2,648 metres\". qualifiers: unit \"metres\". Also maybe \"above sea level\" as qualifier \"reference point\". Could include qualifier \"reference point\" with object \"sea level\". But not required. We'll include unit qualifier.\n\nHighest mountain in Serra del Cadí mountain range. Relation \"highest point in\". object \"Serra del Cadí mountain range\". qualifiers none. subject_type mountain, object_type mountain range.\n\nAlso highest mountain in Catalan Pre-Pyrenees. Relation \"highest point in\". object \"Catalan Pre-Pyrenees\". object_type \"mountain range\" maybe.\n\nWe need subject_type and object_type. Provide plausible types: \"mountain\", \"comarca\", \"region\", \"country\", \"mountain range\". For elevation object_type \"quantity\" maybe \"length\". Use \"length\". Provide qualifiers: unit \"metres\". Also maybe \"point in time\" not needed.\n\nLet's craft JSON.\n\nTriplets list:\n\n1. Vulturó - relation \"instance of\" - \"mountain\". qualifiers [].\n\n2. Vulturó - relation \"located in\" - \"Alt Urgell\". qualifiers [].\n\n3. Vulturó - relation \"located in\" - \"Catalonia\". qualifiers [].\n\n4. Vulturó - relation \"located in\" - \"Spain\". qualifiers [].\n\n5. Vulturó - relation \"elevation\" - \"2,648\". qualifiers: unit \"metres\", maybe \"reference point\" \"sea level\". Use two qualifiers.\n\n6. Vulturó - relation \"highest point in\" - \"Serra del Cadí mountain range\". qualifiers [].\n\n7. Vulturó - relation \"highest point in\" - \"Catalan Pre-Pyrenees\". qualifiers [].\n\nCheck types:\n\n- subject_type for all: \"mountain\".\n- object_type: for instance of: \"mountain\". For location: \"comarca\", \"region\", \"country\". For elevation: \"quantity\". For highest point: \"mountain range\".\n\nLet's produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1658,
+      "total_tokens": 3071,
+      "completion_tokens": 1413,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"instance of\",\n            \"object\": \"mountain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"located in\",\n            \"object\": \"Alt Urgell\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"comarca\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"located in\",\n            \"object\": \"Catalonia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"located in\",\n            \"object\": \"Spain\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"elevation\",\n            \"object\": \"2,648\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"metres\"\n                },\n                {\n                    \"relation\": \"reference point\",\n                    \"object\": \"sea level\"\n                }\n            ],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"highest point in\",\n            \"object\": \"Serra del Cadí mountain range\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        },\n        {\n            \"subject\": \"Vulturó\",\n            \"relation\": \"highest point in\",\n            \"object\": \"Catalan Pre-Pyrenees\",\n            \"qualifiers\": [],\n            \"subject_type\": \"mountain\",\n            \"object_type\": \"mountain range\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Vulturó",
+        "relation": "instance of",
+        "object": "mountain",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "mountain"
+      },
+      {
+        "subject": "Vulturó",
+        "relation": "located in",
+        "object": "Alt Urgell",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "comarca"
+      },
+      {
+        "subject": "Vulturó",
+        "relation": "located in",
+        "object": "Catalonia",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "region"
+      },
+      {
+        "subject": "Vulturó",
+        "relation": "located in",
+        "object": "Spain",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "country"
+      },
+      {
+        "subject": "Vulturó",
+        "relation": "elevation",
+        "object": "2,648",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "metres"
+          },
+          {
+            "relation": "reference point",
+            "object": "sea level"
+          }
+        ],
+        "subject_type": "mountain",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Vulturó",
+        "relation": "highest point in",
+        "object": "Serra del Cadí mountain range",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "mountain range"
+      },
+      {
+        "subject": "Vulturó",
+        "relation": "highest point in",
+        "object": "Catalan Pre-Pyrenees",
+        "qualifiers": [],
+        "subject_type": "mountain",
+        "object_type": "mountain range"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1658,
+    "total_tokens": 3071,
+    "completion_tokens": 1413,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 587,
+    "output_tokens_est": 494
+  },
+  "attempts": 1,
+  "latency_s": 17.594262095997692,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T03:21:40.454289+00:00",
+  "cache_key": "02c458e3902a2b83f5b492796812ecfc"
+}

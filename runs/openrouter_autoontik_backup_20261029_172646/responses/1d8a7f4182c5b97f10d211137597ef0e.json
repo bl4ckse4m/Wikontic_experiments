@@ -1,0 +1,143 @@
+{
+  "task": {
+    "input_id": "4b097a8978d5f84f",
+    "input_hash": "738e6f69f938dfe3d552ec356d81ea8a4368f7f2d63f657fb56a598080d312be",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793201040-Ae2knes99nRWv4GeRLiL",
+    "object": "chat.completion",
+    "created": 1793201040,
+    "model": "openai/gpt-oss-120b",
+    "provider": "Venice",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Embassy of Armenia in London\",\n            \"relation\": \"diplomatic mission of\",\n            \"object\": \"Armenia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"sovereign state\"\n        },\n        {\n            \"subject\": \"Embassy of Armenia in London\",\n            \"relation\": \"located in\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"sovereign state\"\n        },\n        {\n            \"subject\": \"Armenia\",\n            \"relation\": \"has diplomatic relations with\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1992\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"sovereign state\",\n            \"object_type\": \"sovereign state\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets.\n\nEntities: Embassy of Armenia, London (or \"Embassy of Armenia in London\"), Armenia, United Kingdom, diplomatic mission, diplomatic relations, two countries (Armenia and United Kingdom). Also date 1992.\n\nWe need subject_type and object_type.\n\nDefine types: \"Embassy of Armenia in London\" is an \"embassy\" (type: diplomatic mission). Could be \"embassy\". \"Armenia\" is a \"sovereign state\". \"United Kingdom\" is also \"sovereign state\". \"diplomatic mission\" is a type maybe \"institution\". \"diplomatic relations\" is a \"relationship\". \"1992\" is a year.\n\nTriplets:\n\n1. Subject: Embassy of Armenia in London, relation: location, object: London. But text says \"Embassy of Armenia, London\". Could treat as location. However main fact: \"The Embassy of Armenia in London is the diplomatic mission of Armenia in the United Kingdom.\" So we have:\n\n- Embassy of Armenia in London — type: embassy (or diplomatic mission). Relation: \"instance of\" maybe \"type\". But we need factual relationships.\n\nBetter: \"Embassy of Armenia in London\" — relation: \"diplomatic mission of\" — object: Armenia. Also \"in\" relation: location United Kingdom? Actually \"diplomatic mission of Armenia in the United Kingdom\". So we can split:\n\nTriplet A: subject: Embassy of Armenia in London, relation: \"diplomatic mission of\", object: Armenia. subject_type: embassy, object_type: sovereign state.\n\nTriplet B: subject: Embassy of Armenia in London, relation: \"located in\", object: United Kingdom. subject_type: embassy, object_type: sovereign state.\n\nTriplet C: subject: diplomatic relations, relation: \"established between\", object: Armenia and United Kingdom? Actually \"Diplomatic relations between the two countries were established in 1992.\" So we need two triplets: one for each country? Could be \"Armenia\" — relation: \"has diplomatic relations with\" — object: United Kingdom, qualifiers: point in time 1992. subject_type: sovereign state, object_type: sovereign state.\n\nAlso maybe a triplet for \"diplomatic relations\" as an entity: but not needed.\n\nThus produce:\n\n{\n \"subject\": \"Embassy of Armenia in London\",\n \"relation\": \"diplomatic mission of\",\n \"object\": \"Armenia\",\n \"qualifiers\": [],\n \"subject_type\": \"embassy\",\n \"object_type\": \"sovereign state\"\n},\n{\n \"subject\": \"Embassy of Armenia in London\",\n \"relation\": \"located in\",\n \"object\": \"United Kingdom\",\n \"qualifiers\": [],\n \"subject_type\": \"embassy\",\n \"object_type\": \"sovereign state\"\n},\n{\n \"subject\": \"Armenia\",\n \"relation\": \"has diplomatic relations with\",\n \"object\": \"United Kingdom\",\n \"qualifiers\": [{\"relation\":\"point in time\",\"object\":\"1992\",\"object_type\":\"year\"}],\n \"subject_type\":\"sovereign state\",\n \"object_type\":\"sovereign state\"\n}\n\nPotential also include \"United Kingdom\" has diplomatic relations with Armenia (but symmetric). Could add reverse but not required.\n\nAlso maybe \"Embassy of Armenia in London\" — relation: \"type\" — object: \"embassy\". But not needed.\n\nMake sure JSON format matches example: top-level key \"triplets\": [ ... ].\n\nThus output.",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets.\n\nEntities: Embassy of Armenia, London (or \"Embassy of Armenia in London\"), Armenia, United Kingdom, diplomatic mission, diplomatic relations, two countries (Armenia and United Kingdom). Also date 1992.\n\nWe need subject_type and object_type.\n\nDefine types: \"Embassy of Armenia in London\" is an \"embassy\" (type: diplomatic mission). Could be \"embassy\". \"Armenia\" is a \"sovereign state\". \"United Kingdom\" is also \"sovereign state\". \"diplomatic mission\" is a type maybe \"institution\". \"diplomatic relations\" is a \"relationship\". \"1992\" is a year.\n\nTriplets:\n\n1. Subject: Embassy of Armenia in London, relation: location, object: London. But text says \"Embassy of Armenia, London\". Could treat as location. However main fact: \"The Embassy of Armenia in London is the diplomatic mission of Armenia in the United Kingdom.\" So we have:\n\n- Embassy of Armenia in London — type: embassy (or diplomatic mission). Relation: \"instance of\" maybe \"type\". But we need factual relationships.\n\nBetter: \"Embassy of Armenia in London\" — relation: \"diplomatic mission of\" — object: Armenia. Also \"in\" relation: location United Kingdom? Actually \"diplomatic mission of Armenia in the United Kingdom\". So we can split:\n\nTriplet A: subject: Embassy of Armenia in London, relation: \"diplomatic mission of\", object: Armenia. subject_type: embassy, object_type: sovereign state.\n\nTriplet B: subject: Embassy of Armenia in London, relation: \"located in\", object: United Kingdom. subject_type: embassy, object_type: sovereign state.\n\nTriplet C: subject: diplomatic relations, relation: \"established between\", object: Armenia and United Kingdom? Actually \"Diplomatic relations between the two countries were established in 1992.\" So we need two triplets: one for each country? Could be \"Armenia\" — relation: \"has diplomatic relations with\" — object: United Kingdom, qualifiers: point in time 1992. subject_type: sovereign state, object_type: sovereign state.\n\nAlso maybe a triplet for \"diplomatic relations\" as an entity: but not needed.\n\nThus produce:\n\n{\n \"subject\": \"Embassy of Armenia in London\",\n \"relation\": \"diplomatic mission of\",\n \"object\": \"Armenia\",\n \"qualifiers\": [],\n \"subject_type\": \"embassy\",\n \"object_type\": \"sovereign state\"\n},\n{\n \"subject\": \"Embassy of Armenia in London\",\n \"relation\": \"located in\",\n \"object\": \"United Kingdom\",\n \"qualifiers\": [],\n \"subject_type\": \"embassy\",\n \"object_type\": \"sovereign state\"\n},\n{\n \"subject\": \"Armenia\",\n \"relation\": \"has diplomatic relations with\",\n \"object\": \"United Kingdom\",\n \"qualifiers\": [{\"relation\":\"point in time\",\"object\":\"1992\",\"object_type\":\"year\"}],\n \"subject_type\":\"sovereign state\",\n \"object_type\":\"sovereign state\"\n}\n\nPotential also include \"United Kingdom\" has diplomatic relations with Armenia (but symmetric). Could add reverse but not required.\n\nAlso maybe \"Embassy of Armenia in London\" — relation: \"type\" — object: \"embassy\". But not needed.\n\nMake sure JSON format matches example: top-level key \"triplets\": [ ... ].\n\nThus output.",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1391,
+      "completion_tokens": 950,
+      "total_tokens": 2341,
+      "cost": 0.00018423,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 1024,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00018423,
+        "upstream_inference_prompt_cost": 4.173e-05,
+        "upstream_inference_completions_cost": 0.0001425
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 720,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Embassy of Armenia in London\",\n            \"relation\": \"diplomatic mission of\",\n            \"object\": \"Armenia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"sovereign state\"\n        },\n        {\n            \"subject\": \"Embassy of Armenia in London\",\n            \"relation\": \"located in\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [],\n            \"subject_type\": \"embassy\",\n            \"object_type\": \"sovereign state\"\n        },\n        {\n            \"subject\": \"Armenia\",\n            \"relation\": \"has diplomatic relations with\",\n            \"object\": \"United Kingdom\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1992\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"sovereign state\",\n            \"object_type\": \"sovereign state\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Embassy of Armenia in London",
+        "relation": "diplomatic mission of",
+        "object": "Armenia",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "sovereign state"
+      },
+      {
+        "subject": "Embassy of Armenia in London",
+        "relation": "located in",
+        "object": "United Kingdom",
+        "qualifiers": [],
+        "subject_type": "embassy",
+        "object_type": "sovereign state"
+      },
+      {
+        "subject": "Armenia",
+        "relation": "has diplomatic relations with",
+        "object": "United Kingdom",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1992"
+          }
+        ],
+        "subject_type": "sovereign state",
+        "object_type": "sovereign state"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1391,
+    "completion_tokens": 950,
+    "total_tokens": 2341,
+    "cost": 0.00018423,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 1024,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00018423,
+      "upstream_inference_prompt_cost": 4.173e-05,
+      "upstream_inference_completions_cost": 0.0001425
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 720,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 381,
+    "output_tokens_est": 254
+  },
+  "attempts": 1,
+  "latency_s": 29.796500434000336,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T15:24:28.364090+00:00",
+  "cache_key": "1d8a7f4182c5b97f10d211137597ef0e"
+}

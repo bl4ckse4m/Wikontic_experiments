@@ -1,0 +1,161 @@
+{
+  "task": {
+    "input_id": "378496e9295c4909",
+    "input_hash": "b0b07e4569ffc82aff206a48eb5143b1d75abe4b5fdf6cfbaa41761de95dfbe8",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-85c169824fc03a6f91c3c7789a522815",
+    "object": "chat.completion",
+    "created": 1791502320,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of school districts\",\n            \"object\": \"14000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"more than\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"annual expenditure on public primary and secondary education\",\n            \"object\": \"$500 billion\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"monetary amount\"\n        },\n        {\n            \"subject\": \"School districts in United States\",\n            \"relation\": \"required teaching days per year\",\n            \"object\": \"180 days\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"required by\",\n                    \"object\": \"states\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of teachers\",\n            \"object\": \"3823142\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                },\n                {\n                    \"relation\": \"in\",\n                    \"object\": \"public, charter, private, Catholic elementary and secondary schools\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Teachers in United States\",\n            \"relation\": \"students taught\",\n            \"object\": \"55203000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of schools\",\n            \"object\": \"132656\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"type\",\n                    \"object\": \"elementary and secondary schools\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText:\n\n\"Education in the United States\n\nThere are more than 14,000 school districts in the country, and more than $500 billion is spent each year on public primary and secondary education. Most states require that their school districts within the state teach for 180 days a year. In 2010, there were 3,823,142 teachers in public, charter, private, and Catholic elementary and secondary schools. They taught a total of 55,203,000 students, who attended one of 132,656 schools.\"\n\nWe need to extract factual statements.\n\nIdentify entities:\n\n- United States (country)\n- school districts (entity type: administrative division)\n- 14,000 (quantity)\n- $500 billion (amount)\n- each year (time period)\n- public primary and secondary education (type of education)\n- Most states (states)\n- school districts within the state (school districts)\n- teach for 180 days a year (teaching days)\n- 2010 (year)\n- 3,823,142 teachers (quantity)\n- public, charter, private, and Catholic elementary and secondary schools (school types)\n- 55,203,000 students (quantity)\n- 132,656 schools (quantity)\n\nWe need to produce triplets with subject, relation, object, qualifiers.\n\nPotential relations:\n\n- \"number of\" maybe \"count\" but typical Wikidata: \"number of\" is \"count\". Could use \"count\" relation.\n\n- For \"more than 14,000 school districts in the country\": subject: United States, relation: \"number of school districts\", object: \"14,000\". Qualifier: \"qualifier\": {\"relation\":\"statement qualifier\",\"object\":\"more than\"}? Actually we need to capture \"more than\". Use qualifier \"approximation\" with object \"more than\". According to guidelines, approximation qualifier for \"about\", \"nearly\", \"over\". \"more than\" is also approximation. So we can add qualifier {\"relation\":\"approximation\",\"object\":\"more than\"}.\n\nSubject_type: country; object_type: quantity (or \"school district\").\n\nBetter: subject: United States, relation: \"number of school districts\", object: \"14000\". object_type: \"school district\". qualifiers: approximation more than.\n\n- \"$500 billion is spent each year on public primary and secondary education.\" Subject: United States? Or \"public primary and secondary education\" as object of spending. Could treat subject: United States, relation: \"annual expenditure on public primary and secondary education\", object: \"$500 billion\". Qualifier: point in time \"each year\" maybe not needed; we can use qualifier \"frequency\": \"per year\". But guidelines: date can be qualifier. Use qualifier relation \"frequency\" maybe not defined. Could use \"point in time\" with object \"each year\"? Not ideal. Maybe treat as \"annual spending\" relation. Use relation \"annual expenditure\". object \"$500 billion\". qualifiers: none. subject_type: country; object_type: monetary amount.\n\n- \"Most states require that their school districts within the state teach for 180 days a year.\" This is a rule. Subject: states (maybe \"state\" as entity). Relation: \"require teaching days\". Could be \"teaching days required\". Might be \"school districts\" subject? Actually \"states require that their school districts teach for 180 days a year\". So subject: states (or \"state\") relation: \"require teaching days for school districts\" object: \"180 days\". Qualifier: \"frequency\": \"per year\". Also \"within the state\". Might be too complex. Simpler: subject: school districts (in United States) relation: \"teaching days per year required\", object: \"180 days\". Qualifier: \"required by\" with object \"states\". But guidelines: we need subject entity. Could be \"school districts in United States\". We'll create subject: \"school districts in United States\". relation: \"required teaching days per year\", object: \"180 days\". qualifier: {\"relation\":\"required by\",\"object\":\"states\"} maybe not standard. Could use \"required by\" relation. We'll include qualifier.\n\n- \"In 2010, there were 3,823,142 teachers in public, charter, private, and Catholic elementary and secondary schools.\" Subject: United States (or \"United States\" as location). Relation: \"number of teachers\". Object: \"3,823,142\". Qualifier: \"point in time\": \"2010\". Also qualifier: \"type of schools\": \"public, charter, private, Catholic elementary and secondary schools\". Could add qualifier \"in\" with object \"public, charter, private, Catholic elementary and secondary schools\". We'll include.\n\n- \"They taught a total of 55,203,000 students, who attended one of 132,656 schools.\" Here \"They\" refers to teachers. So subject: teachers (in United States). Relation: \"students taught\". Object: \"55,203,000\". Qualifier: maybe \"total\". Also \"students attended schools\". Could also have triplet: \"students attended schools\". Subject: students, relation: \"attended\", object: \"schools\". Qualifier: \"quantity\": \"132,656 schools\". But we need to capture that there are 132,656 schools. So separate triplet: subject: United States, relation: \"number of schools\", object: \"132,656\". qualifier: maybe \"type\": \"elementary and secondary schools\". Also \"students attended one of 132,656 schools\" indicates each student attended a school, but we can capture number of schools.\n\nAlso \"students\" count: 55,203,000 students taught. So triplet: subject: teachers, relation: \"students taught\", object: \"55,203,000\". qualifier: maybe \"total\". Also point in time? Not given, but same 2010 context.\n\nNow need subject_type and object_type.\n\nDefine types:\n\n- United States: country\n- school district: administrative division\n- monetary amount: monetary amount\n- days: time duration\n- state: administrative territorial entity (state)\n- teacher: human occupation (teacher)\n- student: human\n- school: educational institution\n\nQuantities: object_type \"quantity\" maybe \"number\". Use \"quantity\". For monetary: \"monetary amount\". For days: \"duration\". For school districts count: object_type \"school district\". But it's a count, maybe \"quantity\". We'll set object_type \"quantity\". Could also specify \"school district\" but count is quantity.\n\nWe'll produce list of triplets.\n\nLet's enumerate:\n\n1. (United States, number of school districts, 14000) qualifiers: approximation more than. subject_type: country, object_type: quantity.\n\n2. (United States, annual expenditure on public primary and secondary education, $500 billion) qualifiers: none. subject_type: country, object_type: monetary amount.\n\n3. (School districts in United States, required teaching days per year, 180 days) qualifiers: required by states (relation \"required by\", object \"states\"). Also maybe qualifier \"frequency\": \"per year\". We'll include required by.\n\nsubject_type: administrative division, object_type: duration.\n\n4. (United States, number of teachers, 3823142) qualifiers: point in time 2010; school type \"public, charter, private, Catholic elementary and secondary schools\". We'll add two qualifiers: point in time, and \"in\" with object \"public, charter, private, Catholic elementary and secondary schools\". subject_type: country, object_type: quantity.\n\n5. (Teachers in United States, students taught, 55203000) qualifiers: point in time 2010; maybe \"total\". We'll add qualifier \"total\" maybe not needed. We'll add point in time.\n\nsubject_type: human (teachers), object_type: quantity.\n\n6. (United States, number of schools, 132656) qualifiers: school type \"elementary and secondary schools\". subject_type: country, object_type: quantity.\n\n7. (Students, attended, schools) qualifiers: none? But we need count? Could be \"students attended schools\" but not a specific count. Might be redundant. Maybe we skip because not a distinct fact beyond counts.\n\nBetter to include: (Students, attended, schools) with qualifier \"quantity\": \"132,656 schools\". But that seems odd. We'll skip.\n\nThus produce JSON.\n\nNeed to ensure each triplet dictionary includes \"qualifiers\": list of dicts.\n\nNow format.\n\nCheck for proper quoting.\n\nLet's craft.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1691,
+      "total_tokens": 3947,
+      "completion_tokens": 2256,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of school districts\",\n            \"object\": \"14000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"more than\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"annual expenditure on public primary and secondary education\",\n            \"object\": \"$500 billion\",\n            \"qualifiers\": [],\n            \"subject_type\": \"country\",\n            \"object_type\": \"monetary amount\"\n        },\n        {\n            \"subject\": \"School districts in United States\",\n            \"relation\": \"required teaching days per year\",\n            \"object\": \"180 days\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"required by\",\n                    \"object\": \"states\"\n                }\n            ],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of teachers\",\n            \"object\": \"3823142\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                },\n                {\n                    \"relation\": \"in\",\n                    \"object\": \"public, charter, private, Catholic elementary and secondary schools\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Teachers in United States\",\n            \"relation\": \"students taught\",\n            \"object\": \"55203000\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"United States\",\n            \"relation\": \"number of schools\",\n            \"object\": \"132656\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"type\",\n                    \"object\": \"elementary and secondary schools\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"quantity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "United States",
+        "relation": "number of school districts",
+        "object": "14000",
+        "qualifiers": [
+          {
+            "relation": "approximation",
+            "object": "more than"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "United States",
+        "relation": "annual expenditure on public primary and secondary education",
+        "object": "$500 billion",
+        "qualifiers": [],
+        "subject_type": "country",
+        "object_type": "monetary amount"
+      },
+      {
+        "subject": "School districts in United States",
+        "relation": "required teaching days per year",
+        "object": "180 days",
+        "qualifiers": [
+          {
+            "relation": "required by",
+            "object": "states"
+          }
+        ],
+        "subject_type": "administrative division",
+        "object_type": "duration"
+      },
+      {
+        "subject": "United States",
+        "relation": "number of teachers",
+        "object": "3823142",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          },
+          {
+            "relation": "in",
+            "object": "public, charter, private, Catholic elementary and secondary schools"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Teachers in United States",
+        "relation": "students taught",
+        "object": "55203000",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "United States",
+        "relation": "number of schools",
+        "object": "132656",
+        "qualifiers": [
+          {
+            "relation": "type",
+            "object": "elementary and secondary schools"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "quantity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1691,
+    "total_tokens": 3947,
+    "completion_tokens": 2256,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 717,
+    "output_tokens_est": 624
+  },
+  "attempts": 1,
+  "latency_s": 23.94702174000122,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-08T23:32:24.290855+00:00",
+  "cache_key": "c6b84477d77dd150f385eab0ca95485a"
+}

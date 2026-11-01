@@ -1,0 +1,134 @@
+{
+  "task": {
+    "input_id": "e677718a3f0dda76",
+    "input_hash": "0b6e3e298e006835a7831e78d1c854944ab110f96dd489d24502f1e4d5acb0da",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-8af4b46c344fc1758e0bd4a5ec45324d",
+    "object": "chat.completion",
+    "created": 1791507627,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"first hospital for\",\n            \"object\": \"black community\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Detroit, Michigan\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"community\"\n        },\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"location\",\n            \"object\": \"580 Frederick Street\",\n            \"qualifiers\": [],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"address\"\n        },\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"administrative headquarters of\",\n            \"object\": \"Detroit Medical Society\",\n            \"qualifiers\": [],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"listed on\",\n            \"object\": \"National Register of Historic Places\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1979\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"heritage register\"\n        },\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"location\",\n            \"object\": \"Detroit, Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Dunbar Hospital\n\nThe Dunbar Hospital was the first hospital for the black community in Detroit, Michigan. It is located at 580 Frederick Street, and is currently the administrative headquarters of the Detroit Medical Society. It was listed on the National Register of Historic Places in 1979.\"\n\nWe need to identify entities: Dunbar Hospital, black community, Detroit, Michigan, 580 Frederick Street, Detroit Medical Society, National Register of Historic Places.\n\nTriplets:\n\n1. Dunbar Hospital - instance of? maybe \"type\": hospital. But we need explicit facts. \"was the first hospital for the black community in Detroit, Michigan.\" So relation: \"first hospital for\" maybe \"first hospital for\" not standard. Could use \"first of type\" but we need a Wikidata-style predicate. Could use \"first hospital for\" as relation? Might be \"first hospital for\" but better: \"first hospital for\" is a relation. We'll use \"first hospital for\". Subject: Dunbar Hospital, object: black community in Detroit, Michigan. But object should be \"black community\". Could also have location qualifiers: \"point in time\"? Not needed. Also \"in Detroit, Michigan\" is location of the community? Actually phrase: \"first hospital for the black community in Detroit, Michigan.\" Means the black community located in Detroit, Michigan. So we could have two facts: (Dunbar Hospital, first hospital for, black community) with qualifier location = Detroit, Michigan. Or we could have (Dunbar Hospital, location, Detroit, Michigan) but later we have location address.\n\nBetter to extract:\n\n- (Dunbar Hospital, first hospital for, black community) with qualifier location = Detroit, Michigan.\n\nBut we need to decide relation names: maybe \"first hospital for\" is not standard. Could use \"first of type\" but not explicit. The text says \"was the first hospital for the black community\". So we can capture as (Dunbar Hospital, first hospital for, black community). We'll set object_type \"community\". Provide qualifier \"located in\" maybe.\n\nSecond: It is located at 580 Frederick Street. So (Dunbar Hospital, location, 580 Frederick Street). object_type \"address\". Also maybe qualifier \"city\" etc but not needed.\n\nThird: It is currently the administrative headquarters of the Detroit Medical Society. So (Dunbar Hospital, administrative headquarters of, Detroit Medical Society). object_type \"organization\". Could also have qualifier \"point in time\" = currently (but \"currently\" is present). Could add qualifier \"point in time\" with object \"present\". But maybe not needed.\n\nFourth: It was listed on the National Register of Historic Places in 1979. So (Dunbar Hospital, listed on, National Register of Historic Places) with qualifier point in time = 1979.\n\nAlso we might want (Dunbar Hospital, location city, Detroit) but not explicit; address includes city. Could add separate location fact: (Dunbar Hospital, located in city, Detroit). But not explicit; address is given.\n\nAlso \"first hospital for the black community in Detroit, Michigan\" could also be (Dunbar Hospital, located in, Detroit, Michigan). But we have location address; we could also add location city.\n\nBut we must extract every explicitly stated fact. The phrase includes \"in Detroit, Michigan\". That's a location of the hospital (the community). So we can extract (Dunbar Hospital, location, Detroit, Michigan). That is explicit: \"first hospital for the black community in Detroit, Michigan.\" The phrase indicates the hospital is in Detroit, Michigan. So we can have a location fact.\n\nThus triplets:\n\n1. subject: Dunbar Hospital, relation: first hospital for, object: black community, qualifiers: location Detroit, Michigan. subject_type: hospital, object_type: community.\n\n2. subject: Dunbar Hospital, relation: location, object: 580 Frederick Street, qualifiers: [], subject_type: hospital, object_type: address.\n\n3. subject: Dunbar Hospital, relation: administrative headquarters of, object: Detroit Medical Society, qualifiers: [], subject_type: hospital, object_type: organization.\n\n4. subject: Dunbar Hospital, relation: listed on, object: National Register of Historic Places, qualifiers: point in time 1979, subject_type: hospital, object_type: heritage register.\n\n5. subject: Dunbar Hospital, relation: location, object: Detroit, qualifiers: [], subject_type: hospital, object_type: city. (maybe also Michigan as state). Could also have separate: location state Michigan. But we can include both as qualifiers? Could have qualifier \"state\" = Michigan. But we need to keep explicit facts: \"in Detroit, Michigan\". So we can have location = Detroit, and qualifier \"state\" = Michigan. Or location = Detroit, Michigan as combined. Simpler: object \"Detroit, Michigan\". object_type \"city\". Accept.\n\nNow ensure qualifiers format list of dicts.\n\nFor triplet 1 qualifiers: [{\"relation\":\"located in\",\"object\":\"Detroit, Michigan\"}] maybe. Use relation \"located in\". Provide object \"Detroit, Michigan\". object_type for qualifier not needed.\n\nTriplet 5 maybe redundant but okay.\n\nNow produce JSON.\n\nCheck subject_type: \"hospital\". object_type: for black community maybe \"community\". For address: \"address\". For organization: \"organization\". For heritage register: \"heritage register\". For city: \"city\".\n\nNow produce final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1643,
+      "total_tokens": 3117,
+      "completion_tokens": 1474,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"first hospital for\",\n            \"object\": \"black community\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"located in\",\n                    \"object\": \"Detroit, Michigan\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"community\"\n        },\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"location\",\n            \"object\": \"580 Frederick Street\",\n            \"qualifiers\": [],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"address\"\n        },\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"administrative headquarters of\",\n            \"object\": \"Detroit Medical Society\",\n            \"qualifiers\": [],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"organization\"\n        },\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"listed on\",\n            \"object\": \"National Register of Historic Places\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1979\"\n                }\n            ],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"heritage register\"\n        },\n        {\n            \"subject\": \"Dunbar Hospital\",\n            \"relation\": \"location\",\n            \"object\": \"Detroit, Michigan\",\n            \"qualifiers\": [],\n            \"subject_type\": \"hospital\",\n            \"object_type\": \"city\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Dunbar Hospital",
+        "relation": "first hospital for",
+        "object": "black community",
+        "qualifiers": [
+          {
+            "relation": "located in",
+            "object": "Detroit, Michigan"
+          }
+        ],
+        "subject_type": "hospital",
+        "object_type": "community"
+      },
+      {
+        "subject": "Dunbar Hospital",
+        "relation": "location",
+        "object": "580 Frederick Street",
+        "qualifiers": [],
+        "subject_type": "hospital",
+        "object_type": "address"
+      },
+      {
+        "subject": "Dunbar Hospital",
+        "relation": "administrative headquarters of",
+        "object": "Detroit Medical Society",
+        "qualifiers": [],
+        "subject_type": "hospital",
+        "object_type": "organization"
+      },
+      {
+        "subject": "Dunbar Hospital",
+        "relation": "listed on",
+        "object": "National Register of Historic Places",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1979"
+          }
+        ],
+        "subject_type": "hospital",
+        "object_type": "heritage register"
+      },
+      {
+        "subject": "Dunbar Hospital",
+        "relation": "location",
+        "object": "Detroit, Michigan",
+        "qualifiers": [],
+        "subject_type": "hospital",
+        "object_type": "city"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1643,
+    "total_tokens": 3117,
+    "completion_tokens": 1474,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 498,
+    "output_tokens_est": 406
+  },
+  "attempts": 1,
+  "latency_s": 17.92118831800326,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:00:45.228172+00:00",
+  "cache_key": "78d0d92048d077bcb87a345995f1a020"
+}

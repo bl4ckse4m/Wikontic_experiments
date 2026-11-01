@@ -1,0 +1,134 @@
+{
+  "task": {
+    "input_id": "71a80e31307c26e7",
+    "input_hash": "a06ed6f7ba5c59a6c34e765d2964314c27f214714db46db429fc7ded6f61bf1c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-d6cfb2f3b665c233007482855de74f79",
+    "object": "chat.completion",
+    "created": 1791518467,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kongo Loto Lafanga\",\n            \"relation\": \"instance of\",\n            \"object\": \"islet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"geographical feature\"\n        },\n        {\n            \"subject\": \"Kongo Loto Lafanga\",\n            \"relation\": \"located in\",\n            \"object\": \"Nukufetau\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Tuvalu\"\n                }\n            ],\n            \"subject_type\": \"island\",\n            \"object_type\": \"atoll\"\n        },\n        {\n            \"subject\": \"Kongo Loto Lafanga\",\n            \"relation\": \"south of\",\n            \"object\": \"Lafanga islet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"Lafanga islet\",\n            \"relation\": \"located in\",\n            \"object\": \"Nukufetau atoll\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"north east\"\n                }\n            ],\n            \"subject_type\": \"island\",\n            \"object_type\": \"atoll\"\n        },\n        {\n            \"subject\": \"Nukufetau\",\n            \"relation\": \"located in\",\n            \"object\": \"Tuvalu\",\n            \"qualifiers\": [],\n            \"subject_type\": \"atoll\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Kongo Loto Lafanga\n\nKongo Loto Lafanga is an islet of Nukufetau, Tuvalu, which is south of Lafanga islet in the North East of Nukufetau atoll.\"\n\nWe have entity Kongo Loto Lafanga. It is an islet. It is part of Nukufetau, Tuvalu (maybe Nukufetau is an atoll? Actually Nukufetau is an atoll in Tuvalu). So relation: \"instance of\" maybe \"islet\". But we need relation like \"subdivision of\" or \"located in\". Use \"island of\" maybe \"islet of\". We'll use relation \"located in\" or \"part of\". In examples they used \"island of\" not shown. We'll choose \"located in\". Subject: Kongo Loto Lafanga, relation: \"located in\", object: \"Nukufetau\". Also maybe \"country\" Tuvalu. Could have two relations: \"located in\" Nukufetau; \"country\" Tuvalu. But text: \"is an islet of Nukufetau, Tuvalu\". So we can treat object as \"Nukufetau, Tuvalu\". Could split: first location: Nukufetau; second qualifier: \"country\" Tuvalu. But we need separate triplet for country? Might be \"located in\" with object \"Nukufetau\" and qualifier \"country\" Tuvalu? Not typical. Simpler: \"located in\" object \"Nukufetau, Tuvalu\". We'll treat object as \"Nukufetau\". Add qualifier \"country\" Tuvalu.\n\nAlso \"south of Lafanga islet\". So relation: \"south of\" object: \"Lafanga islet\". Subject: Kongo Loto Lafanga. qualifier maybe none.\n\nAlso \"in the North East of Nukufetau atoll.\" This describes location of Lafanga islet? Actually phrase: \"south of Lafanga islet in the North East of Nukufetau atoll.\" Means Lafanga islet is in the North East of Nukufetau atoll. So Kongo Loto Lafanga is south of Lafanga islet, which is in the NE of Nukufetau atoll. Could also add relation: \"located in\" object \"Nukufetau atoll\". But we already have located in Nukufetau. Atoll is part of Nukufetau. Might add \"part of\" relation: \"part of\" object \"Nukufetau atoll\". But maybe redundant.\n\nWe'll produce three triplets:\n\n1. Kongo Loto Lafanga - \"instance of\" - \"islet\". subject_type: \"geographical feature\", object_type: \"geographical feature\". No qualifiers.\n\n2. Kongo Loto Lafanga - \"located in\" - \"Nukufetau\". qualifiers: [{\"relation\":\"country\",\"object\":\"Tuvalu\"}]. subject_type: \"island\", object_type: \"atoll\"? Actually Nukufetau is an atoll. So object_type: \"atoll\". We'll set.\n\n3. Kongo Loto Lafanga - \"south of\" - \"Lafanga islet\". qualifiers: [].\n\nPotential also \"Lafanga islet\" - \"located in\" - \"Nukufetau atoll\". But not required as subject not Kongo Loto Lafanga. Only extract facts about Kongo Loto Lafanga? The instruction: extract every explicitly stated fact. So we could also extract that Lafanga islet is in the North East of Nukufetau atoll. That's a fact: Lafanga islet - \"located in\" - \"Nukufetau atoll\" with qualifier \"direction\" maybe \"north east\". Use qualifier \"direction\" relation? Not defined but we can use \"direction\" as qualifier. However they used \"south of\". For direction within location they used \"south of\". For \"in the North East of Nukufetau atoll\" could be \"located in\" with qualifier \"direction\" \"north east\". But maybe better: \"Lafanga islet\" - \"located in\" - \"Nukufetau atoll\" with qualifier \"direction\" \"north east\". We'll include.\n\nThus triplet: subject \"Lafanga islet\", relation \"located in\", object \"Nukufetau atoll\", qualifiers [{\"relation\":\"direction\",\"object\":\"north east\"}].\n\nBut we need subject_type and object_type. Lafanga islet type: islet. object_type: atoll.\n\nAdd also \"Nukufetau atoll\" - \"located in\" - \"Tuvalu\". Could be derived but not explicit; text says \"Nukufetau, Tuvalu\". So we can have triplet: \"Nukufetau\" - \"located in\" - \"Tuvalu\". But that's not directly about Kongo Loto Lafanga but is explicit: \"Kongo Loto Lafanga is an islet of Nukufetau, Tuvalu\". The phrase \"Nukufetau, Tuvalu\" indicates Nukufetau is in Tuvalu. So we can extract that.\n\nThus triplet: \"Nukufetau\" - \"located in\" - \"Tuvalu\". qualifiers none.\n\nNow compile list.\n\nTriplet list order maybe as they appear.\n\nDefine types: \"Kongo Loto Lafanga\" - subject_type \"island\". object_type for islet: \"island\". For \"south of\" object \"Lafanga islet\" type \"island\". For \"located in\" object \"Nukufetau\" type \"atoll\". For \"Nukufetau\" located in \"Tuvalu\" object_type \"country\". For \"Lafanga islet\" located in \"Nukufetau atoll\" object_type \"atoll\". Provide qualifiers.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1637,
+      "total_tokens": 3231,
+      "completion_tokens": 1594,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Kongo Loto Lafanga\",\n            \"relation\": \"instance of\",\n            \"object\": \"islet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"geographical feature\"\n        },\n        {\n            \"subject\": \"Kongo Loto Lafanga\",\n            \"relation\": \"located in\",\n            \"object\": \"Nukufetau\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"country\",\n                    \"object\": \"Tuvalu\"\n                }\n            ],\n            \"subject_type\": \"island\",\n            \"object_type\": \"atoll\"\n        },\n        {\n            \"subject\": \"Kongo Loto Lafanga\",\n            \"relation\": \"south of\",\n            \"object\": \"Lafanga islet\",\n            \"qualifiers\": [],\n            \"subject_type\": \"island\",\n            \"object_type\": \"island\"\n        },\n        {\n            \"subject\": \"Lafanga islet\",\n            \"relation\": \"located in\",\n            \"object\": \"Nukufetau atoll\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"north east\"\n                }\n            ],\n            \"subject_type\": \"island\",\n            \"object_type\": \"atoll\"\n        },\n        {\n            \"subject\": \"Nukufetau\",\n            \"relation\": \"located in\",\n            \"object\": \"Tuvalu\",\n            \"qualifiers\": [],\n            \"subject_type\": \"atoll\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Kongo Loto Lafanga",
+        "relation": "instance of",
+        "object": "islet",
+        "qualifiers": [],
+        "subject_type": "island",
+        "object_type": "geographical feature"
+      },
+      {
+        "subject": "Kongo Loto Lafanga",
+        "relation": "located in",
+        "object": "Nukufetau",
+        "qualifiers": [
+          {
+            "relation": "country",
+            "object": "Tuvalu"
+          }
+        ],
+        "subject_type": "island",
+        "object_type": "atoll"
+      },
+      {
+        "subject": "Kongo Loto Lafanga",
+        "relation": "south of",
+        "object": "Lafanga islet",
+        "qualifiers": [],
+        "subject_type": "island",
+        "object_type": "island"
+      },
+      {
+        "subject": "Lafanga islet",
+        "relation": "located in",
+        "object": "Nukufetau atoll",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "north east"
+          }
+        ],
+        "subject_type": "island",
+        "object_type": "atoll"
+      },
+      {
+        "subject": "Nukufetau",
+        "relation": "located in",
+        "object": "Tuvalu",
+        "qualifiers": [],
+        "subject_type": "atoll",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1637,
+    "total_tokens": 3231,
+    "completion_tokens": 1594,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 469,
+    "output_tokens_est": 377
+  },
+  "attempts": 1,
+  "latency_s": 19.86297581900726,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:01:27.975792+00:00",
+  "cache_key": "e27ad2764e6b63fe60f0314c436059e6"
+}

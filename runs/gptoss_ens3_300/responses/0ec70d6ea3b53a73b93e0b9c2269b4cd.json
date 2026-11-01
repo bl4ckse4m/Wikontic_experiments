@@ -1,0 +1,171 @@
+{
+  "task": {
+    "input_id": "1fa7806a9faf0c6e",
+    "input_hash": "cbca926ae4d10501946cb294e5ec63595f4c406606dac7c1881891e0b6161450",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-f43f63b5c534166a9c5676df06cd4f62",
+    "object": "chat.completion",
+    "created": 1791549049,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Monroe v. Pape\",\n            \"relation\": \"court\",\n            \"object\": \"United States Supreme Court\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal case\",\n            \"object_type\": \"court\"\n        },\n        {\n            \"subject\": \"Monroe v. Pape\",\n            \"relation\": \"date of decision\",\n            \"object\": \"1961\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal case\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Monroe v. Pape\",\n            \"relation\": \"considered application of\",\n            \"object\": \"federal civil rights law\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"applies to\",\n                    \"object\": \"constitutional violations by city employees\"\n                }\n            ],\n            \"subject_type\": \"legal case\",\n            \"object_type\": \"law\"\n        },\n        {\n            \"subject\": \"Monroe v. Pape\",\n            \"relation\": \"held that\",\n            \"object\": \"42 U.S.C. § 1983\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal case\",\n            \"object_type\": \"statute\"\n        },\n        {\n            \"subject\": \"42 U.S.C. § 1983\",\n            \"relation\": \"provision date\",\n            \"object\": \"1871\",\n            \"qualifiers\": [],\n            \"subject_type\": \"statute\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"42 U.S.C. § 1983\",\n            \"relation\": \"could be used to sue\",\n            \"object\": \"state officers\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"who violated\",\n                    \"object\": \"plaintiff's constitutional rights\"\n                }\n            ],\n            \"subject_type\": \"statute\",\n            \"object_type\": \"legal person\"\n        },\n        {\n            \"subject\": \"state officers\",\n            \"relation\": \"violated\",\n            \"object\": \"plaintiff's constitutional rights\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal person\",\n            \"object_type\": \"legal concept\"\n        },\n        {\n            \"subject\": \"42 U.S.C. § 1983\",\n            \"relation\": \"status before Monroe v. Pape\",\n            \"object\": \"relatively obscure and little-used statute\",\n            \"qualifiers\": [],\n            \"subject_type\": \"statute\",\n            \"object_type\": \"description\"\n        },\n        {\n            \"subject\": \"42 U.S.C. § 1983\",\n            \"relation\": \"central part of\",\n            \"object\": \"United States civil rights law\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"since\",\n                    \"object\": \"Monroe v. Pape\"\n                }\n            ],\n            \"subject_type\": \"statute\",\n            \"object_type\": \"law\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need extract triplets from the text.\n\nEntities: Monroe v. Pape (case), United States Supreme Court, federal civil rights law, constitutional violations, city employees, 42 U.S.C. § 1983 (statute), 1871 (date of provision), state officers, plaintiff, constitutional rights, United States civil rights law.\n\nRelations: \"case name\", \"court\", \"decision year\", \"considered application of\", \"application of\", \"held that\", \"statute provision from\", \"could be used to sue\", etc.\n\nWe must produce subject_type and object_type. Need to decide appropriate classes: e.g., \"legal case\", \"court\", \"law\", \"statute\", \"year\", \"person\" maybe \"plaintiff\" is a role but generic \"human\"? Might be \"legal person\". We'll keep generic.\n\nLet's list explicit facts:\n\n1. Monroe v. Pape is a United States Supreme Court case. => (Monroe v. Pape, instance of, United States Supreme Court case) relation maybe \"instance of\" or \"type\". But earlier examples used \"occupation\", \"award received\". Not sure about allowed relations. Could use \"court\", \"jurisdiction\"? Might use \"court\" relation: \"court\" connecting case to Supreme Court. Provide relation \"court\". We'll choose \"court\". Subject_type: \"legal case\". Object_type: \"court\".\n\n2. Monroe v. Pape citation: 365 U.S. 167 (1961). That indicates decision year 1961 and volume/page citation. Could extract \"date of decision\" 1961. Also \"reporter citation\" maybe not needed. We'll extract \"date of decision\" 1961.\n\n3. The case considered the application of federal civil rights law to constitutional violations by city employees. So relation \"considered\"? maybe \"subject considered\" -> object \"application of federal civil rights law to constitutional violations by city employees\". Could break into: (Monroe v. Pape, considered, federal civil rights law) with qualifier \"application to constitutional violations by city employees\". Might be complex. Simpler: (Monroe v. Pape, considered application of, federal civil rights law) with qualifier \"target\", but guidelines: qualifiers can have relation and object. So we can have qualifiers: {\"relation\":\"target\", \"object\":\"constitutional violations by city employees\"}.\n\nBut \"target\" not a standard relation; but we can use \"applies to\". Could use qualifier \"applies to\" with object \"constitutional violations by city employees\". That seems okay.\n\n4. The case held that 42 U.S.C. § 1983, a statutory provision from 1871, could be used to sue state officers who violated a plaintiff's constitutional rights. So relation \"held that\" maybe \"holds that\". In Wikidata, there is \"statement\" but maybe \"held that\". We'll use \"held that\". Subject: Monroe v. Pape. Object: \"42 U.S.C. § 1983 could be used to sue state officers who violated a plaintiff's constitutional rights\". That's long. Better break into two: (Monroe v. Pape, held that, 42 U.S.C. § 1983) with qualifier \"could be used to sue state officers who violated a plaintiff's constitutional rights\". Or separate: (42 U.S.C. § 1983, provision date, 1871). Also (42 U.S.C. § 1983, could be used to sue, state officers) with qualifier \"who violated a plaintiff's constitutional rights\". Let's do separate.\n\nThus triplets:\n\n- (Monroe v. Pape, held that, 42 U.S.C. § 1983) qualifiers: maybe none.\n\n- (42 U.S.C. § 1983, provision date, 1871) (object_type date).\n\n- (42 U.S.C. § 1983, could be used to sue, state officers) qualifiers: {\"relation\":\"who violated\", \"object\":\"plaintiff's constitutional rights\"} but that's awkward. Could phrase qualifier \"violated constitutional rights of plaintiff\". Use qualifier relation \"violation target\" maybe. We'll use \"violation target\". Acceptable.\n\n- Also (state officers, violated, plaintiff's constitutional rights). That's a fact derived from the clause \"state officers who violated a plaintiff's constitutional rights\". This is explicit description of the officers. So we can produce that.\n\n- Also the case was significant because it held ... So significance maybe not needed.\n\n- Also \"§ 1983 had previously been a relatively obscure and little-used statute, but since Monroe it has become a central part of United States civil rights law.\" So we have: (42 U.S.C. § 1983, status before Monroe, \"relatively obscure and little-used\") with qualifier maybe \"time period\" \"before Monroe\". Hard.\n\nSimplify: (42 U.S.C. § 1983, description, \"relatively obscure and little-used statute\") with qualifier \"time period\" maybe \"prior to Monroe\". But not essential.\n\nAlso: (42 U.S.C. § 1983, central part of, United States civil rights law) with qualifier \"since Monroe\". So we can capture.\n\nLet's produce list of triplets:\n\n1. Monroe v. Pape - court - United States Supreme Court\n2. Monroe v. Pape - date of decision - 1961\n3. Monroe v. Pape - considered application of - federal civil rights law; qualifier: applies to - constitutional violations by city employees\n4. Monroe v. Pape - held that - 42 U.S.C. § 1983\n5. 42 U.S.C. § 1983 - provision date - 1871\n6. 42 U.S.C. § 1983 - could be used to sue - state officers; qualifier: violation - plaintiff's constitutional rights\n7. state officers - violated - plaintiff's constitutional rights\n8. 42 U.S.C. § 1983 - status before Monroe - relatively obscure and little-used statute (maybe object_type \"description\")\n9. 42 U.S.C. § 1983 - central part of - United States civil rights law; qualifier: since - Monroe v. Pape\n\nWe need subject_type and object_type. Provide plausible: \"legal case\", \"court\", \"date\", \"law\", \"statute\", \"year\", \"person\"? For state officers maybe \"legal person\". For plaintiff's constitutional rights maybe \"legal concept\". We'll assign.\n\nLet's craft JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1707,
+      "total_tokens": 3699,
+      "completion_tokens": 1992,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Monroe v. Pape\",\n            \"relation\": \"court\",\n            \"object\": \"United States Supreme Court\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal case\",\n            \"object_type\": \"court\"\n        },\n        {\n            \"subject\": \"Monroe v. Pape\",\n            \"relation\": \"date of decision\",\n            \"object\": \"1961\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal case\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"Monroe v. Pape\",\n            \"relation\": \"considered application of\",\n            \"object\": \"federal civil rights law\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"applies to\",\n                    \"object\": \"constitutional violations by city employees\"\n                }\n            ],\n            \"subject_type\": \"legal case\",\n            \"object_type\": \"law\"\n        },\n        {\n            \"subject\": \"Monroe v. Pape\",\n            \"relation\": \"held that\",\n            \"object\": \"42 U.S.C. § 1983\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal case\",\n            \"object_type\": \"statute\"\n        },\n        {\n            \"subject\": \"42 U.S.C. § 1983\",\n            \"relation\": \"provision date\",\n            \"object\": \"1871\",\n            \"qualifiers\": [],\n            \"subject_type\": \"statute\",\n            \"object_type\": \"year\"\n        },\n        {\n            \"subject\": \"42 U.S.C. § 1983\",\n            \"relation\": \"could be used to sue\",\n            \"object\": \"state officers\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"who violated\",\n                    \"object\": \"plaintiff's constitutional rights\"\n                }\n            ],\n            \"subject_type\": \"statute\",\n            \"object_type\": \"legal person\"\n        },\n        {\n            \"subject\": \"state officers\",\n            \"relation\": \"violated\",\n            \"object\": \"plaintiff's constitutional rights\",\n            \"qualifiers\": [],\n            \"subject_type\": \"legal person\",\n            \"object_type\": \"legal concept\"\n        },\n        {\n            \"subject\": \"42 U.S.C. § 1983\",\n            \"relation\": \"status before Monroe v. Pape\",\n            \"object\": \"relatively obscure and little-used statute\",\n            \"qualifiers\": [],\n            \"subject_type\": \"statute\",\n            \"object_type\": \"description\"\n        },\n        {\n            \"subject\": \"42 U.S.C. § 1983\",\n            \"relation\": \"central part of\",\n            \"object\": \"United States civil rights law\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"since\",\n                    \"object\": \"Monroe v. Pape\"\n                }\n            ],\n            \"subject_type\": \"statute\",\n            \"object_type\": \"law\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Monroe v. Pape",
+        "relation": "court",
+        "object": "United States Supreme Court",
+        "qualifiers": [],
+        "subject_type": "legal case",
+        "object_type": "court"
+      },
+      {
+        "subject": "Monroe v. Pape",
+        "relation": "date of decision",
+        "object": "1961",
+        "qualifiers": [],
+        "subject_type": "legal case",
+        "object_type": "year"
+      },
+      {
+        "subject": "Monroe v. Pape",
+        "relation": "considered application of",
+        "object": "federal civil rights law",
+        "qualifiers": [
+          {
+            "relation": "applies to",
+            "object": "constitutional violations by city employees"
+          }
+        ],
+        "subject_type": "legal case",
+        "object_type": "law"
+      },
+      {
+        "subject": "Monroe v. Pape",
+        "relation": "held that",
+        "object": "42 U.S.C. § 1983",
+        "qualifiers": [],
+        "subject_type": "legal case",
+        "object_type": "statute"
+      },
+      {
+        "subject": "42 U.S.C. § 1983",
+        "relation": "provision date",
+        "object": "1871",
+        "qualifiers": [],
+        "subject_type": "statute",
+        "object_type": "year"
+      },
+      {
+        "subject": "42 U.S.C. § 1983",
+        "relation": "could be used to sue",
+        "object": "state officers",
+        "qualifiers": [
+          {
+            "relation": "who violated",
+            "object": "plaintiff's constitutional rights"
+          }
+        ],
+        "subject_type": "statute",
+        "object_type": "legal person"
+      },
+      {
+        "subject": "state officers",
+        "relation": "violated",
+        "object": "plaintiff's constitutional rights",
+        "qualifiers": [],
+        "subject_type": "legal person",
+        "object_type": "legal concept"
+      },
+      {
+        "subject": "42 U.S.C. § 1983",
+        "relation": "status before Monroe v. Pape",
+        "object": "relatively obscure and little-used statute",
+        "qualifiers": [],
+        "subject_type": "statute",
+        "object_type": "description"
+      },
+      {
+        "subject": "42 U.S.C. § 1983",
+        "relation": "central part of",
+        "object": "United States civil rights law",
+        "qualifiers": [
+          {
+            "relation": "since",
+            "object": "Monroe v. Pape"
+          }
+        ],
+        "subject_type": "statute",
+        "object_type": "law"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1707,
+    "total_tokens": 3699,
+    "completion_tokens": 1992,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 805,
+    "output_tokens_est": 713
+  },
+  "attempts": 1,
+  "latency_s": 21.93389153800672,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:31:11.224031+00:00",
+  "cache_key": "0ec70d6ea3b53a73b93e0b9c2269b4cd"
+}

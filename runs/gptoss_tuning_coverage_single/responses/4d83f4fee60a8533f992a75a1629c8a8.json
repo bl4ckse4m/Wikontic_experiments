@@ -1,0 +1,171 @@
+{
+  "task": {
+    "input_id": "96d62678f4915a84",
+    "input_hash": "22db45ae70975757ceb3d40ebb64ca350e43e6dec3c7f4a1ac0446855ab79d7a",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-dfc4d7363d917187fd388029e2d82ea8",
+    "object": "chat.completion",
+    "created": 1791505283,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Armenia–Singapore relations\",\n            \"relation\": \"instance of\",\n            \"object\": \"bilateral foreign relations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"topic\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Armenia–Singapore relations\",\n            \"relation\": \"relates to country\",\n            \"object\": \"Armenia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"topic\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Armenia–Singapore relations\",\n            \"relation\": \"relates to country\",\n            \"object\": \"Singapore\",\n            \"qualifiers\": [],\n            \"subject_type\": \"topic\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Armenia\",\n            \"relation\": \"resident ambassador\",\n            \"object\": \"none\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"none\"\n        },\n        {\n            \"subject\": \"Singapore\",\n            \"relation\": \"resident ambassador\",\n            \"object\": \"none\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"none\"\n        },\n        {\n            \"subject\": \"Embassy of Armenia in Beijing, China\",\n            \"relation\": \"accredited to\",\n            \"object\": \"Singapore\",\n            \"qualifiers\": [],\n            \"subject_type\": \"diplomatic mission\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Embassy of Armenia in Beijing, China\",\n            \"relation\": \"located in\",\n            \"object\": \"Beijing\",\n            \"qualifiers\": [],\n            \"subject_type\": \"diplomatic mission\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Beijing\",\n            \"relation\": \"located in country\",\n            \"object\": \"China\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Singapore\",\n            \"relation\": \"representation in\",\n            \"object\": \"Armenia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nText: \"Armenia–Singapore relations\n\nArmenia–Singapore relations refers to bilateral foreign relations between the two countries, Armenia and Singapore. Neither country has a resident ambassador. The Embassy of Armenia in Beijing, China is accredited to Singapore. Singapore has no representation in Armenia.\"\n\nWe need to produce triplets.\n\nIdentify entities: \"Armenia–Singapore relations\" (maybe a topic), \"Armenia\", \"Singapore\", \"resident ambassador\", \"Embassy of Armenia in Beijing, China\", \"Beijing\", \"China\", \"representation\".\n\nFacts:\n\n1. Armenia–Singapore relations refers to bilateral foreign relations between Armenia and Singapore. So relation: \"type of\" maybe? Could be \"topic\" but we need a relation like \"subject of\". Might use \"refers to\" but need Wikidata style. Could use \"instance of\" = bilateral relation. But we can capture: (Armenia–Singapore relations, bilateral foreign relations, Armenia and Singapore). However object should be a concept. Could split: (Armenia–Singapore relations, bilateral relation, Armenia) and also with Singapore? Might be better: (Armenia–Singapore relations, relates to country, Armenia) and (Armenia–Singapore relations, relates to country, Singapore). Use relation \"relates to\". Not sure.\n\n2. Neither country has a resident ambassador. So two facts: (Armenia, has resident ambassador, none) and (Singapore, has resident ambassador, none). Represent as (Armenia, resident ambassador, none) maybe relation \"resident ambassador\" with object \"none\". Use object_type \"none\". Also need qualifier polarity negative? Actually statement \"has a resident ambassador\" is negated: \"does not have\". So we should represent as positive claim with qualifier polarity negative? The rule: Represent negated claims with qualifier {\"relation\":\"polarity\",\"object\":\"negative\"}. So we can have (Armenia, resident ambassador, unspecified) but we need object maybe \"resident ambassador\". Could set object \"resident ambassador\". But relation \"has\" maybe \"resident ambassador\". In example they used \"occupation\". For \"has a resident ambassador\" we could use relation \"resident ambassador\" with object \"none\". But we need to indicate negative. Let's do: subject: Armenia, relation: \"resident ambassador\", object: \"none\", qualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"}]. subject_type: \"country\". object_type: \"none\". Similarly for Singapore.\n\n3. The Embassy of Armenia in Beijing, China is accredited to Singapore. So fact: (Embassy of Armenia in Beijing, China, accredited to, Singapore). Also we may want to capture location: (Embassy of Armenia in Beijing, China, located in, Beijing) and maybe \"located in country\", but not required. We'll capture main fact.\n\nSubject_type: \"diplomatic mission\". Object_type: \"country\". Also we might include qualifier \"point in time\"? Not given.\n\n4. Singapore has no representation in Armenia. So similar to #2: (Singapore, representation, none) with polarity negative? Actually \"has no representation\" => negative of \"has representation\". So relation \"representation\" object \"none\" with polarity negative. Or we could phrase as (Singapore, representation in, Armenia) with polarity negative. Better: (Singapore, representation in, Armenia) with polarity negative. That captures that there is no representation. So subject: Singapore, relation: \"representation in\", object: Armenia, qualifiers: polarity negative.\n\nWe also might capture that \"Embassy of Armenia in Beijing, China\" is a diplomatic mission of Armenia. Could add (Embassy of Armenia in Beijing, China, representing, Armenia). Not explicit but implied. Not needed.\n\nNow define types: \"Armenia–Singapore relations\" type maybe \"topic\". Could set subject_type \"topic\". Relation maybe \"refers to\". But we need a Wikidata style predicate. Could use \"instance of\" with object \"bilateral foreign relations\". So (Armenia–Singapore relations, instance of, bilateral foreign relations). Also we could add qualifiers linking the two countries? Not needed.\n\nLet's produce triplets list:\n\n1. subject: \"Armenia–Singapore relations\", relation: \"instance of\", object: \"bilateral foreign relations\", qualifiers: [], subject_type: \"topic\", object_type: \"concept\".\n\n2. subject: \"Armenia–Singapore relations\", relation: \"relates to country\", object: \"Armenia\", qualifiers: [], subject_type: \"topic\", object_type: \"country\". (maybe relation \"relates to\". Use \"relates to\".)\n\n3. subject: \"Armenia–Singapore relations\", relation: \"relates to country\", object: \"Singapore\", qualifiers: [], subject_type: \"topic\", object_type: \"country\".\n\n4. subject: \"Armenia\", relation: \"resident ambassador\", object: \"none\", qualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"}], subject_type:\"country\", object_type:\"none\".\n\n5. subject: \"Singapore\", relation: \"resident ambassador\", object: \"none\", qualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"}], subject_type:\"country\", object_type:\"none\".\n\n6. subject: \"Embassy of Armenia in Beijing, China\", relation: \"accredited to\", object: \"Singapore\", qualifiers: [], subject_type:\"diplomatic mission\", object_type:\"country\".\n\n7. subject: \"Singapore\", relation: \"representation in\", object: \"Armenia\", qualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"}], subject_type:\"country\", object_type:\"country\".\n\nPotential also: \"Embassy of Armenia in Beijing, China\" location: \"Beijing\". Could add (Embassy..., location, Beijing). Not required but could.\n\nAdd: subject: \"Embassy of Armenia in Beijing, China\", relation: \"located in\", object: \"Beijing\", qualifiers: [], subject_type:\"diplomatic mission\", object_type:\"city\". Also maybe \"located in country\", object: \"China\". But we can include one.\n\nLet's include both location and country.\n\n8. subject: \"Embassy of Armenia in Beijing, China\", relation: \"located in\", object: \"Beijing\", qualifiers: [], subject_type:\"diplomatic mission\", object_type:\"city\".\n\n9. subject: \"Beijing\", relation: \"located in country\", object: \"China\", qualifiers: [], subject_type:\"city\", object_type:\"country\".\n\nBut \"Beijing, China\" already includes country. Might be redundant. But okay.\n\nNow produce JSON. Ensure each dict has keys: subject, relation, object, qualifiers (list), subject_type, object_type.\n\nLet's craft final JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1639,
+      "total_tokens": 3602,
+      "completion_tokens": 1963,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Armenia–Singapore relations\",\n            \"relation\": \"instance of\",\n            \"object\": \"bilateral foreign relations\",\n            \"qualifiers\": [],\n            \"subject_type\": \"topic\",\n            \"object_type\": \"concept\"\n        },\n        {\n            \"subject\": \"Armenia–Singapore relations\",\n            \"relation\": \"relates to country\",\n            \"object\": \"Armenia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"topic\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Armenia–Singapore relations\",\n            \"relation\": \"relates to country\",\n            \"object\": \"Singapore\",\n            \"qualifiers\": [],\n            \"subject_type\": \"topic\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Armenia\",\n            \"relation\": \"resident ambassador\",\n            \"object\": \"none\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"none\"\n        },\n        {\n            \"subject\": \"Singapore\",\n            \"relation\": \"resident ambassador\",\n            \"object\": \"none\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"none\"\n        },\n        {\n            \"subject\": \"Embassy of Armenia in Beijing, China\",\n            \"relation\": \"accredited to\",\n            \"object\": \"Singapore\",\n            \"qualifiers\": [],\n            \"subject_type\": \"diplomatic mission\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Embassy of Armenia in Beijing, China\",\n            \"relation\": \"located in\",\n            \"object\": \"Beijing\",\n            \"qualifiers\": [],\n            \"subject_type\": \"diplomatic mission\",\n            \"object_type\": \"city\"\n        },\n        {\n            \"subject\": \"Beijing\",\n            \"relation\": \"located in country\",\n            \"object\": \"China\",\n            \"qualifiers\": [],\n            \"subject_type\": \"city\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Singapore\",\n            \"relation\": \"representation in\",\n            \"object\": \"Armenia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Armenia–Singapore relations",
+        "relation": "instance of",
+        "object": "bilateral foreign relations",
+        "qualifiers": [],
+        "subject_type": "topic",
+        "object_type": "concept"
+      },
+      {
+        "subject": "Armenia–Singapore relations",
+        "relation": "relates to country",
+        "object": "Armenia",
+        "qualifiers": [],
+        "subject_type": "topic",
+        "object_type": "country"
+      },
+      {
+        "subject": "Armenia–Singapore relations",
+        "relation": "relates to country",
+        "object": "Singapore",
+        "qualifiers": [],
+        "subject_type": "topic",
+        "object_type": "country"
+      },
+      {
+        "subject": "Armenia",
+        "relation": "resident ambassador",
+        "object": "none",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "none"
+      },
+      {
+        "subject": "Singapore",
+        "relation": "resident ambassador",
+        "object": "none",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "none"
+      },
+      {
+        "subject": "Embassy of Armenia in Beijing, China",
+        "relation": "accredited to",
+        "object": "Singapore",
+        "qualifiers": [],
+        "subject_type": "diplomatic mission",
+        "object_type": "country"
+      },
+      {
+        "subject": "Embassy of Armenia in Beijing, China",
+        "relation": "located in",
+        "object": "Beijing",
+        "qualifiers": [],
+        "subject_type": "diplomatic mission",
+        "object_type": "city"
+      },
+      {
+        "subject": "Beijing",
+        "relation": "located in country",
+        "object": "China",
+        "qualifiers": [],
+        "subject_type": "city",
+        "object_type": "country"
+      },
+      {
+        "subject": "Singapore",
+        "relation": "representation in",
+        "object": "Armenia",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1639,
+    "total_tokens": 3602,
+    "completion_tokens": 1963,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 770,
+    "output_tokens_est": 677
+  },
+  "attempts": 1,
+  "latency_s": 22.349793932000466,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:21:45.689522+00:00",
+  "cache_key": "4d83f4fee60a8533f992a75a1629c8a8"
+}

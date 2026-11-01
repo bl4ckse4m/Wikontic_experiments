@@ -1,0 +1,133 @@
+{
+  "task": {
+    "input_id": "206a750fc371273a",
+    "input_hash": "a2cf4deb213be36af4b1c8b66ac64f74fd2e6767182304505057aa16cdd62ed8",
+    "gen_index": 1,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-8566e58d957fa8f2a16cf62a9bb871fc",
+    "object": "chat.completion",
+    "created": 1791549172,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"musical work type\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"writer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"composer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"date of first popularity\",\n            \"object\": \"1975\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Linda Ronstadt\",\n            \"relation\": \"performer\",\n            \"object\": \"Love Is a Rose\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\"\n                },\n                {\n                    \"relation\": \"genre\",\n                    \"object\": \"country\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"musical work\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"Love Is a Rose\n\n``Love Is a Rose ''is a song written and composed by Neil Young. It first became popular in 1975 when Linda Ronstadt had a country hit with her version.`` Love Is a Rose'' has also been covered ...\"\n\nWe have entities: \"Love Is a Rose\" (song), Neil Young (human), Linda Ronstadt (human), year 1975 (date), also \"country hit\" maybe treat as event? We can extract:\n\n- Love Is a Rose, instance of song? relation \"instance of\" maybe \"genre\"? But they said \"is a song\". So: (Love Is a Rose, instance of, song) or (Love Is a Rose, genre, song) but typical relation: \"instance of\" = \"song\". Use object_type \"musical work\". We'll set relation \"instance of\" (or \"type\")? They didn't specify allowed relations list but we can use \"instance of\". Good.\n\n- Love Is a Rose, writer, Neil Young. relation \"composer\" maybe \"written by\". Use \"author\" maybe \"composer\". We'll use \"writer\" or \"composer\". In example they used \"award received\". Not sure. Use \"writer\". object_type \"human\". Also \"composer\" maybe separate: \"written and composed by Neil Young\". Could split into two relations: \"writer\" and \"composer\". Both same object.\n\n- Love Is a Rose, first became popular in 1975. That's an event: popularity. Could be relation \"first popular\" with qualifier point in time 1975. Or treat as \"popularity start date\". Use relation \"first popular\" maybe \"date of first popularity\". We'll do relation \"date of first popularity\". object = 1975 (date). qualifiers none.\n\n- Linda Ronstadt had a country hit with her version in 1975. So: (Linda Ronstadt, performed version of, Love Is a Rose) or (Linda Ronstadt, version, Love Is a Rose). Use relation \"performer\". Could be \"artist\". We'll use \"performer\". object_type \"musical work\". Add qualifier point in time 1975, also qualifier \"type\" maybe \"country hit\". But we can add qualifier \"chart type\" but not required. We'll add qualifier \"point in time\" 1975, and maybe \"qualifier\" \"type\" \"country hit\". But \"type\" not defined; maybe we can add qualifier \"genre\" \"country\". But not explicit: \"country hit\". We'll add qualifier \"genre\" \"country\". Keep.\n\n- Love Is a Rose has also been covered by other artists over the years. This is a generic statement, no specific artists. Could create relation \"cover version\" with qualifier \"qualifier\": \"over the years\" maybe \"time period\". But we could create (Love Is a Rose, covered by, other artists) but \"other artists\" is not a specific entity. Might be too vague. Probably skip because not a concrete entity.\n\nNow need subject_type and object_type.\n\n- Love Is a Rose: musical work/song -> object_type for subject? subject_type \"musical work\". object_type for relation \"instance of\": object_type \"song\" (maybe \"musical work type\").\n\n- Neil Young: human.\n\n- Linda Ronstadt: human.\n\n- 1975: date.\n\n- other artists: maybe \"artist\" but ambiguous, skip.\n\nNow construct JSON.\n\nTriplets list order.\n\nTriplet1: subject \"Love Is a Rose\", relation \"instance of\", object \"song\", qualifiers [], subject_type \"musical work\", object_type \"genre\"? maybe \"musical work type\". We'll use \"song\" as object_type \"musical work type\".\n\nTriplet2: subject \"Love Is a Rose\", relation \"writer\", object \"Neil Young\", qualifiers [], subject_type \"musical work\", object_type \"human\".\n\nTriplet3: subject \"Love Is a Rose\", relation \"composer\", object \"Neil Young\", qualifiers [], same types.\n\nTriplet4: subject \"Love Is a Rose\", relation \"date of first popularity\", object \"1975\", qualifiers [], subject_type \"musical work\", object_type \"date\".\n\nTriplet5: subject \"Linda Ronstadt\", relation \"performer\", object \"Love Is a Rose\", qualifiers [{\"relation\":\"point in time\",\"object\":\"1975\"},{\"relation\":\"genre\",\"object\":\"country\"}], subject_type \"human\", object_type \"musical work\".\n\nCould also add relation \"cover version\" but skip.\n\nNow output JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1643,
+      "total_tokens": 2918,
+      "completion_tokens": 1275,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"instance of\",\n            \"object\": \"song\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"musical work type\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"writer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"composer\",\n            \"object\": \"Neil Young\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"Love Is a Rose\",\n            \"relation\": \"date of first popularity\",\n            \"object\": \"1975\",\n            \"qualifiers\": [],\n            \"subject_type\": \"musical work\",\n            \"object_type\": \"date\"\n        },\n        {\n            \"subject\": \"Linda Ronstadt\",\n            \"relation\": \"performer\",\n            \"object\": \"Love Is a Rose\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1975\"\n                },\n                {\n                    \"relation\": \"genre\",\n                    \"object\": \"country\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"musical work\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Love Is a Rose",
+        "relation": "instance of",
+        "object": "song",
+        "qualifiers": [],
+        "subject_type": "musical work",
+        "object_type": "musical work type"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "writer",
+        "object": "Neil Young",
+        "qualifiers": [],
+        "subject_type": "musical work",
+        "object_type": "human"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "composer",
+        "object": "Neil Young",
+        "qualifiers": [],
+        "subject_type": "musical work",
+        "object_type": "human"
+      },
+      {
+        "subject": "Love Is a Rose",
+        "relation": "date of first popularity",
+        "object": "1975",
+        "qualifiers": [],
+        "subject_type": "musical work",
+        "object_type": "date"
+      },
+      {
+        "subject": "Linda Ronstadt",
+        "relation": "performer",
+        "object": "Love Is a Rose",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1975"
+          },
+          {
+            "relation": "genre",
+            "object": "country"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "musical work"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1643,
+    "total_tokens": 2918,
+    "completion_tokens": 1275,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 471,
+    "output_tokens_est": 378
+  },
+  "attempts": 1,
+  "latency_s": 15.706686235993402,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:33:08.027899+00:00",
+  "cache_key": "e70d0a8252f82ed7b1ae014217f04486"
+}

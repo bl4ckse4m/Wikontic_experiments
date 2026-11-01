@@ -1,0 +1,156 @@
+{
+  "task": {
+    "input_id": "f61517ce686fba95",
+    "input_hash": "080135bb03432e05d5d0c026b179ea1502136cb40952b17a4c334a887022c560",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-e91e3434fe378a78d216d7b7c9d9f70c",
+    "object": "chat.completion",
+    "created": 1791508184,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mexico\",\n            \"relation\": \"area\",\n            \"object\": \"1,700,000 square miles (4,400,000 km²)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"before the secession of Texas\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"almost\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Mexico\",\n            \"relation\": \"area\",\n            \"object\": \"800,000 square miles (2,100,000 km²)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1849\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"just under\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Mexico\",\n            \"relation\": \"land transferred to\",\n            \"object\": \"United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"amount\",\n                    \"object\": \"30,000 square miles (78,000 km²)\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1853\"\n                },\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"Gadsden Purchase\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Mexico\",\n            \"relation\": \"territory reduction\",\n            \"object\": \"900,000 square miles (2,300,000 km²)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"percentage\",\n                    \"object\": \"55%\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"more than\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts from the text. The text mentions Mexican–American War heading but facts about territory sizes.\n\nSentences:\n\n\"Before the secession of Texas, Mexico comprised almost 1,700,000 sq mi (4,400,000 km), but ...\"\n\nSo we have a fact: Mexico had area almost 1,700,000 square miles (4,400,000 km²) before Texas secession. Relation could be \"area\" with qualifiers \"point in time\" maybe \"before the secession of Texas\". We need to represent that as a qualifier.\n\nSecond: \"by 1849 it was just under 800,000 square miles (2,100,000 km).\" So Mexico area just under 800,000 sq mi (2,100,000 km²) by 1849. So subject Mexico, relation area, object \"800,000 square miles (2,100,000 km)\" with qualifier point in time 1849 and qualifier approximation (since \"just under\").\n\nThird: \"Another 30,000 square miles (78,000 km) were sold to the U.S. in the Gadsden Purchase of 1853\". So object: \"30,000 square miles (78,000 km)\" sold to US. Relation: \"land transferred\" maybe \"territory transferred to\". Use relation \"land transferred to\" or \"area transferred\". We'll use \"area transferred to\". Subject: Mexico, object: United States, qualifiers: amount 30,000 square miles (78,000 km), point in time 1853, maybe \"event\" Gadsden Purchase.\n\nBut we need to keep object as entity, not amount. Could also have relation \"area transferred to\" with object \"United States\" and qualifier \"amount\". We'll create qualifier with relation \"amount\" object \"30,000 square miles (78,000 km)\". Also qualifier \"point in time\" 1853, qualifier \"event\" \"Gadsden Purchase\". Need to decide object_type: \"country\". qualifier amount type: \"area\". event type: \"historical event\".\n\nFourth: \"so the total reduction of Mexican territory was more than 55%, or 900,000 square miles (2,300,000 km).\" So subject: Mexico, relation: \"territory reduction\", object: \"900,000 square miles (2,300,000 km)\" with qualifier \"percentage\" \"more than 55%\" and maybe point in time? Not given specific date, but after Gadsden Purchase? Could be overall reduction after war. We'll just include qualifier \"approximation\" maybe for \"more than\". Use qualifier \"percentage\" object \"55%\". Also qualifier \"approximation\" maybe \"more than\". We'll include qualifier \"polarity\"? No, it's positive.\n\nWe also have \"Mexican–American War\" heading but no explicit fact linking war. Could add relation \"conflict\" but not explicit.\n\nNow need subject_type and object_type.\n\nSubject \"Mexico\" type \"country\". Object for area facts: area value is a measurement, object_type \"area\". For area transferred to US: object \"United States\" type \"country\". For reduction: object is area value, type \"area\". Also maybe \"percentage\" qualifier object type \"percentage\".\n\nDefine relations: \"area\" maybe \"area\". Use \"area\" relation.\n\nQualifiers: \"point in time\", \"approximation\", \"percentage\", \"amount\", \"event\". Need to ensure qualifiers are list of dicts.\n\nNow produce JSON.\n\nTriplet list:\n\n1. Mexico area 1,700,000 square miles (4,400,000 km²) with qualifiers: point in time \"before the secession of Texas\", approximation \"almost\". object_type area.\n\n2. Mexico area 800,000 square miles (2,100,000 km²) qualifiers: point in time \"1849\", approximation \"just under\". object_type area.\n\n3. Mexico area transferred to United States qualifiers: amount \"30,000 square miles (78,000 km)\", point in time \"1853\", event \"Gadsden Purchase\". relation maybe \"land transferred to\". object_type country.\n\n4. Mexico territory reduction area 900,000 square miles (2,300,000 km) qualifiers: percentage \"55%\" with approximation \"more than\". relation \"territory reduction\". object_type area.\n\nCheck qualifier relation names: \"point in time\", \"approximation\", \"percentage\", \"amount\", \"event\". Use as given.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1700,
+      "total_tokens": 3081,
+      "completion_tokens": 1381,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mexico\",\n            \"relation\": \"area\",\n            \"object\": \"1,700,000 square miles (4,400,000 km²)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"before the secession of Texas\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"almost\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Mexico\",\n            \"relation\": \"area\",\n            \"object\": \"800,000 square miles (2,100,000 km²)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1849\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"just under\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        },\n        {\n            \"subject\": \"Mexico\",\n            \"relation\": \"land transferred to\",\n            \"object\": \"United States\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"amount\",\n                    \"object\": \"30,000 square miles (78,000 km²)\"\n                },\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1853\"\n                },\n                {\n                    \"relation\": \"event\",\n                    \"object\": \"Gadsden Purchase\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Mexico\",\n            \"relation\": \"territory reduction\",\n            \"object\": \"900,000 square miles (2,300,000 km²)\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"percentage\",\n                    \"object\": \"55%\"\n                },\n                {\n                    \"relation\": \"approximation\",\n                    \"object\": \"more than\"\n                }\n            ],\n            \"subject_type\": \"country\",\n            \"object_type\": \"area\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Mexico",
+        "relation": "area",
+        "object": "1,700,000 square miles (4,400,000 km²)",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "before the secession of Texas"
+          },
+          {
+            "relation": "approximation",
+            "object": "almost"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "area"
+      },
+      {
+        "subject": "Mexico",
+        "relation": "area",
+        "object": "800,000 square miles (2,100,000 km²)",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1849"
+          },
+          {
+            "relation": "approximation",
+            "object": "just under"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "area"
+      },
+      {
+        "subject": "Mexico",
+        "relation": "land transferred to",
+        "object": "United States",
+        "qualifiers": [
+          {
+            "relation": "amount",
+            "object": "30,000 square miles (78,000 km²)"
+          },
+          {
+            "relation": "point in time",
+            "object": "1853"
+          },
+          {
+            "relation": "event",
+            "object": "Gadsden Purchase"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "country"
+      },
+      {
+        "subject": "Mexico",
+        "relation": "territory reduction",
+        "object": "900,000 square miles (2,300,000 km²)",
+        "qualifiers": [
+          {
+            "relation": "percentage",
+            "object": "55%"
+          },
+          {
+            "relation": "approximation",
+            "object": "more than"
+          }
+        ],
+        "subject_type": "country",
+        "object_type": "area"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1700,
+    "total_tokens": 3081,
+    "completion_tokens": 1381,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 656,
+    "output_tokens_est": 564
+  },
+  "attempts": 1,
+  "latency_s": 17.050823907004087,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:10:01.465615+00:00",
+  "cache_key": "51fcd82a064256c71f0d0255279d1cd1"
+}

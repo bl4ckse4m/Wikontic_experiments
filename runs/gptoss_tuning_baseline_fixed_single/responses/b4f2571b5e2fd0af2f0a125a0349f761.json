@@ -1,0 +1,137 @@
+{
+  "task": {
+    "input_id": "37fc35c4978c6392",
+    "input_hash": "7c0205ee66621f30c4099e0db1d1a375776a8a814dd43edc35d6ef30ee5a3b5f",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "a4bed0a35e80a5a767c1d14c65eda46a4ee11a4931ba5e7c814b9caf29890f7b",
+    "prompt_path": "prompts/baseline_fixed/propmt_1_types_qualifiers_fixed.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-07192b3732de6e4c8adda0da46acdc03",
+    "object": "chat.completion",
+    "created": 1791509856,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mount Bethel\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Mount Bethel\",\n            \"relation\": \"located in\",\n            \"object\": \"Upper Mount Bethel Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Upper Mount Bethel Township\",\n            \"relation\": \"located in\",\n            \"object\": \"Northampton County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Northampton County\",\n            \"relation\": \"located in\",\n            \"object\": \"Pennsylvania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"political entity\"\n        },\n        {\n            \"subject\": \"Pennsylvania\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political entity\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Mount Bethel\",\n            \"relation\": \"located along\",\n            \"object\": \"Pennsylvania Route 611\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"north of the intersection with Pennsylvania Route 512\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nIdentify entities: Mount Bethel (the community), Upper Mount Bethel Township, Northampton County, Pennsylvania, United States, Pennsylvania Route 611, Pennsylvania Route 512.\n\nRelations: instance of (unincorporated community), located in (Upper Mount Bethel Township), located in (Northampton County), located in (Pennsylvania), located in (United States). Also \"located along\" Pennsylvania Route 611, \"north of the intersection with\" Pennsylvania Route 512.\n\nWe need subject_type and object_type. For community: subject_type \"human settlement\" or \"unincorporated community\". Use \"human settlement\". Object types: township (administrative division), county (administrative division), state (political entity), country (country), road (road), intersection (maybe \"road intersection\").\n\nQualifiers: For the relation \"located along Pennsylvania Route 611 north of the intersection with Pennsylvania Route 512\", maybe we can split into two relations: \"located along\" road, and qualifier \"direction\" north of intersection with other road. But qualifiers must be attached to a triplet. Could have triplet: subject Mount Bethel, relation \"located along\", object \"Pennsylvania Route 611\", qualifiers: [{\"relation\":\"direction\",\"object\":\"north of the intersection with Pennsylvania Route 512\"}]. Or we could have separate triplet: \"Mount Bethel\" \"located north of the intersection with\" \"Pennsylvania Route 512\". But better to attach qualifier.\n\nWe also have \"Mount Bethel is an unincorporated community\". So relation \"instance of\" object \"unincorporated community\". Provide type.\n\nLet's craft list.\n\nTriplet 1:\nsubject: Mount Bethel\nrelation: instance of\nobject: unincorporated community\nqualifiers: []\nsubject_type: human settlement\nobject_type: settlement type\n\nTriplet 2:\nsubject: Mount Bethel\nrelation: located in\nobject: Upper Mount Bethel Township\nqualifiers: []\nsubject_type: human settlement\nobject_type: township\n\nTriplet 3:\nsubject: Upper Mount Bethel Township\nrelation: located in\nobject: Northampton County\nqualifiers: []\nsubject_type: township\nobject_type: county\n\nBut maybe we only need direct relations from Mount Bethel. However we can include hierarchical.\n\nTriplet 4:\nsubject: Northampton County\nrelation: located in\nobject: Pennsylvania\nqualifiers: []\nsubject_type: county\nobject_type: state\n\nTriplet 5:\nsubject: Pennsylvania\nrelation: located in\nobject: United States\nqualifiers: []\nsubject_type: state\nobject_type: country\n\nTriplet 6:\nsubject: Mount Bethel\nrelation: located along\nobject: Pennsylvania Route 611\nqualifiers: [{\"relation\":\"direction\",\"object\":\"north of the intersection with Pennsylvania Route 512\"}]\nsubject_type: human settlement\nobject_type: road\n\nTriplet 7:\nsubject: intersection of Pennsylvania Route 611 and Pennsylvania Route 512? Actually the qualifier mentions intersection with Pennsylvania Route 512. Could also have separate triplet: \"Mount Bethel\" \"located north of\" \"intersection of Pennsylvania Route 611 and Pennsylvania Route 512\". But we already captured direction.\n\nMaybe also include relation \"intersects\" between roads? Not needed.\n\nThus produce JSON.\n\nCheck format: each dict includes \"qualifiers\": list of dicts with relation and object.\n\nMake sure object_type for \"unincorporated community\" maybe \"settlement type\". Use \"settlement type\". For township: \"administrative division\". For county: \"administrative division\". For state: \"political entity\". For country: \"country\". For road: \"road\". For direction qualifier: object is \"intersection with Pennsylvania Route 512\". Could set object_type \"road intersection\". But qualifiers don't have object_type field; only relation and object.\n\nThus final JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 984,
+      "total_tokens": 2166,
+      "completion_tokens": 1182,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Mount Bethel\",\n            \"relation\": \"instance of\",\n            \"object\": \"unincorporated community\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"settlement type\"\n        },\n        {\n            \"subject\": \"Mount Bethel\",\n            \"relation\": \"located in\",\n            \"object\": \"Upper Mount Bethel Township\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Upper Mount Bethel Township\",\n            \"relation\": \"located in\",\n            \"object\": \"Northampton County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"administrative division\"\n        },\n        {\n            \"subject\": \"Northampton County\",\n            \"relation\": \"located in\",\n            \"object\": \"Pennsylvania\",\n            \"qualifiers\": [],\n            \"subject_type\": \"administrative division\",\n            \"object_type\": \"political entity\"\n        },\n        {\n            \"subject\": \"Pennsylvania\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political entity\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Mount Bethel\",\n            \"relation\": \"located along\",\n            \"object\": \"Pennsylvania Route 611\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"direction\",\n                    \"object\": \"north of the intersection with Pennsylvania Route 512\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"road\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Mount Bethel",
+        "relation": "instance of",
+        "object": "unincorporated community",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "settlement type"
+      },
+      {
+        "subject": "Mount Bethel",
+        "relation": "located in",
+        "object": "Upper Mount Bethel Township",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Upper Mount Bethel Township",
+        "relation": "located in",
+        "object": "Northampton County",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "administrative division"
+      },
+      {
+        "subject": "Northampton County",
+        "relation": "located in",
+        "object": "Pennsylvania",
+        "qualifiers": [],
+        "subject_type": "administrative division",
+        "object_type": "political entity"
+      },
+      {
+        "subject": "Pennsylvania",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "political entity",
+        "object_type": "country"
+      },
+      {
+        "subject": "Mount Bethel",
+        "relation": "located along",
+        "object": "Pennsylvania Route 611",
+        "qualifiers": [
+          {
+            "relation": "direction",
+            "object": "north of the intersection with Pennsylvania Route 512"
+          }
+        ],
+        "subject_type": "human settlement",
+        "object_type": "road"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 984,
+    "total_tokens": 2166,
+    "completion_tokens": 1182,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 558,
+    "output_tokens_est": 460
+  },
+  "attempts": 1,
+  "latency_s": 13.94270623200282,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:37:50.240863+00:00",
+  "cache_key": "b4f2571b5e2fd0af2f0a125a0349f761"
+}

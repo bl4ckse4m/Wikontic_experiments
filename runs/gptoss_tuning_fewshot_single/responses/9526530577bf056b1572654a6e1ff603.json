@@ -1,0 +1,150 @@
+{
+  "task": {
+    "input_id": "725d8a03fc2c8ae7",
+    "input_hash": "6d19865b447330f6ea2abe9afdcd0e18e39587709413ff4ab1f7cd05f583dab6",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-ee870efdd050e3d388258f07f8d55dc6",
+    "object": "chat.completion",
+    "created": 1791518511,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"instance of\",\n            \"object\": \"news program\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"broadcast on\",\n            \"object\": \"DuMont Television Network\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1954–1955 season\"\n                },\n                {\n                    \"relation\": \"day of week\",\n                    \"object\": \"Monday through Friday\"\n                },\n                {\n                    \"relation\": \"time of day\",\n                    \"object\": \"7:15pm ET\"\n                }\n            ],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"presenter\",\n            \"object\": \"Morgan Beatty\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"duration\",\n            \"object\": \"15\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"minute\"\n                }\n            ],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"attempt number\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"ordinal\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts.\n\nText: \"DuMont Evening News\n\nThe DuMont Evening News was an American news program which aired Monday through Friday at 7:15pm ET on the DuMont Television Network during the 1954–1955 season. Presented by Morgan Beatty, the 15-minute show was the network's third and final attempt at a nightly news broadcast.\"\n\nWe need entities: DuMont Evening News (program), American (country), news program (type), aired Monday through Friday at 7:15pm ET (schedule), on DuMont Television Network (network), during the 1954–1955 season (time). Presented by Morgan Beatty (presenter). 15-minute show (duration). It was the network's third and final attempt at a nightly news broadcast (role: attempt, ordinal, final). So we need separate triplets.\n\nLet's define subject types: \"DuMont Evening News\" is a \"television program\". object types accordingly.\n\nTriplets:\n\n1. subject: DuMont Evening News, relation: country of origin? maybe \"country of origin\" = United States (American). Use relation \"country of origin\". object: United States. qualifier none. subject_type: television program, object_type: country.\n\n2. subject: DuMont Evening News, relation: genre? \"news program\". relation: \"genre\" or \"type of work\". Use \"genre\". object: news program (or \"news\"). object_type: genre.\n\nBut maybe better: relation \"instance of\" with object \"news program\". But guidelines: use short unambiguous relation. Could use \"instance of\". Let's use \"instance of\" with object \"news program\". object_type: television program? Actually \"news program\" is a type. We'll set object_type: television program.\n\n3. subject: DuMont Evening News, relation: broadcast on, object: DuMont Television Network. qualifiers: point in time \"1954–1955 season\". Also schedule: \"Monday through Friday at 7:15pm ET\". Could be separate qualifiers: \"day of week\" \"Monday through Friday\", \"time of day\" \"7:15pm ET\". Use qualifiers.\n\nThus triplet: broadcast on = DuMont Television Network. qualifiers: point in time \"1954–1955 season\", day of week \"Monday through Friday\", time of day \"7:15pm ET\". subject_type: television program, object_type: television network.\n\n4. subject: DuMont Evening News, relation: presenter, object: Morgan Beatty. qualifiers none. subject_type: television program, object_type: human.\n\n5. subject: DuMont Evening News, relation: duration, object: 15 minutes. qualifier unit \"minutes\"? Actually object includes unit. Use object \"15 minutes\". object_type: duration. Also maybe qualifier \"unit\": \"minute\". But guidelines: unit qualifier separate. Could set object \"15\" with qualifier unit \"minute\". But easier: object \"15 minutes\" and object_type \"duration\". We'll also add qualifier \"unit\": \"minute\". But maybe not needed.\n\nLet's do: relation \"duration\", object \"15\". qualifiers: unit \"minute\". Also maybe \"approximation\"? Not needed.\n\n6. subject: DuMont Evening News, relation: attempt number, object: third. Could use relation \"ordinal\" or \"position\". Use \"ordinal\" with object \"3\". qualifiers: \"final\" as qualifier \"polarity\"? Actually \"final attempt\" indicates it's the last. Could use qualifier \"final\" with relation \"polarity\"? Not appropriate. Use qualifier \"final\" with relation \"status\"? Not defined. Maybe we can encode as qualifier \"final\" with relation \"polarity\"? Not correct. Could use qualifier \"final\" with relation \"qualifier\". But guidelines list allowed qualifier relations: \"polarity\", \"modality\", \"attribution\", \"condition\", \"unit\", \"approximation\", \"point in time\", \"place\". Not \"final\". So maybe we skip that nuance. Could encode as separate triplet: subject: DuMont Television Network, relation: attempt at nightly news broadcast, object: DuMont Evening News, qualifiers: ordinal \"3\", final \"yes\"? Not allowed.\n\nMaybe we can encode as: subject: DuMont Television Network, relation: attempted broadcast, object: nightly news broadcast, qualifiers: ordinal \"3\", \"final\" as \"polarity\"? Not correct.\n\nProbably we can omit the \"third and final attempt\" nuance, just capture that it was the network's third attempt. Use relation \"attempt number\" with object \"3\". qualifier maybe \"final\" not captured.\n\nThus:\n\nTriplet: subject: DuMont Evening News, relation: attempt number, object: 3. qualifiers: none. subject_type: television program, object_type: integer? maybe \"ordinal\". We'll set object_type \"ordinal\".\n\nAlso maybe relation: \"status\" = final. But not in allowed qualifiers. Could use relation \"final\" as object? Not.\n\nWe'll include separate triplet: subject: DuMont Evening News, relation: final attempt, object: true? Not.\n\nBetter to keep simple.\n\nNow produce JSON.\n\nNeed subject_type and object_type for each.\n\nDefine types:\n\n- DuMont Evening News: \"television program\"\n- United States: \"country\"\n- news program: \"genre\" maybe \"television program genre\". We'll set object_type \"genre\".\n- DuMont Television Network: \"television network\"\n- Morgan Beatty: \"human\"\n- 15 minutes: object_type \"duration\"\n- 3: object_type \"ordinal\"\n\nNow qualifiers list objects as strings.\n\nQualifier relations:\n\n- point in time: \"1954–1955 season\"\n- day of week: \"Monday through Friday\"\n- time of day: \"7:15pm ET\"\n- unit: \"minute\"\n\nNow produce JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1659,
+      "total_tokens": 3298,
+      "completion_tokens": 1639,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"country of origin\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"instance of\",\n            \"object\": \"news program\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"genre\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"broadcast on\",\n            \"object\": \"DuMont Television Network\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"1954–1955 season\"\n                },\n                {\n                    \"relation\": \"day of week\",\n                    \"object\": \"Monday through Friday\"\n                },\n                {\n                    \"relation\": \"time of day\",\n                    \"object\": \"7:15pm ET\"\n                }\n            ],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"television network\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"presenter\",\n            \"object\": \"Morgan Beatty\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"human\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"duration\",\n            \"object\": \"15\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"unit\",\n                    \"object\": \"minute\"\n                }\n            ],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"DuMont Evening News\",\n            \"relation\": \"attempt number\",\n            \"object\": \"3\",\n            \"qualifiers\": [],\n            \"subject_type\": \"television program\",\n            \"object_type\": \"ordinal\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "DuMont Evening News",
+        "relation": "country of origin",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "television program",
+        "object_type": "country"
+      },
+      {
+        "subject": "DuMont Evening News",
+        "relation": "instance of",
+        "object": "news program",
+        "qualifiers": [],
+        "subject_type": "television program",
+        "object_type": "genre"
+      },
+      {
+        "subject": "DuMont Evening News",
+        "relation": "broadcast on",
+        "object": "DuMont Television Network",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "1954–1955 season"
+          },
+          {
+            "relation": "day of week",
+            "object": "Monday through Friday"
+          },
+          {
+            "relation": "time of day",
+            "object": "7:15pm ET"
+          }
+        ],
+        "subject_type": "television program",
+        "object_type": "television network"
+      },
+      {
+        "subject": "DuMont Evening News",
+        "relation": "presenter",
+        "object": "Morgan Beatty",
+        "qualifiers": [],
+        "subject_type": "television program",
+        "object_type": "human"
+      },
+      {
+        "subject": "DuMont Evening News",
+        "relation": "duration",
+        "object": "15",
+        "qualifiers": [
+          {
+            "relation": "unit",
+            "object": "minute"
+          }
+        ],
+        "subject_type": "television program",
+        "object_type": "duration"
+      },
+      {
+        "subject": "DuMont Evening News",
+        "relation": "attempt number",
+        "object": "3",
+        "qualifiers": [],
+        "subject_type": "television program",
+        "object_type": "ordinal"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1659,
+    "total_tokens": 3298,
+    "completion_tokens": 1639,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 626,
+    "output_tokens_est": 534
+  },
+  "attempts": 1,
+  "latency_s": 20.14439981500618,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:02:12.419484+00:00",
+  "cache_key": "9526530577bf056b1572654a6e1ff603"
+}

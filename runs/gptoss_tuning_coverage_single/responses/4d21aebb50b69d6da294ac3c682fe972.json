@@ -1,0 +1,192 @@
+{
+  "task": {
+    "input_id": "e2245ced9d621cba",
+    "input_hash": "eef53759dcc3bdf90d6d1cc15ce5e3a87c4a4003d15705b80a9f4b1cad42552f",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-ba82827fea18f5ee4535b03ef9c90808",
+    "object": "chat.completion",
+    "created": 1791507512,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nazih Zuhdi\",\n            \"relation\": \"performed\",\n            \"object\": \"total intentional hemodilution open heart surgery\",\n            \"qualifiers\": [\n                {\"relation\": \"patient\", \"object\": \"Terry Gene Nix\"},\n                {\"relation\": \"patient age\", \"object\": \"7\"},\n                {\"relation\": \"point in time\", \"object\": \"25 February 1960\"},\n                {\"relation\": \"location\", \"object\": \"Mercy Hospital\"},\n                {\"relation\": \"city\", \"object\": \"Oklahoma City\"},\n                {\"relation\": \"outcome\", \"object\": \"success\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"medical procedure\"\n        },\n        {\n            \"subject\": \"Nazih Zuhdi\",\n            \"relation\": \"performed\",\n            \"object\": \"open heart surgery\",\n            \"qualifiers\": [\n                {\"relation\": \"patient\", \"object\": \"child\"},\n                {\"relation\": \"patient age\", \"object\": \"3\"},\n                {\"relation\": \"point in time\", \"object\": \"March 1961\"},\n                {\"relation\": \"instrument\", \"object\": \"total intentional hemodilution machine\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"medical procedure\"\n        },\n        {\n            \"subject\": \"Carey\",\n            \"relation\": \"performed\",\n            \"object\": \"open heart surgery\",\n            \"qualifiers\": [\n                {\"relation\": \"patient\", \"object\": \"child\"},\n                {\"relation\": \"patient age\", \"object\": \"3\"},\n                {\"relation\": \"point in time\", \"object\": \"March 1961\"},\n                {\"relation\": \"instrument\", \"object\": \"total intentional hemodilution machine\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"medical procedure\"\n        },\n        {\n            \"subject\": \"Greer\",\n            \"relation\": \"performed\",\n            \"object\": \"open heart surgery\",\n            \"qualifiers\": [\n                {\"relation\": \"patient\", \"object\": \"child\"},\n                {\"relation\": \"patient age\", \"object\": \"3\"},\n                {\"relation\": \"point in time\", \"object\": \"March 1961\"},\n                {\"relation\": \"instrument\", \"object\": \"total intentional hemodilution machine\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"medical procedure\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets from the text.\n\nFirst, identify entities: Nazih Zuhdi (person), Terry Gene Nix (person), Mercy Hospital (institution), Oklahoma City (place), March 1961 (date), Carey (person?), Greer (person?), \"total intentional hemodilution open heart surgery\" (procedure), \"open heart surgery\" (procedure), \"total intentional hemodilution machine\" (device), \"first total intentional hemodilution open heart surgery\" (event), \"child\" (maybe generic). Also \"age 7\", \"age 3 ⁄\" (maybe age 3½? but text says \"age 3 ⁄,\" maybe a formatting glitch). We'll capture age as qualifier.\n\nTriplets:\n\n1. (Nazih Zuhdi, performed, first total intentional hemodilution open heart surgery) with qualifiers: patient Terry Gene Nix, date 25 February 1960, location Mercy Hospital, city Oklahoma City, patient age 7, outcome success? The operation was a success. So we could have separate triplet: (first total intentional hemodilution open heart surgery, result, success) but maybe better: (Nazih Zuhdi, performed, total intentional hemodilution open heart surgery) with qualifiers: patient Terry Gene Nix, date, location, outcome success. According to guidelines, qualifiers attach to the claim. So we can have:\n\n- subject: Nazih Zuhdi\n- relation: performed\n- object: total intentional hemodilution open heart surgery\n- qualifiers: patient (maybe relation \"patient\" object \"Terry Gene Nix\"), point in time \"25 February 1960\", location \"Mercy Hospital\", city \"Oklahoma City\", patient age \"7\", result \"success\"\n\nBut we need to use Wikidata-style relations. For patient, maybe \"patient\". For location, \"location\". For point in time, \"point in time\". For result, maybe \"outcome\". We'll use \"outcome\". Provide types: subject_type human, object_type medical procedure.\n\n2. (Terry Gene Nix, cause of death, ???) The text says Nix died three years later. So we can have (Terry Gene Nix, date of death, 1963) but not explicit date, just \"three years later\". That's relative, not explicit date. Should we capture as qualifier? Probably not, because not explicit date. Could capture as (Terry Gene Nix, died, true) but not typical. Maybe we skip because not explicit fact.\n\nBut we could capture (Terry Gene Nix, died, true) with qualifier \"time after operation\" but not needed.\n\nBetter: (Terry Gene Nix, death, three years after 25 February 1960) but that's not explicit date.\n\nProbably we skip.\n\n3. In March 1961, Zuhdi, Carey, and Greer performed open heart surgery on a child, age 3 ⁄, using the total intentional hemodilution machine.\n\nSo we have multiple subjects: Nazih Zuhdi, Carey, Greer performed open heart surgery. So we need separate triplets for each performer? Coordination: split coordinated subjects. So three triplets:\n\n- (Nazih Zuhdi, performed, open heart surgery) with qualifiers: patient \"child\", patient age \"3\", date \"March 1961\", instrument \"total intentional hemodilution machine\"\n\n- (Carey, performed, open heart surgery) same qualifiers\n\n- (Greer, performed, open heart surgery) same qualifiers\n\nWe need subject_type human, object_type medical procedure.\n\nAlso we might have a triplet for the device: (total intentional hemodilution machine, used in, open heart surgery) but that's derived.\n\nBetter to capture instrument qualifier.\n\nAlso we have \"first total intentional hemodilution open heart surgery\" maybe as a distinct event. Could have (total intentional hemodilution open heart surgery, first performed by, Nazih Zuhdi) but not needed.\n\nWe'll produce triplets as described.\n\nDefine relation names: \"performed\" (maybe \"performed\" is okay). For patient, use \"patient\". For point in time, \"point in time\". For location, \"location\". For outcome, \"outcome\". For instrument, \"instrument\". For age, maybe \"patient age\". Use \"age\" relation.\n\nNow produce JSON.\n\nList of triplets:\n\n1. Nazih Zuhdi performed total intentional hemodilution open heart surgery (qualifiers: patient Terry Gene Nix, patient age 7, point in time 25 February 1960, location Mercy Hospital, city Oklahoma City, outcome success)\n\n2. Terry Gene Nix died (qualifier: point in time three years after 25 February 1960) but maybe skip.\n\nBut we could include (Terry Gene Nix, cause of death, unknown) not.\n\nI'll include a triplet: (Terry Gene Nix, died, true) with qualifier \"point in time\" \"three years after 25 February 1960\". object_type maybe \"boolean\". But guidelines maybe not.\n\nBetter to include (Terry Gene Nix, date of death, 1963) but not explicit.\n\nI'll omit.\n\n3-5. Nazih Zuhdi performed open heart surgery (qualifiers: patient child, patient age 3, point in time March 1961, instrument total intentional hemodilution machine)\n\nSimilarly for Carey and Greer.\n\nAlso we might have (total intentional hemodilution machine, type, medical device) but not needed.\n\nNow produce JSON.\n\nNeed subject_type and object_type for each.\n\n- subject_type: human\n- object_type: medical procedure\n\nFor qualifiers, we don't need types.\n\nNow craft JSON.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1682,
+      "total_tokens": 3400,
+      "completion_tokens": 1718,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Nazih Zuhdi\",\n            \"relation\": \"performed\",\n            \"object\": \"total intentional hemodilution open heart surgery\",\n            \"qualifiers\": [\n                {\"relation\": \"patient\", \"object\": \"Terry Gene Nix\"},\n                {\"relation\": \"patient age\", \"object\": \"7\"},\n                {\"relation\": \"point in time\", \"object\": \"25 February 1960\"},\n                {\"relation\": \"location\", \"object\": \"Mercy Hospital\"},\n                {\"relation\": \"city\", \"object\": \"Oklahoma City\"},\n                {\"relation\": \"outcome\", \"object\": \"success\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"medical procedure\"\n        },\n        {\n            \"subject\": \"Nazih Zuhdi\",\n            \"relation\": \"performed\",\n            \"object\": \"open heart surgery\",\n            \"qualifiers\": [\n                {\"relation\": \"patient\", \"object\": \"child\"},\n                {\"relation\": \"patient age\", \"object\": \"3\"},\n                {\"relation\": \"point in time\", \"object\": \"March 1961\"},\n                {\"relation\": \"instrument\", \"object\": \"total intentional hemodilution machine\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"medical procedure\"\n        },\n        {\n            \"subject\": \"Carey\",\n            \"relation\": \"performed\",\n            \"object\": \"open heart surgery\",\n            \"qualifiers\": [\n                {\"relation\": \"patient\", \"object\": \"child\"},\n                {\"relation\": \"patient age\", \"object\": \"3\"},\n                {\"relation\": \"point in time\", \"object\": \"March 1961\"},\n                {\"relation\": \"instrument\", \"object\": \"total intentional hemodilution machine\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"medical procedure\"\n        },\n        {\n            \"subject\": \"Greer\",\n            \"relation\": \"performed\",\n            \"object\": \"open heart surgery\",\n            \"qualifiers\": [\n                {\"relation\": \"patient\", \"object\": \"child\"},\n                {\"relation\": \"patient age\", \"object\": \"3\"},\n                {\"relation\": \"point in time\", \"object\": \"March 1961\"},\n                {\"relation\": \"instrument\", \"object\": \"total intentional hemodilution machine\"}\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"medical procedure\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Nazih Zuhdi",
+        "relation": "performed",
+        "object": "total intentional hemodilution open heart surgery",
+        "qualifiers": [
+          {
+            "relation": "patient",
+            "object": "Terry Gene Nix"
+          },
+          {
+            "relation": "patient age",
+            "object": "7"
+          },
+          {
+            "relation": "point in time",
+            "object": "25 February 1960"
+          },
+          {
+            "relation": "location",
+            "object": "Mercy Hospital"
+          },
+          {
+            "relation": "city",
+            "object": "Oklahoma City"
+          },
+          {
+            "relation": "outcome",
+            "object": "success"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "medical procedure"
+      },
+      {
+        "subject": "Nazih Zuhdi",
+        "relation": "performed",
+        "object": "open heart surgery",
+        "qualifiers": [
+          {
+            "relation": "patient",
+            "object": "child"
+          },
+          {
+            "relation": "patient age",
+            "object": "3"
+          },
+          {
+            "relation": "point in time",
+            "object": "March 1961"
+          },
+          {
+            "relation": "instrument",
+            "object": "total intentional hemodilution machine"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "medical procedure"
+      },
+      {
+        "subject": "Carey",
+        "relation": "performed",
+        "object": "open heart surgery",
+        "qualifiers": [
+          {
+            "relation": "patient",
+            "object": "child"
+          },
+          {
+            "relation": "patient age",
+            "object": "3"
+          },
+          {
+            "relation": "point in time",
+            "object": "March 1961"
+          },
+          {
+            "relation": "instrument",
+            "object": "total intentional hemodilution machine"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "medical procedure"
+      },
+      {
+        "subject": "Greer",
+        "relation": "performed",
+        "object": "open heart surgery",
+        "qualifiers": [
+          {
+            "relation": "patient",
+            "object": "child"
+          },
+          {
+            "relation": "patient age",
+            "object": "3"
+          },
+          {
+            "relation": "point in time",
+            "object": "March 1961"
+          },
+          {
+            "relation": "instrument",
+            "object": "total intentional hemodilution machine"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "medical procedure"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1682,
+    "total_tokens": 3400,
+    "completion_tokens": 1718,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 685,
+    "output_tokens_est": 593
+  },
+  "attempts": 1,
+  "latency_s": 21.394558905005397,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T00:58:54.532872+00:00",
+  "cache_key": "4d21aebb50b69d6da294ac3c682fe972"
+}

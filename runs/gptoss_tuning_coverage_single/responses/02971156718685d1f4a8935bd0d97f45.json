@@ -1,0 +1,175 @@
+{
+  "task": {
+    "input_id": "f846ac5f637b7e3b",
+    "input_hash": "8523f786ae413b727559bd16c775b61a8cff29e919eacabcef872d1b45778f8c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-f001053e029e9035895695c6ef54f95a",
+    "object": "chat.completion",
+    "created": 1791508249,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"position\",\n            \"object\": \"chief executive of West Virginia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"role\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"term length\",\n            \"object\": \"four-year term\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"election coincides with\",\n            \"object\": \"presidential elections\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"election\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"inauguration month\",\n            \"object\": \"January\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"month\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"maximum consecutive terms\",\n            \"object\": \"2\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"can run for third term\",\n            \"object\": \"true\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"possible\"\n                }\n            ],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"boolean\"\n        },\n        {\n            \"subject\": \"Jim Justice\",\n            \"relation\": \"political affiliation\",\n            \"object\": \"Democrat\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Jim Justice\",\n            \"relation\": \"office held\",\n            \"object\": \"governor of West Virginia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2016\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Jim Justice\",\n            \"relation\": \"defeated\",\n            \"object\": \"Bill Cole\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2016\"\n                },\n                {\n                    \"relation\": \"election type\",\n                    \"object\": \"general election\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract triplets.\n\nText about Government of West Virginia. Entities: West Virginia (state), governor of West Virginia (office), term length, election timing, inauguration, term limits, Jim Justice (person), Bill Cole (person), election 2016, party Democrat.\n\nLet's parse sentences.\n\n1. \"The chief executive of West Virginia is the governor of West Virginia, who is elected to a four-year term at the same time as presidential elections.\"\n\nTriplet: (governor of West Virginia, position of, chief executive of West Virginia) maybe relation \"position held by\"? Actually \"chief executive of West Virginia\" is a description of the governor. Could be (governor of West Virginia, role, chief executive of West Virginia). We'll use relation \"position\" maybe \"office held\". Let's choose \"position\" as relation. Subject: governor of West Virginia, object: chief executive of West Virginia. subject_type: political office, object_type: role/position.\n\nSecond: (governor of West Virginia, term length, four-year term). object_type: duration.\n\nThird: (governor of West Virginia, election timing, presidential elections) maybe relation \"election coincides with\". Use \"election coincides with\". object_type: election.\n\n2. \"The governor is sworn in the January following the November election.\"\n\nTriplet: (governor of West Virginia, inauguration month, January). object_type: month. Also qualifier: point in time relative to November election? Could add qualifier \"relative to\" but maybe not needed. Also \"following the November election\" indicates that inauguration occurs after November election. Could add qualifier: {\"relation\":\"condition\",\"object\":\"after November election\"} but maybe not required. We'll just capture inauguration month.\n\n3. \"A governor may only serve two consecutive terms.\"\n\nTriplet: (governor of West Virginia, maximum consecutive terms, 2). object_type: integer.\n\n4. \"A governor may run for a third term, but an interceding election must occur.\"\n\nTriplet: (governor of West Virginia, eligibility for third term, possible) maybe relation \"eligible for third term\". object: \"possible\". Use modality qualifier? The statement is about possibility: \"may run for a third term\". So relation: \"eligibility for third term\". object: \"yes\". But we need to capture modality. Could create triplet (governor of West Virginia, can run for third term, true) with qualifier modality \"possible\". Let's do: subject governor, relation \"can run for third term\", object \"true\". qualifier modality possible.\n\n5. \"Democrat Jim Justice was elected governor in 2016, defeating Bill Cole in the general election.\"\n\nTriplets:\n\n- (Jim Justice, political affiliation, Democrat). object_type: political party.\n\n- (Jim Justice, position held, governor of West Virginia). with qualifier point in time 2016 (election year) and maybe \"elected\". Use relation \"office held\". object: governor of West Virginia. qualifier: point in time 2016, qualifier: \"method\", \"election\". Could also have qualifier \"election result\". We'll add point in time.\n\n- (Jim Justice, election result, elected). maybe not needed.\n\n- (Jim Justice, defeated, Bill Cole) with qualifier \"in election\", point in time 2016, qualifier \"type\", \"general election\". relation \"defeated\". object_type: human.\n\n- (general election 2016, location, West Virginia) maybe not needed.\n\n- (Bill Cole, political affiliation, unknown not given). Not include.\n\nAlso \"general election\" is event. Could create triplet (general election 2016, type, general election) but not needed.\n\nWe need subject_type and object_type for each.\n\nDefine types: \"governor of West Virginia\" is political office. \"chief executive of West Virginia\" is role/position. \"four-year term\" is duration. \"presidential elections\" is election. \"January\" is month. \"2\" is quantity/integer. \"possible\" is modality? object_type maybe \"qualifier\" but for main object we used \"true\". Might set object_type \"boolean\". For \"can run for third term\" relation, object \"true\". We'll set object_type \"boolean\". For \"political affiliation\" object \"Democrat\" type political party. For \"defeated\" object \"Bill Cole\" type human. For \"point in time\" qualifier object \"2016\" type date/year.\n\nNow produce JSON.\n\nCheck qualifiers: For inauguration month, maybe add qualifier \"point in time\" \"following November election\". But not required.\n\nFor eligibility third term, add qualifier modality possible.\n\nFor office held by Jim Justice, add qualifier point in time 2016.\n\nFor defeated, add qualifier point in time 2016 and maybe \"type\" \"general election\". Use qualifier relation \"point in time\". Also maybe \"election type\". We'll add qualifier \"election type\" \"general election\".\n\nNow construct list.\n\nLet's enumerate:\n\n1. governor of West Virginia - position - chief executive of West Virginia\n2. governor of West Virginia - term length - four-year term\n3. governor of West Virginia - election coincides with - presidential elections\n4. governor of West Virginia - inauguration month - January (qualifier: point in time \"following November election\"? maybe not)\n5. governor of West Virginia - maximum consecutive terms - 2\n6. governor of West Virginia - can run for third term - true (qualifier modality possible)\n7. Jim Justice - political affiliation - Democrat\n8. Jim Justice - office held - governor of West Virginia (qualifier point in time 2016)\n9. Jim Justice - defeated - Bill Cole (qualifiers point in time 2016, election type general election)\n\nCheck subject_type/object_type:\n\n1. subject_type: political office, object_type: role\n2. object_type: duration\n3. object_type: election\n4. object_type: month\n5. object_type: quantity\n6. object_type: boolean\n7. subject_type: human, object_type: political party\n8. subject_type: human, object_type: political office\n9. subject_type: human, object_type: human\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1678,
+      "total_tokens": 3590,
+      "completion_tokens": 1912,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"position\",\n            \"object\": \"chief executive of West Virginia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"role\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"term length\",\n            \"object\": \"four-year term\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"duration\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"election coincides with\",\n            \"object\": \"presidential elections\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"election\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"inauguration month\",\n            \"object\": \"January\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"month\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"maximum consecutive terms\",\n            \"object\": \"2\",\n            \"qualifiers\": [],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"governor of West Virginia\",\n            \"relation\": \"can run for third term\",\n            \"object\": \"true\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"modality\",\n                    \"object\": \"possible\"\n                }\n            ],\n            \"subject_type\": \"political office\",\n            \"object_type\": \"boolean\"\n        },\n        {\n            \"subject\": \"Jim Justice\",\n            \"relation\": \"political affiliation\",\n            \"object\": \"Democrat\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political party\"\n        },\n        {\n            \"subject\": \"Jim Justice\",\n            \"relation\": \"office held\",\n            \"object\": \"governor of West Virginia\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2016\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"political office\"\n        },\n        {\n            \"subject\": \"Jim Justice\",\n            \"relation\": \"defeated\",\n            \"object\": \"Bill Cole\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2016\"\n                },\n                {\n                    \"relation\": \"election type\",\n                    \"object\": \"general election\"\n                }\n            ],\n            \"subject_type\": \"human\",\n            \"object_type\": \"human\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "governor of West Virginia",
+        "relation": "position",
+        "object": "chief executive of West Virginia",
+        "qualifiers": [],
+        "subject_type": "political office",
+        "object_type": "role"
+      },
+      {
+        "subject": "governor of West Virginia",
+        "relation": "term length",
+        "object": "four-year term",
+        "qualifiers": [],
+        "subject_type": "political office",
+        "object_type": "duration"
+      },
+      {
+        "subject": "governor of West Virginia",
+        "relation": "election coincides with",
+        "object": "presidential elections",
+        "qualifiers": [],
+        "subject_type": "political office",
+        "object_type": "election"
+      },
+      {
+        "subject": "governor of West Virginia",
+        "relation": "inauguration month",
+        "object": "January",
+        "qualifiers": [],
+        "subject_type": "political office",
+        "object_type": "month"
+      },
+      {
+        "subject": "governor of West Virginia",
+        "relation": "maximum consecutive terms",
+        "object": "2",
+        "qualifiers": [],
+        "subject_type": "political office",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "governor of West Virginia",
+        "relation": "can run for third term",
+        "object": "true",
+        "qualifiers": [
+          {
+            "relation": "modality",
+            "object": "possible"
+          }
+        ],
+        "subject_type": "political office",
+        "object_type": "boolean"
+      },
+      {
+        "subject": "Jim Justice",
+        "relation": "political affiliation",
+        "object": "Democrat",
+        "qualifiers": [],
+        "subject_type": "human",
+        "object_type": "political party"
+      },
+      {
+        "subject": "Jim Justice",
+        "relation": "office held",
+        "object": "governor of West Virginia",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2016"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "political office"
+      },
+      {
+        "subject": "Jim Justice",
+        "relation": "defeated",
+        "object": "Bill Cole",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2016"
+          },
+          {
+            "relation": "election type",
+            "object": "general election"
+          }
+        ],
+        "subject_type": "human",
+        "object_type": "human"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1678,
+    "total_tokens": 3590,
+    "completion_tokens": 1912,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 830,
+    "output_tokens_est": 737
+  },
+  "attempts": 1,
+  "latency_s": 23.048118258011527,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T01:11:12.799224+00:00",
+  "cache_key": "02971156718685d1f4a8935bd0d97f45"
+}

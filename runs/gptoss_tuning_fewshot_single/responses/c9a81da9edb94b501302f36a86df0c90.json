@@ -1,0 +1,148 @@
+{
+  "task": {
+    "input_id": "849e523f3d7f4d1a",
+    "input_hash": "8011538908d4a638facad42a7ca35d91b7f1ff988c9ea7d422244f9d2ccd8a4d",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "7e1d3cff0e6cfbbb5ed3ca5c130f33d33abd4ceccbb3f4410243d3d8d18a21cd",
+    "prompt_path": "prompts/candidates/fewshot_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-9fa85b2e16e988fd38b4ea06714e74a7",
+    "object": "chat.completion",
+    "created": 1791519151,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"instance of\",\n            \"object\": \"river\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"located in\",\n            \"object\": \"Saint Lucia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"flow direction\",\n            \"object\": \"southeast\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"direction\"\n        },\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"source location\",\n            \"object\": \"central highlands\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"central highlands\",\n            \"relation\": \"located in\",\n            \"object\": \"Saint Lucia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"mouth location\",\n            \"object\": \"Atlantic Ocean\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"ocean\"\n        },\n        {\n            \"subject\": \"Atlantic Ocean\",\n            \"relation\": \"south of\",\n            \"object\": \"Micoud\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ocean\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Micoud\",\n            \"relation\": \"instance of\",\n            \"object\": \"town\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"human settlement\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract explicit facts.\n\nText: \"Canelles River\n\nThe Canelles River is a river in Saint Lucia. It flows southeast from the central highlands in the south of the island, reaching the Atlantic Ocean to the south of the town of Micoud.\"\n\nEntities: Canelles River (river), Saint Lucia (country), central highlands (region), Atlantic Ocean (ocean), Micoud (town).\n\nTriplets:\n\n1. Canelles River - instance of? relation \"instance of\" maybe \"river\". But they used \"river\" as type. In examples they used occupation etc. We can use relation \"subclass of\"? Actually they used \"occupation\" etc. For geographic, typical relation \"located in\" or \"country\". So: subject: Canelles River, relation: \"located in\", object: Saint Lucia. subject_type: \"river\", object_type: \"country\". Could also have \"type\" relation. We'll include \"located in\".\n\n2. Canelles River - \"flow direction\" maybe \"flows southeast\". relation: \"flow direction\", object: \"southeast\". qualifiers maybe \"point in time\"? Not given. So just relation.\n\nsubject_type: \"river\", object_type: \"direction\". Use \"direction\" as type.\n\n3. Canelles River - \"source location\" maybe \"central highlands\". relation: \"source location\", object: \"central highlands\". qualifiers: maybe \"place\" but not needed. object_type: \"region\". subject_type: \"river\".\n\n4. central highlands - \"located in\" Saint Lucia? Not explicit but \"central highlands in the south of the island\". The island refers to Saint Lucia. Could be \"central highlands\" located in \"Saint Lucia\". It's implicit but explicit: \"central highlands in the south of the island\". The phrase \"the island\" refers to Saint Lucia. So we can add: central highlands - \"located in\" - Saint Lucia. subject_type: \"region\", object_type: \"country\". Might be okay.\n\n5. Canelles River - \"mouth location\" maybe \"Atlantic Ocean\". relation: \"mouth location\", object: \"Atlantic Ocean\". qualifiers: maybe \"place\". object_type: \"ocean\".\n\n6. Atlantic Ocean - \"located south of\" Micoud? Actually \"reaching the Atlantic Ocean to the south of the town of Micoud.\" Means the mouth is south of Micoud. Could add relation: \"south of\" between Atlantic Ocean and Micoud? Not exactly; it's the location of mouth relative to Micoud. Could create triplet: \"Atlantic Ocean\" - \"south of\" - \"Micoud\". But that is a geographic relation. However it's \"to the south of the town of Micoud\". So we can have: \"Canelles River\" - \"mouth location\" - \"Atlantic Ocean\" with qualifier \"direction\" maybe \"south of Micoud\". But qualifiers should be separate relations. Could add qualifier: {\"relation\":\"relative location\",\"object\":\"south of Micoud\"} but not defined. Use \"relative location\" maybe not standard. Simpler: add separate triplet: \"Atlantic Ocean\" - \"south of\" - \"Micoud\". subject_type: \"ocean\", object_type: \"town\". Also \"Micoud\" - \"located in\" - \"Saint Lucia\". Could add.\n\nBut we must only extract explicitly stated facts. The text says: \"reaching the Atlantic Ocean to the south of the town of Micoud.\" This asserts that the Atlantic Ocean is to the south of Micoud (or the point where river reaches ocean is south of Micoud). It's ambiguous but we can capture: \"Atlantic Ocean\" - \"south of\" - \"Micoud\". That's explicit enough.\n\nAlso \"Micoud\" - \"located in\" - \"Saint Lucia\"? Not explicitly said but Micoud is a town in Saint Lucia; but not stated. The phrase \"town of Micoud\" implies it's a town, but not location. Could add type: \"town\". So we can have: Micoud - \"instance of\" - \"town\". subject_type: \"town\", object_type: \"concept\"? Actually object_type maybe \"human settlement\". Use \"town\". Also \"town of Micoud\" indicates it's a town. So we can have relation \"instance of\" or \"type\". Use \"instance of\". Provide object_type \"town\". Might be okay.\n\nAlso \"Canelles River\" - \"instance of\" - \"river\". Provide type.\n\nLet's compile list:\n\nTriplet 1: Canelles River - \"instance of\" - \"river\". qualifiers [].\n\nTriplet 2: Canelles River - \"located in\" - \"Saint Lucia\". qualifiers [].\n\nTriplet 3: Canelles River - \"flow direction\" - \"southeast\". qualifiers [].\n\nTriplet 4: Canelles River - \"source location\" - \"central highlands\". qualifiers [].\n\nTriplet 5: central highlands - \"located in\" - \"Saint Lucia\". qualifiers [].\n\nTriplet 6: Canelles River - \"mouth location\" - \"Atlantic Ocean\". qualifiers [].\n\nTriplet 7: Atlantic Ocean - \"south of\" - \"Micoud\". qualifiers [].\n\nTriplet 8: Micoud - \"instance of\" - \"town\". qualifiers [].\n\nTriplet 9: Micoud - \"located in\" - \"Saint Lucia\". Not explicit, maybe skip. Not explicit, so skip.\n\nCheck qualifiers: none.\n\nSubject_type/object_type:\n\n- river: \"river\"\n- Saint Lucia: \"country\"\n- direction: \"direction\"\n- central highlands: \"region\"\n- Atlantic Ocean: \"ocean\"\n- Micoud: \"town\"\n\nDefine types:\n\nTriplet1: subject_type \"river\", object_type \"geographic feature\"? Actually object is \"river\". Could be \"geographic feature\". But we can set object_type \"geographic feature\". But they used \"profession\" etc. We'll set object_type \"geographic feature\". Or \"type\". Use \"geographic feature\". Triplet2: subject_type \"river\", object_type \"country\". Triplet3: subject_type \"river\", object_type \"direction\". Triplet4: subject_type \"river\", object_type \"region\". Triplet5: subject_type \"region\", object_type \"country\". Triplet6: subject_type \"river\", object_type \"ocean\". Triplet7: subject_type \"ocean\", object_type \"town\". Triplet8: subject_type \"town\", object_type \"type\"? Actually object is \"town\". Could be \"human settlement\". Use \"human settlement\". But relation \"instance of\" expects object_type \"human settlement\". We'll set.\n\nNow produce JSON."
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1635,
+      "total_tokens": 3442,
+      "completion_tokens": 1807,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"instance of\",\n            \"object\": \"river\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"geographic feature\"\n        },\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"located in\",\n            \"object\": \"Saint Lucia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"flow direction\",\n            \"object\": \"southeast\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"direction\"\n        },\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"source location\",\n            \"object\": \"central highlands\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"region\"\n        },\n        {\n            \"subject\": \"central highlands\",\n            \"relation\": \"located in\",\n            \"object\": \"Saint Lucia\",\n            \"qualifiers\": [],\n            \"subject_type\": \"region\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Canelles River\",\n            \"relation\": \"mouth location\",\n            \"object\": \"Atlantic Ocean\",\n            \"qualifiers\": [],\n            \"subject_type\": \"river\",\n            \"object_type\": \"ocean\"\n        },\n        {\n            \"subject\": \"Atlantic Ocean\",\n            \"relation\": \"south of\",\n            \"object\": \"Micoud\",\n            \"qualifiers\": [],\n            \"subject_type\": \"ocean\",\n            \"object_type\": \"town\"\n        },\n        {\n            \"subject\": \"Micoud\",\n            \"relation\": \"instance of\",\n            \"object\": \"town\",\n            \"qualifiers\": [],\n            \"subject_type\": \"town\",\n            \"object_type\": \"human settlement\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Canelles River",
+        "relation": "instance of",
+        "object": "river",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "geographic feature"
+      },
+      {
+        "subject": "Canelles River",
+        "relation": "located in",
+        "object": "Saint Lucia",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "country"
+      },
+      {
+        "subject": "Canelles River",
+        "relation": "flow direction",
+        "object": "southeast",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "direction"
+      },
+      {
+        "subject": "Canelles River",
+        "relation": "source location",
+        "object": "central highlands",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "region"
+      },
+      {
+        "subject": "central highlands",
+        "relation": "located in",
+        "object": "Saint Lucia",
+        "qualifiers": [],
+        "subject_type": "region",
+        "object_type": "country"
+      },
+      {
+        "subject": "Canelles River",
+        "relation": "mouth location",
+        "object": "Atlantic Ocean",
+        "qualifiers": [],
+        "subject_type": "river",
+        "object_type": "ocean"
+      },
+      {
+        "subject": "Atlantic Ocean",
+        "relation": "south of",
+        "object": "Micoud",
+        "qualifiers": [],
+        "subject_type": "ocean",
+        "object_type": "town"
+      },
+      {
+        "subject": "Micoud",
+        "relation": "instance of",
+        "object": "town",
+        "qualifiers": [],
+        "subject_type": "town",
+        "object_type": "human settlement"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1635,
+    "total_tokens": 3442,
+    "completion_tokens": 1807,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 584,
+    "output_tokens_est": 491
+  },
+  "attempts": 1,
+  "latency_s": 22.363637952003046,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T04:12:54.570773+00:00",
+  "cache_key": "c9a81da9edb94b501302f36a86df0c90"
+}

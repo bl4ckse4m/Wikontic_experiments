@@ -1,0 +1,175 @@
+{
+  "task": {
+    "input_id": "708dfafeead284ed",
+    "input_hash": "e250458139d6965c341653308fc2caf421630cf095fc4e2e0bf66f92f2eb44ef",
+    "gen_index": 0,
+    "model": "openai/gpt-oss-120b",
+    "prompt_hash": "2a0c5e67e1519177a3c85356c570b76cee716333ecd23b2bec65fa3d7b81bf29",
+    "prompt_path": "prompts/autoontik/prompt_1_with_types_and_qualifiers.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.2,
+      "max_tokens": 6000
+    },
+    "route": {
+      "provider": "openrouter",
+      "endpoint_hash": "76ef4ad6f0c8a4ae66efb13875c107cee40c78997a212353d379acfbb2f45591"
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "gen-1793203932-n1g97fSq76k8l0k1EXr3",
+    "object": "chat.completion",
+    "created": 1793203932,
+    "model": "openai/gpt-oss-120b",
+    "provider": "DekaLLM",
+    "system_fingerprint": null,
+    "service_tier": null,
+    "choices": [
+      {
+        "index": 0,
+        "logprobs": null,
+        "finish_reason": "stop",
+        "native_finish_reason": "stop",
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"instance of\",\n            \"object\": \"census-designated place\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"census-designated place\"\n        },\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"located in\",\n            \"object\": \"Kent County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Kent County\",\n            \"relation\": \"located in\",\n            \"object\": \"Delaware\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Delaware\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"part of\",\n            \"object\": \"Dover, Delaware Metropolitan Statistical Area\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"metropolitan statistical area\"\n        },\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"population\",\n            \"object\": \"2,456\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"located in\",\n            \"object\": \"Delaware\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        }\n    ]\n}",
+          "refusal": null,
+          "reasoning": "We need to extract triplets from the given text.\n\nText: \"Riverview, Delaware\n\nRiverview is a census-designated place (CDP) in Kent County, Delaware, United States. It is part of the Dover, Delaware Metropolitan Statistical Area. The population was 2,456 at the 2010 census.\"\n\nWe need to identify entities: Riverview (likely a place), Delaware (state), Kent County (county), United States (country), Dover, Delaware Metropolitan Statistical Area (MSA), population number 2,456, 2010 census (event/year). Also \"census-designated place (CDP)\" is a type.\n\nTriplets:\n\n1. Riverview (subject) - instance of - census-designated place (object). relation maybe \"instance of\" or \"type\". Use \"instance of\". subject_type: \"place\". object_type: \"administrative division type\" maybe \"census-designated place\". But we need object_type as class. Could be \"census-designated place\". We'll set object_type \"census-designated place\". subject_type \"human settlement\"? Use \"human settlement\". We'll follow typical.\n\n2. Riverview - located in administrative territorial entity - Kent County. relation \"located in\". object_type \"county\". subject_type \"human settlement\".\n\n3. Kent County - located in - Delaware (state). relation \"located in\". object_type \"state\". subject_type \"county\".\n\n4. Delaware - part of - United States (or located in). Use \"located in\". object_type \"country\". subject_type \"state\".\n\n5. Riverview - part of - Dover, Delaware Metropolitan Statistical Area. relation \"part of\". object_type \"metropolitan statistical area\". subject_type \"human settlement\".\n\n6. Riverview - population - 2,456 with qualifier point in time 2010 (year) and qualifier \"source\" maybe \"2010 census\". Use qualifier \"point in time\". object_type \"number\". subject_type \"human settlement\". relation \"population\". object \"2,456\". qualifier: point in time 2010 (object_type year). Also maybe qualifier \"reference\" \"2010 census\" but we can just use point in time.\n\n7. 2010 census - instance of - census. Could be separate but not required.\n\nWe also have \"Riverview, Delaware\" as name. Could have \"Riverview\" located in \"Delaware\". Already covered via Kent County.\n\nBut also \"Riverview\" - located in \"Delaware\". Could add direct relation.\n\n8. Riverview - located in - Delaware. (maybe redundant but okay). Use \"located in\". object_type \"state\". subject_type \"human settlement\". Could include qualifier \"administrative level\" but not needed.\n\nNow format JSON with \"triplets\": list.\n\nEach dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Riverview: \"human settlement\" (or \"census-designated place\"? but that's object). Use \"human settlement\".\n- census-designated place: \"administrative division type\" maybe \"census-designated place\". object_type \"census-designated place\".\n- Kent County: \"county\".\n- Delaware: \"state\".\n- United States: \"country\".\n- Dover, Delaware Metropolitan Statistical Area: \"metropolitan statistical area\".\n- population number: \"quantity\" or \"number\". Use \"quantity\".\n- 2010: \"year\".\n- 2010 census: maybe not used.\n\nLet's craft JSON.\n\n",
+          "reasoning_details": [
+            {
+              "type": "reasoning.text",
+              "text": "We need to extract triplets from the given text.\n\nText: \"Riverview, Delaware\n\nRiverview is a census-designated place (CDP) in Kent County, Delaware, United States. It is part of the Dover, Delaware Metropolitan Statistical Area. The population was 2,456 at the 2010 census.\"\n\nWe need to identify entities: Riverview (likely a place), Delaware (state), Kent County (county), United States (country), Dover, Delaware Metropolitan Statistical Area (MSA), population number 2,456, 2010 census (event/year). Also \"census-designated place (CDP)\" is a type.\n\nTriplets:\n\n1. Riverview (subject) - instance of - census-designated place (object). relation maybe \"instance of\" or \"type\". Use \"instance of\". subject_type: \"place\". object_type: \"administrative division type\" maybe \"census-designated place\". But we need object_type as class. Could be \"census-designated place\". We'll set object_type \"census-designated place\". subject_type \"human settlement\"? Use \"human settlement\". We'll follow typical.\n\n2. Riverview - located in administrative territorial entity - Kent County. relation \"located in\". object_type \"county\". subject_type \"human settlement\".\n\n3. Kent County - located in - Delaware (state). relation \"located in\". object_type \"state\". subject_type \"county\".\n\n4. Delaware - part of - United States (or located in). Use \"located in\". object_type \"country\". subject_type \"state\".\n\n5. Riverview - part of - Dover, Delaware Metropolitan Statistical Area. relation \"part of\". object_type \"metropolitan statistical area\". subject_type \"human settlement\".\n\n6. Riverview - population - 2,456 with qualifier point in time 2010 (year) and qualifier \"source\" maybe \"2010 census\". Use qualifier \"point in time\". object_type \"number\". subject_type \"human settlement\". relation \"population\". object \"2,456\". qualifier: point in time 2010 (object_type year). Also maybe qualifier \"reference\" \"2010 census\" but we can just use point in time.\n\n7. 2010 census - instance of - census. Could be separate but not required.\n\nWe also have \"Riverview, Delaware\" as name. Could have \"Riverview\" located in \"Delaware\". Already covered via Kent County.\n\nBut also \"Riverview\" - located in \"Delaware\". Could add direct relation.\n\n8. Riverview - located in - Delaware. (maybe redundant but okay). Use \"located in\". object_type \"state\". subject_type \"human settlement\". Could include qualifier \"administrative level\" but not needed.\n\nNow format JSON with \"triplets\": list.\n\nEach dict includes qualifiers list (maybe empty). Provide subject_type and object_type.\n\nDefine types:\n\n- Riverview: \"human settlement\" (or \"census-designated place\"? but that's object). Use \"human settlement\".\n- census-designated place: \"administrative division type\" maybe \"census-designated place\". object_type \"census-designated place\".\n- Kent County: \"county\".\n- Delaware: \"state\".\n- United States: \"country\".\n- Dover, Delaware Metropolitan Statistical Area: \"metropolitan statistical area\".\n- population number: \"quantity\" or \"number\". Use \"quantity\".\n- 2010: \"year\".\n- 2010 census: maybe not used.\n\nLet's craft JSON.\n\n",
+              "format": "unknown",
+              "index": 0
+            }
+          ]
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1407,
+      "completion_tokens": 1146,
+      "total_tokens": 2553,
+      "cost": 0.00024849,
+      "is_byok": false,
+      "prompt_tokens_details": {
+        "cached_tokens": 64,
+        "cache_write_tokens": 0,
+        "audio_tokens": 0,
+        "video_tokens": 0
+      },
+      "cost_details": {
+        "upstream_inference_cost": 0.00024849,
+        "upstream_inference_prompt_cost": 4.221e-05,
+        "upstream_inference_completions_cost": 0.00020628
+      },
+      "completion_tokens_details": {
+        "reasoning_tokens": 724,
+        "image_tokens": 0,
+        "audio_tokens": 0
+      }
+    }
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"instance of\",\n            \"object\": \"census-designated place\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"census-designated place\"\n        },\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"located in\",\n            \"object\": \"Kent County\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"county\"\n        },\n        {\n            \"subject\": \"Kent County\",\n            \"relation\": \"located in\",\n            \"object\": \"Delaware\",\n            \"qualifiers\": [],\n            \"subject_type\": \"county\",\n            \"object_type\": \"state\"\n        },\n        {\n            \"subject\": \"Delaware\",\n            \"relation\": \"located in\",\n            \"object\": \"United States\",\n            \"qualifiers\": [],\n            \"subject_type\": \"state\",\n            \"object_type\": \"country\"\n        },\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"part of\",\n            \"object\": \"Dover, Delaware Metropolitan Statistical Area\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"metropolitan statistical area\"\n        },\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"population\",\n            \"object\": \"2,456\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"point in time\",\n                    \"object\": \"2010\",\n                    \"object_type\": \"year\"\n                }\n            ],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"quantity\"\n        },\n        {\n            \"subject\": \"Riverview\",\n            \"relation\": \"located in\",\n            \"object\": \"Delaware\",\n            \"qualifiers\": [],\n            \"subject_type\": \"human settlement\",\n            \"object_type\": \"state\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "Riverview",
+        "relation": "instance of",
+        "object": "census-designated place",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "census-designated place"
+      },
+      {
+        "subject": "Riverview",
+        "relation": "located in",
+        "object": "Kent County",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "county"
+      },
+      {
+        "subject": "Kent County",
+        "relation": "located in",
+        "object": "Delaware",
+        "qualifiers": [],
+        "subject_type": "county",
+        "object_type": "state"
+      },
+      {
+        "subject": "Delaware",
+        "relation": "located in",
+        "object": "United States",
+        "qualifiers": [],
+        "subject_type": "state",
+        "object_type": "country"
+      },
+      {
+        "subject": "Riverview",
+        "relation": "part of",
+        "object": "Dover, Delaware Metropolitan Statistical Area",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "metropolitan statistical area"
+      },
+      {
+        "subject": "Riverview",
+        "relation": "population",
+        "object": "2,456",
+        "qualifiers": [
+          {
+            "relation": "point in time",
+            "object": "2010"
+          }
+        ],
+        "subject_type": "human settlement",
+        "object_type": "quantity"
+      },
+      {
+        "subject": "Riverview",
+        "relation": "located in",
+        "object": "Delaware",
+        "qualifiers": [],
+        "subject_type": "human settlement",
+        "object_type": "state"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1407,
+    "completion_tokens": 1146,
+    "total_tokens": 2553,
+    "cost": 0.00024849,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 64,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.00024849,
+      "upstream_inference_prompt_cost": 4.221e-05,
+      "upstream_inference_completions_cost": 0.00020628
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 724,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 622,
+    "output_tokens_est": 495
+  },
+  "attempts": 1,
+  "latency_s": 20.24571261899837,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-28T16:12:32.516524+00:00",
+  "cache_key": "949d3ee7d4d4f25fe8bbe46b57a351e1"
+}

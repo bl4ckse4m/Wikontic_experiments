@@ -1,0 +1,158 @@
+{
+  "task": {
+    "input_id": "16587494f9c7168d",
+    "input_hash": "3cd1d371eb8e062031ab8e3d54ab91178b7d141ffa2839885400253e4808d65c",
+    "gen_index": 0,
+    "model": "Openai/Gpt-oss-120b",
+    "prompt_hash": "59ca35c3fa38fb164cb1dba8af10fa6393da3568500b8619c3d3ef0cc2fa2819",
+    "prompt_path": "prompts/candidates/coverage_v1.txt",
+    "schema_id": "wikontic_facts_v1",
+    "gen_params": {
+      "temperature": 0.7,
+      "max_tokens": 6000
+    }
+  },
+  "status": "ok",
+  "raw_response": {
+    "id": "chatcmpl-9c7f121a892b14a64c124259f648323b",
+    "object": "chat.completion",
+    "created": 1791548222,
+    "model": "Openai/Gpt-oss-120b",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "{\n    \"triplets\": [\n        {\n            \"subject\": \"March on Washington for Jobs and Freedom\",\n            \"relation\": \"start time\",\n            \"object\": \"on time\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"temporal concept\"\n        },\n        {\n            \"subject\": \"leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"meeting with\",\n            \"object\": \"members of Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"political body\"\n        },\n        {\n            \"subject\": \"assembled group\",\n            \"relation\": \"origin\",\n            \"object\": \"Washington Monument\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"monument\"\n        },\n        {\n            \"subject\": \"assembled group\",\n            \"relation\": \"destination\",\n            \"object\": \"Lincoln Memorial\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"monument\"\n        },\n        {\n            \"subject\": \"assembled group\",\n            \"relation\": \"presence of leaders\",\n            \"object\": \"present\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"group\",\n            \"object_type\": \"boolean\"\n        },\n        {\n            \"subject\": \"leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"meeting location\",\n            \"object\": \"Constitution Avenue\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"linked arms with\",\n            \"object\": \"crowd\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"group\"\n        },\n        {\n            \"subject\": \"leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"photographed as\",\n            \"object\": \"leading the march\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"activity\"\n        }\n    ]\n}",
+          "refusal": null,
+          "annotations": null,
+          "audio": null,
+          "function_call": null,
+          "reasoning": "We need to extract facts from the text.\n\nText:\n\n\"March on Washington for Jobs and Freedom\n\nThe march failed to start on time because its leaders were meeting with members of Congress. To the leaders' surprise, the assembled group began to march from the Washington Monument to the Lincoln Memorial without them. The leaders met the March at Constitution Avenue, where they linked arms at the head of a crowd in order to be photographed 'leading the march'.\"\n\nWe need to identify entities: \"March on Washington for Jobs and Freedom\" (event), \"its leaders\", \"members of Congress\", \"the assembled group\", \"Washington Monument\", \"Lincoln Memorial\", \"Constitution Avenue\". Also phrase \"the March\" maybe same as event.\n\nExtract triplets:\n\n1. (March on Washington for Jobs and Freedom, instance of, march) maybe not needed. But we need factual statements.\n\nSentence 1: \"The march failed to start on time because its leaders were meeting with members of Congress.\"\n\n- Fact: The march failed to start on time. So relation maybe \"failed to start on time\" but we need a Wikidata style relation. Could use \"start time\" with qualifier \"point in time\" unknown. But maybe \"status\" negative? Might be \"event start delayed\". Use relation \"start time\" with qualifier \"point in time\" missing? Not explicit. Could express as (March on Washington for Jobs and Freedom, start time, not on scheduled time) but that's vague.\n\nBetter to capture: (March on Washington for Jobs and Freedom, point in time, failed to start on time) not typical. Might use relation \"delayed\" with object \"true\". But not in list.\n\nWe could use relation \"failed to start on time\" as custom. However guidelines: use specific Wikidata-style predicates. There is \"start time\" property (P580) and \"end time\". There is also \"has part\". For delays, maybe \"has delay\" not typical. Could encode as (March on Washington for Jobs and Freedom, start time, unspecified) with qualifier \"polarity negative\"? Not.\n\nMaybe we treat as separate claim: (March on Washington for Jobs and Freedom, start time, null) with qualifier \"polarity negative\"? Not good.\n\nPerhaps we skip that because not a clear relation.\n\nBut we must extract every explicitly stated fact. So we need a relation representing \"failed to start on time\". Could use \"event status\" with object \"failed to start on time\". Not standard but allowed? The instruction: \"Use specific Wikidata-style predicates.\" We might approximate with \"status\" (P793 maybe \"significant event\"). But not sure.\n\nBetter to treat as (March on Washington for Jobs and Freedom, start time, not on time) with qualifier \"polarity\" negative? Actually \"failed to start on time\" means the start time was not as scheduled. Could say (March on Washington for Jobs and Freedom, start time, \"on time\") with qualifier polarity negative. That works: object \"on time\" (concept). Qualifier polarity negative -> indicates it did NOT start on time.\n\nThus:\n\nsubject: March on Washington for Jobs and Freedom\nrelation: start time\nobject: on time\nqualifiers: [{\"relation\":\"polarity\",\"object\":\"negative\"}]\nsubject_type: event\nobject_type: time concept? maybe \"time\" but \"on time\" is a concept; could label \"temporal quality\". Use \"time\".\n\nBut we also have cause: because its leaders were meeting with members of Congress. Could capture (March on Washington for Jobs and Freedom, cause, leaders meeting with members of Congress). Or (its leaders, meeting with, members of Congress). Likely we can capture (leaders of March on Washington for Jobs and Freedom, meeting with, members of Congress). But \"its leaders were meeting with members of Congress\" is a state of leaders meeting. So triplet: (leaders of March on Washington for Jobs and Freedom, meeting with, members of Congress). Relation \"meeting with\" maybe \"participated in meeting with\". Use \"meeting with\". object_type: group.\n\nWe need to resolve \"its leaders\" to entity: \"leaders of March on Washington for Jobs and Freedom\". So subject: \"leaders of March on Washington for Jobs and Freedom\". relation: \"meeting with\". object: \"members of Congress\". qualifiers none.\n\nsubject_type: group (maybe \"person group\").\n\nobject_type: political body.\n\nSecond sentence: \"To the leaders' surprise, the assembled group began to march from the Washington Monument to the Lincoln Memorial without them.\"\n\nFacts:\n\n- The assembled group began to march from Washington Monument to Lincoln Memorial.\n- It was without the leaders (i.e., the leaders were not present). Could capture that leaders were not present.\n\nTriplet 1: (assembled group, start location, Washington Monument). relation maybe \"origin\". Use \"origin\". object_type: monument.\n\nTriplet 2: (assembled group, destination, Lincoln Memorial). relation \"destination\". object_type: monument.\n\nTriplet 3: (assembled group, began to march, true) maybe \"activity\". But we may capture as event: \"march\" is the same event? Actually it's the same March event, but the group marched without leaders. Could capture (March on Washington for Jobs and Freedom, participant, assembled group) but \"assembled group\" is participants. But we already have leaders as participants maybe not. Anyway.\n\nMaybe capture (assembled group, participated in, March on Washington for Jobs and Freedom) with qualifier \"point in time\" unknown.\n\nBut we can extract: (assembled group, began to march, true). Use relation \"participated in\" maybe.\n\nSimplify: (assembled group, location start, Washington Monument) and (assembled group, location end, Lincoln Memorial). Also maybe (assembled group, presence of leaders, false) with polarity negative.\n\nSo add (assembled group, presence of leaders, present) with polarity negative.\n\nThird sentence: \"The leaders met the March at Constitution Avenue, where they linked arms at the head of a crowd in order to be photographed 'leading the march'.\"\n\nFacts:\n\n- The leaders met the March at Constitution Avenue. So (leaders of March..., meeting location, Constitution Avenue). Use relation \"meeting location\". Or \"location of meeting\". Or \"meeting at\". Use \"location\". We'll do (leaders of March on Washington for Jobs and Freedom, meeting location, Constitution Avenue).\n\n- They linked arms at the head of a crowd. So (leaders of March..., linked arms with crowd). Relation \"linked arms with\". object \"crowd\". Could also state location: at head of crowd, but we can capture (leaders of March..., position, head of crowd). Use \"position\" maybe.\n\n- They were photographed \"leading the march\". So (leaders of March..., photographed as, leading the march). relation \"photographed as\". object \"leading the march\". Might be okay.\n\nNow we need subject_type and object_type.\n\nDefine types: \"March on Washington for Jobs and Freedom\" is \"event\". \"leaders of March on Washington for Jobs and Freedom\" is \"group\". \"members of Congress\" is \"political body\". \"assembled group\" is \"group\". \"Washington Monument\" \"monument\". \"Lincoln Memorial\" \"monument\". \"Constitution Avenue\" \"street\". \"crowd\" \"group\". \"leading the march\" maybe \"role\" or \"activity\". Use \"activity\".\n\nNow construct JSON list.\n\nNeed each triplet dict with qualifiers list.\n\nLet's enumerate:\n\n1. start time not on time:\n\n{\n \"subject\":\"March on Washington for Jobs and Freedom\",\n \"relation\":\"start time\",\n \"object\":\"on time\",\n \"qualifiers\":[{\"relation\":\"polarity\",\"object\":\"negative\"}],\n \"subject_type\":\"event\",\n \"object_type\":\"temporal concept\"\n}\n\n2. leaders meeting with members of Congress:\n\n{\n \"subject\":\"leaders of March on Washington for Jobs and Freedom\",\n \"relation\":\"meeting with\",\n \"object\":\"members of Congress\",\n \"qualifiers\":[],\n \"subject_type\":\"group\",\n \"object_type\":\"political body\"\n}\n\n3. assembled group origin:\n\n{\n \"subject\":\"assembled group\",\n \"relation\":\"origin\",\n \"object\":\"Washington Monument\",\n \"qualifiers\":[],\n \"subject_type\":\"group\",\n \"object_type\":\"monument\"\n}\n\n4. assembled group destination:\n\n{\n \"subject\":\"assembled group\",\n \"relation\":\"destination\",\n \"object\":\"Lincoln Memorial\",\n \"qualifiers\":[],\n \"subject_type\":\"group\",\n \"object_type\":\"monument\"\n}\n\n5. assembled group presence of leaders negative:\n\n{\n \"subject\":\"assembled group\",\n \"relation\":\"presence of leaders\",\n \"object\":\"present\",\n \"qualifiers\":[{\"relation\":\"polarity\",\"object\":\"negative\"}],\n \"subject_type\":\"group\",\n \"object_type\":\"boolean\"\n}\n\n6. leaders meeting location Constitution Avenue:\n\n{\n \"subject\":\"leaders of March on Washington for Jobs and Freedom\",\n \"relation\":\"meeting location\",\n \"object\":\"Constitution Avenue\",\n \"qualifiers\":[],\n \"subject_type\":\"group\",\n \"object_type\":\"street\"\n}\n\n7. leaders linked arms with crowd:\n\n{\n \"subject\":\"leaders of March on Washington for Jobs and Freedom\",\n \"relation\":\"linked arms with\",\n \"object\":\"crowd\",\n \"qualifiers\":[],\n \"subject_type\":\"group\",\n \"object_type\":\"group\"\n}\n\n8. leaders photographed as leading the march:\n\n{\n \"subject\":\"leaders of March on Washington for Jobs and Freedom\",\n \"relation\":\"photographed as\",\n \"object\":\"leading the march\",\n \"qualifiers\":[],\n \"subject_type\":\"group\",\n \"object_type\":\"activity\"\n}\n\nPotential also: (leaders of March..., participated in, March on Washington for Jobs and Freedom). But maybe not needed.\n\nCheck qualifiers: none else.\n\nMake sure JSON format correct.\n\n"
+        },
+        "logprobs": null,
+        "finish_reason": "stop",
+        "stop_reason": null,
+        "token_ids": null,
+        "routed_experts": null
+      }
+    ],
+    "service_tier": null,
+    "system_fingerprint": "vllm-0.29.0-tp2-88abe820",
+    "usage": {
+      "prompt_tokens": 1663,
+      "total_tokens": 4162,
+      "completion_tokens": 2499,
+      "prompt_tokens_details": null,
+      "completion_tokens_details": {
+        "reasoning_tokens": 0
+      }
+    },
+    "prompt_logprobs": null,
+    "prompt_token_ids": null,
+    "prompt_text": null,
+    "kv_transfer_params": null,
+    "ec_transfer_params": null,
+    "metrics": null
+  },
+  "raw_text": "{\n    \"triplets\": [\n        {\n            \"subject\": \"March on Washington for Jobs and Freedom\",\n            \"relation\": \"start time\",\n            \"object\": \"on time\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"event\",\n            \"object_type\": \"temporal concept\"\n        },\n        {\n            \"subject\": \"leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"meeting with\",\n            \"object\": \"members of Congress\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"political body\"\n        },\n        {\n            \"subject\": \"assembled group\",\n            \"relation\": \"origin\",\n            \"object\": \"Washington Monument\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"monument\"\n        },\n        {\n            \"subject\": \"assembled group\",\n            \"relation\": \"destination\",\n            \"object\": \"Lincoln Memorial\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"monument\"\n        },\n        {\n            \"subject\": \"assembled group\",\n            \"relation\": \"presence of leaders\",\n            \"object\": \"present\",\n            \"qualifiers\": [\n                {\n                    \"relation\": \"polarity\",\n                    \"object\": \"negative\"\n                }\n            ],\n            \"subject_type\": \"group\",\n            \"object_type\": \"boolean\"\n        },\n        {\n            \"subject\": \"leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"meeting location\",\n            \"object\": \"Constitution Avenue\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"street\"\n        },\n        {\n            \"subject\": \"leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"linked arms with\",\n            \"object\": \"crowd\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"group\"\n        },\n        {\n            \"subject\": \"leaders of March on Washington for Jobs and Freedom\",\n            \"relation\": \"photographed as\",\n            \"object\": \"leading the march\",\n            \"qualifiers\": [],\n            \"subject_type\": \"group\",\n            \"object_type\": \"activity\"\n        }\n    ]\n}",
+  "parsed": {
+    "triplets": [
+      {
+        "subject": "March on Washington for Jobs and Freedom",
+        "relation": "start time",
+        "object": "on time",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "event",
+        "object_type": "temporal concept"
+      },
+      {
+        "subject": "leaders of March on Washington for Jobs and Freedom",
+        "relation": "meeting with",
+        "object": "members of Congress",
+        "qualifiers": [],
+        "subject_type": "group",
+        "object_type": "political body"
+      },
+      {
+        "subject": "assembled group",
+        "relation": "origin",
+        "object": "Washington Monument",
+        "qualifiers": [],
+        "subject_type": "group",
+        "object_type": "monument"
+      },
+      {
+        "subject": "assembled group",
+        "relation": "destination",
+        "object": "Lincoln Memorial",
+        "qualifiers": [],
+        "subject_type": "group",
+        "object_type": "monument"
+      },
+      {
+        "subject": "assembled group",
+        "relation": "presence of leaders",
+        "object": "present",
+        "qualifiers": [
+          {
+            "relation": "polarity",
+            "object": "negative"
+          }
+        ],
+        "subject_type": "group",
+        "object_type": "boolean"
+      },
+      {
+        "subject": "leaders of March on Washington for Jobs and Freedom",
+        "relation": "meeting location",
+        "object": "Constitution Avenue",
+        "qualifiers": [],
+        "subject_type": "group",
+        "object_type": "street"
+      },
+      {
+        "subject": "leaders of March on Washington for Jobs and Freedom",
+        "relation": "linked arms with",
+        "object": "crowd",
+        "qualifiers": [],
+        "subject_type": "group",
+        "object_type": "group"
+      },
+      {
+        "subject": "leaders of March on Washington for Jobs and Freedom",
+        "relation": "photographed as",
+        "object": "leading the march",
+        "qualifiers": [],
+        "subject_type": "group",
+        "object_type": "activity"
+      }
+    ]
+  },
+  "service": {},
+  "usage": {
+    "prompt_tokens": 1663,
+    "total_tokens": 4162,
+    "completion_tokens": 2499,
+    "prompt_tokens_details": null,
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "token_estimate": {
+    "input_tokens_est": 707,
+    "output_tokens_est": 615
+  },
+  "attempts": 1,
+  "latency_s": 26.91256766699371,
+  "error": null,
+  "error_kind": null,
+  "mock": false,
+  "created_utc": "2026-10-09T12:17:29.082011+00:00",
+  "cache_key": "406e4ae732e31e3bb8df5c1c1d293320"
+}
