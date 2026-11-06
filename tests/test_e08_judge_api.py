@@ -84,8 +84,9 @@ def test_prepare_is_blind_stateless_fixed_and_offline(project, monkeypatch):
         for private in ("DO_NOT_SEND_METHOD", "n_support", "private-input-id", "Read only", "calibration/judgments"):
             assert private not in serialized
         assert api.money(job["reservation_usd"]) > 0
-    with pytest.raises(ValueError, match="change budget"):
-        api.prepare(project, "3.10")
+    assert plan["cost_policy"] == "accounting_only_no_scientific_monetary_cap"
+    assert plan["operational_key_safety"] is None
+    assert "max_usd" not in plan and "max_price" not in api.PROVIDER
 
 
 def test_one_attempt_cache_and_export_without_metadata_hallucinations(project, monkeypatch):
@@ -101,7 +102,7 @@ def test_one_attempt_cache_and_export_without_metadata_hallucinations(project, m
         assert all(r["status"] == "silver" and r["annotator"] == api.API_MODEL for r in labels)
     from wikontic_exp.api_client import AccessConfig
     monkeypatch.setattr(AccessConfig, "load", lambda *a, **kw: pytest.fail("Completed run loaded credentials"))
-    resumed = api.run(project, None, True)
+    resumed = api.run(project, None)
     assert resumed["labels"] == result["labels"]
     assert len(calls) == 2
 
@@ -118,15 +119,16 @@ def test_crash_after_reservation_is_never_replayed(project):
     assert api.money(result["accounted_usd_including_unknown_reservations"]) > 0
 
 
-def test_budget_guard_stops_before_sending(project):
-    api.prepare(project, "0.000001")
+def test_no_scientific_budget_cap_even_when_cost_exceeds_allowance(project):
+    api.prepare(project)
     plan, jobs = api.verify_plan(project)
-    result = api.execute_jobs(project, plan, jobs, lambda body: pytest.fail("Exceeded budget"))
-    assert result["halted"] and result["jobs"] == {"pending": 2}
-    assert result["labels"] == {"binary": 0, "merger_audit": 0}
+    calls = []
+    result = api.execute_jobs(project, plan, jobs, lambda body: (calls.append(body), success(body, cost=20))[1])
+    assert len(calls) == 2 and not result["halted"]
+    assert api.money(result["reported_cost_usd"]) == 40
 
 
-def test_missing_billed_cost_stops_with_conservative_debit(project):
+def test_missing_billed_cost_is_reported_but_does_not_stop(project):
     api.prepare(project)
     plan, jobs = api.verify_plan(project)
     calls = []
@@ -136,9 +138,10 @@ def test_missing_billed_cost_stops_with_conservative_debit(project):
         del receipt["response"]["usage"]["cost"]
         return receipt
     result = api.execute_jobs(project, plan, jobs, no_cost)
-    assert result["halted"] and len(calls) == 1
+    assert not result["halted"] and len(calls) == 2
     assert api.money(result["accounted_usd_including_unknown_reservations"]) > 0
     assert api.money(result["reported_cost_usd"]) == 0
+    assert len(result["missing_cost_jobs"]) == 2
 
 
 def test_invalid_json_is_not_repaired_or_retried(project):
@@ -226,9 +229,7 @@ def test_export_never_overwrites_foreign_work(project):
     assert api.stage.path(project, rel).read_bytes() == original
 
 
-def test_lock_change_key_confirmation_and_concurrency(project):
-    with pytest.raises(ValueError, match="confirm-key-limit"):
-        api.run(project, None, False)
+def test_lock_change_and_concurrency(project):
     api.prepare(project)
     with api.exclusive_run(project):
         with pytest.raises(ValueError, match="already active"):
@@ -257,6 +258,169 @@ def test_rubric_criteria_copied_and_complete_ids_required(project):
 
 
 @pytest.mark.parametrize("invalid", ["NaN", "Infinity", "-1", True])
-def test_invalid_budget_values(invalid):
+def test_invalid_accounting_values(invalid):
     with pytest.raises(ValueError):
         api.money(invalid)
+
+
+def guarded_prepare(project, remaining="5", margin="0.50"):
+    save(project, "key_snapshot.json", {"limit": 5, "limit_remaining": remaining,
+         "usage": 123, "usage_daily": 0, "limit_reset": "daily",
+         "label": "DO_NOT_RETAIN", "hash": "DO_NOT_RETAIN"})
+    return api.prepare(project, "key_snapshot.json", margin)
+
+
+def test_key_guard_is_operational_not_lifetime_usage_budget(project):
+    result = guarded_prepare(project)
+    assert result["operational_key_safety"]["run_allowance_usd"] == "4.50"
+    plan, jobs = api.verify_plan(project)
+    assert "DO_NOT_RETAIN" not in json.dumps(plan)
+    assert api.prepare(project, "key_snapshot.json")["status"].startswith("already prepared")
+    with pytest.raises(ValueError, match="change operational"):
+        api.prepare(project, "key_snapshot.json", "0.60")
+    calls = []
+    checked = []
+    def key_check():
+        checked.append(1)
+        return {"status_code": 200, "error": None, "accounting": {
+            "limit_remaining": 5, "label": "DO_NOT_RETAIN", "hash": "DO_NOT_RETAIN"}}
+    result = api.execute_jobs(project, plan, jobs, lambda body: (calls.append(body), success(body))[1], key_check)
+    assert len(calls) == len(checked) == 2 and not result["halted"]
+    for p in (project / api.API_DIR / "key_checks").glob("*.json"):
+        assert "DO_NOT_RETAIN" not in p.read_text()
+
+
+def test_external_key_margin_halts_without_changing_samples(project):
+    guarded_prepare(project, remaining="0.500001")
+    plan, jobs = api.verify_plan(project)
+    result = api.execute_jobs(project, plan, jobs, lambda body: pytest.fail("Crossed key safety margin"),
+                              lambda: pytest.fail("No credit for next batch"))
+    assert result["halted"] and result["jobs"] == {"pending": 2}
+    assert not list((project / api.API_DIR / "records").glob("*.attempt.json"))
+
+
+def test_live_key_usage_by_other_clients_is_respected(project):
+    guarded_prepare(project)
+    plan, jobs = api.verify_plan(project)
+    result = api.execute_jobs(project, plan, jobs, lambda body: pytest.fail("Key has no safe credit"),
+                              lambda: {"status_code": 200, "accounting": {"limit_remaining": 0.1}})
+    assert result["halted"] and result["jobs"] == {"pending": 2}
+
+
+def test_effective_budget_is_the_most_restrictive_credit(project):
+    assert api.remaining_credit({"limit_remaining": 5, "effective_budget": {"remaining_usd": 2}}) == 2
+
+
+def test_unknown_cost_reserve_and_live_credit_allow_completion(project):
+    guarded_prepare(project)
+    plan, jobs = api.verify_plan(project)
+    def unknown(body):
+        receipt = success(body)
+        receipt["response"].pop("usage")
+        return receipt
+    result = api.execute_jobs(project, plan, jobs, unknown,
+                              lambda: {"status_code": 200, "accounting": {"limit_remaining": 5}})
+    assert not result["halted"] and result["labels"] == {"binary": 4, "merger_audit": 2}
+    assert len(result["missing_cost_jobs"]) == 2
+
+
+def test_wrong_provider_or_model_stops_without_retry(project):
+    api.prepare(project)
+    plan, jobs = api.verify_plan(project)
+    calls = []
+    def wrong(body):
+        calls.append(body)
+        receipt = success(body)
+        receipt["response"]["provider"] = "wrong-provider"
+        return receipt
+    result = api.execute_jobs(project, plan, jobs, wrong)
+    assert result["halted"] and result["jobs"] == {"failed": 1, "pending": 1}
+    assert len(calls) == 1
+
+
+def test_key_accounting_failure_is_retained_and_never_infers(project):
+    guarded_prepare(project)
+    plan, jobs = api.verify_plan(project)
+    result = api.execute_jobs(project, plan, jobs, lambda body: pytest.fail("Unverified key credit"),
+                              lambda: {"status_code": 503, "error": "synthetic service failure"})
+    assert result["halted"] and result["jobs"] == {"pending": 2}
+
+
+def test_first_frozen_job_smoke_pause_resumes_without_rejudging(project):
+    api.prepare(project)
+    plan, jobs = api.verify_plan(project)
+    calls = []
+    send = lambda body: (calls.append(body), success(body))[1]
+    first = api.execute_jobs(project, plan, jobs, send, max_new_requests=1)
+    assert not first["halted"] and first["jobs"] == {"ok": 1, "pending": 1}
+    result = api.execute_jobs(project, plan, jobs, send)
+    assert len(calls) == 2 and result["jobs"] == {"ok": 2}
+
+
+def test_production_run_rejects_unguarded_offline_plan(project, monkeypatch):
+    from wikontic_exp.api_client import AccessConfig
+    api.prepare(project)
+    monkeypatch.setattr(AccessConfig, "load", lambda **kw: pytest.fail("Must refuse before credentials/network"))
+    with pytest.raises(ValueError, match="Production run requires"):
+        api.run(project, None)
+
+
+def test_guarded_execution_requires_callback(project):
+    guarded_prepare(project)
+    plan, jobs = api.verify_plan(project)
+    with pytest.raises(ValueError, match="live key check callback"):
+        api.execute_jobs(project, plan, jobs, lambda body: pytest.fail("Unchecked POST"))
+
+
+def test_crash_after_key_check_before_attempt_is_resumable(project, monkeypatch):
+    guarded_prepare(project)
+    plan, jobs = api.verify_plan(project)
+    original = api.durable_record
+    def crash(root, rel, value):
+        if rel.endswith(".attempt.json"):
+            raise KeyboardInterrupt("Before attempt marker and POST")
+        original(root, rel, value)
+    monkeypatch.setattr(api, "durable_record", crash)
+    check = lambda: {"status_code": 200, "accounting": {"limit_remaining": 5}}
+    with pytest.raises(KeyboardInterrupt):
+        api.execute_jobs(project, plan, jobs, lambda body: pytest.fail("No POST yet"), check)
+    folder = project / api.API_DIR / "key_checks"
+    old = {p.name: p.read_bytes() for p in folder.glob("*.json")}
+    assert len(old) == 1
+    monkeypatch.setattr(api, "durable_record", original)
+    result = api.execute_jobs(project, plan, jobs, success, check)
+    assert result["jobs"] == {"ok": 2} and not result["halted"]
+    assert len(list(folder.glob("*.json"))) == 3
+    assert all((folder / name).read_bytes() == value for name, value in old.items())
+
+
+@pytest.mark.parametrize("envelope", [[], None])
+def test_nonobject_200_envelope_halts_without_next_post(project, envelope):
+    api.prepare(project)
+    plan, jobs = api.verify_plan(project)
+    calls = []
+    def send(body):
+        calls.append(body)
+        return {"status_code": 200, "error": None, "response": envelope}
+    result = api.execute_jobs(project, plan, jobs, send)
+    assert len(calls) == 1 and result["halted"]
+    assert result["jobs"] == {"failed": 1, "pending": 1}
+
+
+def test_production_mock_transport_checks_key_before_every_post(project, monkeypatch):
+    import httpx
+    from wikontic_exp.api_client import AccessConfig
+    guarded_prepare(project)
+    events = []
+    def handle(request):
+        events.append((request.method, request.url.path))
+        if request.method == "GET":
+            return httpx.Response(200, json={"data": {"limit_remaining": 5, "label": "DO_NOT_RETAIN"}})
+        return httpx.Response(200, json=success(json.loads(request.content))["response"])
+    original = httpx.Client
+    monkeypatch.setattr(httpx, "Client", lambda **kw: original(transport=httpx.MockTransport(handle)))
+    monkeypatch.setattr(AccessConfig, "load", lambda **kw: AccessConfig(
+        api_base="https://openrouter.ai/api/v1", api_key="synthetic", model=api.API_MODEL))
+    result = api.run(project, None)
+    assert result["jobs"] == {"ok": 2}
+    assert events == [("GET", "/api/v1/key"), ("POST", "/api/v1/chat/completions")] * 2

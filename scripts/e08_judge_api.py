@@ -17,6 +17,7 @@ from pathlib import Path
 import random
 import tempfile
 import time
+from uuid import uuid4
 
 from wikontic_exp.hashing import canonical_json, hash_obj, sha256_hex
 
@@ -28,8 +29,8 @@ API_DIR = "data/experiments/e08/api_judging"
 API_MODEL = "anthropic/claude-sonnet-5.5"
 KINDS = {"binary": ("annotation_id", "candidates.jsonl", 32),
          "merger_audit": ("audit_id", "pairs.jsonl", 16)}
-PROVIDER = {"only": ["anthropic"], "allow_fallbacks": False, "require_parameters": True,
-            "max_price": {"prompt": 2, "completion": 10, "request": 0}}
+PROVIDER = {"only": ["anthropic"], "allow_fallbacks": False, "require_parameters": True}
+PLAN_VERSION = "e08-stateless-2.0"
 
 
 def money(value) -> Decimal:
@@ -123,15 +124,47 @@ def make_jobs(root: Path) -> tuple[list[dict], dict]:
     return jobs, totals
 
 
-def prepare(root: Path, max_usd: str = "3.00") -> dict:
+def key_accounting(data: dict) -> dict:
+    """Whitelist accounting fields only: never persist key labels, hashes or credentials."""
+    if not isinstance(data, dict):
+        raise ValueError("Expected key accounting data")
+    names = ("limit", "limit_remaining", "limit_reset", "usage", "usage_daily",
+             "usage_weekly", "usage_monthly", "include_byok_in_limit", "is_free_tier")
+    result = {k: data[k] for k in names if k in data}
+    effective = data.get("effective_budget")
+    if isinstance(effective, dict):
+        fields = ("scope", "limit_usd", "spend_usd", "remaining_usd", "reset_interval", "resets_at", "include_byok")
+        result["effective_budget"] = {k: effective[k] for k in fields if k in effective}
+    return result
+
+
+def remaining_credit(data: dict) -> Decimal:
+    values = [data.get("limit_remaining")]
+    if isinstance(data.get("effective_budget"), dict):
+        values.append(data["effective_budget"].get("remaining_usd"))
+    amounts = [money(v) for v in values if v is not None]
+    if not amounts:
+        raise ValueError("Missing finite remaining credit for operational key safety")
+    return min(amounts)
+
+
+def prepare(root: Path, key_status_file: str | None = None, safety_margin_usd: str = "0.50") -> dict:
     stage.verify(root)
-    budget = money(max_usd)
-    if budget <= 0:
-        raise ValueError("API budget must be positive")
+    safety = None
+    if key_status_file is not None:
+        snapshot = key_accounting(stage.read(root, key_status_file))
+        remaining = remaining_credit(snapshot)
+        margin = money(safety_margin_usd)
+        if remaining <= margin:
+            raise ValueError("No key credit above the operational safety margin")
+        safety = {"snapshot_path": key_status_file, "initial_accounting": snapshot,
+                  "initial_remaining_usd": str(remaining), "margin_usd": str(margin),
+                  "run_allowance_usd": str(remaining - margin),
+                  "note": "External key limit only, not a scientific budget. Never expand allowance on daily reset."}
     if stage.path(root, f"{API_DIR}/plan.json").exists():
         plan, _ = verify_plan(root)
-        if budget != money(plan["max_usd"]):
-            raise ValueError("Cannot change budget after API plan lock")
+        if safety != plan["operational_key_safety"]:
+            raise ValueError("Cannot change operational key safety after API plan lock")
         return {"status": "already prepared and verified; no files updated", "model_calls": 0,
                 **plan["workload"]}
     folder = stage.path(root, API_DIR)
@@ -141,10 +174,6 @@ def prepare(root: Path, max_usd: str = "3.00") -> dict:
         output = stage.path(root, f"{stage.MAIN}/{kind}/judgments.jsonl")
         if output.exists() and output.read_bytes().strip():
             raise ValueError("Main labels already exist; do not mix agent and API judgments")
-    reported = stage.read(root, f"{stage.BASE}/budget_status.json")
-    prior = money(reported["reported_cumulative_spend_usd_approx"])
-    if prior + budget > money(reported["total_budget_usd"]):
-        raise ValueError("API allowance exceeds the reported remaining total budget")
     jobs, totals = make_jobs(root)
     summary = stage.read(root, f"{stage.BASE}/judging_summary.json")
     if (totals["binary"] != summary["unique_facts_to_judge"]
@@ -157,11 +186,15 @@ def prepare(root: Path, max_usd: str = "3.00") -> dict:
     for optional in ("tests/test_e08_judge_api.py", "reports/E08_API_EXECUTION.md"):
         if stage.path(root, optional).exists():
             sources.append(optional)
+    if key_status_file is not None:
+        sources.append(key_status_file)
+    if stage.path(root, "research/experiments/E08.md").exists():
+        sources.append("research/experiments/E08.md")
     request_bytes = stage.e08_preparation.jsonl_bytes(jobs)
     workload = {**totals, "requests": len(jobs)}
-    plan = {"experiment": "E08", "transport": "stateless OpenRouter API", "model": API_MODEL,
-            "reasoning": "low", "provider": PROVIDER, "workload": workload,
-            "max_usd": str(budget), "reported_prior_spend_usd_approx": str(prior),
+    plan = {"version": PLAN_VERSION, "experiment": "E08", "transport": "stateless OpenRouter API", "model": API_MODEL,
+             "reasoning": "low", "provider": PROVIDER, "workload": workload,
+             "cost_policy": "accounting_only_no_scientific_monetary_cap", "operational_key_safety": safety,
             "batch_sizes": {k: v[2] for k, v in KINDS.items()}, "seed": 42,
             "source_files_sha256": stage.hashes(root, sources),
             "requests_sha256": sha256_hex(request_bytes),
@@ -169,21 +202,24 @@ def prepare(root: Path, max_usd: str = "3.00") -> dict:
             "amendment": "Main labels have not started. Replace the agent delivery wrapper with stateless API batches. "
                          "Copy substantive rubric criteria; retain all sampled IDs, model, low effort and silver labels. "
                          "Calibration remains agent-based exploratory evidence, not validation of this API harness.",
-            "policy": "One HTTP attempt per batch. No tools/history, fallback, quality retry, rebatching, or extra calibration. "
-                      "Unknown charges reserve the full allowance for that request and stop further calls. "
-                      "A crash after reservation is never automatically retried. Budget exhaustion leaves missing labels.",
+             "policy": "One HTTP attempt per batch. No tools/history, fallback, quality retry, rebatching, or extra calibration. "
+                       "Missing cost is reported and conservatively reserved, not a scientific stop. "
+                        "Production run requires an external-key guard and a fresh key check before every POST. "
+                       "A crash after the durable attempt marker is never automatically retried.",
             "full_completion_guaranteed": False,
             "metadata": "status and annotator are supplied by the runner from the fixed request, not model self-identification"}
     stage.create_files(root, {f"{API_DIR}/requests.jsonl": request_bytes,
                               f"{API_DIR}/plan.json": stage.e08_preparation.json_bytes(plan)})
     return {"status": "API plan frozen; no credentials read", **workload, "model_calls": 0,
-            "max_usd": str(budget), "full_completion_guaranteed": False,
+             "cost_policy": plan["cost_policy"], "operational_key_safety": safety, "full_completion_guaranteed": False,
             "summed_conservative_reservations_usd": plan["summed_conservative_reservations_usd"]}
 
 
 def verify_plan(root: Path) -> tuple[dict, list[dict]]:
     stage.verify(root)
     plan = stage.read(root, f"{API_DIR}/plan.json")
+    if plan.get("version") != PLAN_VERSION:
+        raise ValueError("Unsupported legacy API plan; preserve it and register a separate delivery amendment")
     if plan["model"] != API_MODEL or plan["reasoning"] != "low" or plan["provider"] != PROVIDER:
         raise ValueError("API model/route settings changed")
     stage.verify_hashes(root, plan["source_files_sha256"])
@@ -191,6 +227,9 @@ def verify_plan(root: Path) -> tuple[dict, list[dict]]:
     jobs = stage.rows(root, f"{API_DIR}/requests.jsonl")
     if len({j["job_id"] for j in jobs}) != len(jobs):
         raise ValueError("Duplicate API jobs")
+    regenerated, _ = make_jobs(root)
+    if jobs != regenerated:
+        raise ValueError("API requests differ from the fixed rubric, sample or batching")
     return plan, jobs
 
 
@@ -202,6 +241,8 @@ def decoded(job: dict, receipt: dict) -> list[dict]:
         raise ValueError("Expected an API response object")
     if raw.get("model") != API_MODEL:
         raise ValueError("Response model identity differs from the frozen API model")
+    if raw.get("provider") is not None and str(raw["provider"]).casefold() != "anthropic":
+        raise ValueError("Response provider identity differs from the frozen Anthropic route")
     choices = raw.get("choices")
     if not isinstance(choices, list) or len(choices) != 1 or not isinstance(choices[0], dict):
         raise ValueError("Expected exactly one API choice")
@@ -255,6 +296,7 @@ def durable_record(root: Path, rel: str, value: dict) -> None:
 def scan(root: Path, jobs: list[dict]) -> dict:
     labels = {kind: [] for kind in KINDS}
     states, errors = Counter(), {}
+    missing_cost, usage_totals, providers = [], Counter(), Counter()
     charged = known = Decimal(0)
     must_stop = False
     expected_records = set()
@@ -283,6 +325,11 @@ def scan(root: Path, jobs: list[dict]) -> dict:
         raw = receipt.get("response")
         usage = raw.get("usage") if isinstance(raw, dict) else None
         cost = usage.get("cost") if isinstance(usage, dict) else None
+        for name in ("prompt_tokens", "completion_tokens", "total_tokens"):
+            if isinstance(usage, dict) and type(usage.get(name)) is int:
+                usage_totals[name] += usage[name]
+        if isinstance(raw, dict):
+            providers[str(raw.get("provider", "unreported"))] += 1
         try:
             if cost is None:
                 raise ValueError("Missing billed cost")
@@ -290,11 +337,9 @@ def scan(root: Path, jobs: list[dict]) -> dict:
             known += debit
         except ValueError:
             debit = money(job["reservation_usd"])
-            must_stop = True
+            missing_cost.append(job["job_id"])
         charged += debit
-        if debit > money(job["reservation_usd"]):
-            must_stop = True
-        if receipt["status_code"] != 200 or receipt.get("error"):
+        if (receipt["status_code"] != 200 or receipt.get("error") or not isinstance(raw, dict)):
             must_stop = True
         try:
             result = decoded(job, receipt)
@@ -303,13 +348,14 @@ def scan(root: Path, jobs: list[dict]) -> dict:
         except (ValueError, KeyError, TypeError, IndexError) as exc:
             states["failed"] += 1
             errors[job["job_id"]] = str(exc)
-            if "model identity" in str(exc):
+            if "model identity" in str(exc) or "provider identity" in str(exc):
                 must_stop = True
     for file in stage.path(root, f"{API_DIR}/records").glob("*.json"):
         if file.relative_to(root).as_posix() not in expected_records:
             raise ValueError("Unexpected record outside the frozen API plan")
     return {"labels": labels, "states": dict(states), "errors": errors,
-            "accounted_usd": charged, "reported_cost_usd": known, "must_stop": must_stop}
+             "accounted_usd": charged, "reported_cost_usd": known, "must_stop": must_stop,
+             "missing_cost_jobs": missing_cost, "usage_totals": dict(usage_totals), "providers": dict(providers)}
 
 
 def sync_outputs(root: Path, state: dict) -> None:
@@ -365,7 +411,9 @@ def summary(plan: dict, state: dict, root: Path) -> dict:
             "labels": {k: len(v) for k, v in state["labels"].items()},
             "reported_cost_usd": str(state["reported_cost_usd"]),
             "accounted_usd_including_unknown_reservations": str(state["accounted_usd"]),
-            "max_usd": plan["max_usd"], "failed_jobs": state["errors"],
+             "cost_policy": plan["cost_policy"], "operational_key_safety": plan["operational_key_safety"],
+             "missing_cost_jobs": state["missing_cost_jobs"], "usage_totals": state["usage_totals"],
+             "providers": state["providers"], "failed_jobs": state["errors"],
             "halted": stage.path(root, f"{API_DIR}/halt.json").exists(),
             "note": "Missing labels are not zeros; failed/uncertain requests are never retried"}
 
@@ -376,12 +424,16 @@ def halt(root: Path, reason: str) -> None:
         durable_record(root, rel, {"reason": reason})
 
 
-def execute_jobs(root: Path, plan: dict, jobs: list[dict], send) -> dict:
+def execute_jobs(root: Path, plan: dict, jobs: list[dict], send, check_key=None,
+                 max_new_requests: int | None = None) -> dict:
     """send(body) -> receipt; injectable for offline synthetic tests."""
+    if max_new_requests is not None and (type(max_new_requests) is not int or max_new_requests <= 0):
+        raise ValueError("max_new_requests must be a positive integer")
+    sent = 0
     state = scan(root, jobs)
     sync_outputs(root, state)
     if state["must_stop"]:
-        halt(root, "uncertain billing/attempt, route error, or reservation exceeded")
+        halt(root, "uncertain attempt, HTTP/transport error, or model/provider identity error")
     if stage.path(root, f"{API_DIR}/halt.json").exists():
         return summary(plan, state, root)
     for job in jobs:
@@ -389,39 +441,64 @@ def execute_jobs(root: Path, plan: dict, jobs: list[dict], send) -> dict:
         if stage.path(root, attempt_rel).exists():
             continue  # Never reissue a completed, failed, or uncertain request.
         reserve = money(job["reservation_usd"])
-        if state["accounted_usd"] + reserve > money(plan["max_usd"]):
-            halt(root, "budget insufficient for the next frozen batch reservation")
-            break
+        safety = plan["operational_key_safety"]
+        if safety is not None:
+            if check_key is None:
+                raise ValueError("Operational key safety requires a live key check callback before POST")
+            if state["accounted_usd"] + reserve > money(safety["run_allowance_usd"]):
+                halt(root, "external key safety margin: insufficient conservative allowance for next fixed batch")
+                break
+            if check_key is not None:
+                # Accounting GETs are not inference; no secrets/labels are persisted.
+                try:
+                    checked = check_key()
+                    checked = {**checked, "accounting": key_accounting(checked.get("accounting", {}))}
+                    rel = f"{API_DIR}/key_checks/{job['job_id']}_{uuid4().hex}.json"
+                    durable_record(root, rel, checked)
+                    if checked.get("status_code") != 200 or checked.get("error"):
+                        raise ValueError("Key accounting HTTP/transport failure")
+                    current = remaining_credit(checked["accounting"])
+                    if reserve + money(safety["margin_usd"]) > current:
+                        halt(root, "external key safety margin: observed remaining credit is insufficient")
+                        break
+                except (ValueError, OSError, KeyError, TypeError) as exc:
+                    halt(root, f"External key accounting unavailable or interrupted: {exc}")
+                    break
         durable_record(root, attempt_rel, {
             "job_id": job["job_id"], "request_sha256": hash_obj(job["request"]),
             "reservation_usd": job["reservation_usd"], "started_unix": time.time()})
         # The reservation is durable BEFORE sending. A process crash cannot cause a replay.
+        started = time.monotonic()
         receipt = send(job["request"])
+        receipt["latency_s"] = time.monotonic() - started
         receipt["request_sha256"] = hash_obj(job["request"])
         durable_record(root, response_rel, receipt)
         state = scan(root, jobs)
         sync_outputs(root, state)
         if state["must_stop"]:
-            halt(root, "HTTP/billing/identity uncertainty; no further paid requests")
+            halt(root, "HTTP/transport/identity uncertainty; no further model requests")
             break
+        sent += 1
+        if max_new_requests is not None and sent >= max_new_requests:
+            break  # Operational pause only: next run resumes untouched jobs, never rejudges.
     state = scan(root, jobs)
     sync_outputs(root, state)
     return summary(plan, state, root)
 
 
-def run(root: Path, creds_file: str | None, confirmed_key_limit: bool) -> dict:
-    if not confirmed_key_limit:
-        raise ValueError("Set the key credit limit first, then explicitly pass --confirm-key-limit")
+def run(root: Path, creds_file: str | None, max_new_requests: int | None = None) -> dict:
     plan, jobs = verify_plan(root)
     with exclusive_run(root):
         state = scan(root, jobs)
         if state["must_stop"] or stage.path(root, f"{API_DIR}/halt.json").exists() or not state["states"].get("pending"):
             return execute_jobs(root, plan, jobs, lambda body: (_ for _ in ()).throw(ValueError("No request permitted")))
+        if plan["operational_key_safety"] is None:
+            raise ValueError("Production run requires prepare --key-status-file and operational key safety")
         import httpx
         from wikontic_exp.api_client import AccessConfig
         cfg = AccessConfig.load(creds_file=creds_file, openrouter=True)
         if cfg.api_base != "https://openrouter.ai/api/v1" or not cfg.api_key:
-            raise ValueError("This budgeted runner requires the explicit official OpenRouter endpoint and key")
+            raise ValueError("This runner requires the explicit official OpenRouter endpoint and key")
         with httpx.Client(timeout=180, transport=httpx.HTTPTransport(retries=0), trust_env=False) as client:
             def send(body):
                 try:
@@ -436,23 +513,33 @@ def run(root: Path, creds_file: str | None, confirmed_key_limit: bool) -> dict:
                     return {"status_code": response.status_code, "response": data, "error": None}
                 except httpx.HTTPError as exc:
                     return {"status_code": 0, "response": None, "error": cfg.redact(str(exc))}
-            return execute_jobs(root, plan, jobs, send)
+            def check_key():
+                try:
+                    response = client.get(cfg.api_base + "/key", headers={"Authorization": "Bearer " + cfg.api_key})
+                    if response.status_code != 200:
+                        return {"status_code": response.status_code, "error": "Key accounting HTTP failure"}
+                    return {"status_code": 200, "checked_unix": time.time(),
+                             "accounting": key_accounting(response.json()["data"]), "error": None}
+                except (httpx.HTTPError, ValueError, TypeError, KeyError) as exc:
+                    return {"status_code": 0, "error": cfg.redact(str(exc))}
+            return execute_jobs(root, plan, jobs, send, check_key, max_new_requests)
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("command", choices=("prepare", "verify", "status", "export", "run"))
     p.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
-    p.add_argument("--max-usd", default="3.00", help="additional API-only budget, fixed at prepare")
+    p.add_argument("--key-status-file", default=None, help="sanitized /key snapshot, relative to --root; operational guard only")
+    p.add_argument("--key-safety-margin-usd", default="0.50", help="reserve below the external key limit, not a scientific budget")
     p.add_argument("--creds-file", default=None)
-    p.add_argument("--confirm-key-limit", action="store_true")
+    p.add_argument("--max-new-requests", type=int, default=None, help="operational pause after N previously unattempted batches; no retries")
     args = p.parse_args()
     root = args.root.resolve()
     try:
         if args.command == "prepare":
-            result = prepare(root, args.max_usd)
+            result = prepare(root, args.key_status_file, args.key_safety_margin_usd)
         elif args.command == "run":
-            result = run(root, args.creds_file, args.confirm_key_limit)
+            result = run(root, args.creds_file, args.max_new_requests)
         else:
             plan, jobs = verify_plan(root)
             with exclusive_run(root):
